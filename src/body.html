@@ -97,9 +97,10 @@
       </div>
       <div class="card wide" id="scrCards" hidden>
         <div class="ckTop"><h1>CARD <span>PACKS</span></h1><span class="ckProg" id="ckProg"></span></div>
+        <div class="seg ckSet" id="ckSet"><button type="button" data-v="kbo" aria-pressed="true">KBO Series</button><button type="button" data-v="bl" aria-pressed="false">Big League Series</button></div>
         <div class="packRow">
           <button type="button" class="pack" id="packBtn" aria-label="Open a card pack"><canvas id="packCv" width="48" height="64"></canvas></button>
-          <div class="packInfo"><b id="packN"></b><p>Five cards a pack, at least one Rare or better. Earn a pack for every game you finish and a bonus pack for a win.</p>
+          <div class="packInfo"><b id="packN"></b><p id="packInfoTxt">Five cards a pack, at least one Rare or better. Earn a pack for every game you finish and a bonus pack for a win.</p>
             <button class="big" id="openPack" type="button">OPEN PACK</button></div>
         </div>
         <div class="ckFilter" id="ckFilter"></div>
