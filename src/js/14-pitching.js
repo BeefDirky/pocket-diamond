@@ -19,7 +19,7 @@ function startWindup(kf){closePen();
  const side=pitcher().hand==='R'?1:-1;
  S.pitch={k,name:P.name,mph,travel,side,slot:pt.slot||'over',h0:sideArm?3.9:6.2,relX:-(sideArm?4.4:2.2)*side,plateX:rand(-.7,.7),mov:.7+pt.mov*.006,inZone:bpm?Math.random()<.92:k==='SP'?Math.random()<.2:Math.random()<P.zone*(.82+pt.ctl*.0035),kn:[rand(9,15),rand(0,6.3),rand(17,24),rand(0,6.3),rand(8,13),rand(0,6.3)],wind:pitching()?rand(1600,2000):rand(1000,1500),releaseAt:0,trail:[]};
  if(bpm){S.pitch.relX=0;S.pitch.h0=4.2;S.pitch.wind=1400;S.pitch.side=1}
- else if(!S.pitch.inZone&&Math.random()<.028&&k!=='KN'){S.pitch.hbp=true;S.pitch.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
+ else if(!S.pitch.inZone&&Math.random()<.007+clamp(((S.pcOf[fldKey()]||0)-30)/70,0,1)*.026&&k!=='KN')/* fresh arms rarely plunk anyone; tired ones lose the handle */{S.pitch.hbp=true;S.pitch.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
  S.swing=null;setPhase('windup');
  if(S.online&&S.online.inGame&&pitching())netWindup();
  if(pitching()&&S.auto){S.pitch.q=clamp(rand(.3,1.08),0,1)}

@@ -28,14 +28,14 @@ function update(dt,now){
    if(S.online&&S.online.inGame&&pitching()&&!S.pitch.decided){break}// wait for the batter's call however long it takes; guessing would split the two screens
    {const el=now-S.pitch.releaseAt,tc=S.pitch.travel*(S.pitch.wild?1.6:1.135);
     // the ball is in the mitt, but a very late swing still counts (as a late swing and miss) for a beat before the call
-    if(el>=tc){if(!S.swing&&!S.pitch.wild&&!pitching()&&el<tc+420){if(!S.pitch.popped){S.pitch.popped=true;if(S.mode!=='bp')sfx('pop')}}else pitchEnd()}}break}
+    if(el>=tc&&!(S.swing&&S.swing.contactAt&&!S.swing.done)){if(!S.swing&&!S.pitch.wild&&!pitching()&&el<tc+420){if(!S.pitch.popped){S.pitch.popped=true;if(S.mode!=='bp')sfx('pop')}}else pitchEnd()}}break}
   case'play':{const pl=S.play,t0=pl.t;pl.t+=dt/1000*SPEED;const r=pl.res;
    // walk-off: the dugout empties the moment it's decided (ball leaves the yard, or the winning run touches home)
    if(r&&pl.woAt==null){pl.woAt=-1;const wo=S.mode==='arcade'||(S.half==='bot'&&S.inning>=(S.schedInn||9));const outsAfter=S.outs+(r.outs||0);
     if(wo&&S.mode!=='bp'&&outsAfter<3&&S.runs+(r.runs||0)>S.target){if(r.hr)pl.woAt=pl.ballGone||0;else{const need=S.target+1-S.runs;
       const arr=(pl.runners||[]).filter(x=>x.dest===4&&!x.out).map(x=>x.start+(4-x.from)*LEG/x.speed).sort((a,b)=>a-b);pl.woAt=arr[need-1]!=null?arr[need-1]:pl.end-.4}}}
    if(pl.woAt>=0&&pl.t>=pl.woAt&&!pl.woFired){pl.woFired=true;startCelebration(true);S.cheerUntil=performance.now()+1e9}
-   if(r&&!pl.reachCued&&!r.steal&&!r.hr&&(r.hit||r.code==='E'||r.code==='IFH')&&S.mode!=='bp'&&pl.t>=pl.reachAt){pl.reachCued=true;crowdReach()}
+   if(r&&!pl.reachCued&&!r.steal&&!r.hr&&(r.hit||r.code==='E'||r.code==='IFH')&&S.mode!=='bp'&&pl.t>=pl.reachAt){pl.reachCued=true;crowdReach(r.code==='E')}
    {const dT=pl.watch!=null?pl.watch+(pl.flip?pl.flip.dur:1.1):.6;if(!pl.foul&&!pl.bp&&!(pl.res&&pl.res.steal)&&t0<dT&&pl.t>=dT)sfx('drop')}
    for(const sg of pl.segs)if(sg.snd&&!sg.sounded&&pl.t>=sg.t1){sg.sounded=true;sfx('glove')}
    if(pl.dive&&!pl.diveSnd&&pl.t>=pl.dive.t&&fldKey()===S.opp&&batKey()===S.you){pl.diveSnd=true;crowdClip('dcatch',2)}

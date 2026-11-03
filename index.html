@@ -1648,7 +1648,7 @@ function organRamp(){if(!AC||!BUF.ramp||muted||S.rampSrc)return;const t=AC.curre
  src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
 function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=vol;src.connect(g).connect(BUS.crowd);src.start();return src}
 // someone reached base: the home crowd roars, and is much quieter for the visitors
-function crowdReach(){crowdClip('csingle',batKey()===S.you?3.4:1.1)}
+function crowdReach(err){crowdClip('csingle',(batKey()===S.you?3.4:1.1)*(err?1.6:1))}
 let chantSrc=null,nextChant=0;
 function crowdChant(){if(chantSrc||S.mode==='bp')return;chantSrc=crowdClip('chant',1.9);if(chantSrc)chantSrc.onended=()=>{chantSrc=null}}
 function stopRamp(){if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
@@ -1753,7 +1753,7 @@ function startWindup(kf){closePen();
  const side=pitcher().hand==='R'?1:-1;
  S.pitch={k,name:P.name,mph,travel,side,slot:pt.slot||'over',h0:sideArm?3.9:6.2,relX:-(sideArm?4.4:2.2)*side,plateX:rand(-.7,.7),mov:.7+pt.mov*.006,inZone:bpm?Math.random()<.92:k==='SP'?Math.random()<.2:Math.random()<P.zone*(.82+pt.ctl*.0035),kn:[rand(9,15),rand(0,6.3),rand(17,24),rand(0,6.3),rand(8,13),rand(0,6.3)],wind:pitching()?rand(1600,2000):rand(1000,1500),releaseAt:0,trail:[]};
  if(bpm){S.pitch.relX=0;S.pitch.h0=4.2;S.pitch.wind=1400;S.pitch.side=1}
- else if(!S.pitch.inZone&&Math.random()<.028&&k!=='KN'){S.pitch.hbp=true;S.pitch.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
+ else if(!S.pitch.inZone&&Math.random()<.007+clamp(((S.pcOf[fldKey()]||0)-30)/70,0,1)*.026&&k!=='KN')/* fresh arms rarely plunk anyone; tired ones lose the handle */{S.pitch.hbp=true;S.pitch.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
  S.swing=null;setPhase('windup');
  if(S.online&&S.online.inGame&&pitching())netWindup();
  if(pitching()&&S.auto){S.pitch.q=clamp(rand(.3,1.08),0,1)}
@@ -2091,8 +2091,8 @@ function buildFoul(P,dir){
  finalize(play,[],{code:'FOUL',runs:0,outs:0});
  play.end=play.segs[0].t1+.2;return play;
 }
-function hitAdvance(runners,tp,Pp,delay){
- const ballAt=k=>tp+.7+dist(Pp,baseP(k))/THROW;
+function hitAdvance(runners,tp,Pp,delay,ex){
+ const ballAt=k=>{const d=dist(Pp,baseP(k));return tp+.7+(ex||0)+d/(THROW*(d>200?.86:1))};
  let cap=4;
  for(const r of runners){
   r.start=r.batter?.65:delay;r.speed=spdFt(r.who);
@@ -2108,14 +2108,16 @@ function hitAdvance(runners,tp,Pp,delay){
  }
 }
 function outfieldHit(play,it,P,runners,delay,errBy){
- hitAdvance(runners,it.t,it.p,delay);
+ // retrieval time: an outfielder who had to run it down, dig it off the wall or chase a carom in the corner needs longer to get rid of it
+ const ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(Math.hypot(it.p.x,it.p.y)>285?.75:0)+(P.line?.9:0)):0;
+ hitAdvance(runners,it.t,it.p,delay,ex);
  const bd=runners.find(r=>r.batter).dest;runners.find(r=>r.batter).round=true;
  // on a single, the runner from second tries to score on speed: 70+ scores, 50-69 is a play at the plate, under 50 holds at third
  let sendHome=null;
  if(bd===1&&errBy==null){const r2=runners.find(r=>r.from===2&&!r.batter);if(r2&&r2.dest===3&&(r2.who.spd||60)>=50){r2.dest=4;sendHome=r2;
   const sp=r2.who.spd||60;if(sp<70){r2.closeHome=true;if(Math.random()<.2+(70-sp)*.02)r2.out=true}}}
  const tgt=sendHome?4:bd>=3?4:bd+1,tb=baseP(tgt);
- const t0=it.t+.65;
+ const t0=it.t+.65+ex;
  const cov=tgt===4?1:tgt===3?4:(it.p.x<0?3:5);
  let tArr;
  if(it.i>=6&&Math.hypot(it.p.x,it.p.y)>200){
@@ -2136,14 +2138,18 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  const word={1:'Single',2:'Double',3:'Triple',4:'Inside-the-park home run'}[bd];
  const ban={1:'SINGLE!',2:'DOUBLE!',3:'TRIPLE!',4:'INSIDE-THE-PARK HR!'}[bd];
  if(errBy!=null)return finalize(play,runners,{code:'E',hit:false,outs:0,banner:'ERROR!',tone:'',sub:'Dropped it!',desc:`Dropped fly ball, E${errBy+1}${runsTxt(runs)}`});
- return finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} to ${fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
+ const dl=P.line||Math.abs(P.s)>=41?' down the line':'';
+ return finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} ${dl?dl.trim()+' in '+fieldName(P.s):'to '+fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
 }
 function buildGrounder(P,dir,b){
  const C={x:0,y:2};
  const vf=.72*(1-Math.max(0,-P.L)/75);
  const v0=P.EV*1.467*vf,A=P.bunt?9:15,ts=v0/A,dmax=fenceDist(P.s)-10;
  const gpos=t=>{const tt=Math.min(t,ts);const d=Math.min(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
- const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8],P.bunt?.35:0);
+ // a scorcher right down the line gets past the corner infielder most of the time and rattles into the corner
+ const lineShot=!P.bunt&&Math.abs(P.s)>=40.5&&P.EV>=86&&Math.random()<.7;
+ const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8].filter(i=>!(lineShot&&i===(P.s>0?2:4))),P.bunt?.35:0);
+ if(lineShot)P.line=true;
  const play=newPlay();
  const gs=fnSeg(0,it.t,gpos);gs.snd=true;play.segs.push(gs);
  play.fk[it.i]=chase(it.i,it.p,it.t);
@@ -2991,7 +2997,7 @@ const wb=document.createElement('canvas');wb.width=W;wb.height=H;const wg=wb.get
 let TOWERS=[];
 let FIELD=null,DECOR=null,SIGNS=null,CROWD_A=null,CROWD_B=null,FANS=[],CONC=[],AISLES=[],RAIL=[],FLAGFANS=[];
 function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,3);cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
-new ResizeObserver(resize).observe(cv);resize();applyWide();if(location.hash==='#dbg')window.__pd={TEAMS,S,toTitle:()=>toTitle(),gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
+new ResizeObserver(resize).observe(cv);resize();applyWide();if(location.hash==='#dbg')window.__pd={TEAMS,S,toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 function drawJumbo(g,now){
  const cx=HX/K,x0=cx-95,y0=10,w=190,h=66;
@@ -3472,9 +3478,13 @@ function render(now){
     add(1e6,()=>{wg.globalAlpha=1-k2;wg.strokeStyle='#ffffff';wg.lineWidth=1;wg.beginPath();wg.arc(bq.x,bq.y,4+k2*10,0,Math.PI*2);wg.stroke();
      wg.font='bold 11px "Pixelify Sans", monospace';wg.textAlign='center';wg.fillStyle='#ffbf3c';wg.fillText('TAG!',bq.x,bq.y-24-k2*6);wg.globalAlpha=1})}
    if(r.slide&&t>=r.slide.t0&&t<r.slide.t1+.55&&!(r.out&&t>r.outAt+.3)){const bb=BASES[r.slide.b%4],pv=r.slide.back?baseP(r.slide.b+1):baseP(r.slide.b-1),dir=Math.sign(bb.x-pv.x)||1;
-    const u=clamp((t-r.slide.t0)/(r.slide.t1-r.slide.t0),0,1),sp=t<r.slide.t1?{x:lerp(p.x,bb.x,u*.15),y:lerp(p.y,bb.y,u*.15)}:bb,sq=toPx(sp.x,sp.y);
+    const u=clamp((t-r.slide.t0)/(r.slide.t1-r.slide.t0),0,1);
+    // one continuous glide from where he left his feet to the bag (a tagged-out runner comes up a foot short)
+    if(!r.slide.p0)r.slide.p0=runnerPos(r,r.slide.t0);const p0=r.slide.p0,E=r.out?{x:lerp(bb.x,p0.x,.12),y:lerp(bb.y,p0.y,.12)}:bb,k3=1-(1-u)*(1-u);
+    const sp={x:lerp(p0.x,E.x,k3),y:lerp(p0.y,E.y,k3)},sq=toPx(sp.x,sp.y);
     if(t<r.slide.t1&&Math.random()<.5){DUST.push({x:sq.x+rand(-4,4),y:sq.y+rand(-1,1),vx:rand(-20,20),vy:rand(-26,-6),life:rand(.3,.55),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f'])})}
-    add(sq.y,()=>drawDiver(wg,sq.x,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},r.slide.head?dir:-dir,u<1?(1-u)*3:0));continue}
+    const back=dir*9*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// keep the leading hand (or spikes) on the bag, then get up onto it
+    add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},r.slide.head?dir:-dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));
   }
  }else if(ph!=='title'){
@@ -3639,14 +3649,14 @@ function update(dt,now){
    if(S.online&&S.online.inGame&&pitching()&&!S.pitch.decided){break}// wait for the batter's call however long it takes; guessing would split the two screens
    {const el=now-S.pitch.releaseAt,tc=S.pitch.travel*(S.pitch.wild?1.6:1.135);
     // the ball is in the mitt, but a very late swing still counts (as a late swing and miss) for a beat before the call
-    if(el>=tc){if(!S.swing&&!S.pitch.wild&&!pitching()&&el<tc+420){if(!S.pitch.popped){S.pitch.popped=true;if(S.mode!=='bp')sfx('pop')}}else pitchEnd()}}break}
+    if(el>=tc&&!(S.swing&&S.swing.contactAt&&!S.swing.done)){if(!S.swing&&!S.pitch.wild&&!pitching()&&el<tc+420){if(!S.pitch.popped){S.pitch.popped=true;if(S.mode!=='bp')sfx('pop')}}else pitchEnd()}}break}
   case'play':{const pl=S.play,t0=pl.t;pl.t+=dt/1000*SPEED;const r=pl.res;
    // walk-off: the dugout empties the moment it's decided (ball leaves the yard, or the winning run touches home)
    if(r&&pl.woAt==null){pl.woAt=-1;const wo=S.mode==='arcade'||(S.half==='bot'&&S.inning>=(S.schedInn||9));const outsAfter=S.outs+(r.outs||0);
     if(wo&&S.mode!=='bp'&&outsAfter<3&&S.runs+(r.runs||0)>S.target){if(r.hr)pl.woAt=pl.ballGone||0;else{const need=S.target+1-S.runs;
       const arr=(pl.runners||[]).filter(x=>x.dest===4&&!x.out).map(x=>x.start+(4-x.from)*LEG/x.speed).sort((a,b)=>a-b);pl.woAt=arr[need-1]!=null?arr[need-1]:pl.end-.4}}}
    if(pl.woAt>=0&&pl.t>=pl.woAt&&!pl.woFired){pl.woFired=true;startCelebration(true);S.cheerUntil=performance.now()+1e9}
-   if(r&&!pl.reachCued&&!r.steal&&!r.hr&&(r.hit||r.code==='E'||r.code==='IFH')&&S.mode!=='bp'&&pl.t>=pl.reachAt){pl.reachCued=true;crowdReach()}
+   if(r&&!pl.reachCued&&!r.steal&&!r.hr&&(r.hit||r.code==='E'||r.code==='IFH')&&S.mode!=='bp'&&pl.t>=pl.reachAt){pl.reachCued=true;crowdReach(r.code==='E')}
    {const dT=pl.watch!=null?pl.watch+(pl.flip?pl.flip.dur:1.1):.6;if(!pl.foul&&!pl.bp&&!(pl.res&&pl.res.steal)&&t0<dT&&pl.t>=dT)sfx('drop')}
    for(const sg of pl.segs)if(sg.snd&&!sg.sounded&&pl.t>=sg.t1){sg.sounded=true;sfx('glove')}
    if(pl.dive&&!pl.diveSnd&&pl.t>=pl.dive.t&&fldKey()===S.opp&&batKey()===S.you){pl.diveSnd=true;crowdClip('dcatch',2)}

@@ -174,9 +174,13 @@ function render(now){
     add(1e6,()=>{wg.globalAlpha=1-k2;wg.strokeStyle='#ffffff';wg.lineWidth=1;wg.beginPath();wg.arc(bq.x,bq.y,4+k2*10,0,Math.PI*2);wg.stroke();
      wg.font='bold 11px "Pixelify Sans", monospace';wg.textAlign='center';wg.fillStyle='#ffbf3c';wg.fillText('TAG!',bq.x,bq.y-24-k2*6);wg.globalAlpha=1})}
    if(r.slide&&t>=r.slide.t0&&t<r.slide.t1+.55&&!(r.out&&t>r.outAt+.3)){const bb=BASES[r.slide.b%4],pv=r.slide.back?baseP(r.slide.b+1):baseP(r.slide.b-1),dir=Math.sign(bb.x-pv.x)||1;
-    const u=clamp((t-r.slide.t0)/(r.slide.t1-r.slide.t0),0,1),sp=t<r.slide.t1?{x:lerp(p.x,bb.x,u*.15),y:lerp(p.y,bb.y,u*.15)}:bb,sq=toPx(sp.x,sp.y);
+    const u=clamp((t-r.slide.t0)/(r.slide.t1-r.slide.t0),0,1);
+    // one continuous glide from where he left his feet to the bag (a tagged-out runner comes up a foot short)
+    if(!r.slide.p0)r.slide.p0=runnerPos(r,r.slide.t0);const p0=r.slide.p0,E=r.out?{x:lerp(bb.x,p0.x,.12),y:lerp(bb.y,p0.y,.12)}:bb,k3=1-(1-u)*(1-u);
+    const sp={x:lerp(p0.x,E.x,k3),y:lerp(p0.y,E.y,k3)},sq=toPx(sp.x,sp.y);
     if(t<r.slide.t1&&Math.random()<.5){DUST.push({x:sq.x+rand(-4,4),y:sq.y+rand(-1,1),vx:rand(-20,20),vy:rand(-26,-6),life:rand(.3,.55),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f'])})}
-    add(sq.y,()=>drawDiver(wg,sq.x,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},r.slide.head?dir:-dir,u<1?(1-u)*3:0));continue}
+    const back=dir*9*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// keep the leading hand (or spikes) on the bag, then get up onto it
+    add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},r.slide.head?dir:-dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));
   }
  }else if(ph!=='title'){

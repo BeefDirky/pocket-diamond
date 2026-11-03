@@ -29,8 +29,8 @@ function buildFoul(P,dir){
  finalize(play,[],{code:'FOUL',runs:0,outs:0});
  play.end=play.segs[0].t1+.2;return play;
 }
-function hitAdvance(runners,tp,Pp,delay){
- const ballAt=k=>tp+.7+dist(Pp,baseP(k))/THROW;
+function hitAdvance(runners,tp,Pp,delay,ex){
+ const ballAt=k=>{const d=dist(Pp,baseP(k));return tp+.7+(ex||0)+d/(THROW*(d>200?.86:1))};
  let cap=4;
  for(const r of runners){
   r.start=r.batter?.65:delay;r.speed=spdFt(r.who);
@@ -46,14 +46,16 @@ function hitAdvance(runners,tp,Pp,delay){
  }
 }
 function outfieldHit(play,it,P,runners,delay,errBy){
- hitAdvance(runners,it.t,it.p,delay);
+ // retrieval time: an outfielder who had to run it down, dig it off the wall or chase a carom in the corner needs longer to get rid of it
+ const ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(Math.hypot(it.p.x,it.p.y)>285?.75:0)+(P.line?.9:0)):0;
+ hitAdvance(runners,it.t,it.p,delay,ex);
  const bd=runners.find(r=>r.batter).dest;runners.find(r=>r.batter).round=true;
  // on a single, the runner from second tries to score on speed: 70+ scores, 50-69 is a play at the plate, under 50 holds at third
  let sendHome=null;
  if(bd===1&&errBy==null){const r2=runners.find(r=>r.from===2&&!r.batter);if(r2&&r2.dest===3&&(r2.who.spd||60)>=50){r2.dest=4;sendHome=r2;
   const sp=r2.who.spd||60;if(sp<70){r2.closeHome=true;if(Math.random()<.2+(70-sp)*.02)r2.out=true}}}
  const tgt=sendHome?4:bd>=3?4:bd+1,tb=baseP(tgt);
- const t0=it.t+.65;
+ const t0=it.t+.65+ex;
  const cov=tgt===4?1:tgt===3?4:(it.p.x<0?3:5);
  let tArr;
  if(it.i>=6&&Math.hypot(it.p.x,it.p.y)>200){
@@ -74,14 +76,18 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  const word={1:'Single',2:'Double',3:'Triple',4:'Inside-the-park home run'}[bd];
  const ban={1:'SINGLE!',2:'DOUBLE!',3:'TRIPLE!',4:'INSIDE-THE-PARK HR!'}[bd];
  if(errBy!=null)return finalize(play,runners,{code:'E',hit:false,outs:0,banner:'ERROR!',tone:'',sub:'Dropped it!',desc:`Dropped fly ball, E${errBy+1}${runsTxt(runs)}`});
- return finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} to ${fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
+ const dl=P.line||Math.abs(P.s)>=41?' down the line':'';
+ return finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} ${dl?dl.trim()+' in '+fieldName(P.s):'to '+fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
 }
 function buildGrounder(P,dir,b){
  const C={x:0,y:2};
  const vf=.72*(1-Math.max(0,-P.L)/75);
  const v0=P.EV*1.467*vf,A=P.bunt?9:15,ts=v0/A,dmax=fenceDist(P.s)-10;
  const gpos=t=>{const tt=Math.min(t,ts);const d=Math.min(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
- const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8],P.bunt?.35:0);
+ // a scorcher right down the line gets past the corner infielder most of the time and rattles into the corner
+ const lineShot=!P.bunt&&Math.abs(P.s)>=40.5&&P.EV>=86&&Math.random()<.7;
+ const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8].filter(i=>!(lineShot&&i===(P.s>0?2:4))),P.bunt?.35:0);
+ if(lineShot)P.line=true;
  const play=newPlay();
  const gs=fnSeg(0,it.t,gpos);gs.snd=true;play.segs.push(gs);
  play.fk[it.i]=chase(it.i,it.p,it.t);

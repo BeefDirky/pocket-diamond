@@ -26,7 +26,7 @@ function organRamp(){if(!AC||!BUF.ramp||muted||S.rampSrc)return;const t=AC.curre
  src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
 function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=vol;src.connect(g).connect(BUS.crowd);src.start();return src}
 // someone reached base: the home crowd roars, and is much quieter for the visitors
-function crowdReach(){crowdClip('csingle',batKey()===S.you?3.4:1.1)}
+function crowdReach(err){crowdClip('csingle',(batKey()===S.you?3.4:1.1)*(err?1.6:1))}
 let chantSrc=null,nextChant=0;
 function crowdChant(){if(chantSrc||S.mode==='bp')return;chantSrc=crowdClip('chant',1.9);if(chantSrc)chantSrc.onended=()=>{chantSrc=null}}
 function stopRamp(){if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
