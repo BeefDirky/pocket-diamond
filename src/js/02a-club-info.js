@@ -12,7 +12,7 @@ const CLUB_INFO={
   facts:['Fans tie orange plastic bags on their heads in the late innings, then use them for trash on the way out.',
    'The whole ballpark sings the harbor song in the 8th, win or lose.',
    'Harbor Field\'s left-field wall is the tallest in the league, so ships in the bay get a better view than the bleachers.'],
-  slogans:['부산 시글스!','마! 함 해보자','사직 노래방'],landmark:'bridge'},
+  slogans:['부산 시걸스!','마! 함 해보자','사직 노래방'],landmark:'bridge'},
  incheon:{est:1982,nick:'Gateway to Korea',
   city:'The port city on the Yellow Sea, home to the country\'s main airport and the Chinatown where jajangmyeon was born.',
   facts:['Planes on approach fly low enough that pitchers say they can read the tail numbers, which is how Cosmo got his job.',

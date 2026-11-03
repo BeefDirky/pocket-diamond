@@ -33,7 +33,7 @@ const TEAMS={
   jersey:'#4a5060',cap:'#c8202a',brim:'#7a1018',mascot:'Chuchu',mdesc:'A subway rat in a conductor\'s cap. Knows every shortcut on Line 2 and squeaks the seventh-inning song.',
   pitcher:{name:'AHN W.K.',hand:'R',slot:'side'},pen:[{name:'WALSH',hand:'R',slot:'over'},{name:'NOH S.H.',hand:'L',slot:'over'}],
   lineup:[['PARK J.H.','L'],['KIM D.W.','R'],['RAMIREZ','S'],['LEE S.M.','R'],['CHOI W.S.','L'],['JUNG H.S.','R'],['KANG M.G.','R'],['OH J.Y.','L'],['YANG E.S.','R']]},
- busan:{city:'BUSAN',kcity:'부산',name:'SEAGLES',kname:'시글스',script:'Seagles',emblem:'seagle',logo:'sea',
+ busan:{city:'BUSAN',kcity:'부산',name:'SEAGULLS',kname:'시걸스',script:'Seagulls',emblem:'seagle',logo:'sea',
   jersey:'#e8642a',cap:'#123a6b',brim:'#0b2547',mascot:'Galmae',mdesc:'Half seagull, half eagle, all attitude. Swoops on foul balls and leads the harbor song from the dugout roof.',
   pitcher:{name:'BRENNAN',hand:'R',slot:'over'},pen:[{name:'PARK S.W.',hand:'R',slot:'side'},{name:'KOO S.J.',hand:'L',slot:'over'}],
   lineup:[['HWANG M.U.','L'],['JEON J.H.','R'],['SON H.S.','L'],['DAVIS','R'],['YOON D.H.','R'],['HAN D.Y.','S'],['NA J.B.','R'],['KIM M.S.','L'],['YOO K.H.','R']]},

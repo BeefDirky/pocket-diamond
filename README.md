@@ -43,4 +43,4 @@ every 2 s, so dropped messages heal; a player only counts as gone after 12 s of 
 
 ## Clubs
 
-Seoul Rats · Busan Seagles · Suwon Wizards · Daejeon Bears · Gwangju Cats · Changwon Rexes · Incheon Cosmos · Daegu Kings · Ulsan Whales · Jeju Tangerines
+Seoul Rats · Busan Seagulls · Suwon Wizards · Daejeon Bears · Gwangju Cats · Changwon Rexes · Incheon Cosmos · Daegu Kings · Ulsan Whales · Jeju Tangerines
