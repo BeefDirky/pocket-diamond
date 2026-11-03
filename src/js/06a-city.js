@@ -5,13 +5,13 @@ let PARK_OUTLINE=null,OUT_CV=null,OUT_KEY='';
 function parkOutline(){// the stadium's outer wall, in world pixels: stands end a little past the fence, wrapping behind home
  const pts=[],f45=fenceDist(45)+40;
  for(let a=-180;a<=180;a+=3){const A=Math.abs(a),sg=Math.sign(a)||1;let r;
-  if(A<=45)r=fenceDist(a)+40;else if(A<=92)r=lerp(f45,232,ease((A-45)/47));else r=lerp(232,56,ease((A-92)/88));
+  r=A<=45?fenceDist(a)+120:A<=92?lerp(f45+80,330,ease((A-45)/47)):lerp(330,140,ease((A-92)/88));
   // the stands only exist inside the park buffer, so the wall has to stay inside it too
-  const sn=Math.abs(Math.sin(a*RAD)),cs=Math.cos(a*RAD),maxX=(W/2-14)*FT,maxUp=(HY-14)*FT,maxDn=(H-HY-12)*FT;
+  const sn=Math.abs(Math.sin(a*RAD)),cs=Math.cos(a*RAD),maxX=(W/2-6)*FT,maxUp=(HY-6)*FT,maxDn=(H-HY-6)*FT;
   if(sn>.01)r=Math.min(r,maxX/sn);if(cs>.01)r=Math.min(r,maxUp/cs);if(cs<-.01)r=Math.min(r,maxDn/-cs);
   pts.push({a,r})}
  // round off the corners where the wall meets the buffer's edges
- const sm=pts.map((p,i)=>{let s2=0,n=0;for(let d=-3;d<=3;d++){const q=pts[(i+d+pts.length)%pts.length];s2+=q.r;n++}return{a:p.a,r:Math.min(p.r,s2/n)}});
+ const sm=pts.map((p,i)=>{let s2=0,n=0;for(let d=-2;d<=2;d++){const q=pts[(i+d+pts.length)%pts.length];s2+=q.r;n++}return{a:p.a,r:Math.min(p.r,s2/n)}});
  return sm.map(p=>toPx(Math.sin(p.a*RAD)*p.r,Math.cos(p.a*RAD)*p.r))}
 function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');

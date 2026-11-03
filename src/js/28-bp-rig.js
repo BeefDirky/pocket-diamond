@@ -281,7 +281,8 @@ function render(now){
   // the pitch ricochets off the hitter and dribbles away
   const x=f.x0+f.dx*o,y=f.y0+f.dy*o,h=f.h0*Math.max(0,1-e*2.4)+Math.abs(Math.sin(e*Math.PI*2.2))*1.6*(1-e),q=toPx(x,y);drawBall(wg,q.x,q.y,h,null)}
  if(false){}else if(inPlay&&!play.hide){const p=ballAt(play,t);if(p){let q=toPx(p.x,p.y),hh=p.h;const dv=play.dive,sg=play.curSeg;
-  if(dv&&t>=dv.t&&t<=dv.t+.95&&dist(p,fpos(play,dv.i,t))<8){const f=fpos(play,dv.i,t),fq=toPx(f.x,f.y);q={x:fq.x+dv.dir*15,y:fq.y-7};hh=0}
+  const inGlove=dv&&!play.bobble&&t>=dv.t-.03&&t<=dv.t+.95&&(!sg||sg.hold===dv.i||(!sg.thr&&sg.hold==null&&t>=sg.t1-.03));
+  if(inGlove){const f=fpos(play,dv.i,t),fq=toPx(f.x,f.y),lf=t<dv.t?4:0;q={x:fq.x+dv.dir*15,y:fq.y-6-lf};hh=0}
   else if(sg&&sg.hold!=null&&t>=sg.t0&&t<=sg.t1){const f=fpos(play,sg.hold,t),fq=toPx(f.x,f.y);q={x:fq.x+4,y:fq.y-9};hh=0}
   if(!play.foul||true)dustAt(play,p.x,p.y,p.h);drawBall(wg,q.x,q.y,hh)}}
  drawGulls(wg,now);

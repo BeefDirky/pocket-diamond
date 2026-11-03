@@ -553,6 +553,9 @@ body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .a
  .app.deskApp>.acts,.app.deskApp>.pacts{transform:scale(.68);width:320px}
  .app.deskApp>.board{transform:translateX(-50%) scale(.62);width:520px}
 }
+
+.app.deskApp .skipBtn{position:fixed;right:14px;bottom:calc(14px + 118px);margin:0;z-index:7}
+@media (max-width:999px){.app.deskApp .skipBtn{bottom:calc(10px + 92px)}}
 </style>
 
 <div class="app">
@@ -1291,13 +1294,13 @@ let PARK_OUTLINE=null,OUT_CV=null,OUT_KEY='';
 function parkOutline(){// the stadium's outer wall, in world pixels: stands end a little past the fence, wrapping behind home
  const pts=[],f45=fenceDist(45)+40;
  for(let a=-180;a<=180;a+=3){const A=Math.abs(a),sg=Math.sign(a)||1;let r;
-  if(A<=45)r=fenceDist(a)+40;else if(A<=92)r=lerp(f45,232,ease((A-45)/47));else r=lerp(232,56,ease((A-92)/88));
+  r=A<=45?fenceDist(a)+120:A<=92?lerp(f45+80,330,ease((A-45)/47)):lerp(330,140,ease((A-92)/88));
   // the stands only exist inside the park buffer, so the wall has to stay inside it too
-  const sn=Math.abs(Math.sin(a*RAD)),cs=Math.cos(a*RAD),maxX=(W/2-14)*FT,maxUp=(HY-14)*FT,maxDn=(H-HY-12)*FT;
+  const sn=Math.abs(Math.sin(a*RAD)),cs=Math.cos(a*RAD),maxX=(W/2-6)*FT,maxUp=(HY-6)*FT,maxDn=(H-HY-6)*FT;
   if(sn>.01)r=Math.min(r,maxX/sn);if(cs>.01)r=Math.min(r,maxUp/cs);if(cs<-.01)r=Math.min(r,maxDn/-cs);
   pts.push({a,r})}
  // round off the corners where the wall meets the buffer's edges
- const sm=pts.map((p,i)=>{let s2=0,n=0;for(let d=-3;d<=3;d++){const q=pts[(i+d+pts.length)%pts.length];s2+=q.r;n++}return{a:p.a,r:Math.min(p.r,s2/n)}});
+ const sm=pts.map((p,i)=>{let s2=0,n=0;for(let d=-2;d<=2;d++){const q=pts[(i+d+pts.length)%pts.length];s2+=q.r;n++}return{a:p.a,r:Math.min(p.r,s2/n)}});
  return sm.map(p=>toPx(Math.sin(p.a*RAD)*p.r,Math.cos(p.a*RAD)*p.r))}
 function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
@@ -1898,8 +1901,12 @@ function camTarget(){
   const play=S.play;const t=S.phase==='result'?play.end:play.t;const b=ballAt(play,t);
   if(!b)return clampCam(isWide()?{x:HX,y:H*.56,z:1}:CAM_FULL);
   const q=toPx(b.x,b.y),c2=toPx(0,85);const d=Math.hypot(b.x,b.y);
-  if(isWide())return clampCam({x:lerp(q.x,c2.x,.55),y:lerp(q.y,c2.y,.55),z:Math.max(zFit(),lerp(1.3,1,clamp(d/260,0,1))*S.zoom)});
-  return clampCam({x:lerp(q.x,c2.x,.3),y:lerp(q.y,c2.y,.3),z:Math.max(zFit(),lerp(1.8,1.25,clamp(d/320,0,1))*S.zoom)});
+  const wide=isWide(),k=wide?.55:.3,cx=lerp(q.x,c2.x,k),cy=lerp(q.y,c2.y,k);
+  let z=Math.max(zFit(),(wide?lerp(1.3,1,clamp(d/260,0,1)):lerp(1.8,1.25,clamp(d/320,0,1)))*S.zoom);
+  // the ball is drawn lifted by its height: keep that point inside the frame (with room to spare), zooming out if needed
+  const by=q.y-(b.h||0)/FT*.5,bx=q.x,dyN=Math.abs(by-cy)*2.6,dxN=Math.abs(bx-cx)*2.4;
+  if(dyN>0)z=Math.min(z,W*VA/dyN);if(dxN>0)z=Math.min(z,W/dxN);
+  return clampCam({x:cx,y:cy,z:Math.max(zFit(),z)});
  }
  if(S.camMode==='pitch'){// wide: frame a fixed slice of the park (home plate to past second base) whatever the screen's shape
   const c=isWide()?{x:HX,y:HY-210,z:W*VA/820}:CAM_PITCH,z=Math.max(zFit(),c.z*S.zoom);let y=c.y;
@@ -1909,6 +1916,8 @@ function camTarget(){
    const need=2*(hY+44-y);zz=Math.max(1,Math.min(z,W*VA/need))}
   // zooming out past the default drifts the view up toward the middle of the park, so the whole neighborhood comes into frame
   if(S.zoom<1){const k=clamp((1-S.zoom)/.55,0,1);y=lerp(y,H*.42,k)}
+  // whatever the zoom, the batter stays in frame, clear of the controls along the bottom
+  {const vh=viewWH(zz)[1];y=clamp(y,HY+34-.33*vh,HY-60+.42*vh)}
   return clampCam({x:c.x,y,z:zz})}
  return clampCam(isWide()?{x:HX,y:H*.56,z:1}:CAM_FULL);
 }
@@ -2361,7 +2370,7 @@ function groundOut(play,it,P,runners){
  const bst=P.bunt?(batR.who.spd>=85?.2:.35):.65;const batArr1=bst+LEG/spdFt(batR.who),r1Arr2=r1?.1+LEG/spdFt(r1.who):99;
  runners.forEach(r=>{r.start=r.batter?bst:r.L0!=null?0:.1;r.speed=spdFt(r.who)});
  const bob=!P.bunt&&Math.random()<errChance(i,play.dive&&play.dive.i===i?.16:.05);// a diving stop is much harder to field cleanly
- if(bob){const sq={x:Pp.x+rand(-8,8),y:Pp.y-rand(4,10)},t0=tf;
+ if(bob){play.bobble=true;const sq={x:Pp.x+rand(-8,8),y:Pp.y-rand(4,10)},t0=tf;
   play.segs.push(fnSeg(t0,t0+.7,tt=>{const uu=(tt-t0)/.7;return{x:lerp(Pp.x,sq.x,uu),y:lerp(Pp.y,sq.y,uu),h:Math.abs(Math.sin(uu*6))*2*(1-uu)}}));
   pushKey(play,i,{t:t0+1,x:sq.x,y:sq.y});tf=t0+1;Pp=sq}
  const cov1=i===2?0:2,cov2=(i===3||i===2)?5:3;
@@ -3964,7 +3973,8 @@ function render(now){
   // the pitch ricochets off the hitter and dribbles away
   const x=f.x0+f.dx*o,y=f.y0+f.dy*o,h=f.h0*Math.max(0,1-e*2.4)+Math.abs(Math.sin(e*Math.PI*2.2))*1.6*(1-e),q=toPx(x,y);drawBall(wg,q.x,q.y,h,null)}
  if(false){}else if(inPlay&&!play.hide){const p=ballAt(play,t);if(p){let q=toPx(p.x,p.y),hh=p.h;const dv=play.dive,sg=play.curSeg;
-  if(dv&&t>=dv.t&&t<=dv.t+.95&&dist(p,fpos(play,dv.i,t))<8){const f=fpos(play,dv.i,t),fq=toPx(f.x,f.y);q={x:fq.x+dv.dir*15,y:fq.y-7};hh=0}
+  const inGlove=dv&&!play.bobble&&t>=dv.t-.03&&t<=dv.t+.95&&(!sg||sg.hold===dv.i||(!sg.thr&&sg.hold==null&&t>=sg.t1-.03));
+  if(inGlove){const f=fpos(play,dv.i,t),fq=toPx(f.x,f.y),lf=t<dv.t?4:0;q={x:fq.x+dv.dir*15,y:fq.y-6-lf};hh=0}
   else if(sg&&sg.hold!=null&&t>=sg.t0&&t<=sg.t1){const f=fpos(play,sg.hold,t),fq=toPx(f.x,f.y);q={x:fq.x+4,y:fq.y-9};hh=0}
   if(!play.foul||true)dustAt(play,p.x,p.y,p.h);drawBall(wg,q.x,q.y,hh)}}
  drawGulls(wg,now);

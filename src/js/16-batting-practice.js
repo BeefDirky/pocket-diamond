@@ -105,7 +105,7 @@ function groundOut(play,it,P,runners){
  const bst=P.bunt?(batR.who.spd>=85?.2:.35):.65;const batArr1=bst+LEG/spdFt(batR.who),r1Arr2=r1?.1+LEG/spdFt(r1.who):99;
  runners.forEach(r=>{r.start=r.batter?bst:r.L0!=null?0:.1;r.speed=spdFt(r.who)});
  const bob=!P.bunt&&Math.random()<errChance(i,play.dive&&play.dive.i===i?.16:.05);// a diving stop is much harder to field cleanly
- if(bob){const sq={x:Pp.x+rand(-8,8),y:Pp.y-rand(4,10)},t0=tf;
+ if(bob){play.bobble=true;const sq={x:Pp.x+rand(-8,8),y:Pp.y-rand(4,10)},t0=tf;
   play.segs.push(fnSeg(t0,t0+.7,tt=>{const uu=(tt-t0)/.7;return{x:lerp(Pp.x,sq.x,uu),y:lerp(Pp.y,sq.y,uu),h:Math.abs(Math.sin(uu*6))*2*(1-uu)}}));
   pushKey(play,i,{t:t0+1,x:sq.x,y:sq.y});tf=t0+1;Pp=sq}
  const cov1=i===2?0:2,cov2=(i===3||i===2)?5:3;

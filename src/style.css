@@ -542,3 +542,6 @@ body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .a
  .app.deskApp>.acts,.app.deskApp>.pacts{transform:scale(.68);width:320px}
  .app.deskApp>.board{transform:translateX(-50%) scale(.62);width:520px}
 }
+
+.app.deskApp .skipBtn{position:fixed;right:14px;bottom:calc(14px + 118px);margin:0;z-index:7}
+@media (max-width:999px){.app.deskApp .skipBtn{bottom:calc(10px + 92px)}}

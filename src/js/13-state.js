@@ -32,8 +32,12 @@ function camTarget(){
   const play=S.play;const t=S.phase==='result'?play.end:play.t;const b=ballAt(play,t);
   if(!b)return clampCam(isWide()?{x:HX,y:H*.56,z:1}:CAM_FULL);
   const q=toPx(b.x,b.y),c2=toPx(0,85);const d=Math.hypot(b.x,b.y);
-  if(isWide())return clampCam({x:lerp(q.x,c2.x,.55),y:lerp(q.y,c2.y,.55),z:Math.max(zFit(),lerp(1.3,1,clamp(d/260,0,1))*S.zoom)});
-  return clampCam({x:lerp(q.x,c2.x,.3),y:lerp(q.y,c2.y,.3),z:Math.max(zFit(),lerp(1.8,1.25,clamp(d/320,0,1))*S.zoom)});
+  const wide=isWide(),k=wide?.55:.3,cx=lerp(q.x,c2.x,k),cy=lerp(q.y,c2.y,k);
+  let z=Math.max(zFit(),(wide?lerp(1.3,1,clamp(d/260,0,1)):lerp(1.8,1.25,clamp(d/320,0,1)))*S.zoom);
+  // the ball is drawn lifted by its height: keep that point inside the frame (with room to spare), zooming out if needed
+  const by=q.y-(b.h||0)/FT*.5,bx=q.x,dyN=Math.abs(by-cy)*2.6,dxN=Math.abs(bx-cx)*2.4;
+  if(dyN>0)z=Math.min(z,W*VA/dyN);if(dxN>0)z=Math.min(z,W/dxN);
+  return clampCam({x:cx,y:cy,z:Math.max(zFit(),z)});
  }
  if(S.camMode==='pitch'){// wide: frame a fixed slice of the park (home plate to past second base) whatever the screen's shape
   const c=isWide()?{x:HX,y:HY-210,z:W*VA/820}:CAM_PITCH,z=Math.max(zFit(),c.z*S.zoom);let y=c.y;
@@ -43,6 +47,8 @@ function camTarget(){
    const need=2*(hY+44-y);zz=Math.max(1,Math.min(z,W*VA/need))}
   // zooming out past the default drifts the view up toward the middle of the park, so the whole neighborhood comes into frame
   if(S.zoom<1){const k=clamp((1-S.zoom)/.55,0,1);y=lerp(y,H*.42,k)}
+  // whatever the zoom, the batter stays in frame, clear of the controls along the bottom
+  {const vh=viewWH(zz)[1];y=clamp(y,HY+34-.33*vh,HY-60+.42*vh)}
   return clampCam({x:c.x,y,z:zz})}
  return clampCam(isWide()?{x:HX,y:H*.56,z:1}:CAM_FULL);
 }
