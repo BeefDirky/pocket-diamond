@@ -24,7 +24,9 @@ const zFit=()=>{const e=EXT();return e.mx?Math.max(W/(W+2*e.mx),W*VA/(H+2*e.my))
 function viewWH(z){const HH=H+2*EXT().my;let vw=W/z,vh=vw*VA;if(vh>HH){vh=HH;vw=HH/VA}return[vw,vh]}
 function clampCam(c){const e=EXT(),[vw,vh]=viewWH(c.z),WW=W+2*e.mx,HH=H+2*e.my;
  return{x:vw>=WW?W/2:clamp(c.x,vw/2-e.mx,W+e.mx-vw/2),y:vh>=HH?H/2:clamp(c.y,vh/2-e.my,H+e.my-vh/2),z:c.z}}
-const isWide=()=>OPT.cam==='wide';
+// any sideways screen (computer, tablet, phone on its side) plays full screen with the wide camera
+const isLandscape=()=>innerWidth>innerHeight&&innerWidth>=640;
+const isWide=()=>OPT.cam==='wide'||isLandscape();
 function camTarget(){
  if(S.camMode==='follow'&&S.play){
   const play=S.play;const t=S.phase==='result'?play.end:play.t;const b=ballAt(play,t);
@@ -33,7 +35,8 @@ function camTarget(){
   if(isWide())return clampCam({x:lerp(q.x,c2.x,.55),y:lerp(q.y,c2.y,.55),z:Math.max(zFit(),lerp(1.3,1,clamp(d/260,0,1))*S.zoom)});
   return clampCam({x:lerp(q.x,c2.x,.3),y:lerp(q.y,c2.y,.3),z:Math.max(zFit(),lerp(1.8,1.25,clamp(d/320,0,1))*S.zoom)});
  }
- if(S.camMode==='pitch'){const c=OPT.cam==='wide'?CAM_WIDE:CAM_PITCH,z=Math.max(zFit(),c.z*S.zoom);let y=c.y;
+ if(S.camMode==='pitch'){// wide: frame a fixed slice of the park (home plate to past second base) whatever the screen's shape
+  const c=isWide()?{x:HX,y:HY-210,z:W*VA/820}:CAM_PITCH,z=Math.max(zFit(),c.z*S.zoom);let y=c.y;
   // zooming in slides the view up toward the mound (it's dead center at full zoom), keeping the batter in frame
   let zz=z;if(S.zoom>1){const k=clamp((S.zoom-1)/.35,0,1),mY=toPx(0,60.5).y,hY=toPx(0,0).y;y=lerp(c.y,mY,k);
    // never zoom so far that the batter drops out of the bottom of the frame
