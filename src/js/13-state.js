@@ -17,9 +17,13 @@ const effHand=b=>b.hand==='S'?(pitcher().hand==='R'?'L':'R'):b.hand;
 function setCam(m){S.camMode=m}
 function sdamp(cur,target,vel,st,dt){const om=2/st,x=om*dt,e=1/(1+x+.48*x*x+.235*x*x*x);const ch=cur-target,tmp=(vel+om*ch)*dt;return[target+(ch+tmp)*e,(vel-om*tmp)*e]}
 let VA=H/W;
-const zFit=()=>Math.min(1,W*VA/H);// zoom that shows the whole park top to bottom
-function viewWH(z){let vw=W/z,vh=vw*VA;if(vh>H){vh=H;vw=H/VA}return[vw,vh]}
-function clampCam(c){const[vw,vh]=viewWH(c.z);return{x:vw>=W?W/2:clamp(c.x,vw/2,W-vw/2),y:vh>=H?H/2:clamp(c.y,vh/2,H-vh/2),z:c.z}}
+// the world past the park walls: every park sits in its neighborhood (drawn at half resolution), so the camera may
+// pan and zoom out past the stands. EXT is how far that neighborhood reaches beyond the park buffer on each side.
+const EXT_M={mx:1100,my:900},EXT=()=>S.mode==='bp'||S.phase==='title'?{mx:0,my:0}:EXT_M;
+const zFit=()=>{const e=EXT();return e.mx?Math.max(W/(W+2*e.mx),W*VA/(H+2*e.my)):Math.min(1,W*VA/H)};// widest zoom allowed
+function viewWH(z){const HH=H+2*EXT().my;let vw=W/z,vh=vw*VA;if(vh>HH){vh=HH;vw=HH/VA}return[vw,vh]}
+function clampCam(c){const e=EXT(),[vw,vh]=viewWH(c.z),WW=W+2*e.mx,HH=H+2*e.my;
+ return{x:vw>=WW?W/2:clamp(c.x,vw/2-e.mx,W+e.mx-vw/2),y:vh>=HH?H/2:clamp(c.y,vh/2-e.my,H+e.my-vh/2),z:c.z}}
 const isWide=()=>OPT.cam==='wide';
 function camTarget(){
  if(S.camMode==='follow'&&S.play){
@@ -34,6 +38,8 @@ function camTarget(){
   let zz=z;if(S.zoom>1){const k=clamp((S.zoom-1)/.35,0,1),mY=toPx(0,60.5).y,hY=toPx(0,0).y;y=lerp(c.y,mY,k);
    // never zoom so far that the batter drops out of the bottom of the frame
    const need=2*(hY+44-y);zz=Math.max(1,Math.min(z,W*VA/need))}
+  // zooming out past the default drifts the view up toward the middle of the park, so the whole neighborhood comes into frame
+  if(S.zoom<1){const k=clamp((1-S.zoom)/.55,0,1);y=lerp(y,H*.42,k)}
   return clampCam({x:c.x,y,z:zz})}
  return clampCam(isWide()?{x:HX,y:H*.56,z:1}:CAM_FULL);
 }

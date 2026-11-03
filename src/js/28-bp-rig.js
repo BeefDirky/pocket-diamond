@@ -309,15 +309,22 @@ function render(now){
   wg.restore()}
  else dayPass(wg);
  // to screen
- const[vw,vh]=viewWH(S.cam.z);
- const sx=clamp(S.cam.x-vw/2,0,Math.max(0,W-vw)),sy=clamp(S.cam.y-vh/2,0,Math.max(0,H-vh));
- const scale=cv.height/vh;
+ const C=clampCam(S.cam),[vw,vh]=viewWH(C.z),e=EXT();
+ const vx0=C.x-vw/2,vy0=C.y-vh/2,scale=cv.height/vh;
  ctx.imageSmoothingEnabled=scale<1.6;ctx.imageSmoothingQuality='high';
- S.view={sx:vw>W?0:sx,sy,vw:Math.min(vw,W),vh,ox:vw>W?(cv.width-W*scale)/2:0,scale};
- if(vw>W){const dw=W*scale,ox=(cv.width-dw)/2;ctx.fillStyle='#1b232a';ctx.fillRect(0,0,cv.width,cv.height);
-  // beyond the park walls: the city
-  const CY=cityFor();if(CY){const x0=-(vw-W)/2,sw=Math.min(vw,W+CITY_M*2),sx2=Math.max(0,(x0+CITY_M)/2),dx=Math.max(0,(-CITY_M-x0))*scale;ctx.drawImage(CY,sx2,sy/2,sw/2,vh/2,dx,0,sw*scale,cv.height)}
-  ctx.drawImage(wb,0,sy,W,vh,ox,0,dw,cv.height)}
- else ctx.drawImage(wb,sx,sy,vw,vh,0,0,cv.width,cv.height);
+ S.view={sx:vx0,sy:vy0,vw,vh,ox:0,scale};
+ let OUT=e.mx?outsideFor():null;const inside=vx0>=0&&vy0>=0&&vx0+vw<=W&&vy0+vh<=H;
+ // the usual close-up never reaches past the outer wall: skip the neighborhood and the clip entirely (cheap on phones)
+ if(OUT&&inside&&PARK_OUTLINE&&[[vx0,vy0],[vx0+vw,vy0],[vx0,vy0+vh],[vx0+vw,vy0+vh]].every(([x,y])=>insidePoly(PARK_OUTLINE,x,y)))OUT=null;
+ if(OUT)ctx.drawImage(OUT,(vx0+e.mx)/2,(vy0+e.my)/2,vw/2,vh/2,0,0,cv.width,cv.height);else if(!inside){ctx.fillStyle='#1b232a';ctx.fillRect(0,0,cv.width,cv.height)}
+ const ix0=Math.max(0,vx0),iy0=Math.max(0,vy0),ix1=Math.min(W,vx0+vw),iy1=Math.min(H,vy0+vh);
+ if(ix1>ix0&&iy1>iy0){const dx=(ix0-vx0)*scale,dy=(iy0-vy0)*scale,dw=(ix1-ix0)*scale,dh=(iy1-iy0)*scale;
+  if(OUT&&PARK_OUTLINE){// the stands end at the stadium's outer wall; the neighborhood shows past it
+   ctx.save();ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();ctx.clip();
+   ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh);ctx.restore();
+   ctx.save();ctx.lineJoin='round';ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();
+   ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=Math.max(2,16*scale);ctx.stroke();ctx.strokeStyle=S.night?'#3a424c':'#b9b4a8';ctx.lineWidth=Math.max(1.5,9*scale);ctx.stroke();
+   ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}
+  else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
 }
 

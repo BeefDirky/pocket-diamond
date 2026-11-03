@@ -6,7 +6,7 @@ const CLUB_INFO={
   facts:['In Korea the magpie is the bird of good news: hear one in the morning and a guest is on the way.',
    'Hangang Park sits so close to the river that home runs to right have been fished out by rowers.',
    'Night games end with the whole park lit up on phone flashlights while the cheer squad leads one last song.'],
-  slogans:['한강의 기적','반가운 소식!','오늘도 까치!'],landmark:'tower'},
+  slogans:['한강의 기적','반가운 소식!','오늘도 까치!'],landmark:null},
  busan:{est:1982,nick:'Baseball city',
   city:'Korea\'s second city and its biggest port: Haeundae beach, the Gwangan Bridge and a seagull for a city bird.',
   facts:['Fans tie orange plastic bags on their heads in the late innings, then use them for trash on the way out.',

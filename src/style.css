@@ -521,3 +521,24 @@ body:has(.app.deskApp){padding:0!important;overflow:hidden}
 .app.deskApp>.book{display:none}
 .app.deskApp .pcBox,.app.deskApp .bug{transform:scale(.9);transform-origin:top right}
 body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .app.deskApp>.meter,body.inMenu .app.deskApp>.acts,body.inMenu .app.deskApp>.pacts{display:none!important}
+
+/* phones held upright: give the park more of the screen. The score bug in the park already shows the score,
+   so the line score goes, and the panels underneath get tighter */
+@media (orientation:portrait) and (max-width:700px){
+ body:not(:has(.app.wideApp)):not(:has(.app.deskApp)){padding:max(4px,env(safe-area-inset-top,0px)) 4px max(4px,env(safe-area-inset-bottom,0px))}
+ .app:not(.wideApp):not(.deskApp){gap:5px}
+ .app:not(.wideApp):not(.deskApp)>.board{display:none}
+ .app:not(.wideApp):not(.deskApp)>.stage{border-width:2px}
+ .app:not(.wideApp):not(.deskApp) .matchup{gap:5px}
+ .app:not(.wideApp):not(.deskApp) .mu{padding:5px 7px!important}
+ .app:not(.wideApp):not(.deskApp) .meter{padding:4px 7px!important;gap:3px!important}
+ .app:not(.wideApp):not(.deskApp) .swing{min-height:56px!important;padding:10px 8px!important}
+ .app:not(.wideApp):not(.deskApp) .pbtn{padding:10px 4px}
+}
+/* small landscape screens: the floating controls shrink further so they don't collide */
+@media (max-width:999px){
+ .app.deskApp>.matchup{transform:scale(.68);width:290px}
+ .app.deskApp>.meter{transform:translateX(-50%) scale(.68);width:420px}
+ .app.deskApp>.acts,.app.deskApp>.pacts{transform:scale(.68);width:320px}
+ .app.deskApp>.board{transform:translateX(-50%) scale(.62);width:520px}
+}

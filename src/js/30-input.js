@@ -1,7 +1,7 @@
 // ---------- input ----------
 const overlayOpen=()=>!$('title').hidden||!$('over').hidden;
 cv.addEventListener('pointerdown',e=>{if(overlayOpen())return;e.preventDefault();if(S.phase==='play'&&S.play&&S.play.hrFired){S.play.t=S.play.end;return}
- if(S.view&&S.stealHit&&S.stealHit.length){const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*cv.width/r.width,py=(e.clientY-r.top)*cv.height/r.height,wx=S.view.sx+(px-S.view.ox)/S.view.scale,wy=S.view.sy+py/S.view.scale;
+ if(S.view&&S.stealHit&&S.stealHit.length){const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*cv.width/r.width,py=(e.clientY-r.top)*cv.height/r.height,wx=S.view.sx+(px-S.view.ox)/S.view.scale,wy=S.view.sy+(py-(S.view.oy||0))/S.view.scale;
   for(const h of S.stealHit)if(Math.hypot(h.x-wx,h.y-wy)<16){toggleSteal(h.k);return}}
  swing()});
 $('swingBtn').addEventListener('pointerdown',e=>{e.preventDefault();swing()});

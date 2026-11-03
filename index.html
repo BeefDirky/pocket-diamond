@@ -532,6 +532,27 @@ body:has(.app.deskApp){padding:0!important;overflow:hidden}
 .app.deskApp>.book{display:none}
 .app.deskApp .pcBox,.app.deskApp .bug{transform:scale(.9);transform-origin:top right}
 body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .app.deskApp>.meter,body.inMenu .app.deskApp>.acts,body.inMenu .app.deskApp>.pacts{display:none!important}
+
+/* phones held upright: give the park more of the screen. The score bug in the park already shows the score,
+   so the line score goes, and the panels underneath get tighter */
+@media (orientation:portrait) and (max-width:700px){
+ body:not(:has(.app.wideApp)):not(:has(.app.deskApp)){padding:max(4px,env(safe-area-inset-top,0px)) 4px max(4px,env(safe-area-inset-bottom,0px))}
+ .app:not(.wideApp):not(.deskApp){gap:5px}
+ .app:not(.wideApp):not(.deskApp)>.board{display:none}
+ .app:not(.wideApp):not(.deskApp)>.stage{border-width:2px}
+ .app:not(.wideApp):not(.deskApp) .matchup{gap:5px}
+ .app:not(.wideApp):not(.deskApp) .mu{padding:5px 7px!important}
+ .app:not(.wideApp):not(.deskApp) .meter{padding:4px 7px!important;gap:3px!important}
+ .app:not(.wideApp):not(.deskApp) .swing{min-height:56px!important;padding:10px 8px!important}
+ .app:not(.wideApp):not(.deskApp) .pbtn{padding:10px 4px}
+}
+/* small landscape screens: the floating controls shrink further so they don't collide */
+@media (max-width:999px){
+ .app.deskApp>.matchup{transform:scale(.68);width:290px}
+ .app.deskApp>.meter{transform:translateX(-50%) scale(.68);width:420px}
+ .app.deskApp>.acts,.app.deskApp>.pacts{transform:scale(.68);width:320px}
+ .app.deskApp>.board{transform:translateX(-50%) scale(.62);width:520px}
+}
 </style>
 
 <div class="app">
@@ -872,7 +893,7 @@ const CLUB_INFO={
   facts:['In Korea the magpie is the bird of good news: hear one in the morning and a guest is on the way.',
    'Hangang Park sits so close to the river that home runs to right have been fished out by rowers.',
    'Night games end with the whole park lit up on phone flashlights while the cheer squad leads one last song.'],
-  slogans:['한강의 기적','반가운 소식!','오늘도 까치!'],landmark:'tower'},
+  slogans:['한강의 기적','반가운 소식!','오늘도 까치!'],landmark:null},
  busan:{est:1982,nick:'Baseball city',
   city:'Korea\'s second city and its biggest port: Haeundae beach, the Gwangan Bridge and a seagull for a city bird.',
   facts:['Fans tie orange plastic bags on their heads in the late innings, then use them for trash on the way out.',
@@ -1263,67 +1284,95 @@ function blit(g,map,cols,x0,y0){
 
 // ---------- field (static) ----------
 
-// ---------- the city around the ballpark (Seoul for now): seen when the camera is wider than the park ----------
-// Drawn once per park/time of day at half resolution. City pixel (cx,cy) is world pixel (cx*2-CITY_M, cy*2).
-const CITY_M=1100;let CITY=null,CITY_KEY='';
-function cityFor(){if(S.you!=='seoul'||S.mode==='bp')return null;const key=S.you+(S.night?'n':'d');if(CITY_KEY!==key){CITY=buildCity(!!S.night);CITY_KEY=key}return CITY}
-function buildCity(night){
- const CW=Math.round((W+CITY_M*2)/2),CH=Math.round(H/2),c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
- const rr=mulberry32(hash('seoul-city')),R=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))};
- const L0=0,L1=CITY_M/2,R0=(CITY_M+W)/2,R1=CW;// left strip [L0,L1), right strip [R0,R1)
- const col=night?{ground:'#1a1f26',road:'#0e1116',lane:'#3a3420',block:'#20262e',park:'#14241a',water:'#0b1a33',bank:'#1a2a22',roofs:['#242a33','#2b313b','#1f242c','#30343c','#262b22']}
-  :{ground:'#9aa1a6',road:'#5b6167',lane:'#e8e2c8',block:'#b9bdbf',park:'#5f9a4c',water:'#3d7fb8',bank:'#7fae62',roofs:['#c9c6bd','#a9b1b8','#d8d0c0','#8f98a2','#b7a48c','#cfd6dc','#9aa38a']};
+// ---------- outside the park: the stadium's outer wall and the neighborhood around it ----------
+// The park buffer is W x H; the neighborhood reaches EXT().mx/my beyond it and is drawn once per park and time of day
+// at half resolution. Neighborhood pixel (cx,cy) is world pixel (cx*2-mx, cy*2-my).
+let PARK_OUTLINE=null,OUT_CV=null,OUT_KEY='';
+function parkOutline(){// the stadium's outer wall, in world pixels: stands end a little past the fence, wrapping behind home
+ const pts=[],f45=fenceDist(45)+40;
+ for(let a=-180;a<=180;a+=3){const A=Math.abs(a),sg=Math.sign(a)||1;let r;
+  if(A<=45)r=fenceDist(a)+40;else if(A<=92)r=lerp(f45,232,ease((A-45)/47));else r=lerp(232,56,ease((A-92)/88));
+  // the stands only exist inside the park buffer, so the wall has to stay inside it too
+  const sn=Math.abs(Math.sin(a*RAD)),cs=Math.cos(a*RAD),maxX=(W/2-14)*FT,maxUp=(HY-14)*FT,maxDn=(H-HY-12)*FT;
+  if(sn>.01)r=Math.min(r,maxX/sn);if(cs>.01)r=Math.min(r,maxUp/cs);if(cs<-.01)r=Math.min(r,maxDn/-cs);
+  pts.push({a,r})}
+ // round off the corners where the wall meets the buffer's edges
+ const sm=pts.map((p,i)=>{let s2=0,n=0;for(let d=-3;d<=3;d++){const q=pts[(i+d+pts.length)%pts.length];s2+=q.r;n++}return{a:p.a,r:Math.min(p.r,s2/n)}});
+ return sm.map(p=>toPx(Math.sin(p.a*RAD)*p.r,Math.cos(p.a*RAD)*p.r))}
+function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
+function outsideFor(){const key=S.you+(S.night?'n':'d')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
+ if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();OUT_CV=buildOutside(S.you,!!S.night);OUT_KEY=key}return OUT_CV}
+function buildOutside(k,night){
+ const e=EXT_M,CW=Math.round((W+2*e.mx)/2),CH=Math.round((H+2*e.my)/2),c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
+ const rr=mulberry32(hash(k+'-outside')),R=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))};
+ const cx=x=>(x+e.mx)/2,cy=y=>(y+e.my)/2,T=TEAMS[k];
+ const seoul=k==='seoul',coast=k==='busan'||k==='incheon'||k==='ulsan';
+ const col=night?{ground:'#171c22',road:'#0d1015',lane:'#3a3420',block:'#1d232b',plaza:'#232830',park:'#13231a',water:'#0a1a33',bank:'#18291f',roofs:['#242a33','#2b313b','#1f242c','#30343c','#262b22']}
+  :{ground:'#a3a9ad',road:'#5b6167',lane:'#ece6cc',block:'#bcc0c2',plaza:'#d6d2c8',park:'#62a04e',water:'#3d7fb8',bank:'#86b46a',roofs:['#c9c6bd','#a9b1b8','#d8d0c0','#8f98a2','#b7a48c','#cfd6dc','#9aa38a']};
  R(0,0,CW,CH,col.ground);
- // ---- left strip: the Han River flowing top to bottom, riverside parks, bridges ----
- const rvX=L1-236,rvW=124;// the river runs just west of the park so it shows in a widescreen viewR(rvX-26,0,26,CH,col.bank);R(rvX+rvW,0,26,CH,col.bank);
- for(let i=0;i<60;i++){R(rvX-24+rr()*22,rr()*CH,3,3,night?'#1d3324':'#3f7a37');R(rvX+rvW+2+rr()*22,rr()*CH,3,3,night?'#1d3324':'#3f7a37')}
- R(rvX,0,rvW,CH,col.water);
- g.globalAlpha=night?.35:.25;for(let i=0;i<80;i++)R(rvX+rr()*rvW,rr()*CH,4+rr()*8,1,night?'#6a7fb0':'#d8ecff');g.globalAlpha=1;
- const bridges=[90,300,520];
- bridges.forEach((by,bi)=>{R(rvX-30,by,rvW+60,12,night?'#2a2f38':'#8d939a');R(rvX-30,by,rvW+60,1,night?'#3b414c':'#b7bcc1');R(rvX-30,by+11,rvW+60,1,'#00000040');
-  for(let x=rvX-28;x<rvX+rvW+28;x+=6){R(x,by+5,3,1,col.lane)}
-  if(night){const lc=bi===1?['#ff6fb5','#ffe36b','#6fffd2','#6fb8ff']:['#ffd27a'];for(let x=rvX-28,k=0;x<rvX+rvW+28;x+=5,k++){R(x,by-1,1,1,lc[k%lc.length]);R(x,by+12,1,1,lc[(k+2)%lc.length])}
-   if(bi===1){g.globalAlpha=.25;for(let x=rvX;x<rvX+rvW;x+=3)R(x,by+13,2,6+((x*7)%9),['#ff6fb5','#ffe36b','#6fffd2','#6fb8ff'][(x/3|0)%4]);g.globalAlpha=1}}});
- // blocks of the left strip (between the river and the park)
- const blocks=(x0,x1,seedTag,dense)=>{for(let y=4;y<CH-4;){const bh=26+Math.floor(rr()*34);for(let x=x0;x<x1-10;){const bw=24+Math.floor(rr()*40),w2=Math.min(bw,x1-x-6);
-     R(x,y,w2,bh,col.block);
-     // buildings inside the block, each with a shadow to the lower right
-     for(let k=0;k<(dense?3:2);k++){const w=6+rr()*(w2-10),h=6+rr()*(bh-10),bx=x+2+rr()*(w2-w-4),byy=y+2+rr()*(bh-h-4),tall=dense?2+rr()*6:1+rr()*3;
-      R(bx+tall,byy+tall,w,h,night?'#0a0c10':'#00000030');const rc=col.roofs[Math.floor(rr()*col.roofs.length)];R(bx,byy,w,h,rc);R(bx,byy,w,1,night?'#3a404a':'#ffffff60');
-      if(night){for(let wy=byy+2;wy<byy+h-1;wy+=3)for(let wx=bx+2;wx<bx+w-1;wx+=3)if(rr()<.4)R(wx,wy,1,1,rr()<.85?'#ffd98a':'#bfe3ff')}
-      else if(rr()<.35){R(bx+2,byy+2,3,2,'#7e8a94');R(bx+w-5,byy+h-4,3,2,'#6f7b84')}}
-     if(rr()<.18){R(x+2,y+2,w2-4,bh-4,col.park);for(let t=0;t<6;t++){g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x+4+rr()*(w2-8),y+4+rr()*(bh-8),2.5,0,Math.PI*2);g.fill()}}
-     x+=w2+8}
-    y+=bh+8}};
- blocks(rvX+rvW+30,L1-14,'L',false);blocks(4,rvX-30,'L2',false);
- // ---- right strip: downtown, a supertall tower and the hill with the broadcast tower ----
- blocks(R0+14,R1-4,'R',true);
- // the hill (Namsan-style) with its tower near the top right
- {const hx=R0+150,hy=CH*.24,hr=62;const gr=g.createRadialGradient(hx,hy,10,hx,hy,hr);gr.addColorStop(0,night?'#1d3a24':'#5f9a4c');gr.addColorStop(1,night?'#14241a':'#4f8a40');g.fillStyle=gr;g.beginPath();g.ellipse(hx,hy,hr,hr*.8,0,0,Math.PI*2);g.fill();
-  for(let t=0;t<70;t++){const a=rr()*6.28,d=rr()*hr*.9;g.fillStyle=night?'#183020':'#3f7a37';g.beginPath();g.arc(hx+Math.cos(a)*d,hy+Math.sin(a)*d*.8,3,0,Math.PI*2);g.fill()}
-  g.strokeStyle=night?'#2a2f38':'#c9bba0';g.lineWidth=2;g.beginPath();g.moveTo(hx-hr,hy+20);g.quadraticCurveTo(hx-20,hy+10,hx,hy);g.stroke();
-  // tower: round deck seen from above, a long shadow, a red beacon
-  g.fillStyle=night?'#05070b':'#00000040';g.beginPath();g.moveTo(hx,hy);g.lineTo(hx+70,hy+52);g.lineTo(hx+66,hy+56);g.lineTo(hx-3,hy+3);g.fill();
-  R(hx-7,hy-7,14,14,night?'#d8dde6':'#e8e4dc');g.fillStyle=night?'#9fb4d8':'#c9d4de';g.beginPath();g.arc(hx,hy,5,0,Math.PI*2);g.fill();R(hx-1,hy-1,2,2,'#e0473d');
-  if(night){const bl=g.createRadialGradient(hx,hy,2,hx,hy,26);bl.addColorStop(0,'rgba(255,220,150,.45)');bl.addColorStop(1,'rgba(255,220,150,0)');g.fillStyle=bl;g.fillRect(hx-26,hy-26,52,52)}}
- // the supertall: a tapering square with a very long shadow
- {const tx=R0+92,ty=CH*.64;g.fillStyle=night?'#05070b':'#00000048';g.beginPath();g.moveTo(tx-8,ty-8);g.lineTo(tx+8,ty-8);g.lineTo(tx+150,ty+110);g.lineTo(tx+134,ty+120);g.closePath();g.fill();
-  for(let k=0;k<4;k++){const s=16-k*3.5;R(tx-s,ty-s,s*2,s*2,night?['#2a3140','#344050','#3e4c60','#53657e'][k]:['#9fb0bf','#b3c2cf','#c7d4de','#e1e8ee'][k])}
-  R(tx-1,ty-1,2,2,night?'#ffffff':'#7e8a94');if(night){const bl=g.createRadialGradient(tx,ty,2,tx,ty,30);bl.addColorStop(0,'rgba(160,200,255,.4)');bl.addColorStop(1,'rgba(160,200,255,0)');g.fillStyle=bl;g.fillRect(tx-30,ty-30,60,60)}}
- // ---- avenues: a big road hugging each side of the park, cross streets every block or two ----
- const vroad=(x,w)=>{R(x,0,w,CH,col.road);for(let y=0;y<CH;y+=8)R(x+w/2-.5,y,1,4,col.lane);if(night)for(let y=4;y<CH;y+=14){R(x-1,y,1,1,'#ffe0a0');R(x+w,y+7,1,1,'#ffe0a0')}};
- const hroad=(x0,x1,y,h)=>{R(x0,y,x1-x0,h,col.road);for(let x=x0;x<x1;x+=8)R(x,y+h/2-.5,4,1,col.lane)};
- vroad(L1-12,10);vroad(R0+2,10);vroad(rvX-38,8);
- for(const y of[60,230,410,600])hroad(rvX+rvW+30,L1-12,y,6);for(const y of[150,350,560])hroad(R0+12,R1,y,7);
- // stadium plazas and parking right outside the park walls, with cars
- const lot=(x,y,w,h)=>{R(x,y,w,h,night?'#15191f':'#7d848a');for(let yy=y+3;yy<y+h-3;yy+=7)for(let xx=x+3;xx<x+w-5;xx+=5){R(xx,yy,1,5,night?'#2a2f36':'#c9cdd0');if(rr()<.55){const cc=['#c94a3a','#e8e4dc','#2a3a5a','#9aa3ad','#1b1f24','#d9b04a'][Math.floor(rr()*6)];R(xx+1,yy+1,3,4,cc);if(night)R(xx+1,yy+1,3,1,'#00000060')}}};
- lot(L1-60,CH-150,46,140);lot(R0+18,CH-170,50,160);
- // moving-traffic lights baked as streaks at night, little cars by day
- for(let i=0;i<90;i++){const onL=rr()<.5,x=onL?(L1-12+2+(rr()<.5?0:5)):(R0+4+(rr()<.5?0:5)),y=rr()*CH;
-  if(night){R(x,y,1,3,rr()<.5?'#fff3c8':'#ff4a3a')}else R(x,y,2,4,['#c94a3a','#e8e4dc','#2a3a5a','#9aa3ad','#1b1f24'][Math.floor(rr()*5)])}
- // soft fade into the park's outer wall
- for(const[x0,dir]of[[L1,-1],[R0,1]]){const gr=g.createLinearGradient(x0,0,x0+dir*30,0);gr.addColorStop(0,night?'rgba(5,8,12,.85)':'rgba(40,45,50,.55)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(Math.min(x0,x0+dir*30),0,30,CH)}
- if(night){g.globalAlpha=.25;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}
+ const OL=PARK_OUTLINE.map(q=>({x:cx(q.x),y:cy(q.y)}));
+ const near=(x,y,pad)=>{if(insidePoly(OL,x,y))return true;for(let a=0;a<6.28;a+=.8)if(insidePoly(OL,x+Math.cos(a)*pad,y+Math.sin(a)*pad))return true;return false};
+ // water band along the top: the Han River for Seoul, the sea for the coastal clubs
+ const wTop=cy(-330),wBot=cy(-95),hasWater=seoul||coast;
+ const inWater=(y,h)=>hasWater&&y+h>wTop-14&&y<wBot+14;
+ // plaza ring: concrete apron with trees around the outer wall
+ g.save();g.beginPath();OL.forEach((q,i)=>{const dx=q.x-cx(HX),dy=q.y-cy(HY),l=Math.hypot(dx,dy)||1,o=34;g[i?'lineTo':'moveTo'](q.x+dx/l*o,q.y+dy/l*o)});g.closePath();g.fillStyle=col.plaza;g.fill();g.restore();
+ // ring road just outside the plaza
+ g.save();g.beginPath();OL.forEach((q,i)=>{const dx=q.x-cx(HX),dy=q.y-cy(HY),l=Math.hypot(dx,dy)||1,o=48;g[i?'lineTo':'moveTo'](q.x+dx/l*o,q.y+dy/l*o)});g.closePath();g.strokeStyle=col.road;g.lineWidth=14;g.stroke();
+ g.setLineDash([4,5]);g.strokeStyle=col.lane;g.lineWidth=1;g.stroke();g.restore();
+ // plaza trees + lamp posts
+ for(let i=0;i<OL.length;i+=2){const q=OL[i],dx=q.x-cx(HX),dy=q.y-cy(HY),l=Math.hypot(dx,dy)||1,o=20+rr()*8,x=q.x+dx/l*o,y=q.y+dy/l*o;
+  if(rr()<.7){g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.arc(x+2,y+2,4,0,7);g.fill();g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x,y,4,0,7);g.fill();g.fillStyle=night?'#22402a':'#5aa64c';g.beginPath();g.arc(x-1,y-1,2,0,7);g.fill()}
+  else if(night){const gr=g.createRadialGradient(x,y,0,x,y,10);gr.addColorStop(0,'rgba(255,225,150,.5)');gr.addColorStop(1,'rgba(255,225,150,0)');g.fillStyle=gr;g.fillRect(x-10,y-10,20,20)}}
+ // avenues: a grid around the park
+ const roadsV=[],roadsH=[];for(let x=18;x<CW;x+=90+Math.floor(rr()*40))roadsV.push(x);for(let y=16;y<CH;y+=80+Math.floor(rr()*36))roadsH.push(y);
+ // city blocks between the avenues, skipping the park, the plaza and the water
+ for(let bi=0;bi<roadsV.length;bi++)for(let bj=0;bj<roadsH.length;bj++){const x0=roadsV[bi]+7,y0=roadsH[bj]+7,x1=(roadsV[bi+1]||CW+7)-5,y1=(roadsH[bj+1]||CH+7)-5;if(x1-x0<16||y1-y0<16)continue;
+  // split each block into lots
+  for(let y=y0;y<y1-8;){const lh=Math.min(y1-y,14+Math.floor(rr()*22));for(let x=x0;x<x1-8;){const lw=Math.min(x1-x,14+Math.floor(rr()*26));
+    if(!near(x+lw/2,y+lh/2,Math.max(lw,lh)*.6+46)&&!inWater(y,lh)){
+     const kind=rr();
+     if(kind<.12){R(x,y,lw-3,lh-3,col.park);for(let t=0;t<4;t++){g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x+3+rr()*(lw-8),y+3+rr()*(lh-8),2.5,0,7);g.fill()}}
+     else if(kind<.2){R(x,y,lw-3,lh-3,night?'#14181d':'#868c91');for(let yy=y+2;yy<y+lh-5;yy+=5)for(let xx=x+2;xx<x+lw-6;xx+=4)if(rr()<.5)R(xx,yy,2,3,['#c94a3a','#e8e4dc','#2a3a5a','#9aa3ad','#d9b04a'][Math.floor(rr()*5)])}
+     else{const tall=1+rr()*(seoul?7:4),w=lw-3,h=lh-3;R(x+tall,y+tall,w,h,night?'#07090c':'rgba(0,0,0,.22)');const rc=col.roofs[Math.floor(rr()*col.roofs.length)];R(x,y,w,h,rc);R(x,y,w,1,night?'#3a404a':'rgba(255,255,255,.4)');
+      if(night){for(let wy=y+2;wy<y+h-1;wy+=3)for(let wx=x+2;wx<x+w-1;wx+=3)if(rr()<.38)R(wx,wy,1,1,rr()<.85?'#ffd98a':'#bfe3ff')}
+      else if(rr()<.4){R(x+2,y+2,3,2,'#7e8a94');if(w>10)R(x+w-5,y+h-4,3,2,'#6f7b84')}}}
+    x+=lw}y+=lh}}
+ // draw the avenues over the lots (they stop at the plaza and the water)
+ for(const x of roadsV)for(let y=0;y<CH;y+=2)if(!near(x+3,y,40)&&!inWater(y,2)){R(x,y,6,2,col.road);if(y%8===0)R(x+2.5,y,1,1,col.lane);if(night&&y%14===0){R(x-1,y,1,1,'#ffe0a0');R(x+6,y,1,1,'#ffe0a0')}}
+ for(const y of roadsH)for(let x=0;x<CW;x+=2)if(!near(x,y+3,40)&&!inWater(y,6)){R(x,y,2,6,col.road);if(x%8===0)R(x,y+2.5,1,1,col.lane)}
+ // traffic
+ for(let i=0;i<160;i++){const vert=rr()<.5,x=vert?roadsV[Math.floor(rr()*roadsV.length)]+1+(rr()<.5?0:3):rr()*CW,y=vert?rr()*CH:roadsH[Math.floor(rr()*roadsH.length)]+1+(rr()<.5?0:3);
+  if(near(x,y,40)||inWater(y,1))continue;if(night)R(x,y,vert?1:3,vert?3:1,rr()<.5?'#fff3c8':'#ff4a3a');else R(x,y,vert?2:4,vert?4:2,['#c94a3a','#e8e4dc','#2a3a5a','#9aa3ad','#1b1f24'][Math.floor(rr()*5)])}
+ // big parking lots on the first- and third-base sides
+ for(const sd of[-1,1]){const p=toPx(sd*300,-60),x=cx(p.x)+(sd<0?-70:0),y=cy(p.y);if(near(x+35,y+40,10))continue;R(x,y,70,90,night?'#14181d':'#80878c');
+  for(let yy=y+3;yy<y+87;yy+=7)for(let xx=x+3;xx<x+66;xx+=5){R(xx,yy,1,5,night?'#2a2f36':'#cfd2d4');if(rr()<.6)R(xx+1,yy+1,3,4,['#c94a3a','#e8e4dc','#2a3a5a','#9aa3ad','#1b1f24','#d9b04a'][Math.floor(rr()*6)])}}
+ // ---- water along the top ----
+ if(hasWater){R(0,wTop-12,CW,12,col.bank);R(0,wBot,CW,12,col.bank);for(let i=0;i<120;i++){R(rr()*CW,wTop-11+rr()*9,3,3,night?'#1d3324':'#3f7a37');R(rr()*CW,wBot+1+rr()*9,3,3,night?'#1d3324':'#3f7a37')}
+  const wg2=g.createLinearGradient(0,wTop,0,wBot);wg2.addColorStop(0,shade(col.water,-.15));wg2.addColorStop(1,col.water);g.fillStyle=wg2;g.fillRect(0,wTop,CW,wBot-wTop);
+  g.globalAlpha=night?.35:.25;for(let i=0;i<160;i++)R(rr()*CW,wTop+rr()*(wBot-wTop),5+rr()*9,1,night?'#6a7fb0':'#d8ecff');g.globalAlpha=1;
+  if(seoul){// bridges across the Han, one lit in rainbow colors at night
+   [cx(-420),cx(260),cx(1020),cx(1700)].forEach((bx,bi)=>{R(bx,wTop-14,12,wBot-wTop+28,night?'#2a2f38':'#8d939a');R(bx,wTop-14,1,wBot-wTop+28,night?'#3b414c':'#b7bcc1');R(bx+11,wTop-14,1,wBot-wTop+28,'rgba(0,0,0,.25)');
+    for(let y=wTop-12;y<wBot+14;y+=6)R(bx+5.5,y,1,3,col.lane);
+    if(night){const lc=bi===1?['#ff6fb5','#ffe36b','#6fffd2','#6fb8ff']:['#ffd27a'];for(let y=wTop-12,q=0;y<wBot+14;y+=4,q++){R(bx-1,y,1,1,lc[q%lc.length]);R(bx+12,y,1,1,lc[(q+2)%lc.length])}
+     if(bi===1){g.globalAlpha=.3;for(let y=wTop;y<wBot;y+=3)R(bx+13,y,7+((y*7)%9),2,lc[(y/3|0)%4]);g.globalAlpha=1}}});
+   // a sightseeing boat
+   R(cx(-60),wTop+30,18,6,night?'#3a3f4a':'#f4f1e8');R(cx(-60)+4,wTop+31,8,3,night?'#ffd98a':'#c94a3a')}
+  else{for(let i=0;i<5;i++){const bx=rr()*CW,by=wTop+10+rr()*(wBot-wTop-20);R(bx,by,14,5,night?'#3a3f4a':'#e8e4dc');R(bx+3,by-2,5,2,'#c94a3a');if(night)R(bx+1,by+1,1,1,'#ffd98a')}}}
+ // ---- Seoul landmarks: the tower on its wooded hill across the river, and a supertall downtown ----
+ if(seoul){
+  {const hx=cx(1650),hy=cy(-760<-e.my?-600:-610)+0,hr=58;const hy2=Math.max(30,wTop-70);const gr=g.createRadialGradient(hx,hy2,8,hx,hy2,hr);gr.addColorStop(0,night?'#1d3a24':'#5f9a4c');gr.addColorStop(1,night?'#14241a':'#4f8a40');g.fillStyle=gr;g.beginPath();g.ellipse(hx,hy2,hr*1.3,hr*.7,0,0,7);g.fill();
+   for(let t=0;t<60;t++){const a=rr()*6.28,d=rr()*hr;g.fillStyle=night?'#183020':'#3f7a37';g.beginPath();g.arc(hx+Math.cos(a)*d*1.2,hy2+Math.sin(a)*d*.6,3,0,7);g.fill()}
+   g.fillStyle=night?'#05070b':'rgba(0,0,0,.28)';g.beginPath();g.moveTo(hx,hy2);g.lineTo(hx+60,hy2+40);g.lineTo(hx+56,hy2+44);g.lineTo(hx-3,hy2+3);g.fill();
+   R(hx-7,hy2-7,14,14,night?'#d8dde6':'#ece8e0');g.fillStyle=night?'#9fb4d8':'#c9d4de';g.beginPath();g.arc(hx,hy2,5,0,7);g.fill();R(hx-1,hy2-1,2,2,'#e0473d');
+   if(night){const bl=g.createRadialGradient(hx,hy2,2,hx,hy2,26);bl.addColorStop(0,'rgba(255,220,150,.45)');bl.addColorStop(1,'rgba(255,220,150,0)');g.fillStyle=bl;g.fillRect(hx-26,hy2-26,52,52)}}
+  {const tx=cx(W+330),ty=cy(380);g.fillStyle=night?'#05070b':'rgba(0,0,0,.3)';g.beginPath();g.moveTo(tx-9,ty-9);g.lineTo(tx+9,ty-9);g.lineTo(tx+140,ty+100);g.lineTo(tx+124,ty+110);g.closePath();g.fill();
+   for(let q=0;q<4;q++){const s=17-q*3.8;R(tx-s,ty-s,s*2,s*2,night?['#2a3140','#344050','#3e4c60','#53657e'][q]:['#9fb0bf','#b3c2cf','#c7d4de','#e1e8ee'][q])}
+   if(night){const bl=g.createRadialGradient(tx,ty,2,tx,ty,30);bl.addColorStop(0,'rgba(160,200,255,.4)');bl.addColorStop(1,'rgba(160,200,255,0)');g.fillStyle=bl;g.fillRect(tx-30,ty-30,60,60)}}
+  // a subway entrance and a row of food stalls on the plaza behind home
+  {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
+   R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
+ if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}
  return c}
 // ---------- Ulsan: whale bay, shipyard and the harbor traffic ----------
 function spout(g,q,ph,big){const a=ph;for(let k=0;k<(big?20:14);k++){const s=(k*37%11)/11,h=a*(big?44:34)*(.5+s*.6),dx=(k%2?1:-1)*s*a*(big?18:14);g.globalAlpha=Math.max(0,1-a)*.9;g.fillStyle=k%3?'#e8f6ff':'#9fd8f6';g.fillRect(Math.round(q.x+dx),Math.round(q.y-h),3,3)}g.globalAlpha=1}
@@ -1834,9 +1883,13 @@ const effHand=b=>b.hand==='S'?(pitcher().hand==='R'?'L':'R'):b.hand;
 function setCam(m){S.camMode=m}
 function sdamp(cur,target,vel,st,dt){const om=2/st,x=om*dt,e=1/(1+x+.48*x*x+.235*x*x*x);const ch=cur-target,tmp=(vel+om*ch)*dt;return[target+(ch+tmp)*e,(vel-om*tmp)*e]}
 let VA=H/W;
-const zFit=()=>Math.min(1,W*VA/H);// zoom that shows the whole park top to bottom
-function viewWH(z){let vw=W/z,vh=vw*VA;if(vh>H){vh=H;vw=H/VA}return[vw,vh]}
-function clampCam(c){const[vw,vh]=viewWH(c.z);return{x:vw>=W?W/2:clamp(c.x,vw/2,W-vw/2),y:vh>=H?H/2:clamp(c.y,vh/2,H-vh/2),z:c.z}}
+// the world past the park walls: every park sits in its neighborhood (drawn at half resolution), so the camera may
+// pan and zoom out past the stands. EXT is how far that neighborhood reaches beyond the park buffer on each side.
+const EXT_M={mx:1100,my:900},EXT=()=>S.mode==='bp'||S.phase==='title'?{mx:0,my:0}:EXT_M;
+const zFit=()=>{const e=EXT();return e.mx?Math.max(W/(W+2*e.mx),W*VA/(H+2*e.my)):Math.min(1,W*VA/H)};// widest zoom allowed
+function viewWH(z){const HH=H+2*EXT().my;let vw=W/z,vh=vw*VA;if(vh>HH){vh=HH;vw=HH/VA}return[vw,vh]}
+function clampCam(c){const e=EXT(),[vw,vh]=viewWH(c.z),WW=W+2*e.mx,HH=H+2*e.my;
+ return{x:vw>=WW?W/2:clamp(c.x,vw/2-e.mx,W+e.mx-vw/2),y:vh>=HH?H/2:clamp(c.y,vh/2-e.my,H+e.my-vh/2),z:c.z}}
 const isWide=()=>OPT.cam==='wide';
 function camTarget(){
  if(S.camMode==='follow'&&S.play){
@@ -1851,6 +1904,8 @@ function camTarget(){
   let zz=z;if(S.zoom>1){const k=clamp((S.zoom-1)/.35,0,1),mY=toPx(0,60.5).y,hY=toPx(0,0).y;y=lerp(c.y,mY,k);
    // never zoom so far that the batter drops out of the bottom of the frame
    const need=2*(hY+44-y);zz=Math.max(1,Math.min(z,W*VA/need))}
+  // zooming out past the default drifts the view up toward the middle of the park, so the whole neighborhood comes into frame
+  if(S.zoom<1){const k=clamp((1-S.zoom)/.55,0,1);y=lerp(y,H*.42,k)}
   return clampCam({x:c.x,y,z:zz})}
  return clampCam(isWide()?{x:HX,y:H*.56,z:1}:CAM_FULL);
 }
@@ -2746,7 +2801,7 @@ let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createEle
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='PICK <span>TEAMS</span>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline'])$(k).hidden=k!==id;if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
-const isDesk=()=>isWide()&&innerWidth>=1000&&innerHeight>=560;
+const isDesk=()=>isWide()&&innerWidth>innerHeight&&innerWidth>=640;// any landscape screen: the park fills it, controls float on top
 {let lastDesk=null;addEventListener('resize',()=>{const d=isDesk();if(lastDesk!==null&&d!==lastDesk)applyWide();lastDesk=d})}
 function applyWide(){$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize()})}
 function syncOpts(){for(const b of $('optCam').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.cam));for(const b of $('optTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const b of $('mTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']]){$(id).value=OPT[k];$(id+'V').textContent=OPT[k]}}
@@ -3195,84 +3250,59 @@ function buildBigLeague(){const out=[];
 function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;
  const m=v=>Math.max(0,Math.min(255,Math.round(f<0?v*(1+f):v+(255-v)*f)));return'#'+((1<<24)+(m(r)<<16)+(m(g)<<8)+m(b)).toString(16).slice(1)}
 function cardArt2(c){
- const L=document.createElement('canvas');L.width=64;L.height=80;const g=L.getContext('2d');g.imageSmoothingEnabled=false;
- const p=c.p,T=c.T||TEAMS[c.k],bl=c.set==='bl',rr=mulberry32(hash(c.id+'art2'));
- const P=(x,y,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),1,1)};
- const R=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))};
+ // chibi style: a 32x40 pixel sprite (big head, tiny body) blown up 4x, every pixel crisp
+ const G=32,GH=40,L=document.createElement('canvas');L.width=G;L.height=GH;const g=L.getContext('2d');
+ const F=document.createElement('canvas');F.width=G;F.height=GH;const f=F.getContext('2d');// the figure, outlined separately
+ const p=c.p,T=c.T||TEAMS[c.k],bl=c.set==='bl',rr=mulberry32(hash(c.id+'chibi'));
+ const R=(x,y,w,h,col,ctx)=>{(ctx||g).fillStyle=col;(ctx||g).fillRect(x|0,y|0,w|0,h|0)},P=(x,y,col,ctx)=>R(x,y,1,1,col,ctx);
  // ---- backdrop ----
- if(bl){const sky=g.createLinearGradient(0,0,0,40);sky.addColorStop(0,'#0b1430');sky.addColorStop(1,'#26305e');g.fillStyle=sky;g.fillRect(0,0,64,40);
-  for(const lx of[8,56]){R(lx-4,3,9,4,'#cfd6e6');for(let k=0;k<4;k++)R(lx-3+k*2,4,1,2,'#fff8d8');g.globalAlpha=.16;g.fillStyle='#fff6d8';g.beginPath();g.moveTo(lx-3,7);g.lineTo(lx+3,7);g.lineTo(32+(lx-32)*.2+10,40);g.lineTo(32+(lx-32)*.2-10,40);g.fill();g.globalAlpha=1}
-  for(let y=14;y<34;y+=2)for(let x=(y/2)%2;x<64;x+=2)if(rr()<.55){P(x,y,['#7a86a6','#c94a3a','#e8e4dc','#4f6aa8',T.jersey,T.cap][Math.floor(rr()*6)])}
-  for(let k=0;k<10;k++){const bx=rr()*64,by=12+rr()*20;g.globalAlpha=.5;P(bx,by,'#fff3c0');g.globalAlpha=1}
- }else{const ST2=STADIUMS[c.k];R(0,0,64,34,ST2.seat[0]);
-  const shirts=['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f38d2e','#f1ecdc','#6c7a86',T.jersey,T.jersey,T.cap];
-  for(let y=1;y<33;y+=2)for(let x=(y>>1)%2;x<64;x+=2)if(rr()<.62){P(x,y,shirts[Math.floor(rr()*shirts.length)]);if(rr()<.5)P(x,y-1,SKINS[Math.floor(rr()*5)])}
-  g.globalAlpha=.25;R(0,0,64,34,'#0b1a12');g.globalAlpha=1}
- const ST3=bl?BL_PARK:STADIUMS[c.k];
- R(0,34,64,5,ST3.pad);R(0,38,64,1,ST3.pad2);R(0,34,64,1,shade(ST3.pad,.25));
- for(let y=39;y<80;y++)R(0,y,64,1,ST3.grass[(Math.floor((y-39)/5)&1)]);
- if(c.pit){R(6,64,52,16,'#c48c56');R(10,62,44,3,'#c48c56');R(14,61,36,1,'#c48c56');R(27,69,10,2,CREAM);for(let k=0;k<30;k++)P(6+rr()*52,63+rr()*16,'#b07a44')}
- else{R(0,62,64,18,'#c48c56');for(let k=0;k<40;k++)P(rr()*64,62+rr()*18,'#b07a44');R(4,66,1,14,CREAM);R(4,66,20,1,CREAM)}
- // ---- figure ----
- const hd=hash(c.id+'face'),sk=p.skin||skinOf(p.name),sk2=shade(sk,-.18),hair=['#1b1714','#2b1d14','#3a2718','#5a3a20','#1b1714','#7a5230'][hd%6];
- const J=T.jersey,J2=shade(J,-.3),Cp=T.cap,Cp2=shade(Cp,-.3),PA='#eeeae0',PA2='#c9c3b4';
- const lefty=c.pit?p.hand==='L':p.hand==='L';const v=hash(c.id)%3;
- let pose;
- if(c.pit)pose=v===2?'kick':'release';
- else if(p.spd>=85&&v!==0)pose='run';
- else if(p.pow>=85&&v!==2)pose='swing';
- else if(p.def>=88&&v===1)pose='field';
- else pose='stance';
- // joints on a 64x80 grid, for a right-hander facing left (mirrored for lefties)
- const POSES={
-  stance:{hip:[33,50],sh:[32,33],head:[31,24],kF:[25,61],fF:[21,73],kB:[39,61],fB:[42,73],eF:[25,34],hF:[38,27],eB:[42,36],hB:[39,28],bat:[[38,27],[50,8]]},
-  swing:{hip:[32,50],sh:[30,33],head:[27,24],kF:[25,61],fF:[19,73],kB:[39,62],fB:[44,72],eF:[20,32],hF:[16,24],eB:[24,36],hB:[17,25],bat:[[16,24],[44,14]]},
-  run:{hip:[31,49],sh:[27,33],head:[24,25],kF:[22,58],fF:[14,66],kB:[38,61],fB:[45,71],eF:[22,38],hF:[17,32],eB:[37,38],hB:[42,44],bat:null},
-  field:{hip:[33,54],sh:[29,38],head:[25,30],kF:[22,62],fF:[17,73],kB:[42,63],fB:[47,73],eF:[24,48],hF:[20,56],eB:[36,47],hB:[30,57],bat:null,glove:'F'},
-  release:{hip:[33,50],sh:[29,34],head:[25,26],kF:[22,61],fF:[15,73],kB:[42,60],fB:[48,68],eF:[20,36],hF:[12,32],eB:[38,38],hB:[38,44],bat:null,glove:'B'},
-  kick:{hip:[34,50],sh:[33,33],head:[33,24],kF:[24,46],fF:[27,56],kB:[35,62],fB:[35,73],eF:[27,40],hF:[33,39],eB:[39,40],hB:[33,39],bat:null,glove:'F'}
- };
- const Q=POSES[pose],X=a=>lefty?64-a[0]:a[0],Y=a=>a[1],pt=a=>({x:X(a),y:Y(a)});
- const limb=(a,b,w,col)=>{const A=pt(a),B=pt(b),n=Math.max(1,Math.ceil(Math.hypot(B.x-A.x,B.y-A.y)));for(let i=0;i<=n;i++){const x=A.x+(B.x-A.x)*i/n,y=A.y+(B.y-A.y)*i/n;R(x-w/2,y-w/2,w,w,col)}};
- // pass 1 draws everything in black a pixel bigger (outline), pass 2 draws the colors
- const body=(o)=>{const ow=o?2:0,cc=(col)=>o?INK:col;
-  // back leg
-  limb(Q.hip,Q.kB,4+ow,cc(PA2));limb(Q.kB,Q.fB,4+ow,cc(PA2));if(!o){limb([Q.kB[0],Q.kB[1]+4],Q.fB,3,Cp2)}R(X(Q.fB)-(lefty?-1:3)-ow/2,Y(Q.fB)-1-ow/2,5+ow,2+ow,cc(SHOE));
-  // back arm
-  limb(Q.sh,Q.eB,3+ow,cc(J2));limb(Q.eB,Q.hB,3+ow,cc(sk2));
-  // torso
-  {const s=pt(Q.sh),h=pt(Q.hip);for(let i=0;i<=10;i++){const u=i/10,x=s.x+(h.x-s.x)*u,y=s.y+(h.y-s.y)*u,w=(9-u*2)+ow;R(x-w/2,y-1-ow/2,w,2+ow,cc(i<2?J:J))}
-   if(!o){const mx=Math.round((s.x+h.x)/2),my=Math.round((s.y+h.y)/2);R(mx+(lefty?-4:2),my-6,2,9,J2);R(h.x-4,h.y-1,8,2,BELT);R(mx-2,my-4,1,4,CREAM);R(mx,my-4,1,4,CREAM);R(mx-2,my-4,3,1,CREAM)}}
-  // front leg
-  limb(Q.hip,Q.kF,4+ow,cc(PA));limb(Q.kF,Q.fF,4+ow,cc(PA));if(!o){limb([Q.kF[0]+(Q.fF[0]-Q.kF[0])*.35,Q.kF[1]+(Q.fF[1]-Q.kF[1])*.35],Q.fF,3,Cp)}
-  R(X(Q.fF)-(lefty?-1:3)-ow/2,Y(Q.fF)-1-ow/2,5+ow,2+ow,cc(SHOE));
-  // head
-  {const h=pt(Q.head),f=lefty?1:-1;R(h.x-4-ow/2,h.y-4-ow/2,9+ow,10+ow,cc(sk));R(h.x-1-ow/2,h.y+5,4+ow,3+ow/2,cc(sk2));
-   if(!o){// face: eye, brow, ear, nose, mouth; beard or moustache by hash
-    R(h.x+f*2,h.y,1,2,INK);R(h.x+f*2-(f<0?1:0),h.y-1,2,1,hair);R(h.x-f*2,h.y+1,2,2,sk2);R(h.x+f*4,h.y+2,1,2,sk);R(h.x+f*3,h.y+4,2,1,sk2);
-    if(hd%5===1){R(h.x-3,h.y+4,7,2,hair);R(h.x-2,h.y+5,5,1,hair)}else if(hd%5===2)R(h.x+f*2-1,h.y+3,3,1,hair);
-    R(h.x-f*3-1,h.y-1,2,4,hair)}
-   // cap (pitchers, fielders) or helmet (hitters)
-   const helm=!c.pit&&pose!=='field';
-   R(h.x-5-ow/2,h.y-6-ow/2,11+ow,helm?6+ow:4+ow,cc(Cp));R(h.x+(f<0?-8:3)-ow/2,h.y-2-ow/2,6+ow,2+ow,cc(Cp2));
-   if(!o){R(h.x-4,h.y-6,9,1,shade(Cp,.3));if(helm){R(h.x-f*3-1,h.y-2,3,4,Cp);R(h.x-f*3,h.y-1,1,2,Cp2)}}}
-  // bat
-  if(Q.bat){limb(Q.bat[0],Q.bat[1],2+ow,cc(p.bat||'#d9b07a'));if(!o){const B=pt(Q.bat[1]);R(B.x-1,B.y-1,3,3,p.bat||'#d9b07a')}}
-  // front arm
-  limb(Q.sh,Q.eF,3+ow,cc(J));limb(Q.eF,Q.hF,3+ow,cc(sk));if(!o){R(X(Q.sh)-1,Y(Q.sh)+2,3,1,Cp)}
-  // glove
-  if(Q.glove){const gh=pt(Q.glove==='F'?Q.hF:Q.hB);R(gh.x-3-ow/2,gh.y-3-ow/2,6+ow,6+ow,cc(GLOVE));if(!o){R(gh.x-2,gh.y-2,3,2,shade(GLOVE,.25))}}
-  if(c.pit&&pose==='release'&&!o){const hb=pt(Q.hF);R(hb.x+(lefty?2:-4),hb.y-2,3,3,CREAM);P(hb.x+(lefty?3:-3),hb.y-1,'#d24a3a')}
- };
- g.globalAlpha=.3;g.fillStyle='#08140e';g.beginPath();g.ellipse(32,74,17,3,0,0,Math.PI*2);g.fill();g.globalAlpha=1;
- body(true);body(false);
- if(pose==='run'){g.globalAlpha=.5;for(let k=0;k<4;k++)R(lefty?50+k*3:6-k*3,40+k*6,4,1,CREAM);g.globalAlpha=1}
- if(pose==='swing'){g.globalAlpha=.45;g.strokeStyle=CREAM;g.lineWidth=1;g.beginPath();g.arc(lefty?34:30,22,18,lefty?-.2:Math.PI+.2,lefty?.9:Math.PI-.9,lefty);g.stroke();g.globalAlpha=1}
- // ---- double the grid, keep it crisp ----
+ if(bl){R(0,0,G,17,'#141c44');R(0,0,G,5,'#0c1230');for(let k=0;k<8;k++)P(rr()*G,rr()*6,'#e9ecf7');
+  for(const lx of[4,27]){R(lx-2,1,5,2,'#e6e8f0');P(lx-1,1,'#fff6c8');P(lx+1,1,'#fff6c8')}
+  for(let y=7;y<17;y++)for(let x=(y&1);x<G;x+=2)if(rr()<.6)P(x,y,['#4f6aa8','#c94a3a','#e8e4dc','#7a86a6',T.jersey,T.cap][Math.floor(rr()*6)]);
+ }else{const ST2=STADIUMS[c.k];R(0,0,G,17,ST2.seat[0]);for(let y=1;y<17;y++)for(let x=(y&1);x<G;x+=2)if(rr()<.55)P(x,y,['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f1ecdc',T.jersey,T.cap][Math.floor(rr()*7)])}
+ const ST3=bl?BL_PARK:STADIUMS[c.k];R(0,17,G,2,ST3.pad);R(0,19,G,1,ST3.pad2);
+ for(let y=20;y<GH;y++)R(0,y,G,1,ST3.grass[((y-20)>>2)&1]);
+ if(c.pit){R(5,31,22,9,'#c48c56');R(8,30,16,1,'#c48c56');R(13,34,6,1,CREAM)}else{R(0,32,G,8,'#c48c56');R(2,34,1,6,CREAM);R(2,34,9,1,CREAM)}
+ g.fillStyle='rgba(8,20,14,.35)';g.fillRect(9,36,14,1);
+ // ---- the chibi ----
+ const lefty=p.hand==='L',hd=hash(c.id+'face'),sk=p.skin||skinOf(p.name),sk2=shade(sk,-.16);
+ const hair=['#1b1714','#2b1d14','#3a2718','#5a3a20','#1b1714','#6e4a28'][hd%6],J=T.jersey,J2=shade(J,-.28),Cp=T.cap,Cp2=shade(Cp,-.28);
+ const v=hash(c.id)%3;let pose=c.pit?(v===2?'kick':'throw'):p.spd>=85&&v!==0?'run':p.def>=88&&v===1?'field':'bat';
+ const helm=!c.pit&&pose!=='field';
+ const D=(x,y,w,h,col)=>R(x,y,w,h,col,f);
+ // legs + shoes
+ if(pose==='run'){D(12,29,3,4,'#eeeae0');D(10,32,3,2,Cp);D(8,33,4,2,SHOE);D(17,29,3,3,'#eeeae0');D(19,31,3,2,Cp);D(21,32,4,2,SHOE)}
+ else if(pose==='kick'){D(16,29,3,5,'#eeeae0');D(16,32,3,2,Cp);D(15,34,5,2,SHOE);D(11,26,4,3,'#eeeae0');D(9,28,3,2,Cp);D(8,29,3,2,SHOE)}
+ else{D(12,29,3,5,'#eeeae0');D(17,29,3,5,'#eeeae0');D(12,32,3,2,Cp);D(17,32,3,2,Cp);D(11,34,4,2,SHOE);D(17,34,4,2,SHOE)}
+ // body: jersey with a little number, belt, pants
+ D(11,20,10,7,J);D(11,20,2,7,J2);D(13,22,1,3,CREAM);D(14,22,1,1,CREAM);D(15,22,1,3,CREAM);D(13,24,3,1,CREAM);D(11,26,10,1,BELT);D(12,27,8,2,'#eeeae0');D(12,27,2,2,'#d6d0c0');
+ // arms + props
+ if(pose==='bat'){D(20,21,3,2,J);D(22,20,2,2,sk);D(8,21,3,2,J2);D(10,21,2,2,sk);
+  const bc=p.bat||'#d9b07a';for(let k=0;k<9;k++){D(23+Math.round(k*.5),19-k,2,1,bc)}D(26,9,3,3,bc)}
+ else if(pose==='throw'){D(20,18,2,3,J);D(21,15,2,3,sk);D(21,13,3,3,CREAM);P(22,14,'#d24a3a',f);D(7,22,4,2,J2);D(5,21,4,4,GLOVE);D(6,22,2,1,shade(GLOVE,.25))}
+ else if(pose==='kick'){D(18,21,3,2,J);D(16,20,4,4,GLOVE);D(10,21,3,2,J2);D(14,21,3,2,sk)}
+ else if(pose==='field'){D(8,24,3,2,J2);D(4,25,5,5,GLOVE);D(5,26,2,2,shade(GLOVE,.25));D(20,23,3,2,J);D(22,24,2,2,sk)}
+ else{D(8,21,3,2,J2);D(6,19,2,2,sk);D(20,22,3,2,J);D(22,23,2,2,sk)}
+ // head: big and round, cap or helmet on top
+ const hx=10,hy=7;D(hx+1,hy+3,10,10,sk);D(hx,hy+5,12,6,sk);D(hx+2,hy+12,8,1,sk2);
+ D(hx-1,hy+7,1,3,sk);D(hx+12,hy+7,1,3,sk2);// ears
+ // face
+ const ex=hx+3,ey=hy+7;D(ex,ey,2,2,INK);D(ex+5,ey,2,2,INK);P(ex,ey,'#ffffff',f);P(ex+5,ey,'#ffffff',f);
+ D(ex-1,ey+2,2,1,'#f29aa0');D(ex+6,ey+2,2,1,'#f29aa0');
+ if(hd%4===1){D(ex+1,ey+3,5,2,hair);P(ex+3,ey+3,sk,f)}else{P(ex+2,ey+3,'#6a3020',f);P(ex+3,ey+4,'#6a3020',f);P(ex+4,ey+3,'#6a3020',f)}
+ D(ex-1,ey-1,2,1,hair);D(ex+5,ey-1,2,1,hair);
+ // cap / helmet
+ D(hx,hy+1,12,5,Cp);D(hx+1,hy,10,1,Cp);D(hx+2,hy+1,8,1,shade(Cp,.25));
+ if(helm){D(hx-1,hy+3,2,6,Cp);D(hx+11,hy+3,2,4,Cp2);D(hx-1,hy+8,2,1,Cp2)}else{D(hx-1,hy+4,1,3,hair);D(hx+12,hy+4,1,3,hair)}
+ D(hx+8,hy+5,6,2,Cp2);// brim to the side he's facing
+ if(pose==='run'){for(let k=0;k<3;k++)D(2,24+k*3,3,1,'rgba(244,241,232,.7)')}
+ // outline every figure pixel's empty neighbours in ink, then mirror for lefties, then lay it on the backdrop
+ {const id=f.getImageData(0,0,G,GH),d=id.data,o=new Uint8ClampedArray(d);const at=(x,y)=>x>=0&&y>=0&&x<G&&y<GH&&d[(y*G+x)*4+3]>40;
+  for(let y=0;y<GH;y++)for(let x=0;x<G;x++){const i=(y*G+x)*4;if(d[i+3]>40)continue;if(at(x-1,y)||at(x+1,y)||at(x,y-1)||at(x,y+1)){o[i]=27;o[i+1]=31;o[i+2]=36;o[i+3]=255}}
+  f.putImageData(new ImageData(o,G,GH),0,0)}
+ g.save();if(lefty){g.translate(G,0);g.scale(-1,1)}g.drawImage(F,0,0);g.restore();
+ if(c.r>=3){for(const[sx,sy]of[[3,4],[28,9],[27,28]]){P(sx,sy,'#fff3b0');P(sx-1,sy,'#ffcf4a');P(sx+1,sy,'#ffcf4a');P(sx,sy-1,'#ffcf4a');P(sx,sy+1,'#ffcf4a')}}
  const out=document.createElement('canvas');out.width=128;out.height=160;const o=out.getContext('2d');o.imageSmoothingEnabled=false;o.drawImage(L,0,0,128,160);
- // light vignette + a rarity glint
- const vg=o.createRadialGradient(64,80,40,64,80,110);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.35)');o.fillStyle=vg;o.fillRect(0,0,128,160);
- if(c.r>=3){o.fillStyle='rgba(255,214,90,.9)';for(const[sx,sy]of[[14,18],[108,30],[100,120]]){o.fillRect(sx,sy-3,2,8);o.fillRect(sx-3,sy,8,2)}}
  return out.toDataURL()}
 // ---------- league map: pixel Korea with every club pinned to its city ----------
 const KR_MAIN=[[126.1,37.75],[126.45,37.82],[126.7,37.97],[126.95,38.15],[127.1,38.3],[127.6,38.33],[128.0,38.3],[128.35,38.62],[128.6,38.2],[128.85,37.85],[129.05,37.6],[129.3,37.15],[129.38,36.7],[129.45,36.2],[129.45,35.9],[129.5,35.6],[129.4,35.4],[129.2,35.17],[128.95,35.05],[128.6,34.92],[128.3,34.88],[128.0,34.85],[127.75,34.75],[127.5,34.62],[127.3,34.48],[127.0,34.42],[126.75,34.32],[126.5,34.3],[126.3,34.45],[126.28,34.75],[126.35,35.05],[126.42,35.4],[126.55,35.65],[126.7,35.95],[126.6,36.2],[126.5,36.45],[126.2,36.65],[126.15,36.85],[126.45,37.0],[126.8,37.15],[126.65,37.4],[126.55,37.6]];
@@ -3959,16 +3989,23 @@ function render(now){
   wg.restore()}
  else dayPass(wg);
  // to screen
- const[vw,vh]=viewWH(S.cam.z);
- const sx=clamp(S.cam.x-vw/2,0,Math.max(0,W-vw)),sy=clamp(S.cam.y-vh/2,0,Math.max(0,H-vh));
- const scale=cv.height/vh;
+ const C=clampCam(S.cam),[vw,vh]=viewWH(C.z),e=EXT();
+ const vx0=C.x-vw/2,vy0=C.y-vh/2,scale=cv.height/vh;
  ctx.imageSmoothingEnabled=scale<1.6;ctx.imageSmoothingQuality='high';
- S.view={sx:vw>W?0:sx,sy,vw:Math.min(vw,W),vh,ox:vw>W?(cv.width-W*scale)/2:0,scale};
- if(vw>W){const dw=W*scale,ox=(cv.width-dw)/2;ctx.fillStyle='#1b232a';ctx.fillRect(0,0,cv.width,cv.height);
-  // beyond the park walls: the city
-  const CY=cityFor();if(CY){const x0=-(vw-W)/2,sw=Math.min(vw,W+CITY_M*2),sx2=Math.max(0,(x0+CITY_M)/2),dx=Math.max(0,(-CITY_M-x0))*scale;ctx.drawImage(CY,sx2,sy/2,sw/2,vh/2,dx,0,sw*scale,cv.height)}
-  ctx.drawImage(wb,0,sy,W,vh,ox,0,dw,cv.height)}
- else ctx.drawImage(wb,sx,sy,vw,vh,0,0,cv.width,cv.height);
+ S.view={sx:vx0,sy:vy0,vw,vh,ox:0,scale};
+ let OUT=e.mx?outsideFor():null;const inside=vx0>=0&&vy0>=0&&vx0+vw<=W&&vy0+vh<=H;
+ // the usual close-up never reaches past the outer wall: skip the neighborhood and the clip entirely (cheap on phones)
+ if(OUT&&inside&&PARK_OUTLINE&&[[vx0,vy0],[vx0+vw,vy0],[vx0,vy0+vh],[vx0+vw,vy0+vh]].every(([x,y])=>insidePoly(PARK_OUTLINE,x,y)))OUT=null;
+ if(OUT)ctx.drawImage(OUT,(vx0+e.mx)/2,(vy0+e.my)/2,vw/2,vh/2,0,0,cv.width,cv.height);else if(!inside){ctx.fillStyle='#1b232a';ctx.fillRect(0,0,cv.width,cv.height)}
+ const ix0=Math.max(0,vx0),iy0=Math.max(0,vy0),ix1=Math.min(W,vx0+vw),iy1=Math.min(H,vy0+vh);
+ if(ix1>ix0&&iy1>iy0){const dx=(ix0-vx0)*scale,dy=(iy0-vy0)*scale,dw=(ix1-ix0)*scale,dh=(iy1-iy0)*scale;
+  if(OUT&&PARK_OUTLINE){// the stands end at the stadium's outer wall; the neighborhood shows past it
+   ctx.save();ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();ctx.clip();
+   ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh);ctx.restore();
+   ctx.save();ctx.lineJoin='round';ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();
+   ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=Math.max(2,16*scale);ctx.stroke();ctx.strokeStyle=S.night?'#3a424c':'#b9b4a8';ctx.lineWidth=Math.max(1.5,9*scale);ctx.stroke();
+   ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}
+  else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
 }
 
 // ---------- loop ----------
@@ -4031,7 +4068,7 @@ function frame(now){const dt=Math.min(50,now-last);last=now;update(dt,now);rende
 // ---------- input ----------
 const overlayOpen=()=>!$('title').hidden||!$('over').hidden;
 cv.addEventListener('pointerdown',e=>{if(overlayOpen())return;e.preventDefault();if(S.phase==='play'&&S.play&&S.play.hrFired){S.play.t=S.play.end;return}
- if(S.view&&S.stealHit&&S.stealHit.length){const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*cv.width/r.width,py=(e.clientY-r.top)*cv.height/r.height,wx=S.view.sx+(px-S.view.ox)/S.view.scale,wy=S.view.sy+py/S.view.scale;
+ if(S.view&&S.stealHit&&S.stealHit.length){const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*cv.width/r.width,py=(e.clientY-r.top)*cv.height/r.height,wx=S.view.sx+(px-S.view.ox)/S.view.scale,wy=S.view.sy+(py-(S.view.oy||0))/S.view.scale;
   for(const h of S.stealHit)if(Math.hypot(h.x-wx,h.y-wy)<16){toggleSteal(h.k);return}}
  swing()});
 $('swingBtn').addEventListener('pointerdown',e=>{e.preventDefault();swing()});
