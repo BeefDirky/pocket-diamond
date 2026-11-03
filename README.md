@@ -40,3 +40,7 @@ ever disagree, if the game doesn't end on schedule, or on any page error.
 Online 1v1 runs over Supabase Realtime broadcast channels (no database tables). Each phone re-sends its state
 every 2 s, so dropped messages heal; a player only counts as gone after 12 s of silence, and the game waits
 45 s for them to come back.
+
+## Clubs
+
+Seoul Rats · Busan Seagles · Suwon Wizards · Daejeon Bears · Gwangju Cats · Changwon Rexes · Incheon Cosmos · Daegu Kings · Ulsan Whales · Jeju Tangerines

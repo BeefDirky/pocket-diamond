@@ -545,3 +545,7 @@ body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .a
 
 .app.deskApp .skipBtn{position:fixed;right:14px;bottom:calc(14px + 118px);margin:0;z-index:7}
 @media (max-width:999px){.app.deskApp .skipBtn{bottom:calc(10px + 92px)}}
+/* full-screen layout: keep the park's own buttons clear of the floating panels */
+.app.deskApp .zoomCtl{top:calc(50% - 36px);bottom:auto;left:10px}
+.app.deskApp .infoBtn{top:10px;bottom:auto;left:52px;right:auto}
+.app.deskApp .autoBtn{top:12px;bottom:auto;left:118px;right:auto}

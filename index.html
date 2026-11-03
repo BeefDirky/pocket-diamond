@@ -556,6 +556,10 @@ body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .a
 
 .app.deskApp .skipBtn{position:fixed;right:14px;bottom:calc(14px + 118px);margin:0;z-index:7}
 @media (max-width:999px){.app.deskApp .skipBtn{bottom:calc(10px + 92px)}}
+/* full-screen layout: keep the park's own buttons clear of the floating panels */
+.app.deskApp .zoomCtl{top:calc(50% - 36px);bottom:auto;left:10px}
+.app.deskApp .infoBtn{top:10px;bottom:auto;left:52px;right:auto}
+.app.deskApp .autoBtn{top:12px;bottom:auto;left:118px;right:auto}
 </style>
 
 <div class="app">
@@ -841,36 +845,36 @@ function dugoutFrame(sd){const along=82.5,perp=48.5;return toPx3(sd*(along+perp)
 function penSpot(sd,th){const r=fenceDist(sd*th)+9;return{x:sd*r*Math.sin(th*RAD),y:r*Math.cos(th*RAD)}}
 
 const TEAMS={
- seoul:{city:'SEOUL',kcity:'서울',name:'MAGPIES',kname:'까치',script:'Magpies',emblem:'magpie',logo:'shield',
-  jersey:'#1f4fa8',cap:'#0d2552',brim:'#081733',mascot:'Kkachi',mdesc:'A magpie in a traditional gat. Brings good news to the home dugout.',
+ seoul:{city:'SEOUL',kcity:'서울',name:'RATS',kname:'래츠',script:'Rats',emblem:'rat',logo:'shield',
+  jersey:'#4a5060',cap:'#c8202a',brim:'#7a1018',mascot:'Chuchu',mdesc:'A subway rat in a conductor\'s cap. Knows every shortcut on Line 2 and squeaks the seventh-inning song.',
   pitcher:{name:'AHN W.K.',hand:'R',slot:'side'},pen:[{name:'WALSH',hand:'R',slot:'over'},{name:'NOH S.H.',hand:'L',slot:'over'}],
   lineup:[['PARK J.H.','L'],['KIM D.W.','R'],['RAMIREZ','S'],['LEE S.M.','R'],['CHOI W.S.','L'],['JUNG H.S.','R'],['KANG M.G.','R'],['OH J.Y.','L'],['YANG E.S.','R']]},
- busan:{city:'BUSAN',kcity:'부산',name:'GULLS',kname:'갈매기',script:'Gulls',emblem:'gull',logo:'sea',
-  jersey:'#ef6a1f',cap:'#123a6b',brim:'#0b2547',mascot:'Gulli',mdesc:'Leads the harbor song from the dugout roof, with an orange bag on his head.',
+ busan:{city:'BUSAN',kcity:'부산',name:'SEAGLES',kname:'시글스',script:'Seagles',emblem:'seagle',logo:'sea',
+  jersey:'#e8642a',cap:'#123a6b',brim:'#0b2547',mascot:'Galmae',mdesc:'Half seagull, half eagle, all attitude. Swoops on foul balls and leads the harbor song from the dugout roof.',
   pitcher:{name:'BRENNAN',hand:'R',slot:'over'},pen:[{name:'PARK S.W.',hand:'R',slot:'side'},{name:'KOO S.J.',hand:'L',slot:'over'}],
   lineup:[['HWANG M.U.','L'],['JEON J.H.','R'],['SON H.S.','L'],['DAVIS','R'],['YOON D.H.','R'],['HAN D.Y.','S'],['NA J.B.','R'],['KIM M.S.','L'],['YOO K.H.','R']]},
- incheon:{city:'INCHEON',kcity:'인천',name:'KOI',kname:'잉어',script:'Koi',emblem:'koi',logo:'ball',
-  jersey:'#d23a2e',cap:'#7a1a14',brim:'#4f100c',mascot:'Ingi',mdesc:'A lucky red koi. Swims laps around the outfield lawn.',
+ incheon:{city:'INCHEON',kcity:'인천',name:'COSMOS',kname:'코스모스',script:'Cosmos',emblem:'cosmos',logo:'cosmos',
+  jersey:'#1d2a5e',cap:'#e94e77',brim:'#a8284e',mascot:'Cosmo',mdesc:'An astronaut who floats in on the flight path from the airport and plants a flag at second base.',
   pitcher:{name:'KIM K.T.',hand:'L',slot:'over'},pen:[{name:'SEO J.Y.',hand:'R',slot:'side'},{name:'MOON S.H.',hand:'R',slot:'over'}],
   lineup:[['CHU S.W.','L'],['CHOI J.U.','R'],['HAN Y.D.','R'],['ESPINAL','R'],['OH T.H.','L'],['PARK S.J.','S'],['JUNG E.S.','R'],['KIM S.H.','L'],['LEE J.K.','R']]},
- gwangju:{city:'GWANGJU',kcity:'광주',name:'OWLS',kname:'부엉이',script:'Owls',emblem:'owl',logo:'diamond',
-  jersey:'#3faa5b',cap:'#1d5a32',brim:'#123b20',mascot:'Professor Buong',mdesc:'Wears reading glasses. Has opinions about the infield fly rule.',
+ gwangju:{city:'GWANGJU',kcity:'광주',name:'CATS',kname:'캣츠',script:'Cats',emblem:'cat',logo:'diamond',
+  jersey:'#d0312d',cap:'#1b1b1f',brim:'#0e0e12',mascot:'Nabi',mdesc:'A striped street cat who knocks the rosin bag off the mound and refuses to apologize.',
   pitcher:{name:'YANG H.S.',hand:'L',slot:'over'},pen:[{name:'JEON S.M.',hand:'R',slot:'side'},{name:'CHUNG H.Y.',hand:'R',slot:'over'}],
   lineup:[['KIM D.H.','R'],['NA S.U.','L'],['CHOI H.S.','L'],['MONTERO','L'],['KIM S.Y.','R'],['LEE W.H.','S'],['HAN J.S.','R'],['PARK C.Y.','L'],['KIM T.J.','R']]},
- daegu:{city:'DAEGU',kcity:'대구',name:'BEES',kname:'꿀벌',script:'Bees',emblem:'bee',logo:'hex',
-  jersey:'#f5c935',cap:'#2b2b30',brim:'#151517',mascot:'Buzzi',mdesc:'Does the wave by himself. Hands out honey candy to kids in the front row.',
+ daegu:{city:'DAEGU',kcity:'대구',name:'KINGS',kname:'킹스',script:'Kings',emblem:'king',logo:'hex',
+  jersey:'#1f57c3',cap:'#e8b730',brim:'#a87c12',mascot:'King Dal',mdesc:'A royal from old Dalgubeol in a crown three sizes too big. Knights a fan in the stands every home win.',
   pitcher:{name:'WON S.J.',hand:'R',slot:'over'},pen:[{name:'OH D.K.',hand:'R',slot:'side'},{name:'KWAK B.S.',hand:'L',slot:'over'}],
   lineup:[['KOO J.M.','L'],['BAEK S.H.','R'],['PARK H.J.','R'],['GARCIA','R'],['LEE J.H.','L'],['KIM Y.W.','S'],['CHO S.M.','R'],['YUN T.K.','L'],['KANG H.B.','R']]},
- daejeon:{city:'DAEJEON',kcity:'대전',name:'HERONS',kname:'왜가리',script:'Herons',emblem:'heron',logo:'pennant',
-  jersey:'#1c9aa0',cap:'#0d4f57',brim:'#083339',mascot:'Captain Wade',mdesc:'A seven-foot heron who lifeguards the outfield pool.',
+ daejeon:{city:'DAEJEON',kcity:'대전',name:'BEARS',kname:'베어스',script:'Bears',emblem:'bear',logo:'pennant',
+  jersey:'#7a4a2a',cap:'#ef8a24',brim:'#a85a12',mascot:'Gomi',mdesc:'A big bear who naps in the bullpen between innings and shares bread from the famous bakery with the ball kids.',
   pitcher:{name:'RYU M.S.',hand:'L',slot:'over'},pen:[{name:'KIM S.U.',hand:'R',slot:'side'},{name:'MUN D.W.',hand:'R',slot:'over'}],
   lineup:[['JEONG E.H.','L'],['NOH S.M.','R'],['CHAE E.J.','R'],['WILSON','L'],['HA J.W.','R'],['KIM I.H.','S'],['YOO R.G.','R'],['SIM W.J.','L'],['PARK S.K.','R']]},
- suwon:{city:'SUWON',kcity:'수원',name:'FOXES',kname:'여우',script:'Foxes',emblem:'fox',logo:'fortress',
-  jersey:'#1f1f24',cap:'#c8202a',brim:'#8f161d',mascot:'Rusty',mdesc:'A fortress-guard fox in a red sash. Walks the wall at every home game and steals one hot dog from the press box.',
+ suwon:{city:'SUWON',kcity:'수원',name:'WIZARDS',kname:'위저즈',script:'Wizards',emblem:'wizard',logo:'fortress',
+  jersey:'#4b2a8a',cap:'#1b1b22',brim:'#0e0e14',mascot:'Wizzy',mdesc:'A young wizard who casts the rally spell with his bat-wand in the seventh. It works about a third of the time.',
   pitcher:{name:'GO Y.S.',hand:'R',slot:'side'},pen:[{name:'PARK Y.H.',hand:'R',slot:'over'},{name:'SON D.H.',hand:'L',slot:'over'}],
   lineup:[['KANG B.S.','L'],['JANG S.W.','R'],['BAE J.K.','R'],['ORTIZ','S'],['HWANG J.S.','R'],['MOON S.J.','L'],['KIM J.W.','R'],['OH Y.S.','L'],['SHIN B.H.','R']]},
- changwon:{city:'CHANGWON',kcity:'창원',name:'ARMADILLOS',kname:'아르마딜로',script:'Dillos',emblem:'dillo',logo:'gear',
-  jersey:'#7d55c9',cap:'#2c1d5c',brim:'#1c1240',mascot:'Dilly',mdesc:'An armadillo in a gold hard hat from the machine works. Rolls the first ball out to the mound and curls up during rain delays.',
+ changwon:{city:'CHANGWON',kcity:'창원',name:'REXES',kname:'렉시즈',script:'Rexes',emblem:'rex',logo:'gear',
+  jersey:'#1e8a6e',cap:'#123a32',brim:'#0a2620',mascot:'Rexy',mdesc:'A T-rex in a hard hat from the machine works. Loves high fives, can\'t quite reach them.',
   pitcher:{name:'KOO C.H.',hand:'L',slot:'over'},pen:[{name:'LIM J.S.',hand:'R',slot:'side'},{name:'RYU J.H.',hand:'R',slot:'over'}],
   lineup:[['SON A.R.','L'],['PARK M.S.','R'],['KIM J.K.','R'],['HOLLIS','L'],['KWON H.S.','R'],['SEO H.W.','S'],['DO T.H.','R'],['CHEON J.H.','L'],['OH Y.J.','R']]},
  ulsan:{city:'ULSAN',kcity:'울산',name:'WHALES',kname:'고래',script:'Whales',emblem:'whale',logo:'ball',
@@ -893,52 +897,52 @@ const ORDER=['seoul','busan','incheon','gwangju','daegu','daejeon','suwon','chan
 const CLUB_INFO={
  seoul:{est:1982,nick:'The capital club',
   city:'Korea\'s capital, split down the middle by the Han River and watched over by the tower on Namsan.',
-  facts:['In Korea the magpie is the bird of good news: hear one in the morning and a guest is on the way.',
+  facts:['The rat leads the zodiac: it won the great race by riding the ox and hopping off first. The club says that\'s just good baserunning.',
    'Hangang Park sits so close to the river that home runs to right have been fished out by rowers.',
    'Night games end with the whole park lit up on phone flashlights while the cheer squad leads one last song.'],
-  slogans:['한강의 기적','반가운 소식!','오늘도 까치!'],landmark:null},
+  slogans:['한강의 쥐들!','찍찍 화이팅','오늘도 래츠!'],landmark:null},
  busan:{est:1982,nick:'Baseball city',
   city:'Korea\'s second city and its biggest port: Haeundae beach, the Gwangan Bridge and a seagull for a city bird.',
   facts:['Fans tie orange plastic bags on their heads in the late innings, then use them for trash on the way out.',
-   'The whole ballpark sings the seagull song in the 8th, win or lose.',
+   'The whole ballpark sings the harbor song in the 8th, win or lose.',
    'Harbor Field\'s left-field wall is the tallest in the league, so ships in the bay get a better view than the bleachers.'],
-  slogans:['부산 갈매기!','마! 함 해보자','사직 노래방'],landmark:'bridge'},
+  slogans:['부산 시글스!','마! 함 해보자','사직 노래방'],landmark:'bridge'},
  incheon:{est:1982,nick:'Gateway to Korea',
   city:'The port city on the Yellow Sea, home to the country\'s main airport and the Chinatown where jajangmyeon was born.',
-  facts:['A koi swimming upstream is a symbol of perseverance: the club says that\'s why they never quit in the 9th.',
-   'Port Yard\'s grass berm in left is a picnic lawn where families bring blankets and chicken.',
-   'Planes on approach fly low enough that pitchers say they can read the tail numbers.'],
-  slogans:['잉어 날다!','항구의 자존심','인천 짜장 파워'],landmark:'cranes'},
+  facts:['Planes on approach fly low enough that pitchers say they can read the tail numbers, which is how Cosmo got his job.',
+   'Orbit Park\'s lawn in left is a picnic hill where families bring blankets and fried chicken.',
+   'The scoreboard counts down every home run like a rocket launch: 3, 2, 1, liftoff.'],
+  slogans:['우주 최강!','인천 코스모스','발사!'],landmark:'cranes'},
  gwangju:{est:1982,nick:'City of light',
   city:'Bitgoeul, the city of light, under Mudeungsan, and the food capital of the southwest.',
   facts:['Gwangju fans are famous for the loudest cheer leaders in the league and know every player\'s fight song by heart.',
-   'Professor Buong keeps a chalkboard in the dugout with the day\'s matchups worked out.',
+   'Nabi has nine lives and has used at least four of them chasing foul balls into the stands.',
    'On clear days you can see the rock pillars on top of Mudeungsan from the third-base deck.'],
-  slogans:['빛고을 부엉이','무등산 기운!','밤에 더 강하다'],landmark:'mountain'},
+  slogans:['빛고을 캣츠','야옹 화이팅!','밤에 더 강하다'],landmark:'mountain'},
  daegu:{est:1982,nick:'Daefrica',
   city:'The hottest city in Korea in summer (locals call it Daefrica), and famous for its apples.',
-  facts:['Hive Park hands out paper fans at the gate from June to September. Nobody leaves without one.',
-   'The outfield wall is painted honeycomb gold, and a home run sets off a "buzz" over the speakers.',
-   'Buzzi sneaks apple slices to the bullpen catchers on hot days.'],
-  slogans:['더워도 꿀벌!','대프리카 화이팅','윙윙 홈런!'],landmark:'sun'},
+  facts:['Daegu\'s old name is Dalgubeol, and the Kings crown a fan from the stands as Dalgubeol royalty after every home win.',
+   'Crown Park hands out paper fans at the gate from June to September. Nobody leaves without one.',
+   'The outfield wall is painted gold, and a home run sets off a royal trumpet fanfare.'],
+  slogans:['더워도 킹스!','대프리카 왕국','왕의 홈런!'],landmark:'sun'},
  daejeon:{est:1982,nick:'Science city',
   city:'Korea\'s science city: research parks, the \'93 Expo tower and a bakery people line up for at 7 a.m.',
-  facts:['Herons nest along the Gapcheon stream right behind the ballpark.',
-   'Riverside Park\'s outfield pool is open to fans during day games, lifeguarded by Captain Wade.',
+  facts:['Bread Bowl Park is named for the city\'s bakery obsession: the concourse smells like fresh sweet bread from the first pitch.',
+   'Gomi hibernates in the bullpen through rain delays and wakes up hungry.',
    'Daejeon fans are the most loyal in the league: they sing for their club in rain, in losing streaks, in everything.'],
-  slogans:['보살 팬 응원단','왜가리 날자!','과학의 힘'],landmark:'expo'},
+  slogans:['보살 팬 응원단','곰처럼 힘차게!','빵 먹고 홈런'],landmark:'expo'},
  suwon:{est:2013,nick:'Fortress city',
   city:'Built around Hwaseong, an 18th-century fortress wall you can still walk, and the home of Suwon galbi.',
   facts:['The left-field stands are built into a replica of the fortress wall, with gates and watchtowers.',
-   'Rusty steals one hot dog per game from the press box. It\'s in his contract.',
+   'Wizzy\'s seventh-inning rally spell has a .333 success rate, which the club insists is a good batting average.',
    'A win means galbi: the club lights up "갈비 각" on the scoreboard.'],
-  slogans:['화성의 수호자','여우처럼!','갈비 각!'],landmark:'gate'},
+  slogans:['화성의 마법사','주문을 외워라!','갈비 각!'],landmark:'gate'},
  changwon:{est:2011,nick:'Armored up',
   city:'A planned industrial city of heavy machinery, with the cherry blossom streets of Jinhae inside its limits.',
-  facts:['The armadillo is a nod to the city\'s armor-plating and machinery plants.',
+  facts:['Dinosaur footprints over 100 million years old have been found along the South Coast, a short drive from the ballpark.',
    'Every April the outfield trees go pink for the cherry blossom festival and the club wears blossom caps.',
-   'Dilly rolls the new baseball out to the mound before the first pitch.'],
-  slogans:['벚꽃 야구','단단하게!','공룡보다 딜로'],landmark:'blossom'},
+   'Rexy rolls the first ball out to the mound. His arms are too short to throw it.'],
+  slogans:['벚꽃 야구','크앙! 렉시즈','공룡의 힘'],landmark:'blossom'},
  ulsan:{est:2026,nick:'Whale city',
   city:'Industrial powerhouse of shipyards and car plants, with prehistoric whale carvings in the Bangudae rocks.',
   facts:['The Bangudae petroglyphs, carved thousands of years ago, are some of the oldest whale-hunting pictures on Earth.',
@@ -955,21 +959,21 @@ const CLUB_INFO={
 // ---------- ballparks ----------
 const STADIUMS={
  seoul:{name:'HANGANG PARK',kname:'한강파크',dims:[325,375,400,375,325],grass:['#3c9f37','#48b142','#52ba4b'],mow:'check',
-  seat:['#2d4f8e','#284783'],seatU:['#20386a','#1c315d'],pad:'#123c5c',pad2:'#0d2f49',wallFt:8,feature:'twin',net:true},
+  seat:['#4a5060','#434958'],seatU:['#7a1018','#6b0e15'],pad:'#123c5c',pad2:'#0d2f49',wallFt:8,feature:'twin',net:true},
  busan:{name:'HARBOR FIELD',kname:'바다구장',dims:[318,352,392,352,318],grass:['#3a9a3c','#46ab46','#50b44f'],mow:'stripe',
-  seat:['#b8552a','#a84c25'],seatU:['#2a4a7a','#24416c'],pad:'#1f6b3a',pad2:'#185a30',wallFt:12,feature:'ocean',bags:true},
- incheon:{name:'PORT YARD',kname:'항구야드',dims:[328,368,400,362,315],grass:['#3fa23c','#4cb447','#56bd50'],mow:'arc',
-  seat:['#a8202a','#951c25'],seatU:['#3a3f47','#33373e'],pad:'#3a1e22',pad2:'#2c1619',wallFt:8,feature:'lawn',net:true},
+  seat:['#e8642a','#d65a25'],seatU:['#123a6b','#0f325e'],pad:'#1f6b3a',pad2:'#185a30',wallFt:12,feature:'ocean',bags:true},
+ incheon:{name:'ORBIT PARK',kname:'오빗파크',dims:[328,368,400,362,315],grass:['#3fa23c','#4cb447','#56bd50'],mow:'arc',
+  seat:['#1d2a5e','#1a2552'],seatU:['#e94e77','#d6446b'],pad:'#3a1e22',pad2:'#2c1619',wallFt:8,feature:'lawn',net:true},
  gwangju:{name:'MUDEUNG FIELD',kname:'무등필드',dims:[335,382,405,378,330],grass:['#389a3a','#44ab44','#4fb54d'],mow:'diag',
-  seat:['#2f7a3f','#296d38'],seatU:['#c83c33','#b5352d'],pad:'#14402f',pad2:'#0e3324',wallFt:8,feature:'deck',net:true},
- daegu:{name:'HIVE PARK',kname:'하이브파크',dims:[325,372,400,372,325],grass:['#3a9c39','#46ad45','#50b64e'],mow:'check',
-  seat:['#c9a227','#b59220'],seatU:['#2b2b30','#25252a'],pad:'#1b1b1f',pad2:'#111114',wallFt:8,feature:'honey',net:true},
- daejeon:{name:'RIVERSIDE PARK',kname:'갑천파크',dims:[325,360,400,355,315],grass:['#3fa23c','#4cb447','#56bd50'],mow:'stripe',
-  seat:['#1f8a90','#1a7a80'],seatU:['#d9d4c5','#c9c3b3'],pad:'#0d4f57',pad2:'#083339',wallFt:8,feature:'pool',net:true},
+  seat:['#d0312d','#bc2b28'],seatU:['#1b1b1f','#161619'],pad:'#14402f',pad2:'#0e3324',wallFt:8,feature:'deck',net:true},
+ daegu:{name:'CROWN PARK',kname:'크라운파크',dims:[325,372,400,372,325],grass:['#3a9c39','#46ad45','#50b64e'],mow:'check',
+  seat:['#1f57c3','#1b4dad'],seatU:['#e8b730','#d4a62a'],pad:'#1b1b1f',pad2:'#111114',wallFt:8,feature:'honey',net:true},
+ daejeon:{name:'BREAD BOWL PARK',kname:'빵그릇파크',dims:[325,360,400,355,315],grass:['#3fa23c','#4cb447','#56bd50'],mow:'stripe',
+  seat:['#7a4a2a','#6b4024'],seatU:['#ef8a24','#d97c20'],pad:'#0d4f57',pad2:'#083339',wallFt:8,feature:'pool',net:true},
  suwon:{name:'FORTRESS FIELD',kname:'화성필드',dims:[330,380,400,380,330],grass:['#389a3a','#44ab44','#4fb54d'],mow:'diag',
-  seat:['#2a2a30','#232328'],seatU:['#b52025','#9f1c20'],pad:'#2a2a30',pad2:'#1d1d22',wallFt:8,feature:'fortress',net:true},
- changwon:{name:'PINE HILL PARK',kname:'솔언덕파크',dims:[324,370,400,370,324],grass:['#3c9f37','#48b142','#52ba4b'],mow:'arc',
-  seat:['#3b2a78','#33246a'],seatU:['#c9a227','#b59220'],pad:'#2c1d5c',pad2:'#1c1240',wallFt:8,feature:'trees'},
+  seat:['#4b2a8a','#42257a'],seatU:['#1b1b22','#16161c'],pad:'#2a2a30',pad2:'#1d1d22',wallFt:8,feature:'fortress',net:true},
+ changwon:{name:'FOSSIL YARD',kname:'화석야드',dims:[324,370,400,370,324],grass:['#3c9f37','#48b142','#52ba4b'],mow:'arc',
+  seat:['#1e8a6e','#1a7a62'],seatU:['#123a32','#0f322b'],pad:'#2c1d5c',pad2:'#1c1240',wallFt:8,feature:'trees'},
  ulsan:{name:'WHALE BAY PARK',kname:'고래만파크',dims:[322,365,400,365,322],grass:['#3a9a3c','#46ab46','#50b44f'],mow:'wave',
   seat:['#3f86c4','#3878b0'],seatU:['#1b2f5e','#172851'],pad:'#14325a',pad2:'#0d2442',wallFt:10,feature:'whale',net:true},
  jeju:{name:'HALLA FIELD',kname:'한라필드',dims:[330,375,402,375,330],grass:['#3fa23c','#4cb447','#56bd50'],mow:'check',
@@ -1127,6 +1131,71 @@ function drawEmblem(g,key){
   g.fillStyle='#7c858f';ell(g,-.08,.06,.28,.13,-.25);
   g.fillStyle='#ffbf3c';poly(g,.5,-.27,.84,-.17,.5,-.1);
   g.fillStyle=CREAM;circ(g,.4,-.24,.06);g.fillStyle=INK;circ(g,.41,-.24,.03);
+ }else if(e==='seagle'){
+  // half seagull, half eagle: a white sea-bird head with a hooked gold beak and a stern brow, wing swept back
+  g.fillStyle=T.cap;poly(g,.1,.12,.96,.5,.86,.24,.6,.18,.88,-.02,.4,-.04);
+  g.fillStyle=CREAM;ell(g,-.08,-.06,.44,.38,-.2);poly(g,.2,.2,.62,.46,.3,.34);
+  g.fillStyle='#9aa3ad';poly(g,.06,.16,.5,.38,.18,.34);
+  g.fillStyle='#ffc83a';poly(g,-.46,-.12,-.98,.04,-.86,.2,-.66,.16,-.5,.08);g.fillStyle='#d89a1c';poly(g,-.86,.2,-.98,.04,-.92,.3);
+  g.fillStyle=INK;poly(g,-.34,-.3,-.02,-.22,-.06,-.14,-.32,-.2);circ(g,-.2,-.14,.06);g.fillStyle=CREAM;circ(g,-.22,-.16,.02);
+ }else if(e==='wizard'){
+  // a tall wizard hat with a moon and stars, a baseball bat tucked through the band like a wand
+  g.fillStyle=T.cap;poly(g,-.62,.42,.62,.42,.14,-.6,.34,-.86,.04,-.92,-.12,-.6);
+  g.fillStyle=shade(T.cap,-.3);poly(g,.14,-.6,.62,.42,.3,.42,.06,-.4);
+  g.fillStyle='#ffc83a';g.fillRect(-.6,.26,1.2,.14);
+  g.fillStyle='#ffe36b';for(const[x,y,r]of[[-.18,-.1,.09],[.12,.08,.06],[-.02,-.38,.05]]){g.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;g.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}g.closePath();g.fill()}
+  g.fillStyle=T.jersey;ell(g,0,.5,.9,.16,0);g.fillStyle=shade(T.jersey,-.25);ell(g,0,.54,.9,.1,0);
+  g.strokeStyle='#d9b07a';g.lineWidth=.09;line(g,-.86,.66,.8,-.02);g.fillStyle='#d9b07a';circ(g,.8,-.02,.07);
+ }else if(e==='rat'){
+  // a cheeky city rat: big round ears, pink nose, buck teeth, whiskers
+  g.fillStyle='#8a8f99';circ(g,-.48,-.42,.3);circ(g,.48,-.42,.3);g.fillStyle='#f2a5b4';circ(g,-.48,-.42,.18);circ(g,.48,-.42,.18);
+  g.fillStyle='#9aa0aa';ell(g,0,.04,.56,.5,0);g.fillStyle='#b8bdc6';ell(g,0,.26,.34,.24,0);
+  g.fillStyle=INK;circ(g,-.2,-.06,.08);circ(g,.2,-.06,.08);g.fillStyle=CREAM;circ(g,-.22,-.09,.03);circ(g,.18,-.09,.03);
+  g.fillStyle='#f27a92';ell(g,0,.16,.09,.07,0);g.fillStyle=CREAM;g.fillRect(-.07,.3,.06,.12);g.fillRect(.01,.3,.06,.12);
+  g.strokeStyle=INK;g.lineWidth=.025;for(const sd of[-1,1]){line(g,sd*.16,.2,sd*.62,.1);line(g,sd*.16,.24,sd*.64,.26)}
+  g.fillStyle=T.cap;poly(g,-.3,-.42,.3,-.42,.26,-.56,-.26,-.56);g.fillStyle=T.jersey;g.fillRect(-.34,-.44,.68,.06);
+ }else if(e==='bear'){
+  // a big friendly bear face
+  g.fillStyle='#7a4a2a';circ(g,-.5,-.48,.22);circ(g,.5,-.48,.22);g.fillStyle='#b98058';circ(g,-.5,-.48,.11);circ(g,.5,-.48,.11);
+  g.fillStyle='#8a5632';ell(g,0,.02,.66,.6,0);g.fillStyle='#e3c49a';ell(g,0,.26,.34,.26,0);
+  g.fillStyle=INK;circ(g,-.24,-.1,.07);circ(g,.24,-.1,.07);g.fillStyle=CREAM;circ(g,-.26,-.12,.025);circ(g,.22,-.12,.025);
+  g.fillStyle=INK;ell(g,0,.14,.14,.09,0);g.strokeStyle=INK;g.lineWidth=.04;g.beginPath();g.moveTo(0,.22);g.lineTo(0,.32);g.quadraticCurveTo(-.1,.4,-.16,.34);g.moveTo(0,.32);g.quadraticCurveTo(.1,.4,.16,.34);g.stroke();
+  g.fillStyle='rgba(242,122,146,.45)';circ(g,-.42,.18,.08);circ(g,.42,.18,.08);
+ }else if(e==='cat'){
+  // a striped street cat with green eyes and a smirk
+  g.fillStyle=T.jersey;poly(g,-.62,-.1,-.56,-.8,-.18,-.46);poly(g,.62,-.1,.56,-.8,.18,-.46);
+  g.fillStyle='#f2a5b4';poly(g,-.52,-.3,-.5,-.64,-.28,-.44);poly(g,.52,-.3,.5,-.64,.28,-.44);
+  g.fillStyle=T.jersey;ell(g,0,.04,.64,.54,0);
+  g.fillStyle=shade(T.jersey,-.35);for(const x of[-.16,0,.16])poly(g,x-.04,-.48,x+.04,-.48,x,-.26);poly(g,-.64,0,-.4,-.04,-.62,.1);poly(g,.64,0,.4,-.04,.62,.1);
+  g.fillStyle=CREAM;ell(g,0,.26,.3,.2,0);
+  g.fillStyle='#9fe06a';ell(g,-.24,-.06,.12,.09,0);ell(g,.24,-.06,.12,.09,0);g.fillStyle=INK;ell(g,-.24,-.06,.03,.08,0);ell(g,.24,-.06,.03,.08,0);
+  g.fillStyle='#f27a92';poly(g,-.06,.12,.06,.12,0,.19);g.strokeStyle=INK;g.lineWidth=.03;g.beginPath();g.moveTo(0,.19);g.quadraticCurveTo(-.06,.28,-.14,.24);g.moveTo(0,.19);g.quadraticCurveTo(.08,.28,.16,.22);g.stroke();
+  for(const sd of[-1,1]){line(g,sd*.2,.18,sd*.66,.1);line(g,sd*.2,.22,sd*.68,.28)}
+ }else if(e==='rex'){
+  // a grinning T-rex head in profile, tiny arm waving
+  g.fillStyle=T.jersey;g.beginPath();g.moveTo(-.86,-.1);g.quadraticCurveTo(-.7,-.62,-.06,-.6);g.quadraticCurveTo(.5,-.58,.7,-.2);g.lineTo(.74,.5);g.lineTo(.2,.62);g.lineTo(.06,.1);g.lineTo(-.86,.14);g.closePath();g.fill();
+  g.fillStyle=shade(T.jersey,-.3);for(const x of[-.2,.1,.4])circ(g,x,-.44,.05);
+  g.fillStyle=CREAM;g.beginPath();g.moveTo(-.86,.02);g.lineTo(.04,.02);g.lineTo(.08,.12);g.lineTo(-.86,.14);g.closePath();g.fill();
+  g.fillStyle=CREAM;for(let k=0;k<6;k++)poly(g,-.8+k*.15,.02,-.74+k*.15,.02,-.77+k*.15,.1);
+  g.fillStyle=INK;g.fillRect(-.86,.02,.92,.02);circ(g,-.62,-.32,.03);
+  g.fillStyle=CREAM;circ(g,-.12,-.3,.1);g.fillStyle=INK;circ(g,-.1,-.3,.05);g.fillStyle=INK;poly(g,-.28,-.44,-.02,-.4,-.04,-.36,-.28,-.38);
+  g.fillStyle=T.jersey;g.fillRect(.14,.3,.22,.08);g.fillRect(.32,.24,.06,.1);
+ }else if(e==='cosmos'){
+  // a ringed planet with a shooting star
+  g.fillStyle='#ffe36b';poly(g,.54,-.7,.6,-.56,.74,-.54,.62,-.46,.66,-.32,.54,-.4,.42,-.32,.46,-.46,.34,-.54,.48,-.56);
+  g.strokeStyle='rgba(255,227,107,.7)';g.lineWidth=.05;line(g,.4,-.5,-.1,-.9);
+  g.fillStyle=T.cap;circ(g,0,.08,.46);g.fillStyle=shade(T.cap,.25);ell(g,-.12,-.06,.24,.14,-.4);
+  g.save();g.beginPath();g.arc(0,.08,.46,0,Math.PI*2);g.clip();g.fillStyle=shade(T.cap,-.25);g.fillRect(-.5,.24,1,.08);g.fillRect(-.5,-.04,1,.05);g.restore();
+  g.strokeStyle=CREAM;g.lineWidth=.08;g.beginPath();g.ellipse(0,.08,.82,.22,-.32,Math.PI*.04,Math.PI*.96);g.stroke();
+  g.strokeStyle=T.jersey;g.lineWidth=.04;g.beginPath();g.ellipse(0,.08,.82,.22,-.32,Math.PI*.04,Math.PI*.96);g.stroke();
+  g.fillStyle=CREAM;for(const[x,y]of[[-.7,-.5],[-.5,-.74],[.8,.56],[-.76,.6]])circ(g,x,y,.03);
+ }else if(e==='king'){
+  // a jeweled crown holding a baseball
+  g.fillStyle='#ffc83a';poly(g,-.7,.36,-.78,-.42,-.42,-.06,-.2,-.6,0,-.14,.2,-.6,.42,-.06,.78,-.42,.7,.36);
+  g.fillStyle='#d89a1c';g.fillRect(-.7,.2,1.4,.16);poly(g,0,-.14,.2,-.6,.26,-.44,.06,-.02);
+  g.fillStyle='#e0473d';circ(g,-.4,.28,.06);circ(g,.4,.28,.06);g.fillStyle='#3f82e6';circ(g,0,.28,.07);
+  for(const[x,y]of[[-.78,-.42],[-.2,-.6],[.2,-.6],[.78,-.42]]){g.fillStyle=CREAM;circ(g,x,y,.07)}
+  g.fillStyle=CREAM;circ(g,0,-.02,.18);g.strokeStyle='#c7262e';g.lineWidth=.03;g.beginPath();g.arc(-.24,-.02,.14,-.7,.7);g.stroke();g.beginPath();g.arc(.24,-.02,.14,Math.PI-.7,Math.PI+.7);g.stroke();
  }else if(e==='magpie'){
   g.strokeStyle=INK;g.lineWidth=.05;line(g,0,.3,-.04,.62);line(g,.1,.3,.1,.62);
   g.fillStyle=T.jersey;poly(g,-.28,.14,-.94,.52,-.88,.34,-.34,.02);
@@ -1237,6 +1306,13 @@ function makeLogo(key,size){
   const arc=(lw,col,inset)=>{g.strokeStyle=col;g.lineWidth=lw;g.lineCap='butt';g.beginPath();g.arc(0,.1,.6,.55+inset,Math.PI*2-.55-inset);g.stroke()};
   arc(.46,T.brim,0);arc(.36,CREAM,.04);arc(.22,T.cap,.08);
   stampEmblem(g,key,.44,-.5,.46,0,CREAM,.035);
+ }else if(l==='cosmos'){
+  // a starry night-sky disc with an orbit ring around the emblem
+  g.fillStyle=T.brim;circ(g,0,0,.99);g.fillStyle='#0b1030';circ(g,0,0,.9);
+  g.save();g.beginPath();g.arc(0,0,.9,0,Math.PI*2);g.clip();const sky=g.createRadialGradient(0,-.3,.1,0,0,1);sky.addColorStop(0,T.jersey);sky.addColorStop(1,'#060a1e');g.fillStyle=sky;g.fillRect(-1,-1,2,2);
+  g.fillStyle=CREAM;for(let i=0;i<26;i++){const a=i*2.39,r=.2+((i*37)%70)/100;circ(g,Math.cos(a)*r,Math.sin(a)*r,i%5?.012:.022)}g.restore();
+  stampEmblem(g,key,0,-.12,.7,0,'#060a1e',.04);
+  script(T.script,.6,.36,CREAM,T.brim);
  }else if(l==='sea'){
   // harbor sunset: sun on the horizon, rolling waves, a gull overhead
   g.fillStyle=T.brim;circ(g,0,0,.98);
@@ -1274,12 +1350,13 @@ const MASCOTS={
  black:{c:{c:'#2a2d33',s:'#b9c0c8',w:CREAM,k:INK,y:'#ffbf3c'},m:['...ccccc...','..ccccccc..','..cwkcwkc..','..ccyyycc..','...ccycc...','...ccccc...','..ccsssc...','cccccsssccc','cc.csssc.cc','c..csssc..c','...csssc...','...ccccc...','....c.c....','....y.y....','...yy.yy...']},
  orange:{c:{o:'#f38d2e',w:CREAM,k:INK},m:['...ooooo...','..owwwwwo..','.owkwwwkwo.','.owwwwwwwo.','..owwoowo..','...ooooo...','..owwwwwo..','oowwowwwwoo','o.owwwwoo.o','..owowwwo..','..owwwoow..','...owwwo...','....w.w....','....w.w....','...ww.ww...','...kk.kk...']},
 };
-MASCOTS.seoul={c:{c:'#15171c',s:CREAM,w:CREAM,k:INK,y:'#ffbf3c'},m:MASCOTS.black.m};
-MASCOTS.busan={c:{w:CREAM,k:INK,y:'#ffbf3c',b:'#9aa3ad',o:'#ff8a1f'},m:['....ooo....','...ooooo...'].concat(MASCOTS.blue.m.slice(2))};
-MASCOTS.incheon={c:{o:'#d23a2e',w:CREAM,k:INK},m:MASCOTS.orange.m};
-MASCOTS.gwangju=MASCOTS.green;
-MASCOTS.daegu=MASCOTS.yellow;MASCOTS.daejeon={c:{...MASCOTS.blue.c,b:'#1c9aa0'},m:MASCOTS.blue.m};MASCOTS.suwon={c:{r:'#ee5d2f',d:'#b63d1d',w:CREAM,k:INK,s:'#c8202a',y:'#ffd36b'},m:['.k.......k.','.rk.....kr.','.rrr...rrr.','.rrrrrrrrr.','rrkyrrrykrr','rwwrrkrrwwr','.wwwwwwwww.','..wwwwwww..','...rrrrr...','..rswwwrr..','.rrrswwrr.r','.krrwswrrrr','..rrrrsrrrw','..rr...rrw.','..kk...kk..','.kkk...kkk.']};
-MASCOTS.changwon={c:{t:'#e0bd92',s:'#8a5cd6',q:'#4b2f96',y:'#ffc83a',k:INK,w:CREAM},m:['..yyyyy....','.yyykyyy...','yyyyyyyyy..','.tttttt....','.tktttttt..','.ttttttttt.','..tt.ttttk.','..sssss....','.sqsqsqss..','tsysysyss..','tsqsqsqsst.','.ssssssss.t','..sqsqsqs.t','..sssssss..','...tt.tt...','..kkk.kkk..']};
+MASCOTS.seoul={c:{g:'#9aa0aa',d:'#6e737c',p:'#f2a5b4',k:INK,w:CREAM,r:'#c8202a',y:'#ffc83a'},m:['.gg.....gg.','gppg...gppg','gppgrrrgppg','.gggrrrggg.','.gkgggggkg.','.ggggpgggg.','..gwgggwg..','...ggggg...','..rrrrrrr..','.grrryrrrg.','g.rrrrrrr.g','..ggggggg..','..ggg.ggg..','..gg...gg..','..kk...kk..','....ddd....','.......dd..']};
+MASCOTS.busan={c:{w:CREAM,k:INK,y:'#ffc83a',b:'#9aa3ad',n:'#123a6b',o:'#e8642a'},m:['...wwww....','..wwwwww...','.kkwwkww...','yyywwwwww..','yyy.wwwww..','...wwwww...','..nnoooon..','.bnooooonb.','bbnooooonbb','b.nooooon.b','..nnnnnnn..','...nnnnn...','...w...w...','...y...y...','..yy...yy..']};
+MASCOTS.incheon={c:{w:CREAM,v:'#c9d4de',b:'#3a6ab0',k:INK,p:'#e94e77',n:'#1d2a5e'},m:['...wwwww...','..wvvvvvw..','.wvbbbbbvw.','.wvbkbbkvw.','.wvbbbbbvw.','..wvvvvvw..','...wwwww...','..nwwpwwn..','.wwwwpwwww.','w.wwwwwww.w','w.wwnnnww.w','..wwwwwww..','..ww...ww..','..ww...ww..','.nnn...nnn.']};
+MASCOTS.gwangju={c:{r:'#d0312d',d:'#8e1f1c',w:CREAM,k:INK,g:'#9fe06a',p:'#f2a5b4'},m:['.r.......r.','.rr.....rr.','.rprrrrrpr.','.rrdrdrdrr.','rrgkrrrkgrr','rrrrrprrrrr','.rwwwwwwwr.','..wwkwkww..','...rrrrr...','..rrwwwrr..','.rdrwwwrdr.','r.rrwwwrr.r','..rdrrrdr..','...rr.rr..d','...rr.rr.dd','..kkk.kkk..']};
+MASCOTS.daegu={c:{y:'#ffc83a',d:'#d89a1c',r:'#e0473d',b:'#1f57c3',s:'#f1c7a1',k:INK,w:CREAM,p:'#c8202a'},m:['.y.y.y.y.y.','.yyyyyyyyy.','.yrydybyry.','.yyyyyyyyy.','..sssssss..','..skssskss.','..sssssss..','..ss.k.ss..','...sssss...','..ppppppp..','.ppbbbbbpp.','pp.bbybb.pp','s..bbbbb..s','...bbbbb...','...bb.bb...','..kkk.kkk..']};
+MASCOTS.daejeon={c:{b:'#8a5632',d:'#7a4a2a',m:'#e3c49a',k:INK,w:CREAM,o:'#ef8a24',p:'#f2a5b4'},m:['.bb.....bb.','bmbbbbbbbmb','.bbbbbbbbb.','bbkbbbbbkbb','bbbbmmmbbbb','.bbmkkkmbb.','.pbmmmmmbp.','..bbbbbbb..','.ooooooooo.','oobwwwwwboo','b.owwwwwo.b','..ooooooo..','..bbbbbbb..','..bbb.bbb..','..bbb.bbb..','.kkkk.kkkk.']};MASCOTS.suwon={c:{h:'#4b2a8a',d:'#2e1a58',y:'#ffe36b',s:'#f1c7a1',k:INK,w:CREAM,r:'#1b1b22',b:'#d9b07a'},m:['.....h.....','....hhh....','...hhyhh...','...hhhhh...','..hyhhhhh..','.hhhhhhhhh.','ddddddddddd','..sssssss..','..sksssks..','..sssssss..','...sswss...','..rrrrrrr.b','.rrryrrrrb.','r.rrrrrrbr.','..rrrrrrr..','...rr.rr...','..kkk.kkk..']};
+MASCOTS.changwon={c:{g:'#1e8a6e',d:'#123a32',w:CREAM,k:INK,y:'#ffc83a',l:'#7fd8b8'},m:['....yyyyy..','...yyyyyyy.','...gggggggg','..ggkggggggg'.slice(0,11),'..ggggggggg','..gggwwwwww','..ggg.w.w.w','..gggg.....','.gggggg....','gglllgg.g..','gglllgggg..','.glllgg....','..ggggg....','..gg.gg..gg','..gg.gggggd','.kkk.kkk...']};
 MASCOTS.ulsan={c:{...MASCOTS.blue.c,b:'#4f9fd8'},m:MASCOTS.blue.m};MASCOTS.jeju={c:{o:'#ff9a1f',w:CREAM,k:INK},m:MASCOTS.orange.m};
 function blit(g,map,cols,x0,y0){
  for(let r=0;r<map.length;r++){const row=map[r];for(let c=0;c<row.length;c++){const ch=row[c];if(ch==='.')continue;const col=cols[ch];if(!col)continue;g.fillStyle=col;g.fillRect(x0+c,y0+r,1,1)}}

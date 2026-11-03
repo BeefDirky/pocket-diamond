@@ -91,6 +91,71 @@ function drawEmblem(g,key){
   g.fillStyle='#7c858f';ell(g,-.08,.06,.28,.13,-.25);
   g.fillStyle='#ffbf3c';poly(g,.5,-.27,.84,-.17,.5,-.1);
   g.fillStyle=CREAM;circ(g,.4,-.24,.06);g.fillStyle=INK;circ(g,.41,-.24,.03);
+ }else if(e==='seagle'){
+  // half seagull, half eagle: a white sea-bird head with a hooked gold beak and a stern brow, wing swept back
+  g.fillStyle=T.cap;poly(g,.1,.12,.96,.5,.86,.24,.6,.18,.88,-.02,.4,-.04);
+  g.fillStyle=CREAM;ell(g,-.08,-.06,.44,.38,-.2);poly(g,.2,.2,.62,.46,.3,.34);
+  g.fillStyle='#9aa3ad';poly(g,.06,.16,.5,.38,.18,.34);
+  g.fillStyle='#ffc83a';poly(g,-.46,-.12,-.98,.04,-.86,.2,-.66,.16,-.5,.08);g.fillStyle='#d89a1c';poly(g,-.86,.2,-.98,.04,-.92,.3);
+  g.fillStyle=INK;poly(g,-.34,-.3,-.02,-.22,-.06,-.14,-.32,-.2);circ(g,-.2,-.14,.06);g.fillStyle=CREAM;circ(g,-.22,-.16,.02);
+ }else if(e==='wizard'){
+  // a tall wizard hat with a moon and stars, a baseball bat tucked through the band like a wand
+  g.fillStyle=T.cap;poly(g,-.62,.42,.62,.42,.14,-.6,.34,-.86,.04,-.92,-.12,-.6);
+  g.fillStyle=shade(T.cap,-.3);poly(g,.14,-.6,.62,.42,.3,.42,.06,-.4);
+  g.fillStyle='#ffc83a';g.fillRect(-.6,.26,1.2,.14);
+  g.fillStyle='#ffe36b';for(const[x,y,r]of[[-.18,-.1,.09],[.12,.08,.06],[-.02,-.38,.05]]){g.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;g.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}g.closePath();g.fill()}
+  g.fillStyle=T.jersey;ell(g,0,.5,.9,.16,0);g.fillStyle=shade(T.jersey,-.25);ell(g,0,.54,.9,.1,0);
+  g.strokeStyle='#d9b07a';g.lineWidth=.09;line(g,-.86,.66,.8,-.02);g.fillStyle='#d9b07a';circ(g,.8,-.02,.07);
+ }else if(e==='rat'){
+  // a cheeky city rat: big round ears, pink nose, buck teeth, whiskers
+  g.fillStyle='#8a8f99';circ(g,-.48,-.42,.3);circ(g,.48,-.42,.3);g.fillStyle='#f2a5b4';circ(g,-.48,-.42,.18);circ(g,.48,-.42,.18);
+  g.fillStyle='#9aa0aa';ell(g,0,.04,.56,.5,0);g.fillStyle='#b8bdc6';ell(g,0,.26,.34,.24,0);
+  g.fillStyle=INK;circ(g,-.2,-.06,.08);circ(g,.2,-.06,.08);g.fillStyle=CREAM;circ(g,-.22,-.09,.03);circ(g,.18,-.09,.03);
+  g.fillStyle='#f27a92';ell(g,0,.16,.09,.07,0);g.fillStyle=CREAM;g.fillRect(-.07,.3,.06,.12);g.fillRect(.01,.3,.06,.12);
+  g.strokeStyle=INK;g.lineWidth=.025;for(const sd of[-1,1]){line(g,sd*.16,.2,sd*.62,.1);line(g,sd*.16,.24,sd*.64,.26)}
+  g.fillStyle=T.cap;poly(g,-.3,-.42,.3,-.42,.26,-.56,-.26,-.56);g.fillStyle=T.jersey;g.fillRect(-.34,-.44,.68,.06);
+ }else if(e==='bear'){
+  // a big friendly bear face
+  g.fillStyle='#7a4a2a';circ(g,-.5,-.48,.22);circ(g,.5,-.48,.22);g.fillStyle='#b98058';circ(g,-.5,-.48,.11);circ(g,.5,-.48,.11);
+  g.fillStyle='#8a5632';ell(g,0,.02,.66,.6,0);g.fillStyle='#e3c49a';ell(g,0,.26,.34,.26,0);
+  g.fillStyle=INK;circ(g,-.24,-.1,.07);circ(g,.24,-.1,.07);g.fillStyle=CREAM;circ(g,-.26,-.12,.025);circ(g,.22,-.12,.025);
+  g.fillStyle=INK;ell(g,0,.14,.14,.09,0);g.strokeStyle=INK;g.lineWidth=.04;g.beginPath();g.moveTo(0,.22);g.lineTo(0,.32);g.quadraticCurveTo(-.1,.4,-.16,.34);g.moveTo(0,.32);g.quadraticCurveTo(.1,.4,.16,.34);g.stroke();
+  g.fillStyle='rgba(242,122,146,.45)';circ(g,-.42,.18,.08);circ(g,.42,.18,.08);
+ }else if(e==='cat'){
+  // a striped street cat with green eyes and a smirk
+  g.fillStyle=T.jersey;poly(g,-.62,-.1,-.56,-.8,-.18,-.46);poly(g,.62,-.1,.56,-.8,.18,-.46);
+  g.fillStyle='#f2a5b4';poly(g,-.52,-.3,-.5,-.64,-.28,-.44);poly(g,.52,-.3,.5,-.64,.28,-.44);
+  g.fillStyle=T.jersey;ell(g,0,.04,.64,.54,0);
+  g.fillStyle=shade(T.jersey,-.35);for(const x of[-.16,0,.16])poly(g,x-.04,-.48,x+.04,-.48,x,-.26);poly(g,-.64,0,-.4,-.04,-.62,.1);poly(g,.64,0,.4,-.04,.62,.1);
+  g.fillStyle=CREAM;ell(g,0,.26,.3,.2,0);
+  g.fillStyle='#9fe06a';ell(g,-.24,-.06,.12,.09,0);ell(g,.24,-.06,.12,.09,0);g.fillStyle=INK;ell(g,-.24,-.06,.03,.08,0);ell(g,.24,-.06,.03,.08,0);
+  g.fillStyle='#f27a92';poly(g,-.06,.12,.06,.12,0,.19);g.strokeStyle=INK;g.lineWidth=.03;g.beginPath();g.moveTo(0,.19);g.quadraticCurveTo(-.06,.28,-.14,.24);g.moveTo(0,.19);g.quadraticCurveTo(.08,.28,.16,.22);g.stroke();
+  for(const sd of[-1,1]){line(g,sd*.2,.18,sd*.66,.1);line(g,sd*.2,.22,sd*.68,.28)}
+ }else if(e==='rex'){
+  // a grinning T-rex head in profile, tiny arm waving
+  g.fillStyle=T.jersey;g.beginPath();g.moveTo(-.86,-.1);g.quadraticCurveTo(-.7,-.62,-.06,-.6);g.quadraticCurveTo(.5,-.58,.7,-.2);g.lineTo(.74,.5);g.lineTo(.2,.62);g.lineTo(.06,.1);g.lineTo(-.86,.14);g.closePath();g.fill();
+  g.fillStyle=shade(T.jersey,-.3);for(const x of[-.2,.1,.4])circ(g,x,-.44,.05);
+  g.fillStyle=CREAM;g.beginPath();g.moveTo(-.86,.02);g.lineTo(.04,.02);g.lineTo(.08,.12);g.lineTo(-.86,.14);g.closePath();g.fill();
+  g.fillStyle=CREAM;for(let k=0;k<6;k++)poly(g,-.8+k*.15,.02,-.74+k*.15,.02,-.77+k*.15,.1);
+  g.fillStyle=INK;g.fillRect(-.86,.02,.92,.02);circ(g,-.62,-.32,.03);
+  g.fillStyle=CREAM;circ(g,-.12,-.3,.1);g.fillStyle=INK;circ(g,-.1,-.3,.05);g.fillStyle=INK;poly(g,-.28,-.44,-.02,-.4,-.04,-.36,-.28,-.38);
+  g.fillStyle=T.jersey;g.fillRect(.14,.3,.22,.08);g.fillRect(.32,.24,.06,.1);
+ }else if(e==='cosmos'){
+  // a ringed planet with a shooting star
+  g.fillStyle='#ffe36b';poly(g,.54,-.7,.6,-.56,.74,-.54,.62,-.46,.66,-.32,.54,-.4,.42,-.32,.46,-.46,.34,-.54,.48,-.56);
+  g.strokeStyle='rgba(255,227,107,.7)';g.lineWidth=.05;line(g,.4,-.5,-.1,-.9);
+  g.fillStyle=T.cap;circ(g,0,.08,.46);g.fillStyle=shade(T.cap,.25);ell(g,-.12,-.06,.24,.14,-.4);
+  g.save();g.beginPath();g.arc(0,.08,.46,0,Math.PI*2);g.clip();g.fillStyle=shade(T.cap,-.25);g.fillRect(-.5,.24,1,.08);g.fillRect(-.5,-.04,1,.05);g.restore();
+  g.strokeStyle=CREAM;g.lineWidth=.08;g.beginPath();g.ellipse(0,.08,.82,.22,-.32,Math.PI*.04,Math.PI*.96);g.stroke();
+  g.strokeStyle=T.jersey;g.lineWidth=.04;g.beginPath();g.ellipse(0,.08,.82,.22,-.32,Math.PI*.04,Math.PI*.96);g.stroke();
+  g.fillStyle=CREAM;for(const[x,y]of[[-.7,-.5],[-.5,-.74],[.8,.56],[-.76,.6]])circ(g,x,y,.03);
+ }else if(e==='king'){
+  // a jeweled crown holding a baseball
+  g.fillStyle='#ffc83a';poly(g,-.7,.36,-.78,-.42,-.42,-.06,-.2,-.6,0,-.14,.2,-.6,.42,-.06,.78,-.42,.7,.36);
+  g.fillStyle='#d89a1c';g.fillRect(-.7,.2,1.4,.16);poly(g,0,-.14,.2,-.6,.26,-.44,.06,-.02);
+  g.fillStyle='#e0473d';circ(g,-.4,.28,.06);circ(g,.4,.28,.06);g.fillStyle='#3f82e6';circ(g,0,.28,.07);
+  for(const[x,y]of[[-.78,-.42],[-.2,-.6],[.2,-.6],[.78,-.42]]){g.fillStyle=CREAM;circ(g,x,y,.07)}
+  g.fillStyle=CREAM;circ(g,0,-.02,.18);g.strokeStyle='#c7262e';g.lineWidth=.03;g.beginPath();g.arc(-.24,-.02,.14,-.7,.7);g.stroke();g.beginPath();g.arc(.24,-.02,.14,Math.PI-.7,Math.PI+.7);g.stroke();
  }else if(e==='magpie'){
   g.strokeStyle=INK;g.lineWidth=.05;line(g,0,.3,-.04,.62);line(g,.1,.3,.1,.62);
   g.fillStyle=T.jersey;poly(g,-.28,.14,-.94,.52,-.88,.34,-.34,.02);
@@ -201,6 +266,13 @@ function makeLogo(key,size){
   const arc=(lw,col,inset)=>{g.strokeStyle=col;g.lineWidth=lw;g.lineCap='butt';g.beginPath();g.arc(0,.1,.6,.55+inset,Math.PI*2-.55-inset);g.stroke()};
   arc(.46,T.brim,0);arc(.36,CREAM,.04);arc(.22,T.cap,.08);
   stampEmblem(g,key,.44,-.5,.46,0,CREAM,.035);
+ }else if(l==='cosmos'){
+  // a starry night-sky disc with an orbit ring around the emblem
+  g.fillStyle=T.brim;circ(g,0,0,.99);g.fillStyle='#0b1030';circ(g,0,0,.9);
+  g.save();g.beginPath();g.arc(0,0,.9,0,Math.PI*2);g.clip();const sky=g.createRadialGradient(0,-.3,.1,0,0,1);sky.addColorStop(0,T.jersey);sky.addColorStop(1,'#060a1e');g.fillStyle=sky;g.fillRect(-1,-1,2,2);
+  g.fillStyle=CREAM;for(let i=0;i<26;i++){const a=i*2.39,r=.2+((i*37)%70)/100;circ(g,Math.cos(a)*r,Math.sin(a)*r,i%5?.012:.022)}g.restore();
+  stampEmblem(g,key,0,-.12,.7,0,'#060a1e',.04);
+  script(T.script,.6,.36,CREAM,T.brim);
  }else if(l==='sea'){
   // harbor sunset: sun on the horizon, rolling waves, a gull overhead
   g.fillStyle=T.brim;circ(g,0,0,.98);
