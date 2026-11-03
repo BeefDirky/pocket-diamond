@@ -322,7 +322,7 @@ function render(now){
  if(ix1>ix0&&iy1>iy0){const dx=(ix0-vx0)*scale,dy=(iy0-vy0)*scale,dw=(ix1-ix0)*scale,dh=(iy1-iy0)*scale;
   if(OUT&&PARK_OUTLINE){// the stands end at the stadium's outer wall; the neighborhood shows past it
    ctx.save();ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();ctx.clip();
-   ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh);ctx.restore();
+   ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh);if(OUT_FEATHER)ctx.drawImage(OUT_FEATHER,(vx0+e.mx)/2,(vy0+e.my)/2,vw/2,vh/2,0,0,cv.width,cv.height);ctx.restore();
    ctx.save();ctx.lineJoin='round';ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();
    ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=Math.max(2,16*scale);ctx.stroke();ctx.strokeStyle=S.night?'#3a424c':'#b9b4a8';ctx.lineWidth=Math.max(1.5,9*scale);ctx.stroke();
    ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}

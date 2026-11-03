@@ -1384,11 +1384,11 @@ function blit(g,map,cols,x0,y0){
 // at half resolution. Neighborhood pixel (cx,cy) is world pixel (cx*2-mx, cy*2-my).
 let PARK_OUTLINE=null,OUT_CV=null,OUT_KEY='';
 function parkOutline(){
- // a ballpark footprint shaped like a wide V: a pointed (lightly rounded) tip behind home, long straight arms
- // running up and out behind the foul lines to wide wings at the corners, then the roofline angling back in
- // toward center field, with a short flat top. Slight smoothing keeps the corners crisp but not jagged.
- const sx=W/2-6,tipY=H-6,wingY=Math.round(tipY-sx*1.12),wing2Y=wingY-70,shX=W*.27,shY=64,topY=14;
- const half=[[0,tipY],[sx,wingY],[sx,wing2Y],[shX,shY],[shX*.35,topY]];
+ // the ballpark's outer wall, shaped like a wide V: a pointed tip well behind home, long straight arms out behind
+ // the foul lines to wide wings, then the roofline angling back in to a short top over center field. It reaches
+ // past the park buffer on every side; the stands are extended out there (drawn with the neighborhood).
+ const tipY=HY+400,wingX=1000,wingY=HY-600,wing2Y=HY-800,shX=430,shY=-150,topY=-200;
+ const half=[[0,tipY],[wingX,wingY],[wingX,wing2Y],[shX,shY],[shX*.4,topY]];
  let pts=[...half,...half.slice(1).reverse().map(([x,y])=>[-x,y])];
  const chaikin=P=>{const out=[];for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];
    out.push([a[0]*.85+b[0]*.15,a[1]*.85+b[1]*.15],[a[0]*.15+b[0]*.85,a[1]*.15+b[1]*.85])}return out};
@@ -1396,7 +1396,17 @@ function parkOutline(){
  return pts.map(([x,y])=>({x:HX+x,y}))}
 function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
- if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();OUT_CV=buildOutside(S.you,!!S.night);OUT_KEY=key}return OUT_CV}
+ if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();OUT_CV=buildOutside(S.you,!!S.night);OUT_FEATHER=buildFeather(OUT_CV);OUT_KEY=key}return OUT_CV}
+// the park buffer's straight edges would show as a seam where the extended stands begin: this overlay fades the
+// extended stands in over the last stretch of the buffer (static, so it costs one drawImage a frame)
+let OUT_FEATHER=null;
+function buildFeather(src){const e=EXT_M,c=document.createElement('canvas');c.width=src.width;c.height=src.height;const g=c.getContext('2d');
+ const x0=e.mx/2,y0=e.my/2,x1=(W+e.mx)/2,y1=(H+e.my)/2,B=14;
+ const strip=(sx,sy,w,h,gx0,gy0,gx1,gy1)=>{const t=document.createElement('canvas');t.width=w;t.height=h;const q=t.getContext('2d');q.drawImage(src,sx,sy,w,h,0,0,w,h);
+  q.globalCompositeOperation='destination-in';const gr=q.createLinearGradient(gx0,gy0,gx1,gy1);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');q.fillStyle=gr;q.fillRect(0,0,w,h);g.drawImage(t,sx,sy)};
+ strip(x0,y0,B,y1-y0,0,0,B,0);strip(x1-B,y0,B,y1-y0,B,0,0,0);strip(x0,y0,x1-x0,B,0,0,0,B);strip(x0,y1-B,x1-x0,B,0,B,0,0);
+ g.globalCompositeOperation='destination-in';g.beginPath();PARK_OUTLINE.forEach((q,i)=>g[i?'lineTo':'moveTo']((q.x+e.mx)/2,(q.y+e.my)/2));g.closePath();g.fill();
+ return c}
 function buildOutside(k,night){
  const e=EXT_M,CW=Math.round((W+2*e.mx)/2),CH=Math.round((H+2*e.my)/2),c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
  const rr=mulberry32(hash(k+'-outside')),R=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))};
@@ -1408,7 +1418,7 @@ function buildOutside(k,night){
  const OL=PARK_OUTLINE.map(q=>({x:cx(q.x),y:cy(q.y)}));
  const near=(x,y,pad)=>{if(insidePoly(OL,x,y))return true;for(let a=0;a<6.28;a+=.8)if(insidePoly(OL,x+Math.cos(a)*pad,y+Math.sin(a)*pad))return true;return false};
  // water band along the top: the Han River for Seoul, the sea for the coastal clubs
- const wTop=cy(-330),wBot=cy(-95),hasWater=seoul||coast;
+ const wTop=cy(-660),wBot=cy(-420),hasWater=seoul||coast;
  const inWater=(y,h)=>hasWater&&y+h>wTop-14&&y<wBot+14;
  // plaza ring: concrete apron with trees around the outer wall
  g.save();g.beginPath();OL.forEach((q,i)=>{const dx=q.x-cx(HX),dy=q.y-cy(HY),l=Math.hypot(dx,dy)||1,o=34;g[i?'lineTo':'moveTo'](q.x+dx/l*o,q.y+dy/l*o)});g.closePath();g.fillStyle=col.plaza;g.fill();g.restore();
@@ -1467,7 +1477,26 @@ function buildOutside(k,night){
   // a subway entrance and a row of food stalls on the plaza behind home
   {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
- if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}
+ if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}// the city dims at night; the stadium stays lit
+ // ---- the stands keep going past the park buffer, out to the outer wall ----
+ {const ST=STADIUMS[k],hx=cx(HX),hy=cy(HY);g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
+  g.fillStyle=ST.seat[1];g.fillRect(0,0,CW,CH);
+  // rows: rings around home plate, lower bowl in the club's main color, a concourse, then the upper deck
+  // rows continue in the same seat colors the park uses, with a walkway ring every so often
+  for(let r=8;r<1500;r+=3){const ring=(r%90)<3;g.strokeStyle=ring?(night?'#2a2f36':'#8d939a'):ST.seat[(r/3|0)%2];g.lineWidth=3.2;g.beginPath();g.arc(hx,hy,r,0,Math.PI*2);g.stroke()}
+  // aisles every few degrees, and a stair every so often
+  g.strokeStyle=night?'rgba(0,0,0,.35)':'rgba(30,34,40,.35)';g.lineWidth=1.4;for(let a=0;a<360;a+=6){const A=a*RAD;g.beginPath();g.moveTo(hx,hy);g.lineTo(hx+Math.cos(A)*1600,hy+Math.sin(A)*1600);g.stroke()}
+  // the crowd
+  const shirts=['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f38d2e','#f1ecdc','#6c7a86',T.jersey,T.jersey,T.jersey,T.cap];
+  let minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;for(const q of OL){minX=Math.min(minX,q.x);maxX=Math.max(maxX,q.x);minY=Math.min(minY,q.y);maxY=Math.max(maxY,q.y)}
+  const bx0=cx(0),by0=cy(0),bx1=cx(W),by1=cy(H);
+  for(let n=0;n<60000;n++){const x=minX+rr()*(maxX-minX),y=minY+rr()*(maxY-minY);if(x>bx0&&x<bx1&&y>by0&&y<by1)continue;if(!insidePoly(OL,x,y))continue;
+   const sc=shirts[Math.floor(rr()*shirts.length)];g.fillStyle=night?shade(sc,-.35):sc;g.fillRect(Math.round(x),Math.round(y),1,1);if(rr()<.4){g.fillStyle=SKINS[Math.floor(rr()*5)];g.fillRect(Math.round(x),Math.round(y)-1,1,1)}}
+  // at night the light towers wash the whole bowl, brightest near the field
+  if(night){const gl=g.createRadialGradient(hx,cy(HY-500),60,hx,cy(HY-500),900);gl.addColorStop(0,'rgba(255,246,210,.18)');gl.addColorStop(1,'rgba(0,0,0,.25)');g.fillStyle=gl;g.fillRect(0,0,CW,CH)}
+  // a soft shadow where the roof overhangs the top rows
+  g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.stroke();
+  g.restore()}
  return c}
 // ---------- Ulsan: whale bay, shipyard and the harbor traffic ----------
 function spout(g,q,ph,big){const a=ph;for(let k=0;k<(big?20:14);k++){const s=(k*37%11)/11,h=a*(big?44:34)*(.5+s*.6),dx=(k%2?1:-1)*s*a*(big?18:14);g.globalAlpha=Math.max(0,1-a)*.9;g.fillStyle=k%3?'#e8f6ff':'#9fd8f6';g.fillRect(Math.round(q.x+dx),Math.round(q.y-h),3,3)}g.globalAlpha=1}
@@ -4107,7 +4136,7 @@ function render(now){
  if(ix1>ix0&&iy1>iy0){const dx=(ix0-vx0)*scale,dy=(iy0-vy0)*scale,dw=(ix1-ix0)*scale,dh=(iy1-iy0)*scale;
   if(OUT&&PARK_OUTLINE){// the stands end at the stadium's outer wall; the neighborhood shows past it
    ctx.save();ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();ctx.clip();
-   ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh);ctx.restore();
+   ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh);if(OUT_FEATHER)ctx.drawImage(OUT_FEATHER,(vx0+e.mx)/2,(vy0+e.my)/2,vw/2,vh/2,0,0,cv.width,cv.height);ctx.restore();
    ctx.save();ctx.lineJoin='round';ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();
    ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=Math.max(2,16*scale);ctx.stroke();ctx.strokeStyle=S.night?'#3a424c':'#b9b4a8';ctx.lineWidth=Math.max(1.5,9*scale);ctx.stroke();
    ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}
