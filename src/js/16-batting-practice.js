@@ -48,7 +48,11 @@ function hitAdvance(runners,tp,Pp,delay){
 function outfieldHit(play,it,P,runners,delay,errBy){
  hitAdvance(runners,it.t,it.p,delay);
  const bd=runners.find(r=>r.batter).dest;runners.find(r=>r.batter).round=true;
- const tgt=bd>=3?4:bd+1,tb=baseP(tgt);
+ // on a single, the runner from second tries to score on speed: 70+ scores, 50-69 is a play at the plate, under 50 holds at third
+ let sendHome=null;
+ if(bd===1&&errBy==null){const r2=runners.find(r=>r.from===2&&!r.batter);if(r2&&r2.dest===3&&(r2.who.spd||60)>=50){r2.dest=4;sendHome=r2;
+  const sp=r2.who.spd||60;if(sp<70){r2.closeHome=true;if(Math.random()<.2+(70-sp)*.02)r2.out=true}}}
+ const tgt=sendHome?4:bd>=3?4:bd+1,tb=baseP(tgt);
  const t0=it.t+.65;
  const cov=tgt===4?1:tgt===3?4:(it.p.x<0?3:5);
  let tArr;
@@ -60,14 +64,17 @@ function outfieldHit(play,it,P,runners,delay,errBy){
   tArr=t1+.32+dist(Cc,tb)/THROW;
  }else{play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,fromF(play,it.i,t0),tb));tArr=t0+dist(it.p,tb)/THROW}
  if(cov!==it.i&&!play.fk[cov])play.fk[cov]=cover(cov,tb,tArr);
+ if(sendHome){const r2=sendHome,tR=r2.start+2*LEG/r2.speed;
+  if(r2.out){if(tR<tArr+.12)r2.speed=2*LEG/Math.max(.5,tArr+.15-r2.start);r2.outAt=tArr+.05}
+  else if(tR>tArr-.1)r2.speed=2*LEG/Math.max(.5,tArr-(r2.closeHome?.1:.4)-r2.start)}
  let bu=null,bdist=1e9;for(const i of[6,7,8])if(i!==it.i&&!play.fk[i]){const dd=dist(POS[i],it.p);if(dd<bdist){bdist=dd;bu=i}}
  if(bu!==null&&it.i>=6){const f=POS[bu];play.fk[bu]=chase(bu,{x:lerp(f.x,it.p.x,.55),y:lerp(f.y,it.p.y,.55)},it.t)}
  const code={1:'1B',2:'2B',3:'3B',4:'IPHR'}[bd];
- const runs=runners.filter(r=>r.dest===4).length;
+ const runs=runners.filter(r=>r.dest===4&&!r.out).length,homeOut=sendHome&&sendHome.out;
  const word={1:'Single',2:'Double',3:'Triple',4:'Inside-the-park home run'}[bd];
  const ban={1:'SINGLE!',2:'DOUBLE!',3:'TRIPLE!',4:'INSIDE-THE-PARK HR!'}[bd];
  if(errBy!=null)return finalize(play,runners,{code:'E',hit:false,outs:0,banner:'ERROR!',tone:'',sub:'Dropped it!',desc:`Dropped fly ball, E${errBy+1}${runsTxt(runs)}`});
- return finalize(play,runners,{code,hit:true,outs:0,banner:ban,tone:bd===4?'hr':'hit',desc:`${word} to ${fieldName(P.s)}${runsTxt(runs)}`});
+ return finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} to ${fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
 }
 function buildGrounder(P,dir,b){
  const C={x:0,y:2};
@@ -186,6 +193,9 @@ function buildAir(P,dir,b){
  }
  const cands=[2,3,4,5,6,7,8];if(D<60)cands.push(0);if(D<70)cands.push(1);
  let best=7,bn=1e9;for(const i of cands){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/f.sp;if(need<bn){bn=need;best=i}}
+ // outfielders have priority: on anything hit past the infield dirt, an outfielder who can get there calls the infielder off
+ if(best<6&&D>=128){let ob=-1,on=1e9;for(const i of[6,7,8]){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/f.sp;if(need<on){on=need;ob=i}}
+  if(ob>=0&&on<=T+.02){best=ob;bn=on}}
  const drop=bn<=T+.05&&P.L<45&&Math.random()<errChance(best,.05);
  if(bn<=T+.05&&!drop){
   const XF=.7+(bn>T-.12&&P.L<45?.9:0);
@@ -350,8 +360,11 @@ function afterPA(){
   setPhase('inning');updateHUD();return;
  }
  const fk=fldKey(),st=TEAMS[fk].staff||[],lim=S.mode==='full'?95:55;
- if((S.pIdxOf[fk]||0)<st.length-1&&((S.pRunsOf[fk]||0)>=4||(S.pcOf[fk]||0)>=lim)){
-  S.pIdxOf[fk]=(S.pIdxOf[fk]||0)+1;S.pRunsOf[fk]=0;S.pBFOf[fk]=0;S.pcOf[fk]=0;applyDefense();const np=pitcher();
+ const humanPen=onlineGame()||(S.mode==='full'&&fk===S.you&&!S.auto);// a human manager makes their own calls
+ const nxt=st.findIndex((p,i)=>i>(S.pIdxOf[fk]||0)&&!usedOf(fk).includes(i));
+ if(humanPen&&nxt>=0&&((S.pRunsOf[fk]||0)>=4||(S.pcOf[fk]||0)>=lim)&&!S.penHint){S.penHint=true;setTimeout(()=>{if(pitching()&&S.phase==='choose')banner('YOUR PITCHER IS TIRING',`${S.pcOf[fk]||0} pitches. Tap BULLPEN (or press B) to make a change.`)},900)}
+ if(!humanPen&&nxt>=0&&((S.pRunsOf[fk]||0)>=4||(S.pcOf[fk]||0)>=lim)){
+  changePitcher(fk,nxt,true);const np=pitcher();
   banner('PITCHING CHANGE',`${fk===S.you?'Your bullpen: ':''}#${np.no} ${np.name}, ${np.slot==='side'?'sidearm ':''}${np.hand}HP, in from the pen`);
   S.jumbo={text:'NEW PITCHER',kr:'투수 교체',until:performance.now()+3200};$('tag').hidden=true;setPhase('inning');updateHUD();return;
  }

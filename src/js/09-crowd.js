@@ -49,7 +49,8 @@ function buildCrowd(){
 }
 function drawBanners(g){
  const home=TEAMS[S.you],away=TEAMS[S.opp];
- const list=[[50,`${home.kname} 화이팅!`,home,1],[24,`LET'S GO ${home.name}!`,home],[-50,`${away.kname} 원정 응원단`,away,1],[-24,`${away.city} TRAVELS`,away],[9,`최강 ${home.kname}`,home,1],[-9,`${home.mascot.toUpperCase()} FAN CLUB`,home]];
+ const sl=(CLUB_INFO[S.you]&&CLUB_INFO[S.you].slogans)||[];
+ const list=[[50,sl[0]||`${home.kname} 화이팅!`,home,1],[24,`LET'S GO ${home.name}!`,home],[-50,`${away.kname} 원정 응원단`,away,1],[-24,`${away.city} TRAVELS`,away],[9,sl[1]||`최강 ${home.kname}`,home,1],[-9,`${home.mascot.toUpperCase()} FAN CLUB`,home],[37,sl[2]||`${home.kname} 사랑해`,home,1],[-37,`최강 ${home.kname}`,home,1]];
  for(const[ang,txt0,T,kr]of list){
   const txt=txt0;
   let best=null,bd=99;for(const c of RAIL){const d=Math.abs(c.ang-ang);if(d<bd){bd=d;best=c}}

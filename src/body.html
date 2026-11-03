@@ -23,6 +23,8 @@
     <button class="infoBtn" id="infoBtn" type="button" aria-pressed="true" title="Show or hide hit info">INFO <b>ON</b></button>
     <div class="pcBox" aria-label="Inning and pitch count"><span id="bugInn"></span><span>PITCHES <b id="pcV">0</b></span><span id="clkS" hidden>CLOCK <b id="clkV">15</b></span></div>
     <div class="relMeter" id="relMeter" hidden><div class="rmBar"><i class="rmG"></i><i class="rmP" id="rmP"></i><b id="rmMk"></b></div><span id="rmTxt">TAP TO RELEASE</span></div>
+    <div class="pkBar" id="pkBar" hidden><span>PICKOFF</span><button type="button" id="pk1" data-b="1" hidden>1B <small>Q</small></button><button type="button" id="pk2" data-b="2" hidden>2B <small>W</small></button></div>
+    <div class="penPanel" id="penPanel" hidden><div class="penHead"><b>BULLPEN</b><span id="penSub"></span><button type="button" id="penClose" aria-label="Close bullpen">✕</button></div><div class="penList" id="penList"></div></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
 
     <div class="overlay" id="title">
@@ -81,6 +83,7 @@
         <div class="pick"><span class="k">YOUR CLUB</span><div class="chips" id="pickYou"></div></div>
         <div class="pick" id="oppPick" hidden><span class="k">VISITORS (THEY PITCH AND FIELD)</span><div class="chips" id="pickOpp"></div></div>
         <div class="masc"><canvas id="mascCv" width="11" height="17"></canvas><div id="mascTxt"></div></div>
+        <div class="clubInfo" id="clubInfo"></div>
         <p class="oppLine" id="oppLine"></p>
         <button class="big" id="playGo" type="button" hidden>PLAY BALL</button>
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
@@ -215,7 +218,7 @@
     <div class="bar"><i class="z z1"></i><i class="z z2"></i><i class="z z3"></i><i class="mk" id="mk" hidden></i></div>
   </div>
 
-  <div class="pacts" id="actsPitch" hidden><button class="pbtn" type="button" data-k="FB">FASTBALL<small>1</small></button><button class="pbtn" type="button" data-k="SL">SLIDER<small>2</small></button><button class="pbtn" type="button" data-k="CH">CHANGEUP<small>3</small></button><button class="pbtn" type="button" data-k="SP">SPLITTER<small>4</small></button><button class="pbtn" type="button" data-k="KN" id="btnKN" hidden>KNUCKLE<small>5</small></button></div>
+  <div class="pacts" id="actsPitch" hidden><button class="pbtn" type="button" data-k="FB">FASTBALL<small>1</small></button><button class="pbtn" type="button" data-k="SL">SLIDER<small>2</small></button><button class="pbtn" type="button" data-k="CH">CHANGEUP<small>3</small></button><button class="pbtn" type="button" data-k="SP">SPLITTER<small>4</small></button><button class="pbtn" type="button" data-k="KN" id="btnKN" hidden>KNUCKLE<small>5</small></button><button class="pbtn pen" type="button" id="penBtn" hidden>BULLPEN<small>B</small></button></div>
   <div class="acts" id="actsBat"><button class="swing" id="swingBtn" type="button">SWING<small>or tap anywhere · Space</small></button><button class="swing bunt" id="buntBtn" type="button">BUNT</button><div class="bpBar" id="bpBar" hidden><span class="k">MACHINE</span><button class="pbtn" type="button" data-k="FB">FASTBALL<small>1</small></button><button class="pbtn" type="button" data-k="SL">SLIDER<small>2</small></button><button class="pbtn" type="button" data-k="CH">CHANGEUP<small>3</small></button><button class="pbtn" type="button" data-k="SP">SPLITTER<small>4</small></button><button class="pbtn" type="button" data-k="KN">KNUCKLE<small>5</small></button></div></div>
 
   <section class="book">

@@ -1,6 +1,6 @@
 // ---------- pick a hitter: tap the at-bat panel ----------
 function openPicker(){
- if(S.phase==='title'||S.phase==='over'||pitching()||S.online)return;
+ if(S.phase==='title'||S.phase==='over'||pitching()||onlineGame())return;
  const k=batKey(),T=TEAMS[k],cur=(S.orderOf[k]||0),mine=k===S.you,bp=S.mode==='bp';
  const canSwap=bp||(mine&&S.balls===0&&S.strikes===0&&!['pitch','play','call','result'].includes(S.phase));
  $('pickNote').textContent=bp?'Pick who takes batting practice. He stays in until you pick someone else.':!mine?'The visitors are batting. You can only change your own hitters.':canSwap?'Pinch hit: the hitter you pick moves into this lineup spot, and the current hitter takes his spot.':'You can only change hitters before the first pitch of an at-bat.';

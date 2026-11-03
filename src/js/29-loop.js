@@ -1,7 +1,7 @@
 // ---------- loop ----------
 function update(dt,now){
  if(S.paused)return;
- if(S.online&&S.online.inGame)netTick(now);
+ if(S.online&&S.online.inGame)netTick(now);syncPickBar();
  S.pt+=dt;
  if((!S.wave||now>S.wave.end+15000)&&S.phase!=='title'&&Math.random()<dt/22000)S.wave={start:now,end:now+5500};
  if(now<S.fwUntil&&Math.random()<dt/240)burst(rand(80,880)*K,rand(30,260)*K);
@@ -15,20 +15,20 @@ function update(dt,now){
     // the visiting pitcher sometimes throws over (more often when he senses a steal)
     {const abKey=`${S.inning}|${S.half}|${S.orderOf[batKey()]}`;if(!S.pk||S.pk.ab!==abKey)S.pk={ab:abKey,n:0};
      const k=S.bases[0]&&!S.bases[1]?1:S.bases[1]&&!S.bases[2]?2:0;
-     if(k&&!pitching()&&!S.online&&S.mode!=='bp'&&S.pk.n<2&&Math.random()<(S.steal&&S.steal[k]?.3:.1)){S.pk.n++;S.play=buildPickoff(k);S.steal=null;
+     if(k&&!pitching()&&!onlineGame()&&S.mode!=='bp'&&S.pk.n<2&&Math.random()<(S.steal&&S.steal[k]?.3:.1)){S.pk.n++;S.play=buildPickoff(k);S.steal=null;
       if(batKey()===S.you)crowdClip('boo',1.5);setPhase('play');setCam('follow');break}}
     if(S.online&&S.online.inGame&&!pitching()){}
-    else if(pitching()&&S.auto){startWindup()}else if(pitching()){setPhase('choose');banner('YOUR PITCH','1 Fastball · 2 Slider · 3 Changeup · 4 Splitter');updateHUD()}else startWindup()}break;
+    else if(pitching()&&S.auto){startWindup()}else if(pitching()){setPhase('choose');banner('YOUR PITCH',arsOf(pitcher()).map((a,i)=>`${i+1} ${PITCHES[a].name[0]+PITCHES[a].name.slice(1).toLowerCase()}`).join(' · '));updateHUD()}else startWindup()}break;
   case'windup':if(S.pt>=S.pitch.wind&&!(S.pitch.remote&&!S.pitch.relRecv))release(now);break;
   case'pitch':{
    if(S.swing&&S.swing.contactAt&&!S.swing.done&&now>=S.swing.contactAt){doContact();break}
    if(S.mode==='bp'){if(now-S.pitch.releaseAt>=S.pitch.travel*1.4)pitchEnd();break}
-   if(S.online&&S.online.inGame&&pitching()&&!S.pitch.decided){if(now-S.pitch.releaseAt>S.pitch.travel*1.135+9000)S.pitch.decided=true;break}
+   if(S.online&&S.online.inGame&&pitching()&&!S.pitch.decided){break}// wait for the batter's call however long it takes; guessing would split the two screens
    {const el=now-S.pitch.releaseAt,tc=S.pitch.travel*(S.pitch.wild?1.6:1.135);
     // the ball is in the mitt, but a very late swing still counts (as a late swing and miss) for a beat before the call
     if(el>=tc){if(!S.swing&&!S.pitch.wild&&!pitching()&&el<tc+420){if(!S.pitch.popped){S.pitch.popped=true;if(S.mode!=='bp')sfx('pop')}}else pitchEnd()}}break}
   case'play':{const pl=S.play,t0=pl.t;pl.t+=dt/1000*SPEED;const r=pl.res;
-   {const dT=pl.watch!=null?pl.watch+(pl.flip?pl.flip.dur:1.1):.6;if(!pl.foul&&!pl.bp&&t0<dT&&pl.t>=dT)sfx('drop')}
+   {const dT=pl.watch!=null?pl.watch+(pl.flip?pl.flip.dur:1.1):.6;if(!pl.foul&&!pl.bp&&!(pl.res&&pl.res.steal)&&t0<dT&&pl.t>=dT)sfx('drop')}
    for(const sg of pl.segs)if(sg.snd&&!sg.sounded&&pl.t>=sg.t1){sg.sounded=true;sfx('glove')}
    if(pl.dive&&!pl.diveSnd&&pl.t>=pl.dive.t&&fldKey()===S.opp&&batKey()===S.you){pl.diveSnd=true;crowdClip('dcatch',2)}
    if(pl.jump&&!pl.jumpSnd&&pl.t>=pl.jump.t-.05&&fldKey()===S.opp&&batKey()===S.you){pl.jumpSnd=true;crowdClip('dcatch',1.6)}

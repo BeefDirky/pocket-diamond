@@ -31,7 +31,8 @@ function updateHUD(){
  for(let k=1;k<=3;k++)if(!S.baseChase)$('d'+k).classList.toggle('on',!hrTrot&&!!S.bases[k-1]);
  const b=curBatter(),p=pitcher();
  $('abTeam').textContent=`${TEAMS[batKey()].name} · AT BAT`;$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE · ON THE MOUND':`${TEAMS[fldKey()].name} · PITCHING${pitching()?' (YOU)':''}`;
- const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;$('btnKN').hidden=!(pit&&pitcher().type==='knuckle');document.querySelector('.meter').hidden=pit;
+ const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;if(pit){const A=arsOf(pitcher());for(const pb of document.querySelectorAll('#actsPitch .pbtn[data-k]')){const i=A.indexOf(pb.dataset.k);pb.hidden=i<0;if(i>=0)pb.querySelector('small').textContent=i+1}
+  $('actsPitch').style.gridTemplateColumns=isWide()?'':`repeat(${A.length},1fr) ${canPen()?'.9fr':''}`;$('penBtn').hidden=!canPen()}document.querySelector('.meter').hidden=pit;
  for(const pb of document.querySelectorAll('#actsPitch .pbtn'))pb.disabled=S.phase!=='choose';
  {const bg=document.querySelector('.bug'),pb=document.querySelector('.pcBox');if(bg&&pb){pb.style.top=(bg.offsetTop+bg.offsetHeight)+'px';pb.style.width=bg.offsetWidth+'px';pb.style.boxSizing='border-box'}}
  $('pcV').textContent=(S.pcOf&&S.pcOf[fldKey()])||0;$('bugInn').textContent=S.phase==='title'?'':`${S.mode==='full'&&S.half==='top'?'▲':'▼'}${S.inning}`;

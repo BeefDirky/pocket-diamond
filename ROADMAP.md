@@ -10,6 +10,17 @@
 - [x] Pitch clock (15 s) on both screens online; the pitch is thrown automatically when it runs out
 - [x] Bunt button on the left in every mode
 
+- [x] Walk-off celebration at the plate
+- [x] Outfielders call off infielders on shallow flies; outfield range up
+- [x] Splitter lands out of the zone 80% of the time when taken
+- [x] Magpies are the default club; wide view zooms out to the whole park; BP hitter picker fixed
+- [x] Bullpen: pick your pitcher (six-man staffs; starters 4 pitches, relievers 3), synced online
+- [x] Pickoffs for the pitching player (Q / W), online too; no bat-drop sound on pickoffs
+- [x] Runner on 2nd scores on a single by speed (70+ scores, 50-69 play at the plate, <50 holds)
+- [x] Hit-by-pitch ricochet + batter flinch
+- [x] Smaller line score on phones
+- [x] Club info + fun facts in the club picker; local banner slogans; city murals in left field
+
 ## Online failsafes
 - [ ] Rejoin after a page reload (same room code restores the game)
 - [ ] Lag / connection indicator

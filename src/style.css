@@ -418,3 +418,51 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 .pcBox{align-items:center}
 .pcBox span{display:inline-flex;align-items:center;gap:5px;line-height:1}
 .pcBox b{display:inline-block;line-height:1;transform:translateY(-.5px)}
+
+/* bullpen */
+.pbtn.pen{background:var(--chalk)}
+.pbtn[hidden]{display:none}
+.penPanel{position:absolute;left:8px;right:8px;bottom:8px;max-height:72%;display:flex;flex-direction:column;background:rgba(8,20,14,.95);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--panel-hi),0 6px 0 rgba(0,0,0,.4);z-index:20}
+.penPanel[hidden]{display:none}
+.penHead{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:2px solid var(--panel-hi)}
+.penHead b{font-family:var(--f-px);font-weight:400;font-size:12px;color:var(--amber)}
+.penHead span{flex:1;font-size:11px;color:var(--dim)}
+.penHead button{background:none;border:0;color:var(--chalk);font-size:16px;cursor:pointer;padding:2px 6px}
+.penList{overflow-y:auto;display:flex;flex-direction:column}
+.penRow{display:grid;grid-template-columns:34px 1fr auto;gap:5px 8px;align-items:center;text-align:left;padding:9px 10px;background:none;border:0;border-bottom:1px solid var(--panel-hi);color:var(--chalk);cursor:pointer;font-family:var(--f-hud)}
+.penRow:disabled{opacity:.45;cursor:default}
+.penRow[aria-current=true]{background:rgba(255,190,60,.1);opacity:1}
+.penRow .no{font-family:var(--f-px);font-size:9px;color:var(--dim)}
+.penRow .nm{display:flex;flex-direction:column;gap:2px;min-width:0}.penRow .nm b{font-weight:400;font-size:14px;white-space:nowrap}.penRow .nm small{color:var(--dim);font-size:10px}
+.penRow .st{font-size:10px;letter-spacing:.1em;color:var(--dim);text-align:right;white-space:nowrap}
+.penRow .st.ready{color:#7fdc7a}.penRow .st.now{color:var(--amber)}
+.penRow .ln2{grid-column:2/4;display:flex;flex-wrap:wrap;gap:5px 10px;align-items:center;justify-content:space-between}
+.penRow .rt{font-size:11px;color:var(--dim)}
+.penRow .ars{display:flex;gap:4px;flex-wrap:wrap}
+.penRow .ars i{font-style:normal;font-family:var(--f-px);font-size:7px;padding:3px 4px;border:1px solid var(--panel-hi);color:var(--chalk)}
+/* end bullpen */
+.pkBar{position:absolute;left:8px;top:50px;z-index:3;display:flex;flex-direction:column;gap:4px;align-items:stretch}
+.pkBar[hidden]{display:none}
+.pkBar span{font-size:8px;letter-spacing:.14em;color:var(--chalk);text-shadow:1px 1px 0 var(--edge)}
+.pkBar button{font-family:var(--f-px);font-size:10px;padding:7px 8px;background:rgba(8,20,14,.88);color:var(--amber);border:2px solid var(--amber);cursor:pointer}
+.pkBar button small{font-family:var(--f-hud);font-size:9px;color:var(--dim)}
+.pkBar button[hidden]{display:none}
+/* phones: a slimmer line score up top */
+@media (max-width:520px){
+ .app:not(.wideApp) .board{padding:2px 6px;border-width:2px}
+ .app:not(.wideApp) .line{border-spacing:1px}
+ .app:not(.wideApp) .line th{font-size:9px;line-height:1.1}
+ .app:not(.wideApp) .line td{padding:1px 2px;min-width:15px}
+ .app:not(.wideApp) .line td:not(.tname){font-size:8px;line-height:1.4}
+ .app:not(.wideApp) .line td.tname{font-size:10px}
+ .app:not(.wideApp) .line td.tname img{width:12px;height:12px;vertical-align:-2px;margin-right:4px}
+}
+.clubInfo{background:var(--edge);border:2px solid var(--panel-hi);padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--dim)}
+.clubInfo:empty{display:none}
+.ciTop b{display:block;font-family:var(--f-px);font-weight:400;font-size:12px;color:var(--amber)}
+.ciTop span{font-size:10px;letter-spacing:.12em}
+.clubInfo dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:0}
+.clubInfo dt{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding-top:2px}
+.clubInfo dd{margin:0;color:var(--chalk)}
+.clubInfo ul{margin:0;padding-left:16px;display:flex;flex-direction:column;gap:5px;color:var(--chalk)}
+.clubInfo li::marker{color:var(--amber)}

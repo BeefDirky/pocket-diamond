@@ -94,7 +94,7 @@ function drawPlayer(g,X,Y,T,o){
   case'follow':R(sk,2,-10,2,1,1);R(sk,0,-9,2,1,1);R(sk,-2,-8,2,1,1);R(sk,-3,-7,1,1,1);R(GLOVE,-3,-12,2,2,1);break;
   case'bat':R(sk,-3,-10,1,2,1);R(sk,3,-10,1,2,1);R(sk,1,-10,2,1,1);break;
   case'bunt':R(sk,-3,-10,1,2,1);R(sk,3,-10,1,2,1);R(sk,-2,-11,5,1,1);break;
-  case'punch':R(sk,-4,-10,1,3,1);R(sk,4,-16,1,5,1);break;
+  case'punch':R(sk,-4,-10,1,3,1);R(sk,4,-16,1,5,1);break;case'cheer':R(sk,-4,-16,1,5,1);R(sk,4,-16,1,5,1);break;
   case'proc':{ // throwing arm drawn every frame from a continuous path (shoulder → elbow → hand)
    const A=o.arm||{x:0,y:3},sx=4,sy=-11,gl=o.gloveAt||{x:-6,y:-11};
    R(sk,gl.x+1,gl.y+1,1,2,1);R(GLOVE,gl.x-1,gl.y,2,2,1);

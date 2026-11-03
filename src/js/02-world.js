@@ -15,9 +15,9 @@ const POS=[
  {n:'second',x:42,y:142,sp:21,re:.24,reach:6},
  {n:'third',x:-70,y:84,sp:19,re:.24,reach:6},
  {n:'short',x:-44,y:142,sp:22,re:.24,reach:6},
- {n:'left',x:-150,y:255,sp:24,re:.4,reach:7},
- {n:'center',x:0,y:300,sp:25,re:.4,reach:7},
- {n:'right',x:150,y:255,sp:24,re:.4,reach:7},
+ {n:'left',x:-150,y:255,sp:26,re:.36,reach:7},
+ {n:'center',x:0,y:300,sp:27,re:.36,reach:7},
+ {n:'right',x:150,y:255,sp:26,re:.36,reach:7},
 ];
 const LEG=90,RS=26,THROW=92,SPEED=1.12,INNINGS=3;let WIN=150;
 // timing window: tighter than before, contact still widens it

@@ -84,9 +84,9 @@ function finalize(play,runners,res){
  for(const k in play.fk){const ks=play.fk[k];e=Math.max(e,ks[ks.length-1].t)}
  play.end=e+.6;
  ambient(play);   // background movement never lengthens the play
- for(const r of runners){const b=r.dest;if(b!==2&&b!==3)continue;if(r.dest<=r.from)continue;
+ for(const r of runners){const b=r.dest;if(b!==2&&b!==3&&!(b===4&&r.closeHome))continue;if(r.dest<=r.from)continue;
   const L=(r.from>=1&&r.tagAt==null)?(LEADFT[r.from]+3)/LEG:0,tArr=r.start+((r.dest-r.from)-L)*LEG/r.speed;
-  let tThr=null;for(const sg of play.segs)if(sg.thr&&dist(sg.to,BASES[b])<5)tThr=sg.t1;
+  let tThr=null;for(const sg of play.segs)if(sg.thr&&dist(sg.to,BASES[b%4])<5)tThr=sg.t1;
   if(r.steal||(r.out&&r.outAt!=null)||(tThr!=null&&Math.abs(tThr-tArr)<.7)){const tA=r.out?Math.min(tArr,r.outAt):tArr;r.slide={t0:tA-.32,t1:tA,head:r.steal||Math.random()<.4,b}}}
  {let tE=0;for(const sg of play.segs)tE=Math.max(tE,sg.t1);
   for(let i=0;i<9;i++){if(play.dive&&play.dive.i===i)continue;const f=POS[i],ks=play.fk[i],lastT=ks?ks[ks.length-1].t:0,t0=Math.max(tE+.2,lastT),a=fpos(play,i,t0),d=dist(a,f);if(d<4)continue;

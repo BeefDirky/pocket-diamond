@@ -33,9 +33,9 @@ function supaRoom(){let sb=null;
  if(!ROOM&&/^https:/.test(SUPA.url)&&typeof claude==='undefined')ROOM=supaRoom()})();
 function netRand(fn){if(!S.online||!S.online.inGame||!S.pitch||!S.pitch.pid)return fn();const r=Math.random;Math.random=mulberry32(hash(S.online.gid+'|'+S.pitch.pid));try{return fn()}finally{Math.random=r}}
 function netPresence(patch){const o=S.online;if(!o||!o.nr)return;Object.assign(o.mine,patch);o.nr.presence(patch).catch(()=>{})}
-function snapState(){const T=TEAMS[batKey()];return{i:S.inning,h:S.half,o:S.outs,b:S.balls,s:S.strikes,r:S.runs,t:S.target,hs:[S.hits,S.oppHits,S.errs||0,S.myErrs||0],bs:S.bases.map(p=>p?T.lineup.indexOf(p):-1),or:S.orderOf,pi:S.pIdxOf,pc:S.pcOf,pr:S.pRunsOf,pb:S.pBFOf,yl:S.youLine,ol:S.oppLine,n:S.totalInn}}
-function applySnap(z){S.pIdxOf={...z.pi};S.orderOf={...z.or};S.inning=z.i;S.half=z.h;setSides();S.outs=z.o;S.balls=z.b;S.strikes=z.s;S.runs=z.r;S.target=z.t;
- [S.hits,S.oppHits,S.errs,S.myErrs]=z.hs;const T=TEAMS[batKey()];S.bases=z.bs.map(i=>i>=0?T.lineup[i]:null);S.pcOf={...z.pc};S.pRunsOf={...z.pr};S.pBFOf={...z.pb};S.youLine=[...z.yl];S.oppLine=[...z.ol];S.totalInn=z.n;applyDefense();updateHUD()}
+function snapState(){const T=TEAMS[batKey()];return{i:S.inning,h:S.half,o:S.outs,b:S.balls,s:S.strikes,r:S.runs,t:S.target,hs:[S.hits,S.oppHits,S.errs||0,S.myErrs||0],bs:S.bases.map(p=>p?T.lineup.indexOf(p):-1),or:S.orderOf,pi:S.pIdxOf,pc:S.pcOf,pr:S.pRunsOf,pb:S.pBFOf,yl:S.youLine,ol:S.oppLine,n:S.totalInn,u:S.usedOf||{}}}
+function applySnap(z){const fk0=fldKey(),was=S.pIdxOf[fk0]||0;S.usedOf=JSON.parse(JSON.stringify(z.u||{}));S.pIdxOf={...z.pi};S.orderOf={...z.or};S.inning=z.i;S.half=z.h;setSides();S.outs=z.o;S.balls=z.b;S.strikes=z.s;S.runs=z.r;S.target=z.t;
+ [S.hits,S.oppHits,S.errs,S.myErrs]=z.hs;const T=TEAMS[batKey()];S.bases=z.bs.map(i=>i>=0?T.lineup[i]:null);S.pcOf={...z.pc};S.pRunsOf={...z.pr};S.pBFOf={...z.pb};S.youLine=[...z.yl];S.oppLine=[...z.ol];S.totalInn=z.n;applyDefense();{const fk=fldKey();if(fk===fk0&&(S.pIdxOf[fk]||0)!==was){const np=pitcher();banner('PITCHING CHANGE',`#${np.no} ${np.name} in from the pen · ${arsOf(np).map(a=>PITCHES[a].name.toLowerCase()).join(', ')}`);S.jumbo={text:'NEW PITCHER',kr:'투수 교체',until:performance.now()+3200}}}updateHUD()}
 const PITCH_KEYS=['k','name','mph','travel','side','slot','h0','relX','plateX','mov','inZone','kn','wind','hbp','pid'];
 function pitchData(){const d={};for(const k of PITCH_KEYS)if(S.pitch[k]!==undefined)d[k]=S.pitch[k];return d}
 function netWindup(){const o=S.online;o.n=(o.n||0)+1;S.pitch.pid=o.role[0]+o.n;netPresence({pt:{id:S.pitch.pid,st:'w',p:pitchData(),z:snapState()}})}
@@ -63,7 +63,8 @@ function netTick(now){const o=S.online,opp=o.opp;
  else if(!$('clkS').hidden)$('clkS').hidden=true;if(o.lostAt&&o.lostBan&&$('banner').hidden){$('bt').textContent='CONNECTION LOST';$('bs').textContent='Waiting for your opponent to come back…';$('banner').dataset.tone='';$('banner').hidden=false}if(!opp)return;
  if(!pitching()&&S.phase==='ready'&&S.pt>2600&&!o.waitMsg){o.waitMsg=true;banner('THEIR PITCH','Waiting for the pitcher…')}
  if(!pitching()){const pt=opp.pt;if(pt&&pt.id){
-   if(o.seenW!==pt.id&&(S.phase==='ready'||S.phase==='choose')&&S.pt>250)applyWindup(pt);
+   if(pt.st==='k'){if(o.seenW!==pt.id&&(S.phase==='ready'||S.phase==='choose')&&S.pt>250){o.seenW=pt.id;o.waitMsg=false;hideBanner();applySnap(pt.z);runPickoff(pt.b,o.gid+'|'+pt.id)}}
+   else if(o.seenW!==pt.id&&(S.phase==='ready'||S.phase==='choose')&&S.pt>250)applyWindup(pt);
    if(o.seenW===pt.id&&pt.st==='r'&&o.seenR!==pt.id&&S.pitch&&S.pitch.pid===pt.id)applyRelease(pt)}}
  else{const dc=opp.dc;if(dc&&S.phase==='pitch'&&S.pitch&&dc.id===S.pitch.pid)applyDecision(dc);
   if(opp.sk&&S.phase==='play'&&S.play&&S.play.hrFired&&S.pitch&&opp.sk===S.pitch.pid&&S.play.t<S.play.end)S.play.t=S.play.end}}

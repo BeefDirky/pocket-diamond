@@ -1,7 +1,7 @@
 // ---------- game flow ----------
 function startGame(mode){
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
- S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.pcOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.wildUntil=0;
+ S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pcOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();
  S.inning=1;S.errs=0;S.outs=0;S.balls=0;S.strikes=0;S.runs=0;S.hits=0;S.hr=0;S.ks=0;
  S.bases=[null,null,null];S.play=null;S.swing=null;S.pitch=null;S.jumbo=null;
@@ -24,18 +24,26 @@ function startGame(mode){
  S.jumbo={text:'PLAY BALL',kr:'플레이 볼!',until:performance.now()+3000};
  setPhase('inning');updateHUD();
 }
-function gameOver(win){
- setPhase('over');setCam('full');hideBanner();$('tag').hidden=true;
+function startCelebration(){const k=batKey(),T=TEAMS[k],sd=k===S.you?1:-1,now=performance.now();
+ const dug=toPx(sd*84,14),pants=k===S.you?'#eeeae0':'#a9b0b5',mob=[];
+ const on=new Set(S.bases.filter(Boolean));
+ T.lineup.forEach((p,i)=>{if(on.has(p))return;const a=Math.PI*(.15+.7*((i*.37)%1)),r=rand(14,26),tg=toPx(Math.cos(a)*r*sd*.9,Math.sin(a)*r*.55+3);
+  const st={x:dug.x+rand(-14,14),y:dug.y+rand(-8,8)};mob.push({sx:st.x,sy:st.y,tx:tg.x,ty:tg.y,d:rand(0,500),dur:rand(1300,1900),ph:rand(0,6),hj:rand(0,4),sk:skinOf(p.name),pants,helmet:false})});
+ for(let j=0;j<5;j++){const a=Math.PI*rand(.1,.9),r=rand(18,32),tg=toPx(Math.cos(a)*r,Math.sin(a)*r*.5+4);mob.push({sx:dug.x+rand(-16,16),sy:dug.y+rand(-8,8),tx:tg.x,ty:tg.y,d:rand(300,900),dur:rand(1500,2200),ph:rand(0,6),hj:rand(0,4),sk:SKINS[j%5],pants,helmet:false})}
+ S.celebr={k,at:now,mob}}
+function gameOver(win){const onl=onlineGame();
+ S.celebr=null;if(win&&(S.mode==='arcade'||S.half==='bot'))startCelebration();
+ setPhase('over');setCam(S.celebr?'pitch':'full');hideBanner();$('tag').hidden=true;
  const you=TEAMS[S.you],opp=TEAMS[S.opp];
  if(win){S.cheerUntil=performance.now()+1e9;S.fwUntil=performance.now()+9000;if(!muted){playSample('fworks',.9,1);setTimeout(()=>{if(S.phase==='over')playSample('fworks',.8,.96)},3600)}S.jumbo={text:'WALK-OFF!',until:performance.now()+1e9}}
  const wo=S.mode==='arcade'||(S.half==='bot'&&win);
  $('overT').innerHTML=win?(wo?`<span>WALK-OFF</span> WIN`:`<span>WIN</span>`):'FINAL';
  $('overS').textContent=win?`${you.city} ${you.name} ${S.runs}, ${opp.name} ${S.target}. ${you.mascot} is already on the dugout roof.`:`${opp.city} ${opp.name} ${S.target}, ${you.name} ${S.runs}.${S.mode==="arcade"?" Out of outs.":""}`;
  $('overStats').innerHTML=S.mode==='full'?`<div><b>${S.hits}</b><span>HITS</span></div><div><b>${S.hr}</b><span>HOME RUNS</span></div><div><b>${S.myK}</b><span>K'S PITCHED</span></div>`:`<div><b>${S.hits}</b><span>HITS</span></div><div><b>${S.hr}</b><span>HOME RUNS</span></div><div><b>${S.ks}</b><span>STRIKEOUTS</span></div>`;
- if(S.online){const iWin=S.online.me==='home'?win:!win;$('overT').innerHTML=iWin?'<span>YOU</span> WIN':'YOU LOSE';$('overS').textContent=`Final: ${opp.city} ${opp.name} ${S.target}, ${you.city} ${you.name} ${S.runs}.`;win=iWin}
+ if(onl){const iWin=S.online.me==='home'?win:!win;$('overT').innerHTML=iWin?'<span>YOU</span> WIN':'YOU LOSE';$('overS').textContent=`Final: ${opp.city} ${opp.name} ${S.target}, ${you.city} ${you.name} ${S.runs}.`;win=iWin}
  awardPacks(win);
- $('toLobby').hidden=!S.online;if(S.online){$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
+ $('toLobby').hidden=!onl;if(onl){$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false}
- $('over').hidden=false;updateHUD();
+ if(S.celebr){const ce=S.celebr;setTimeout(()=>{if(S.phase==='over'&&S.celebr===ce)$('over').hidden=false},3400)}else $('over').hidden=false;updateHUD();
 }
 

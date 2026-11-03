@@ -37,10 +37,15 @@ function buildRosters(){
    pl.bat=['#1c1c1f','#5a2a1e','#d9b07a'][Math.floor(r()*3)];
    return pl});
   const pr=mulberry32(hash(k+T.pitcher.name));const ps=v=>clamp(Math.round(v+(pr()*24-12)),35,99);
-  let pno;do{pno=1+Math.floor(pr()*89)}while(used.has(pno));
+  let pno;do{pno=1+Math.floor(pr()*89)}while(used.has(pno));used.add(pno);
   Object.assign(T.pitcher,{pos:'SP',no:pno,thr:T.pitcher.hand,vel:ps(78),mov:ps(72),ctl:ps(68),def:ps(60)});
   {const L=T.lineup,av=f=>L.reduce((a,p)=>a+p[f],0)/L.length,lift=(f,floor)=>{const d=Math.round(floor-av(f));if(d>0)for(const p of L)p[f]=clamp(p[f]+d,20,99)};
    lift('con',66);lift('pow',63);if(k==='daejeon'){for(const p of L){p.spd=clamp(p.spd+6,20,99);p.con=clamp(p.con+2,20,99)}}}
+  // deepen every bullpen to six arms: named relievers first, then generated ones
+  {const pr2=mulberry32(hash(k+'pen')),SUR=['KIM','LEE','PARK','CHOI','JUNG','KANG','CHO','YOON','JANG','LIM','HAN','OH','SEO','SHIN','KWON','HWANG','AHN','SONG','JEON','HONG','YOO','KO','MOON','YANG','BAE','BAEK','NAM','NOH','HA','GO'],INI='BCDGHJKMSWY',VOW=['A','E','H','J','K','M','S','W','Y'];
+   const have=new Set([T.pitcher.name,...(T.pen||[]).map(x=>x.name),...T.lineup.map(x=>x.name)]);T.pen=[...(T.pen||[])];
+   while(T.pen.length<5){const nm=`${SUR[Math.floor(pr2()*SUR.length)]} ${INI[Math.floor(pr2()*INI.length)]}.${VOW[Math.floor(pr2()*VOW.length)]}.`;if(have.has(nm))continue;have.add(nm);
+    T.pen.push({name:nm,hand:pr2()<.32?'L':'R',slot:pr2()<.22?'side':'over'})}}
   T.staff=[T.pitcher].concat((T.pen||[]).map(rp=>{const rr=mulberry32(hash(k+rp.name));const q=v=>clamp(Math.round(v+(rr()*30-15)),35,99);
    let n;do{n=1+Math.floor(rr()*89)}while(used.has(n));used.add(n);
    return{...rp,pos:'RP',no:n,thr:rp.hand,vel:q(rp.slot==='side'?72:84),mov:q(rp.slot==='side'?84:70),ctl:q(66),def:q(55)}}));
@@ -50,8 +55,16 @@ function buildRosters(){
   if(hk%3===0){T.pitcher.type='demon';T.pitcher.vel=Math.max(T.pitcher.vel,90+hk%6)}
   // knuckleballers: rare, only three in the league
   if(['busan','daejeon','changwon'].includes(k)){const kn=T.staff.find(x=>x.pos==='RP'&&!x.type);if(kn){kn.type='knuckle';kn.vel=Math.min(kn.vel,62);kn.mov=Math.max(kn.mov,88)}}
+  // arsenals: starters carry four pitches, relievers three
+  for(const p of T.staff)p.ars=arsFor(p,k);
  }
 }
+function arsFor(p,k){const h=hash((k||'')+p.name+'ars');
+ if(p.type==='knuckle')return['FB','KN','CH'];
+ if(p.pos==='SP')return['FB','SL','CH','SP'];
+ if(p.type==='demon')return['FB','SL',h%2?'SP':'CH'];
+ return['FB',...[['SL','CH'],['SL','SP'],['CH','SP'],['SL','CH'],['CH','SP']][h%5]]}
+const arsOf=p=>(p&&p.ars)||arsFor(p||{});
 const ovr=p=>(p.pos==='SP'||p.pos==='RP')?Math.round(p.vel*.4+p.mov*.35+p.ctl*.25):Math.round(p.con*.3+p.pow*.3+p.spd*.15+p.def*.25);
 const spdFt=w=>19+((w&&w.spd)||60)*.1;
 const PITCHES={
