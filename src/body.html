@@ -1,0 +1,229 @@
+
+<div class="app">
+  <section class="board" aria-label="Scoreboard">
+    <div class="lineWrap"><table class="line" id="line"></table></div>
+  </section>
+
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-label="Ballpark. Tap to swing."></canvas>
+    <button type="button" class="pauseBtn" id="pauseBtn" aria-label="Pause (P)"><i></i><i></i></button>
+    <button type="button" class="parkBtn" id="parkBtn" hidden>PARK ▾</button>
+    <div class="zoomCtl"><button type="button" id="zIn" aria-label="Zoom in">+</button><button type="button" id="zOut" aria-label="Zoom out">−</button></div>
+    <div class="tag" id="tag" hidden><span id="tagTxt"></span><canvas id="flame" width="72" height="26" hidden></canvas></div>
+    <div class="bug" aria-label="Count, outs and runners">
+      <div class="bugDia"><i class="b2" id="d2"></i><i class="b3" id="d3"></i><i class="b1" id="d1"></i></div>
+      <div class="bugCnt">
+        <div><span>B</span><span class="bulbs" id="lb"></span></div>
+        <div><span>S</span><span class="bulbs" id="ls"></span></div>
+        <div><span>O</span><span class="bulbs" id="lo"></span></div>
+      </div>
+    </div>
+    <button class="skipBtn" id="skipBtn" type="button" hidden>SKIP TROT ▸</button>
+    <button class="autoBtn" id="autoBtn" type="button" aria-pressed="false" title="Let the game play itself">AUTO <b>OFF</b></button>
+    <button class="infoBtn" id="infoBtn" type="button" aria-pressed="true" title="Show or hide hit info">INFO <b>ON</b></button>
+    <div class="pcBox" aria-label="Inning and pitch count"><span id="bugInn"></span><span>PITCHES <b id="pcV">0</b></span><span id="clkS" hidden>CLOCK <b id="clkV">15</b></span></div>
+    <div class="relMeter" id="relMeter" hidden><div class="rmBar"><i class="rmG"></i><i class="rmP" id="rmP"></i><b id="rmMk"></b></div><span id="rmTxt">TAP TO RELEASE</span></div>
+    <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
+
+    <div class="overlay" id="title">
+      <div class="card menuMain" id="scrMain">
+        <div class="mmLogo"><h1>POCKET <span>DIAMOND</span></h1><small>KBO-STYLE PIXEL BASEBALL</small></div>
+        <nav class="mmBtns">
+          <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
+          <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
+          <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
+          <button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button>
+        </nav>
+        <small class="mmFoot">AN IMUGI LABS GAME</small>
+      </div>
+      <div class="card" id="scrSingle" hidden>
+        <h1>SINGLE <span>PLAYER</span></h1>
+        <div hidden>
+        <div class="mMatchup">
+          <button type="button" class="mTeam" data-go="scrTeams"><img id="mLogoY" alt=""><b id="mNameY"></b><small>HOME · YOU BAT</small></button>
+          <span class="vs">VS</span>
+          <button type="button" class="mTeam" data-go="scrTeams"><img id="mLogoO" alt=""><b id="mNameO"></b><small>OPPONENT</small></button>
+        </div>
+        <p id="mMatch"></p>
+        <div class="mTimeRow"><span>GAME TIME</span><div class="seg" id="mTime"><button type="button" data-v="day">☀ Day</button><button type="button" data-v="night">☾ Night</button><button type="button" data-v="random">Random</button></div></div>
+        </div>
+        <div class="modes">
+          <button class="mode" id="go" type="button"><b>ARCADE</b><small>3-inning chase. You bat.</small></button>
+          <button class="mode alt" id="goFull" type="button"><b>FULL GAME</b><small>9 innings. Bat and pitch.</small></button>
+          <button class="mode po" id="goPO" type="button"><b>PLAYOFFS</b><small>8-team bracket. Best-of-3, then a best-of-5 final.</small></button>
+          <button class="mode watch" id="goWatch" type="button"><b>WATCH</b><small>Sit back. A full 9 innings plays itself.</small></button>
+          <button class="mode bp" id="goBP" type="button"><b>BATTING PRACTICE</b><small>Empty park, pitching machine. Pick your pitch.</small></button>
+        </div>
+        <div class="tiles three">
+          <button class="tile" type="button" data-go="scrTeams"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M1 3h4v11H1zM6 2h4v11H6zM11 3h4v11h-4z" opacity=".35"/><path fill="currentColor" d="M7 4h2v2H7zM3 7h2v2H3zM12 9h2v2h-2zM8 10h2v2H8z"/></svg><span>Teams</span></button>
+          <button class="tile" type="button" data-go="scrLineup"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M2 1h12v14H2z" opacity=".35"/><path fill="currentColor" d="M6 3h4v4H6zM5 8h6v2H5zM4 11h8v1H4zM4 13h6v1H4z"/></svg><span>Lineup</span></button>
+          <button class="tile" type="button" data-go="scrCards"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M3 1h10v14H3z" opacity=".35"/><path fill="currentColor" d="M3 1h10v3H3zM6 6h4v4H6zM3 12h10v3H3z"/></svg><span>Cards</span><em class="pkBadge" id="pkBadge" hidden></em></button>
+        </div>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
+      <div class="card" id="scrAbout" hidden>
+        <h1><span>ABOUT</span></h1>
+        <div class="about">
+          <div class="abLogo"><b>POCKET <span>DIAMOND</span></b><small>KBO-STYLE PIXEL BASEBALL</small></div>
+          <dl>
+            <dt>Created by</dt><dd>Imugi Labs</dd>
+            <dt>Art lead</dt><dd>Imugi Labs</dd>
+            <dt>Audio lead</dt><dd>Imugi Labs</dd>
+            <dt>Design</dt><dd>Supported with Claude</dd>
+          </dl>
+          <p class="abFoot">© Imugi Labs · imugilabs.com</p>
+        </div>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
+      <div class="card wide" id="scrTeams" hidden>
+        <h1>PICK <span>TEAMS</span></h1>
+        <div class="mapWrap"><canvas id="koreaMap" width="720" height="900" aria-label="Map of Korea with every club. Tap a logo to pick your home club."></canvas><span class="mapHint">Tap a logo to pick your club</span></div>
+        <div class="pick"><span class="k">YOUR CLUB</span><div class="chips" id="pickYou"></div></div>
+        <div class="pick" id="oppPick" hidden><span class="k">VISITORS (THEY PITCH AND FIELD)</span><div class="chips" id="pickOpp"></div></div>
+        <div class="masc"><canvas id="mascCv" width="11" height="17"></canvas><div id="mascTxt"></div></div>
+        <p class="oppLine" id="oppLine"></p>
+        <button class="big" id="playGo" type="button" hidden>PLAY BALL</button>
+        <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
+      </div>
+      <div class="card wide" id="scrLineup" hidden>
+        <div class="lnTop"><h2 id="lnTitle"></h2><div class="seg"><button type="button" id="lnMine" aria-pressed="true">Your club</button><button type="button" id="lnOpp" aria-pressed="false">Scout visitors</button></div></div>
+        <p id="lnHint"></p>
+        <button class="mbtn" id="lnCreate" type="button" data-go="scrEdit">★ Create-a-player</button>
+        <div class="cards" id="cards"></div>
+        <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
+      </div>
+      <div class="card wide" id="scrCards" hidden>
+        <div class="ckTop"><h1>CARD <span>PACKS</span></h1><span class="ckProg" id="ckProg"></span></div>
+        <div class="packRow">
+          <button type="button" class="pack" id="packBtn" aria-label="Open a card pack"><canvas id="packCv" width="48" height="64"></canvas></button>
+          <div class="packInfo"><b id="packN"></b><p>Five cards a pack, at least one Rare or better. Earn a pack for every game you finish and a bonus pack for a win.</p>
+            <button class="big" id="openPack" type="button">OPEN PACK</button></div>
+        </div>
+        <div class="ckFilter" id="ckFilter"></div>
+        <div class="binder" id="binder"></div>
+        <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
+        <div class="reveal" id="reveal" hidden>
+          <div class="rvTop"><b id="rvTitle">PACK OPENED</b><span id="rvHint">Tap each card to flip it</span></div>
+          <div class="rvCards" id="rvCards"></div>
+          <div class="rvBtns"><button class="mbtn" type="button" id="rvAll">Flip all</button><button class="big" type="button" id="rvDone">DONE</button></div>
+        </div>
+        <div class="zoomCard" id="zoomCard" hidden></div>
+      </div>
+      <div class="card wide" id="scrPick" hidden>
+        <h1>PICK A <span>HITTER</span></h1>
+        <p id="pickNote"></p>
+        <div class="pickList" id="pickList"></div>
+        <button class="mbtn back" type="button" id="pickBack">Back to the game</button>
+      </div>
+      <div class="card wide" id="scrBracket" hidden>
+        <div class="ckTop"><h1>KBO <span>PLAYOFFS</span></h1><span class="ckProg" id="poStatus"></span></div>
+        <div class="bracket" id="bracket"></div>
+        <p id="poNext" class="oppLine"></p>
+        <button class="big" id="poPlay" type="button">PLAY GAME</button>
+        <div class="tiles three"><button class="tile" type="button" id="poSim"><span>Sim this game</span></button><button class="tile" type="button" id="poNew"><span>New bracket</span></button><button class="tile" type="button" data-go="scrMain"><span>Menu</span></button></div>
+      </div>
+      <div class="card wide" id="scrOnline" hidden>
+        <h1>ONLINE <span>1v1</span></h1>
+        <p id="olNote">Play a friend in real time. One of you creates a room and shares the code, the other joins with it. Then you each pick a club. The host is the home team.</p>
+        <div id="olStart" class="olStart">
+          <button class="big" id="olCreate" type="button">CREATE ROOM</button>
+          <div class="olJoin"><input id="olCode" maxlength="4" autocomplete="off" spellcheck="false" placeholder="CODE" aria-label="Room code"><button class="big alt" id="olJoin" type="button">JOIN</button></div>
+        </div>
+        <div id="olRoom" class="olRoom" hidden>
+          <div class="olCodeBox">ROOM CODE <b id="olCodeShow"></b></div>
+          <div class="olVs"><div class="olSide" id="olMe"></div><span class="vs">VS</span><div class="olSide" id="olThem"></div></div>
+          <div class="pick"><span class="k">PICK YOUR CLUB</span><div class="olPick" id="olPick"></div></div>
+          <div class="opt" id="olInnRow"><span>Innings</span><div class="seg" id="olInn"><button type="button" data-v="3" aria-pressed="true">3</button><button type="button" data-v="6">6</button><button type="button" data-v="9">9</button></div><b></b></div>
+          <p id="olStatus" class="oppLine"></p>
+          <button class="big" id="olGo" type="button" hidden>START GAME</button>
+          <button class="mbtn" id="olLeave" type="button">Leave room</button>
+        </div>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
+      <div class="card" id="scrPause" hidden>
+        <h1>GAME <span>PAUSED</span></h1>
+        <p id="pauseInfo"></p>
+        <button class="big" id="resume" type="button">RESUME</button>
+        <div class="tiles three">
+          <button class="tile" type="button" id="pOpts"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M7 1h2v2h2v2h2v2h2v2h-2v2h-2v2H9v2H7v-2H5v-2H3V9H1V7h2V5h2V3h2zM7 6v4h2V6z"/></svg><span>Options</span></button>
+          <button class="tile" type="button" id="pLine"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M2 1h12v14H2z" opacity=".35"/><path fill="currentColor" d="M6 3h4v4H6zM5 8h6v2H5zM4 11h8v1H4zM4 13h6v1H4z"/></svg><span>Lineup</span></button>
+          <button class="tile" type="button" id="pQuit"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M2 2h7v2H4v8h5v2H2zM10 5h2v2h3v2h-3v2h-2z"/></svg><span>Quit</span></button>
+        </div>
+      </div>
+      <div class="card" id="scrOpts" hidden>
+        <h1><span>OPTIONS</span></h1>
+        <label class="opt" for="vMusic"><span>Music</span><input type="range" id="vMusic" min="0" max="100" step="5"><b id="vMusicV"></b></label>
+        <label class="opt" for="vCrowd"><span>Crowd</span><input type="range" id="vCrowd" min="0" max="100" step="5"><b id="vCrowdV"></b></label>
+        <label class="opt" for="vSfx"><span>Effects</span><input type="range" id="vSfx" min="0" max="100" step="5"><b id="vSfxV"></b></label>
+        <div class="opt"><span>Game time</span><div class="seg" id="optTime"><button type="button" data-v="day">Day</button><button type="button" data-v="night">Night</button><button type="button" data-v="random">Random</button></div><b></b></div>
+        <div class="opt"><span>Camera</span><div class="seg" id="optCam"><button type="button" data-v="broadcast">Broadcast</button><button type="button" data-v="wide">Wide (landscape)</button></div><b></b></div>
+        <button class="mbtn back" type="button" id="optBack">Back</button>
+      </div>
+      <div class="card" id="scrEdit" hidden>
+        <h1>CREATE <span>A PLAYER</span></h1>
+        <div class="edGrid">
+          <label for="edName">Name</label><input id="edName" maxlength="10" autocomplete="off">
+          <label for="edNo">Number</label><input id="edNo" type="number" min="0" max="99">
+          <span>Bats</span><div class="seg" id="edHand"><button type="button" data-v="R">Right</button><button type="button" data-v="L">Left</button><button type="button" data-v="S">Switch</button></div>
+          <span>Bat</span><div class="seg" id="edBat"><button type="button" data-v="#1c1c1f">Black</button><button type="button" data-v="#5a2a1e">Red-brown</button><button type="button" data-v="#d9b07a">Tan</button></div>
+          <label for="edSlot">Replaces</label><select id="edSlot"></select>
+        </div>
+        <label class="opt" for="edCon"><span>Contact</span><input type="range" id="edCon" min="20" max="99"><b id="edConV"></b></label>
+        <label class="opt" for="edPow"><span>Power</span><input type="range" id="edPow" min="20" max="99"><b id="edPowV"></b></label>
+        <label class="opt" for="edSpd"><span>Speed</span><input type="range" id="edSpd" min="20" max="99"><b id="edSpdV"></b></label>
+        <label class="opt" for="edDef"><span>Defense</span><input type="range" id="edDef" min="20" max="99"><b id="edDefV"></b></label>
+        <button class="big" id="edSave" type="button">SAVE TO LINEUP</button>
+        <button class="mbtn" id="edRemove" type="button">Bench my player, restore the original</button>
+        <button class="mbtn back" type="button" data-go="scrLineup">Back</button>
+      </div>
+      <div class="card" id="scrHow" hidden>
+        <h1>HOW TO <span>PLAY</span></h1>
+        <p>The visitors already posted their runs. You bat the bottom halves and have three innings to beat them.</p>
+        <p>Tap the field, press Swing, or hit Space when the ball reaches the plate. Early pulls the ball, late pushes it the other way. Press Bunt (or B) before the pitch arrives to square around. Press P or Esc (or the pause button) to pause.</p>
+        <div class="howStats">
+          <div><b>CON</b><span>Contact. Widens your timing window, so near-misses still find the barrel.</span></div>
+          <div><b>POW</b><span>Power. More exit velocity and more lift on contact.</span></div>
+          <div><b>SPD</b><span>Speed. Beats out grounders, stretches singles, scores from second.</span></div>
+          <div><b>DEF</b><span>Defense. The visitors' range, reactions and error rate.</span></div>
+          <div><b>VEL · MOV · CTL</b><span>Their pitcher's velocity, break on the slider and changeup, and how often he finds the zone.</span></div>
+        </div>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="over" hidden>
+      <div class="card">
+        <h1 id="overT">FINAL</h1>
+        <p id="overS"></p>
+        <div class="stats" id="overStats"></div>
+        <button class="big" id="again" type="button">RUN IT BACK</button>
+        <button class="big" id="toBracket" type="button" hidden>BACK TO THE BRACKET</button>
+        <button class="big" id="toLobby" type="button" hidden>BACK TO THE ROOM</button>
+        <p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Open card packs</button>
+        <button class="ghost" id="change" type="button">Change clubs</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="matchup">
+    <div class="mu muBat" id="muBat" role="button" tabindex="0" title="Pick a hitter"><div class="k" id="abTeam">AT BAT</div><div class="v" id="abName">—</div><div class="h" id="abHand"></div></div>
+    <div class="mu"><div class="k" id="pTeam">PITCHING</div><div class="v" id="pName">—</div><div class="h" id="pHand"></div></div>
+  </div>
+
+  <div class="meter" aria-live="polite">
+    <div class="meterTop"><span>EARLY</span><b id="tRead">Timing shows here after a swing</b><span>LATE</span></div>
+    <div class="bar"><i class="z z1"></i><i class="z z2"></i><i class="z z3"></i><i class="mk" id="mk" hidden></i></div>
+  </div>
+
+  <div class="pacts" id="actsPitch" hidden><button class="pbtn" type="button" data-k="FB">FASTBALL<small>1</small></button><button class="pbtn" type="button" data-k="SL">SLIDER<small>2</small></button><button class="pbtn" type="button" data-k="CH">CHANGEUP<small>3</small></button><button class="pbtn" type="button" data-k="SP">SPLITTER<small>4</small></button><button class="pbtn" type="button" data-k="KN" id="btnKN" hidden>KNUCKLE<small>5</small></button></div>
+  <div class="acts" id="actsBat"><button class="swing" id="swingBtn" type="button">SWING<small>or tap anywhere · Space</small></button><button class="swing bunt" id="buntBtn" type="button">BUNT</button><div class="bpBar" id="bpBar" hidden><span class="k">MACHINE</span><button class="pbtn" type="button" data-k="FB">FASTBALL<small>1</small></button><button class="pbtn" type="button" data-k="SL">SLIDER<small>2</small></button><button class="pbtn" type="button" data-k="CH">CHANGEUP<small>3</small></button><button class="pbtn" type="button" data-k="SP">SPLITTER<small>4</small></button><button class="pbtn" type="button" data-k="KN">KNUCKLE<small>5</small></button></div></div>
+
+  <section class="book">
+    <div class="bookTop">
+      <h2>SCOREBOOK</h2>
+      <div class="tools"><button id="optsBtn" type="button">Options</button><button id="snd" type="button" aria-pressed="true">Sound on</button><button id="quit" type="button">New game</button></div>
+    </div>
+    <ol class="log" id="log"><li class="empty">Every plate appearance gets written here in scorebook shorthand: 6-3 is short to first, F8 a flyout to center.</li></ol>
+  </section>
+</div>
+

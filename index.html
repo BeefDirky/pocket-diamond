@@ -42,8 +42,7 @@ body.inMenu .stage.land{width:min(100%,calc((100dvh - 48px) * 1.6));max-width:no
 .app.wideApp>.stage{grid-column:1;grid-row:1/span 30;width:min(100%,calc((100dvh - 24px) * 1.6));max-width:none;margin:0 auto}
 .app.wideApp>:not(.stage){grid-column:2}
 .app.wideApp .matchup{grid-template-columns:1fr}
-.app.wideApp .acts,.app.wideApp .acts.withBP{grid-template-columns:1fr 1fr}
-.app.wideApp .acts .swing:first-child{grid-column:1/-1}
+.app.wideApp .acts,.app.wideApp .acts.withBP{grid-template-columns:1fr 3fr}
 .app.wideApp .acts .bpBar{grid-column:1/-1}
 .app.wideApp .pacts{grid-template-columns:1fr 1fr}
 .app.wideApp .book{max-height:40dvh;overflow:auto}
@@ -141,6 +140,34 @@ body.autoOn .acts,body.autoOn .pacts{opacity:.45}
 
 /* menu + player cards */
 .mTitle{text-align:center;display:flex;flex-direction:column;gap:4px}
+/* main menu: the ballpark fills the screen behind a floating logo and four choices */
+body.inMenu .stage,body.inMenu .stage.land,body.inMenu .app.wideApp>.stage{position:fixed;inset:0;width:100vw;height:100dvh;aspect-ratio:auto;max-width:none;min-width:0;border:0;margin:0;z-index:30}
+body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug,body.inMenu .pcBox{display:none!important}
+.overlay:has(#scrMain:not([hidden])){background:radial-gradient(ellipse at 50% 45%,rgba(8,20,14,.25),rgba(8,20,14,.72));}
+.card.menuMain{background:none;border:0;box-shadow:none;max-width:440px;align-items:stretch;gap:clamp(18px,4vh,36px);padding:16px}
+.mmLogo{text-align:center;display:flex;flex-direction:column;gap:10px;filter:drop-shadow(0 4px 0 rgba(0,0,0,.6))}
+.mmLogo h1{font-size:clamp(30px,9vw,54px);line-height:1.05;letter-spacing:.02em;text-shadow:3px 3px 0 var(--edge),-2px -2px 0 var(--edge),2px -2px 0 var(--edge),-2px 2px 0 var(--edge)}
+.mmLogo small{font-size:11px;letter-spacing:.24em;color:var(--chalk);text-shadow:1px 1px 0 var(--edge)}
+.mmBtns{display:flex;flex-direction:column;gap:12px}
+.mmBtn{font-family:var(--f-px);font-size:clamp(16px,4.6vw,22px);padding:20px 16px;background:var(--amber);color:var(--edge);border:3px solid var(--edge);box-shadow:0 5px 0 var(--edge);cursor:pointer;letter-spacing:.04em}
+.mmBtn.alt{background:var(--chalk)}
+.mmBtn:active,.mmSm:active{transform:translateY(3px);box-shadow:0 2px 0 var(--edge)}
+.mmPair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mmSm{font-family:var(--f-px);font-size:12px;padding:14px 10px;background:rgba(8,20,14,.88);color:var(--chalk);border:3px solid var(--edge);box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--panel-hi);cursor:pointer;letter-spacing:.08em}
+.mmFoot{text-align:center;font-size:10px;letter-spacing:.3em;color:var(--chalk);opacity:.75;text-shadow:2px 2px 0 var(--edge)}
+.about{display:flex;flex-direction:column;gap:14px;background:var(--edge);border:2px solid var(--panel-hi);padding:16px}
+.abLogo{text-align:center;display:flex;flex-direction:column;gap:6px}.abLogo b{font-family:var(--f-px);font-weight:400;font-size:20px}.abLogo b span{color:var(--amber)}.abLogo small{font-size:10px;letter-spacing:.2em;color:var(--dim)}
+.about dl{display:grid;grid-template-columns:auto 1fr;gap:10px 16px;margin:0;font-size:14px}
+.about dt{color:var(--dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase;align-self:center}
+.about dd{margin:0;color:var(--chalk);font-family:var(--f-px);font-size:12px}
+.abFoot{text-align:center;font-size:11px;color:var(--dim);margin:0}
+.olPick{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.olPick button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);font-size:9px;cursor:pointer;position:relative}
+.olPick img{width:34px;height:34px;image-rendering:pixelated}
+.olPick button[aria-pressed=true]{border-color:var(--amber);box-shadow:inset 0 0 0 2px var(--amber)}
+.olPick button.taken{opacity:.45}.olPick button.taken::after{content:'THEM';position:absolute;top:2px;right:2px;font-size:7px;background:#c7442f;color:#fff;padding:1px 3px}
+.olWarn{color:#ff7a5a!important}
+
 .mTitle h1{font-size:clamp(20px,6vw,28px)}
 .mTitle small{font-size:10px;letter-spacing:.14em;color:var(--dim)}
 .mMatchup{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:var(--edge);padding:10px 8px;border:2px solid var(--panel-hi)}
@@ -160,7 +187,7 @@ body.autoOn .acts,body.autoOn .pacts{opacity:.45}
 .mode.online{background:#ff8a5c;grid-column:1/-1;flex-direction:row;align-items:baseline;gap:12px;padding:12px}
 .mode.po{background:#4fa8ff}.mode.watch{background:#c9a6ff}
 .mode.bp{grid-column:1/-1;background:#7fbf6a;flex-direction:row;align-items:baseline;gap:12px;padding:12px}
-.acts.withBP{grid-template-columns:4fr 1.1fr 1.15fr}
+.acts.withBP{grid-template-columns:1.1fr 4fr 1.15fr}
 .bpBar{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,1fr);gap:4px;align-items:stretch}
 .bpBar .k{grid-column:1/-1}
 .bpBar .pbtn{padding:4px 2px;font-size:9px;gap:2px;box-shadow:0 2px 0 var(--edge)}
@@ -341,6 +368,7 @@ body.autoOn .acts,body.autoOn .pacts{opacity:.45}
 .pbtn:disabled{background:var(--panel-hi);color:var(--dim);cursor:default;box-shadow:none}
 .pcBox{position:absolute;right:8px;top:calc(8px + var(--bugH,96px));display:flex;gap:12px;justify-content:space-between;min-width:140px;background:rgba(8,20,14,.86);border:2px solid var(--edge);border-top:0;padding:5px 10px;font-family:var(--f-hud);font-size:14px;color:var(--dim);pointer-events:none}
 .pcBox b{font-weight:400;color:var(--amber)}
+#clkS[hidden]{display:none}#clkS.low b{color:#ff5a4a}
 #bugInn{color:var(--chalk)}
 .relMeter{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(70%,340px);background:rgba(8,20,14,.88);border:2px solid var(--edge);padding:8px 10px;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;z-index:2}
 .rmBar{position:relative;width:100%;height:16px;background:#3a1a16}
@@ -348,7 +376,8 @@ body.autoOn .acts,body.autoOn .pacts{opacity:.45}
 .rmBar .rmP{position:absolute;top:0;bottom:0;left:41%;right:41%;background:var(--lamp-b)}
 .rmBar b{position:absolute;top:-4px;width:4px;height:24px;background:var(--amber);margin-left:-2px;left:0}
 #rmTxt{font-family:var(--f-px);font-size:10px}
-.acts{display:grid;grid-template-columns:4fr 1.2fr;gap:8px}
+.acts{display:grid;grid-template-columns:1.2fr 4fr;gap:8px}
+.acts .swing.bunt{order:-1}
 .swing small{display:block;font-family:var(--f-hud);font-size:12px;opacity:.65;margin-top:6px;letter-spacing:.04em}
 .swing.bunt{background:var(--chalk);font-size:13px}
 .hint{font-size:11px;color:var(--dim);text-align:center;margin-top:-4px}
@@ -424,13 +453,24 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
     <button class="skipBtn" id="skipBtn" type="button" hidden>SKIP TROT ▸</button>
     <button class="autoBtn" id="autoBtn" type="button" aria-pressed="false" title="Let the game play itself">AUTO <b>OFF</b></button>
     <button class="infoBtn" id="infoBtn" type="button" aria-pressed="true" title="Show or hide hit info">INFO <b>ON</b></button>
-    <div class="pcBox" aria-label="Inning and pitch count"><span id="bugInn"></span><span>PITCHES <b id="pcV">0</b></span></div>
+    <div class="pcBox" aria-label="Inning and pitch count"><span id="bugInn"></span><span>PITCHES <b id="pcV">0</b></span><span id="clkS" hidden>CLOCK <b id="clkV">15</b></span></div>
     <div class="relMeter" id="relMeter" hidden><div class="rmBar"><i class="rmG"></i><i class="rmP" id="rmP"></i><b id="rmMk"></b></div><span id="rmTxt">TAP TO RELEASE</span></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
 
     <div class="overlay" id="title">
-      <div class="card" id="scrMain">
-        <div class="mTitle"><h1>POCKET <span>DIAMOND</span></h1><small>KBO-STYLE PIXEL BASEBALL · 10 CLUBS</small></div>
+      <div class="card menuMain" id="scrMain">
+        <div class="mmLogo"><h1>POCKET <span>DIAMOND</span></h1><small>KBO-STYLE PIXEL BASEBALL</small></div>
+        <nav class="mmBtns">
+          <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
+          <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
+          <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
+          <button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button>
+        </nav>
+        <small class="mmFoot">AN IMUGI LABS GAME</small>
+      </div>
+      <div class="card" id="scrSingle" hidden>
+        <h1>SINGLE <span>PLAYER</span></h1>
+        <div hidden>
         <div class="mMatchup">
           <button type="button" class="mTeam" data-go="scrTeams"><img id="mLogoY" alt=""><b id="mNameY"></b><small>HOME · YOU BAT</small></button>
           <span class="vs">VS</span>
@@ -438,21 +478,34 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
         </div>
         <p id="mMatch"></p>
         <div class="mTimeRow"><span>GAME TIME</span><div class="seg" id="mTime"><button type="button" data-v="day">☀ Day</button><button type="button" data-v="night">☾ Night</button><button type="button" data-v="random">Random</button></div></div>
+        </div>
         <div class="modes">
           <button class="mode" id="go" type="button"><b>ARCADE</b><small>3-inning chase. You bat.</small></button>
           <button class="mode alt" id="goFull" type="button"><b>FULL GAME</b><small>9 innings. Bat and pitch.</small></button>
           <button class="mode po" id="goPO" type="button"><b>PLAYOFFS</b><small>8-team bracket. Best-of-3, then a best-of-5 final.</small></button>
-          <button class="mode online" id="goOnline" type="button"><b>ONLINE 1v1</b><small>Play a friend live with a room code.</small></button>
           <button class="mode watch" id="goWatch" type="button"><b>WATCH</b><small>Sit back. A full 9 innings plays itself.</small></button>
           <button class="mode bp" id="goBP" type="button"><b>BATTING PRACTICE</b><small>Empty park, pitching machine. Pick your pitch.</small></button>
         </div>
-        <div class="tiles five">
+        <div class="tiles three">
           <button class="tile" type="button" data-go="scrTeams"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M1 3h4v11H1zM6 2h4v11H6zM11 3h4v11h-4z" opacity=".35"/><path fill="currentColor" d="M7 4h2v2H7zM3 7h2v2H3zM12 9h2v2h-2zM8 10h2v2H8z"/></svg><span>Teams</span></button>
           <button class="tile" type="button" data-go="scrLineup"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M2 1h12v14H2z" opacity=".35"/><path fill="currentColor" d="M6 3h4v4H6zM5 8h6v2H5zM4 11h8v1H4zM4 13h6v1H4z"/></svg><span>Lineup</span></button>
           <button class="tile" type="button" data-go="scrCards"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M3 1h10v14H3z" opacity=".35"/><path fill="currentColor" d="M3 1h10v3H3zM6 6h4v4H6zM3 12h10v3H3z"/></svg><span>Cards</span><em class="pkBadge" id="pkBadge" hidden></em></button>
-          <button class="tile" type="button" data-go="scrHow"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M5 2h6v2h2v4h-2v2H9v2H7V9h2V7h2V4H5v2H3V4h2zM7 13h2v2H7z"/></svg><span>How to</span></button>
-          <button class="tile" type="button" data-go="scrOpts"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M7 1h2v2h2v2h2v2h2v2h-2v2h-2v2H9v2H7v-2H5v-2H3V9H1V7h2V5h2V3h2zM7 6v4h2V6z"/></svg><span>Options</span></button>
         </div>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
+      <div class="card" id="scrAbout" hidden>
+        <h1><span>ABOUT</span></h1>
+        <div class="about">
+          <div class="abLogo"><b>POCKET <span>DIAMOND</span></b><small>KBO-STYLE PIXEL BASEBALL</small></div>
+          <dl>
+            <dt>Created by</dt><dd>Imugi Labs</dd>
+            <dt>Art lead</dt><dd>Imugi Labs</dd>
+            <dt>Audio lead</dt><dd>Imugi Labs</dd>
+            <dt>Design</dt><dd>Supported with Claude</dd>
+          </dl>
+          <p class="abFoot">© Imugi Labs · imugilabs.com</p>
+        </div>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="card wide" id="scrTeams" hidden>
         <h1>PICK <span>TEAMS</span></h1>
@@ -462,14 +515,14 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
         <div class="masc"><canvas id="mascCv" width="11" height="17"></canvas><div id="mascTxt"></div></div>
         <p class="oppLine" id="oppLine"></p>
         <button class="big" id="playGo" type="button" hidden>PLAY BALL</button>
-        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+        <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
       <div class="card wide" id="scrLineup" hidden>
         <div class="lnTop"><h2 id="lnTitle"></h2><div class="seg"><button type="button" id="lnMine" aria-pressed="true">Your club</button><button type="button" id="lnOpp" aria-pressed="false">Scout visitors</button></div></div>
         <p id="lnHint"></p>
         <button class="mbtn" id="lnCreate" type="button" data-go="scrEdit">★ Create-a-player</button>
         <div class="cards" id="cards"></div>
-        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+        <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
       <div class="card wide" id="scrCards" hidden>
         <div class="ckTop"><h1>CARD <span>PACKS</span></h1><span class="ckProg" id="ckProg"></span></div>
@@ -480,7 +533,7 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
         </div>
         <div class="ckFilter" id="ckFilter"></div>
         <div class="binder" id="binder"></div>
-        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+        <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
         <div class="reveal" id="reveal" hidden>
           <div class="rvTop"><b id="rvTitle">PACK OPENED</b><span id="rvHint">Tap each card to flip it</span></div>
           <div class="rvCards" id="rvCards"></div>
@@ -503,7 +556,7 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
       </div>
       <div class="card wide" id="scrOnline" hidden>
         <h1>ONLINE <span>1v1</span></h1>
-        <p id="olNote">Play a friend in real time. One of you creates a room and shares the code; the other joins. The host is the home team. You pitch while they bat, then swap.</p>
+        <p id="olNote">Play a friend in real time. One of you creates a room and shares the code, the other joins with it. Then you each pick a club. The host is the home team.</p>
         <div id="olStart" class="olStart">
           <button class="big" id="olCreate" type="button">CREATE ROOM</button>
           <div class="olJoin"><input id="olCode" maxlength="4" autocomplete="off" spellcheck="false" placeholder="CODE" aria-label="Room code"><button class="big alt" id="olJoin" type="button">JOIN</button></div>
@@ -511,6 +564,7 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
         <div id="olRoom" class="olRoom" hidden>
           <div class="olCodeBox">ROOM CODE <b id="olCodeShow"></b></div>
           <div class="olVs"><div class="olSide" id="olMe"></div><span class="vs">VS</span><div class="olSide" id="olThem"></div></div>
+          <div class="pick"><span class="k">PICK YOUR CLUB</span><div class="olPick" id="olPick"></div></div>
           <div class="opt" id="olInnRow"><span>Innings</span><div class="seg" id="olInn"><button type="button" data-v="3" aria-pressed="true">3</button><button type="button" data-v="6">6</button><button type="button" data-v="9">9</button></div><b></b></div>
           <p id="olStatus" class="oppLine"></p>
           <button class="big" id="olGo" type="button" hidden>START GAME</button>
@@ -1428,7 +1482,7 @@ const pitching=()=>S.mode==='full'&&S.fld===myTeam();
 const myBat=()=>S.bat===myTeam();
 function setSides(){if(S.half==='top'){S.bat=S.opp;S.fld=S.you}else{S.bat=S.you;S.fld=S.opp}applyDefense()}
 function addRuns(n){if(!n)return;const f=fldKey();S.pRunsOf[f]=(S.pRunsOf[f]||0)+n;if(batKey()===S.you){S.runs+=n;S.youLine[S.inning-1]+=n}else{S.target+=n;S.oppLine[S.inning-1]+=n}}
-const isWalkoff=()=>S.mode==='arcade'?S.runs>S.target:(S.half==='bot'&&S.inning>=9&&S.runs>S.target);
+const isWalkoff=()=>S.mode==='arcade'?S.runs>S.target:(S.half==='bot'&&S.inning>=(S.schedInn||9)&&S.runs>S.target);
 const effHand=b=>b.hand==='S'?(pitcher().hand==='R'?'L':'R'):b.hand;
 function setCam(m){S.camMode=m}
 function sdamp(cur,target,vel,st,dt){const om=2/st,x=om*dt,e=1/(1+x+.48*x*x+.235*x*x*x);const ch=cur-target,tmp=(vel+om*ch)*dt;return[target+(ch+tmp)*e,(vel-om*tmp)*e]}
@@ -2039,7 +2093,7 @@ function runnerPos(r,t){
  const a=baseP(r.from+leg),b=baseP(r.from+leg+1);
  return{x:lerp(a.x,b.x,f),y:lerp(a.y,b.y,f),moving:prog>0&&prog<total};
 }
-function hrMoment(r){const now=performance.now();$('skipBtn').hidden=false;banner(r.banner,r.sub,'hr');if(r.bp)return;S.baseChase=now;
+function hrMoment(r){const now=performance.now();$('skipBtn').hidden=!!(S.online&&S.online.inGame&&pitching());banner(r.banner,r.sub,'hr');if(r.bp)return;S.baseChase=now;
  if(batKey()===S.you){const pl=S.play;S.hrHype=pl;setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700);
   setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700+((BUF.horn&&BUF.horn.duration)||4.8)*1000+250)}
  if(batKey()===S.you){S.cheerUntil=now+1e9;S.fwUntil=now+4600;setTimeout(()=>{if(!S.paused&&!muted)playSample('fworks',.85,1)},350);S.jumbo={text:r.banner.replace('!',''),kr:'홈런!',until:now+5200}}}
@@ -2102,14 +2156,14 @@ function fullInning(){
  if(isWalkoff()){gameOver(true);return true}
  if(S.outs<3)return false;
  if(S.half==='top'){
-  if(S.inning>=9&&S.runs>S.target){gameOver(true);return true}
+  if(S.inning>=(S.schedInn||9)&&S.runs>S.target){gameOver(true);return true}
   S.half='bot';
  }else{
-  if(S.inning>=9&&S.runs!==S.target){gameOver(S.runs>S.target);return true}
+  if(S.inning>=(S.schedInn||9)&&S.runs!==S.target){gameOver(S.runs>S.target);return true}
   S.half='top';S.inning++;if(S.inning>S.totalInn){S.totalInn++;S.oppLine.push(0);S.youLine.push(0)}
  }
  S.outs=0;S.bases=[null,null,null];S.balls=0;S.strikes=0;setSides();
- const extra=S.inning>9?' · extra innings':'';
+ const extra=S.inning>(S.schedInn||9)?' · extra innings':'';
  banner(`${S.half==='top'?'TOP':'BOTTOM'} OF THE ${ord(S.inning).toUpperCase()}`,S.half==='top'?`You're pitching to the ${TEAMS[S.opp].name}${extra}`:`${TEAMS[S.you].name} batting · ${TEAMS[S.opp].name} ${S.target}, ${TEAMS[S.you].name} ${S.runs}${extra}`);
  setPhase('inning');updateHUD();return true;
 }
@@ -2123,7 +2177,7 @@ function startGame(mode){
  S.inning=1;S.errs=0;S.outs=0;S.balls=0;S.strikes=0;S.runs=0;S.hits=0;S.hr=0;S.ks=0;
  S.bases=[null,null,null];S.play=null;S.swing=null;S.pitch=null;S.jumbo=null;
  if(S.mode==='full'){
-  S.totalInn=9;S.target=0;S.oppLine=Array(9).fill(0);S.youLine=Array(9).fill(0);S.oppHits=0;
+  S.totalInn=9;S.schedInn=9;S.target=0;S.oppLine=Array(9).fill(0);S.youLine=Array(9).fill(0);S.oppHits=0;
  }else{
   S.totalInn=INNINGS;{const edge=(typeof teamStr==='function')?teamStr(S.opp)-teamStr(S.you):0;S.target=clamp(1+Math.floor(Math.random()*3)+(edge>3?1:0)-(edge<-3?1:0),1,5)}
   const line=[0,0,0];for(let k=0;k<S.target;k++)line[Math.floor(Math.random()*3)]++;
@@ -2149,6 +2203,7 @@ function gameOver(win){
  $('overT').innerHTML=win?(wo?`<span>WALK-OFF</span> WIN`:`<span>WIN</span>`):'FINAL';
  $('overS').textContent=win?`${you.city} ${you.name} ${S.runs}, ${opp.name} ${S.target}. ${you.mascot} is already on the dugout roof.`:`${opp.city} ${opp.name} ${S.target}, ${you.name} ${S.runs}.${S.mode==="arcade"?" Out of outs.":""}`;
  $('overStats').innerHTML=S.mode==='full'?`<div><b>${S.hits}</b><span>HITS</span></div><div><b>${S.hr}</b><span>HOME RUNS</span></div><div><b>${S.myK}</b><span>K'S PITCHED</span></div>`:`<div><b>${S.hits}</b><span>HITS</span></div><div><b>${S.hr}</b><span>HOME RUNS</span></div><div><b>${S.ks}</b><span>STRIKEOUTS</span></div>`;
+ if(S.online){const iWin=S.online.me==='home'?win:!win;$('overT').innerHTML=iWin?'<span>YOU</span> WIN':'YOU LOSE';$('overS').textContent=`Final: ${opp.city} ${opp.name} ${S.target}, ${you.city} ${you.name} ${S.runs}.`;win=iWin}
  awardPacks(win);
  $('toLobby').hidden=!S.online;if(S.online){$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false}
@@ -2252,7 +2307,7 @@ $('lnOpp').addEventListener('click',()=>{lnView='opp';lnSel=null;renderCards()})
 let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.fillStyle='#1b1f24';g.beginPath();g.arc(48,48,44,0,Math.PI*2);g.fill();g.strokeStyle='#3a4048';g.lineWidth=6;g.stroke();g.fillStyle='#ffbf3c';g.font='48px "Press Start 2P", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('?',50,52);return Q_URL=c.toDataURL()}
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
-function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='PICK <span>TEAMS</span>'}if(id==='scrMain')pendingMode=null;for(const k of['scrMain','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline'])$(k).hidden=k!==id;if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;renderCards()}if(id==='scrMain')refreshMenu();$('title').scrollTop=0}
+function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='PICK <span>TEAMS</span>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline'])$(k).hidden=k!==id;if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 function applyWide(){$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide());requestAnimationFrame(()=>{resize()})}
 function syncOpts(){for(const b of $('optCam').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.cam));for(const b of $('optTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const b of $('mTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']]){$(id).value=OPT[k];$(id+'V').textContent=OPT[k]}}
 for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']])$(id).addEventListener('input',e=>{OPT[k]=+e.target.value;$(id+'V').textContent=OPT[k];ensureAudio();applyVolumes();saveOpts()});
@@ -2280,7 +2335,7 @@ $('pOpts').addEventListener('click',()=>{optsFromGame=true;showScreen('scrOpts')
 $('pLine').addEventListener('click',()=>{lineFromPause=true;showScreen('scrLineup')});
 $('pQuit').addEventListener('click',()=>{S.paused=false;optsFromGame=false;try{if(AC&&AC.state==='suspended')AC.resume()}catch(e){}toTitle()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
-document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{if(parkFromBP&&b.dataset.go==='scrMain'){backToCage();return}if(lineFromPause&&S.paused&&b.dataset.go==='scrMain'){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const toMenu=b.dataset.go==='scrMain'||b.dataset.go==='scrSingle';if(parkFromBP&&toMenu){backToCage();return}if(lineFromPause&&S.paused&&toMenu){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
 // ---------- title picker ----------
 function buildPicker(){
  const mk=(id,key)=>{$(id).innerHTML=ORDER.map(t=>`<button type="button" class="chip" data-t="${t}"><img alt="" src="${LOGO_URL[t]}"><span class="c">${TEAMS[t].city}</span><span class="n">${TEAMS[t].name}</span><span class="c kr">${TEAMS[t].kcity} ${TEAMS[t].kname}</span></button>`).join('');
@@ -2370,7 +2425,7 @@ $('toBracket').addEventListener('click',()=>{$('over').hidden=true;toTitle();ope
 // timing), and publishes its decision. Every random outcome uses a seed both sides share, and the pitcher
 // re-sends the full game state with every windup, so the two screens can't drift apart.
 // Everything travels in room "presence" (latest-state, re-sent on reconnect), so nothing is lost if a message drops.
-let ROOM=null;
+let ROOM=null;const PCLOCK=15;
 // On a self-hosted copy there is no claude.ai room, so the same calls run over Supabase Realtime presence instead.
 const SUPA={url:'https://waikmdodbrirekjmqvug.supabase.co',key:'sb_publishable_iZ3XpRVvPInDsCRI3wxlBQ_jMKzDieT'};
 function supaRoom(){let sb=null;
@@ -2417,17 +2472,27 @@ function applyDecision(dc){const p=S.pitch;if(!p||p.decided||dc.id!==p.pid)retur
  const arr=p.releaseAt+p.travel;
  if(dc.k==='bunt'){if(!S.swing)S.swing={at:arr-200,bunt:true,err:0,contactAt:arr}}
  else if(dc.k==='swing'&&!S.swing){S.swing={at:arr+dc.e-60,err:dc.e,cpu:true};if(dc.m)S.swing.miss=true;else S.swing.contactAt=arr+Math.max(0,dc.e)}}
-function netTick(now){const o=S.online,opp=o.opp;if(o.lostAt&&o.lostBan&&$('banner').hidden){$('bt').textContent='CONNECTION LOST';$('bs').textContent='Waiting for your opponent to come back…';$('banner').dataset.tone='';$('banner').hidden=false}if(!opp)return;
+function netTick(now){const o=S.online,opp=o.opp;
+ // pitch clock: the pitcher has PCLOCK seconds to pick a pitch; both screens show the countdown
+ if(o.inGame){let left=-1;
+  if(pitching()){if(S.phase==='choose'){if(!o.clkEnd){o.clkEnd=now+PCLOCK*1000;o.clkN=(o.clkN||0)+1;netPresence({ck:{id:o.role[0]+o.clkN,ms:PCLOCK*1000}})}
+    left=o.clkEnd-now;if(left<=0){o.clkEnd=0;netPresence({ck:null});hideBanner();startWindup();updateHUD();left=-1}}
+   else if(o.clkEnd){o.clkEnd=0;netPresence({ck:null})}}
+  else{const ck=opp&&opp.ck;if(ck&&ck.id!==o.oclkId){o.oclkId=ck.id;o.oclkEnd=now+ck.ms-100}
+   if(!ck)o.oclkEnd=0;if(o.oclkEnd&&(S.phase==='ready'||S.phase==='choose'))left=o.oclkEnd-now}
+  const el=$('clkS');if(left>=0){const sec=Math.ceil(left/1000);el.hidden=false;if(o.clkShown!==sec){o.clkShown=sec;$('clkV').textContent=sec;el.classList.toggle('low',sec<=5)}}else if(!el.hidden){el.hidden=true;o.clkShown=-1}}
+ else if(!$('clkS').hidden)$('clkS').hidden=true;if(o.lostAt&&o.lostBan&&$('banner').hidden){$('bt').textContent='CONNECTION LOST';$('bs').textContent='Waiting for your opponent to come back…';$('banner').dataset.tone='';$('banner').hidden=false}if(!opp)return;
  if(!pitching()&&S.phase==='ready'&&S.pt>2600&&!o.waitMsg){o.waitMsg=true;banner('THEIR PITCH','Waiting for the pitcher…')}
  if(!pitching()){const pt=opp.pt;if(pt&&pt.id){
    if(o.seenW!==pt.id&&(S.phase==='ready'||S.phase==='choose')&&S.pt>250)applyWindup(pt);
    if(o.seenW===pt.id&&pt.st==='r'&&o.seenR!==pt.id&&S.pitch&&S.pitch.pid===pt.id)applyRelease(pt)}}
- else{const dc=opp.dc;if(dc&&S.phase==='pitch'&&S.pitch&&dc.id===S.pitch.pid)applyDecision(dc)}}
+ else{const dc=opp.dc;if(dc&&S.phase==='pitch'&&S.pitch&&dc.id===S.pitch.pid)applyDecision(dc);
+  if(opp.sk&&S.phase==='play'&&S.play&&S.play.hrFired&&S.pitch&&opp.sk===S.pitch.pid&&S.play.t<S.play.end)S.play.t=S.play.end}}
 function startOnline(st){const o=S.online;o.gid=st.gid;o.inGame=true;o.n=0;o.seenW=o.seenR=null;
  o.prevCustom=CUSTOM.active;CUSTOM.active=false;applyCustom();
  S.you=st.home;S.opp=st.away;S.night=!!st.night;syncPicker();if(FIELD){rebuildPark();SIGNS=buildSigns()}
  S.auto=false;syncAuto();o.sawIng=false;o.lostAt=0;netPresence({pt:null,dc:null,ing:st.gid});
- pendingMode=null;startGame('full');if(S.night!==!!st.night){S.night=!!st.night;SIGNS=buildSigns()}S.totalInn=st.inn;S.oppLine=Array(st.inn).fill(0);S.youLine=Array(st.inn).fill(0);
+ pendingMode=null;startGame('full');if(S.night!==!!st.night){S.night=!!st.night;SIGNS=buildSigns()}S.totalInn=st.inn;S.schedInn=st.inn;S.oppLine=Array(st.inn).fill(0);S.youLine=Array(st.inn).fill(0);
  banner('PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name} · ${st.inn} innings · you are ${o.me==='home'?'home':'away'}`);updateHUD()}
 function lobbyRender(){const o=S.online;if(!o)return;$('olStart').hidden=!!o.nr;$('olRoom').hidden=!o.nr;if(!o.nr)return;
  $('olCodeShow').textContent=o.code.toUpperCase();
@@ -2435,8 +2500,12 @@ function lobbyRender(){const o=S.online;if(!o)return;$('olStart').hidden=!!o.nr;
  const meK=o.mine.team,thK=o.opp&&o.opp.team;
  $('olMe').innerHTML=side(meK,`YOU · ${o.role==='host'?'HOME':'AWAY'}`);$('olThem').innerHTML=side(thK,o.role==='host'?'AWAY':'HOME');$('olThem').classList.toggle('wait',!thK);
  $('olInnRow').hidden=o.role!=='host';
+ if(!$('olPick').children.length){$('olPick').innerHTML=ORDER.map(t=>`<button type="button" data-t="${t}" aria-label="${TEAMS[t].city} ${TEAMS[t].name}"><img alt="" src="${LOGO_URL[t]}"><span>${TEAMS[t].name.toUpperCase()}</span></button>`).join('')}
+ for(const c of $('olPick').children){c.setAttribute('aria-pressed',String(c.dataset.t===meK));c.classList.toggle('taken',c.dataset.t===thK)}
  const same=thK&&thK===meK;
- $('olStatus').textContent=!o.opp?'Share the code. Waiting for your friend to join…':same?'You both picked the same club. One of you needs to switch (Back, then pick another).':o.role==='host'?'Both here. Start when ready.':'Both here. Waiting for the host to start.';
+ if(o.warnUntil>performance.now())return void($('olGo').hidden=!(o.role==='host'&&o.opp&&!same));
+ $('olStatus').classList.toggle('olWarn',!!same);
+ $('olStatus').textContent=!o.opp?(o.role==='host'?'Share the code. Waiting for your friend to join…':'Waiting for the host…'):same?`You both picked the ${TEAMS[meK].name}. The same club can't play itself. One of you needs to pick another.`:o.role==='host'?'Both here. Start when ready.':'Both here. Waiting for the host to start.';
  $('olGo').hidden=!(o.role==='host'&&o.opp&&!same)}
 async function joinRoom(code,role){const note=t=>{const n=$('olNote');n.textContent=t;n.style.color='var(--amber)';n.scrollIntoView({block:'nearest'})};
  if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on play.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
@@ -2454,12 +2523,15 @@ async function joinRoom(code,role){const note=t=>{const n=$('olNote');n.textCont
   if(o.inGame&&o.opp&&o.lostAt){o.lostAt=0;clearTimeout(o.lostT);if(o.lostBan){o.lostBan=false;hideBanner()}}
   lobbyRender()});
  netPresence({v:1,role,team:S.you});lobbyRender()}
+$('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
+ if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
+ S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();if(FIELD)rebuildPark();netPresence({team:t});lobbyRender()});
 function openOnline(){if(!S.online)S.online={mine:{},opp:null};lobbyRender();showScreen('scrOnline')}
 $('olCreate').addEventListener('click',()=>{const L='abcdefghjkmnpqrstuvwxyz';let c='';for(let i=0;i<4;i++)c+=L[Math.floor(Math.random()*L.length)];joinRoom(c,'host')});
 $('olJoin').addEventListener('click',()=>joinRoom($('olCode').value,'guest'));
 $('olCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')joinRoom($('olCode').value,'guest')});
 $('olInn').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const x of $('olInn').children)x.setAttribute('aria-pressed',String(x===b))});
-$('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp)return;const inn=+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v;
+$('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o.mine.team){lobbyRender();return}const inn=+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v;
  const st={gid:Math.random().toString(36).slice(2,8),home:o.mine.team,away:o.opp.team,inn,night:Math.random()<.55};netPresence({start:st});startOnline(st)});
 $('olLeave').addEventListener('click',async()=>{const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;openOnline()});
 $('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
@@ -2626,7 +2698,7 @@ const wb=document.createElement('canvas');wb.width=W;wb.height=H;const wg=wb.get
 let TOWERS=[];
 let FIELD=null,DECOR=null,SIGNS=null,CROWD_A=null,CROWD_B=null,FANS=[],CONC=[],AISLES=[],RAIL=[],FLAGFANS=[];
 function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,3);cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
-new ResizeObserver(resize).observe(cv);resize();applyWide();if(location.hash==='#dbg')window.__pd={TEAMS,S,toTitle:()=>toTitle(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
+new ResizeObserver(resize).observe(cv);resize();applyWide();if(location.hash==='#dbg')window.__pd={TEAMS,S,toTitle:()=>toTitle(),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 function drawJumbo(g,now){
  const cx=HX/K,x0=cx-95,y0=10,w=190,h=66;
@@ -3299,7 +3371,7 @@ addEventListener('keydown',e=>{
  else if(/^[1-5]$/.test(e.key)&&!e.repeat&&S.mode==='bp'){setBP(['FB','SL','CH','SP','KN'][+e.key-1])}
  else if(/^[1-5]$/.test(e.key)&&!e.repeat){const kk=['FB','SL','CH','SP','KN'][+e.key-1];if(kk!=='KN'||pitcher().type==='knuckle')choosePitch(kk)}
 });
-const toTitle=()=>{if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
+const toTitle=()=>{$('clkS').hidden=true;if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
 let pendingMode=null;
 const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTING PRACTICE',playoffs:'PLAYOFFS',watch:'WATCH A GAME'};
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}
@@ -3311,7 +3383,7 @@ $('goFull').addEventListener('click',()=>chooseMode('full'));
 $('goBP').addEventListener('click',()=>chooseMode('bp'));
 $('goPO').addEventListener('click',()=>chooseMode('playoffs'));
 $('goWatch').addEventListener('click',()=>chooseMode('watch'));
-$('goOnline').addEventListener('click',()=>chooseMode('online'));
+$('goMulti').addEventListener('click',()=>{ensureAudio();openOnline()});
 $('playGo').addEventListener('click',()=>{if(parkFromBP){backToCage();return}const m=pendingMode;pendingMode=null;$('playGo').hidden=true;
  if(m==='playoffs'){openBracket(true);return}if(m==='online'){openOnline();return}if(m==='watch'){S.auto=true;syncAuto();startGame('full');return}
  if(m){S.auto=false;syncAuto();startGame(m)}});
@@ -3330,7 +3402,7 @@ $('autoBtn').addEventListener('click',e=>{e.stopPropagation();if(S.online)return
 const syncInfo=()=>{const on=OPT.info!==false;$('infoBtn').setAttribute('aria-pressed',String(on));$('infoBtn').innerHTML=`INFO <b>${on?'ON':'OFF'}</b>`};
 $('infoBtn').addEventListener('click',e=>{e.stopPropagation();OPT.info=OPT.info===false;saveOpts();syncInfo();if(OPT.info===false)hideBanner()});
 $('infoBtn').addEventListener('pointerdown',e=>e.stopPropagation());syncInfo();
-$('skipBtn').addEventListener('click',()=>{if(S.phase==='play'&&S.play&&S.play.hrFired)S.play.t=S.play.end});
+$('skipBtn').addEventListener('click',()=>{if(S.phase==='play'&&S.play&&S.play.hrFired){if(S.online&&S.online.inGame){if(pitching())return;netPresence({sk:S.pitch&&S.pitch.pid})}S.play.t=S.play.end}});
 $('snd').addEventListener('click',()=>{muted=!muted;ensureAudio();applyVolumes();$('snd').textContent=muted?'Sound off':'Sound on';$('snd').setAttribute('aria-pressed',String(!muted))});
 
 document.addEventListener('pointerdown',e=>{if(e.button>0||overlayOpen()||e.target===cv)return;if(e.target.closest('button,input,select,textarea,a,label,.book,.zoomCtl,.pauseBtn'))return;if(S.phase==='title'||S.phase==='over')return;swing()});
