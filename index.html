@@ -2375,7 +2375,7 @@ let ROOM=null;
 const SUPA={url:'https://waikmdodbrirekjmqvug.supabase.co',key:'sb_publishable_iZ3XpRVvPInDsCRI3wxlBQ_jMKzDieT'};
 function supaRoom(){let sb=null;
  const load=()=>sb?Promise.resolve(sb):new Promise((res,rej)=>{const mk=()=>{try{sb=window.supabase.createClient(SUPA.url,SUPA.key,{realtime:{params:{eventsPerSecond:30}}});res(sb)}catch(e){rej({code:'setup'})}};
-  if(window.supabase)return mk();const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';sc.onload=mk;sc.onerror=()=>rej({code:'offline'});document.head.appendChild(sc)});
+  if(window.supabase)return mk();const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';sc.onload=mk;sc.onerror=()=>rej({code:'offline'});document.head.appendChild(sc)});
  return{join:async name=>{const c=await load();const me=Math.random().toString(36).slice(2,10);const ch=c.channel(name,{config:{presence:{key:me}}});let cbs=[];const state={};
   const peers=()=>{const ps=ch.presenceState(),out=[];for(const k in ps){const m=ps[k][ps[k].length-1];out.push({sameTab:k===me,presence:(m&&m.s)||{}})}return out};
   ch.on('presence',{event:'sync'},()=>{const pl=peers();for(const f of cbs)f({peers:pl})});
