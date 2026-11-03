@@ -5,7 +5,7 @@
 import subprocess,time,sys,json,os
 from playwright.sync_api import sync_playwright
 HERE=os.path.dirname(os.path.abspath(__file__));d=os.path.dirname(HERE)
-secs=int(sys.argv[1]) if len(sys.argv)>1 else 480
+secs=int(sys.argv[1]) if len(sys.argv)>1 else 700
 mock=open(os.path.join(HERE,'mock-supabase.js')).read()
 srv=subprocess.Popen(['python3','-m','http.server','8768','-d',d],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);time.sleep(1)
 ok=True
