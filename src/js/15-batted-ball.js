@@ -95,7 +95,9 @@ function finalize(play,runners,res){
    if(t0>lastT)play.fk[i].push({t:t0,x:a.x,y:a.y});play.fk[i].push({t:t0+.05+d*.55/(f.sp*.55),x:tgt.x,y:tgt.y})}}
  if(!res.newBases){const nb=[null,null,null];for(const r of runners)if(!r.out&&r.dest>=1&&r.dest<=3)nb[r.dest-1]=r.who;res.newBases=nb}
  if(res.runs==null)res.runs=runners.filter(r=>!r.out&&r.dest===4).length;
- play.res=res;return play;
+ play.res=res;
+ {const s0=play.segs[0];play.reachAt=s0&&s0.air?s0.t1:.3}
+ return play;
 }
 function simulateContact(err,hand,b){
  const q=clamp(1-Math.pow(Math.abs(err)/WIN,1.05)+(b.con-50)*.002-(S.pitch&&S.pitch.k==='SL'?.15:S.pitch&&S.pitch.k==='KN'?.12:0),0,1);

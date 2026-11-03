@@ -17,7 +17,8 @@ MASCOTS.seoul={c:{c:'#15171c',s:CREAM,w:CREAM,k:INK,y:'#ffbf3c'},m:MASCOTS.black
 MASCOTS.busan={c:{w:CREAM,k:INK,y:'#ffbf3c',b:'#9aa3ad',o:'#ff8a1f'},m:['....ooo....','...ooooo...'].concat(MASCOTS.blue.m.slice(2))};
 MASCOTS.incheon={c:{o:'#d23a2e',w:CREAM,k:INK},m:MASCOTS.orange.m};
 MASCOTS.gwangju=MASCOTS.green;
-MASCOTS.daegu=MASCOTS.yellow;MASCOTS.daejeon={c:{...MASCOTS.blue.c,b:'#1c9aa0'},m:MASCOTS.blue.m};MASCOTS.suwon=MASCOTS.red;MASCOTS.changwon=MASCOTS.purple;
+MASCOTS.daegu=MASCOTS.yellow;MASCOTS.daejeon={c:{...MASCOTS.blue.c,b:'#1c9aa0'},m:MASCOTS.blue.m};MASCOTS.suwon={c:{r:'#ee5d2f',d:'#b63d1d',w:CREAM,k:INK,s:'#c8202a',y:'#ffd36b'},m:['.k.......k.','.rk.....kr.','.rrr...rrr.','.rrrrrrrrr.','rrkyrrrykrr','rwwrrkrrwwr','.wwwwwwwww.','..wwwwwww..','...rrrrr...','..rswwwrr..','.rrrswwrr.r','.krrwswrrrr','..rrrrsrrrw','..rr...rrw.','..kk...kk..','.kkk...kkk.']};
+MASCOTS.changwon={c:{t:'#e0bd92',s:'#8a5cd6',q:'#4b2f96',y:'#ffc83a',k:INK,w:CREAM},m:['..yyyyy....','.yyykyyy...','yyyyyyyyy..','.tttttt....','.tktttttt..','.ttttttttt.','..tt.ttttk.','..sssss....','.sqsqsqss..','tsysysyss..','tsqsqsqsst.','.ssssssss.t','..sqsqsqs.t','..sssssss..','...tt.tt...','..kkk.kkk..']};
 MASCOTS.ulsan={c:{...MASCOTS.blue.c,b:'#4f9fd8'},m:MASCOTS.blue.m};MASCOTS.jeju={c:{o:'#ff9a1f',w:CREAM,k:INK},m:MASCOTS.orange.m};
 function blit(g,map,cols,x0,y0){
  for(let r=0;r<map.length;r++){const row=map[r];for(let c=0;c<row.length;c++){const ch=row[c];if(ch==='.')continue;const col=cols[ch];if(!col)continue;g.fillStyle=col;g.fillRect(x0+c,y0+r,1,1)}}

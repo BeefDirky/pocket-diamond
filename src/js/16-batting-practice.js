@@ -98,7 +98,7 @@ function groundOut(play,it,P,runners){
  const batR=runners.find(r=>r.batter),r1=runners.find(r=>r.from===1);
  const bst=P.bunt?(batR.who.spd>=85?.2:.35):.65;const batArr1=bst+LEG/spdFt(batR.who),r1Arr2=r1?.1+LEG/spdFt(r1.who):99;
  runners.forEach(r=>{r.start=r.batter?bst:.1;r.speed=spdFt(r.who)});
- const bob=!P.bunt&&Math.random()<errChance(i,.05);
+ const bob=!P.bunt&&Math.random()<errChance(i,play.dive&&play.dive.i===i?.16:.05);// a diving stop is much harder to field cleanly
  if(bob){const sq={x:Pp.x+rand(-8,8),y:Pp.y-rand(4,10)},t0=tf;
   play.segs.push(fnSeg(t0,t0+.7,tt=>{const uu=(tt-t0)/.7;return{x:lerp(Pp.x,sq.x,uu),y:lerp(Pp.y,sq.y,uu),h:Math.abs(Math.sin(uu*6))*2*(1-uu)}}));
   pushKey(play,i,{t:t0+1,x:sq.x,y:sq.y});tf=t0+1;Pp=sq}
@@ -128,7 +128,7 @@ function groundOut(play,it,P,runners){
   }
   batR.dest=1;
   if(t1<batArr1){
-   if(note!=='3U'&&Math.random()<errChance(i,.06)){
+   if(note!=='3U'&&Math.random()<errChance(i,play.dive&&play.dive.i===i?.13:.06)){// throwing from the knees
     // throwing error: the ball sails past first and rolls into foul ground
     code='E';note=`E${i+1}`;batR.dest=2;
     const last=play.segs.pop();const over={x:BASES[1].x+22,y:BASES[1].y-18};const ts=throwSeg(last.t0,fromF(play,i,last.t0),over);ts.snd=false;play.segs.push(ts);
@@ -196,7 +196,7 @@ function buildAir(P,dir,b){
  // outfielders have priority: on anything hit past the infield dirt, an outfielder who can get there calls the infielder off
  if(best<6&&D>=128){let ob=-1,on=1e9;for(const i of[6,7,8]){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/f.sp;if(need<on){on=need;ob=i}}
   if(ob>=0&&on<=T+.02){best=ob;bn=on}}
- const drop=bn<=T+.05&&P.L<45&&Math.random()<errChance(best,.05);
+ const drop=bn<=T+.05&&P.L<45&&Math.random()<errChance(best,bn>T-.12?.2:.05);// diving catches pop out of the glove far more often
  if(bn<=T+.05&&!drop){
   const XF=.7+(bn>T-.12&&P.L<45?.9:0);
   const dv0=bn>T-.12&&P.L<45,leap=!dv0&&((best<=5&&P.L>=10&&P.L<26)||(best>=6&&D>fd-24))&&Math.random()<.14;if(leap)play.jump={i:best,t:T};
@@ -334,7 +334,7 @@ function finishPlay(){
   const runTxt=`+${runs} RUN${runs>1?'S':''}`;
   const sub=isWalkoff()?'Walk-off!':r.hr?runTxt:r.sub||(runs?runTxt:r.desc);
   banner(r.banner,sub,r.tone);
-  if(!r.hr){sfx(r.hit?'hit':'out');if(mine?(r.hit||runs):r.outs>0)S.cheerUntil=now+2200;if((r.hit||r.code==='E'||r.code==='IFH')&&!r.steal)crowdReach()}
+  if(!r.hr){sfx(r.hit?'hit':'out');if(mine?(r.hit||runs):r.outs>0)S.cheerUntil=now+2200;if((r.hit||r.code==='E'||r.code==='IFH')&&!r.steal&&!S.play.reachCued)crowdReach()}
   if(r.hr){}
   else if(runs)S.jumbo={text:runs>1?`${runs} RUNS SCORE`:'RUN SCORES',until:now+3000};
   if(!r.steal)nextBatter();

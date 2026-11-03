@@ -15,10 +15,17 @@ function drawEmblem(g,key){
   g.strokeStyle=INK;g.lineWidth=.05;line(g,.07,-.56,-.22,-.66);
   g.fillStyle=INK;circ(g,.2,-.51,.035);
  }else if(e==='fox'){
-  g.fillStyle='#ef5a3a';poly(g,-.62,-.05,-.52,-.72,-.18,-.32,.18,-.32,.52,-.72,.62,-.05,0,.64);
-  g.fillStyle=INK;poly(g,-.48,-.56,-.3,-.34,-.44,-.24);poly(g,.48,-.56,.3,-.34,.44,-.24);
-  g.fillStyle=CREAM;poly(g,-.62,-.05,-.1,.2,0,.64);poly(g,.62,-.05,.1,.2,0,.64);
-  g.fillStyle=INK;ell(g,-.22,-.08,.08,.04,.45);ell(g,.22,-.08,.08,.04,-.45);circ(g,0,.56,.07);
+  // sly fox head: tall black-tipped ears, cream cheek ruff, narrowed eyes
+  const R1='#ee5d2f',R2='#b63d1d';
+  g.fillStyle=R2;poly(g,-.7,0,-.58,-.82,-.16,-.36,.16,-.36,.58,-.82,.7,0,.36,.34,0,.7,-.36,.34);
+  g.fillStyle=R1;poly(g,-.62,-.04,-.54,-.7,-.18,-.3,.18,-.3,.54,-.7,.62,-.04,.32,.3,0,.6,-.32,.3);
+  g.fillStyle=INK;poly(g,-.58,-.82,-.5,-.58,-.38,-.66);poly(g,.58,-.82,.5,-.58,.38,-.66);
+  g.fillStyle='#4a1a10';poly(g,-.5,-.58,-.3,-.34,-.46,-.26);poly(g,.5,-.58,.3,-.34,.46,-.26);
+  g.fillStyle=CREAM;poly(g,-.78,.1,-.36,.02,-.12,.24,0,.66,-.4,.44);poly(g,.78,.1,.36,.02,.12,.24,0,.66,.4,.44);
+  g.fillStyle=R1;poly(g,-.1,-.3,.1,-.3,.06,.1,-.06,.1);
+  g.fillStyle=INK;poly(g,-.38,-.12,-.12,-.04,-.16,-.13);poly(g,.38,-.12,.12,-.04,.16,-.13);
+  g.fillStyle='#ffd36b';circ(g,-.2,-.07,.025);circ(g,.2,-.07,.025);
+  g.fillStyle=INK;ell(g,0,.58,.09,.06,0);
  }else if(e==='bee'){
   g.fillStyle='rgba(244,241,232,.92)';ell(g,-.05,-.38,.2,.32,-.4);ell(g,.2,-.34,.16,.28,.35);
   g.save();g.beginPath();g.ellipse(.05,.12,.5,.32,0,0,Math.PI*2);g.clip();
@@ -56,12 +63,18 @@ function drawEmblem(g,key){
   g.fillStyle=INK;circ(g,-.19,.1,.055);circ(g,.19,.1,.055);
   g.strokeStyle=INK;g.lineWidth=.045;g.beginPath();g.arc(0,.2,.14,.25,Math.PI-.25);g.stroke();
  }else if(e==='dillo'){
-  const tan='#d7b48a';
-  g.fillStyle=tan;g.fillRect(-.34,.22,.12,.2);g.fillRect(.26,.22,.12,.2);poly(g,.55,.15,.92,.36,.56,.27);
-  g.fillStyle=T.jersey;g.beginPath();g.moveTo(-.48,.26);g.bezierCurveTo(-.48,-.48,.6,-.48,.62,.26);g.closePath();g.fill();
-  g.strokeStyle='rgba(27,31,36,.45)';g.lineWidth=.05;for(const bx of[-.2,.05,.3]){g.beginPath();g.moveTo(bx,-.26);g.quadraticCurveTo(bx+.05,0,bx,.25);g.stroke()}
-  g.fillStyle=tan;ell(g,-.6,.12,.2,.13,-.3);poly(g,-.74,.1,-.96,.24,-.7,.24);poly(g,-.56,0,-.5,-.22,-.44,0);
-  g.fillStyle=INK;circ(g,-.64,.07,.03);
+  // armored armadillo, banded shell riveted in gold, charging left
+  const tan='#e0bd92',tan2='#b48a5c',gold='#ffc83a';
+  g.fillStyle=tan2;g.fillRect(-.36,.2,.14,.26);g.fillRect(.24,.2,.14,.26);g.fillStyle=tan;g.fillRect(-.33,.2,.1,.22);g.fillRect(.27,.2,.1,.22);
+  g.strokeStyle=tan2;g.lineWidth=.12;g.beginPath();g.moveTo(.56,.18);g.quadraticCurveTo(.86,.2,.94,.44);g.stroke();
+  g.fillStyle=INK;g.beginPath();g.moveTo(-.54,.28);g.bezierCurveTo(-.54,-.58,.68,-.58,.68,.28);g.closePath();g.fill();
+  g.fillStyle=T.jersey;g.beginPath();g.moveTo(-.48,.25);g.bezierCurveTo(-.48,-.5,.62,-.5,.62,.25);g.closePath();g.fill();
+  g.save();g.beginPath();g.moveTo(-.48,.25);g.bezierCurveTo(-.48,-.5,.62,-.5,.62,.25);g.closePath();g.clip();
+  g.fillStyle=T.cap;for(const bx of[-.24,.02,.28])g.fillRect(bx,-.6,.09,.9);
+  g.fillStyle=gold;for(const bx of[-.2,.06,.32])for(const by of[-.18,.04])circ(g,bx,by,.028);g.restore();
+  g.fillStyle=gold;g.fillRect(-.5,.2,1.14,.07);
+  g.fillStyle=tan;ell(g,-.62,.08,.22,.15,-.25);poly(g,-.76,.04,-1,.22,-.72,.22);poly(g,-.58,-.04,-.5,-.3,-.42,-.04);
+  g.fillStyle=INK;circ(g,-.66,.03,.035);circ(g,-.98,.2,.03);
  }else if(e==='flamingo'){
   const pk='#ff8cc0';
   g.strokeStyle=pk;g.lineWidth=.05;line(g,.1,.32,.1,.82);line(g,.1,.5,.26,.42);line(g,.26,.42,.16,.32);
@@ -159,6 +172,30 @@ function makeLogo(key,size){
   g.restore();
   stampEmblem(g,key,.04,-.14,.62,0,T.brim,.045);
   script(T.script,.64,.32,CREAM,T.brim);
+ }else if(l==='fortress'){
+  // a Hwaseong-style gate: tiled roof, stone wall with a gate arch, the fox peeking over the battlements
+  g.fillStyle=T.brim;circ(g,0,0,.99);g.fillStyle=INK;circ(g,0,0,.92);
+  g.save();g.beginPath();g.arc(0,0,.88,0,Math.PI*2);g.clip();
+  const sky=g.createLinearGradient(0,-.9,0,.4);sky.addColorStop(0,T.cap);sky.addColorStop(1,'#5a1015');g.fillStyle=sky;g.fillRect(-1,-1,2,2);
+  g.fillStyle='rgba(255,211,107,.9)';circ(g,.46,-.5,.13);
+  stampEmblem(g,key,0,-.22,.5,0,INK,.04);
+  g.fillStyle='#c9bba0';g.fillRect(-1,.06,2,1);g.fillStyle='#a8977a';for(let yy=.14;yy<1;yy+=.14)g.fillRect(-1,yy,2,.018);
+  for(let xx=-1;xx<1;xx+=.24){g.fillStyle='#c9bba0';g.fillRect(xx,-.04,.14,.12)}
+  g.fillStyle='#1a1410';g.beginPath();g.moveTo(-.18,.62);g.lineTo(-.18,.38);g.quadraticCurveTo(0,.2,.18,.38);g.lineTo(.18,.62);g.closePath();g.fill();
+  g.restore();
+  g.fillStyle=INK;g.beginPath();g.moveTo(-.98,.5);g.quadraticCurveTo(0,.78,.98,.5);g.lineTo(.92,.86);g.quadraticCurveTo(0,1.08,-.92,.86);g.closePath();g.fill();
+  g.fillStyle=T.cap;g.beginPath();g.moveTo(-.92,.55);g.quadraticCurveTo(0,.82,.92,.55);g.lineTo(.87,.82);g.quadraticCurveTo(0,1.02,-.87,.82);g.closePath();g.fill();
+  script(T.script,.74,.34,CREAM,INK);
+ }else if(l==='gear'){
+  // a gold machine gear (Changwon builds things) around the armored armadillo, with blossom petals for Jinhae
+  const gold='#ffc83a',gold2='#c9921a';
+  g.fillStyle=gold2;for(let i=0;i<12;i++){g.save();g.rotate(i*Math.PI/6);g.fillRect(-.12,-1,.24,.24);g.restore()}
+  g.fillStyle=gold;for(let i=0;i<12;i++){g.save();g.rotate(i*Math.PI/6);g.fillRect(-.09,-.97,.18,.2);g.restore()}
+  g.fillStyle=gold2;circ(g,0,0,.82);g.fillStyle=gold;circ(g,0,0,.78);g.fillStyle=T.brim;circ(g,0,0,.66);g.fillStyle=T.cap;circ(g,0,0,.6);
+  g.fillStyle='#f7b6d2';for(const[a,r]of[[-2.3,.72],[-.75,.72],[2.5,.72]]){g.save();g.translate(Math.cos(a)*r,Math.sin(a)*r);for(let k=0;k<5;k++){g.rotate(Math.PI*2/5);ell(g,0,-.06,.04,.06,0)}g.fillStyle='#ffe36b';circ(g,0,0,.025);g.fillStyle='#f7b6d2';g.restore()}
+  stampEmblem(g,key,.04,-.14,.66,0,INK,.04);
+  g.fillStyle=INK;g.fillRect(-.74,.34,1.48,.3);g.fillStyle=T.jersey;g.fillRect(-.7,.37,1.4,.24);
+  script(T.script,.5,.32,gold,INK);
  }else if(l==='monogram'){
   // block C monogram with a crow perched on it
   const arc=(lw,col,inset)=>{g.strokeStyle=col;g.lineWidth=lw;g.lineCap='butt';g.beginPath();g.arc(0,.1,.6,.55+inset,Math.PI*2-.55-inset);g.stroke()};

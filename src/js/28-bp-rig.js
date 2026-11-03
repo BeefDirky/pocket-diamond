@@ -215,7 +215,7 @@ function render(now){
    const st=toPx(kw.hand==='R'?-3.2:3.2,0),D=toPx(kw.sd*84,14),k=ease(clamp(u*1.15-.1,0,1)),x=lerp(st.x,D.x,k),y=lerp(st.y,D.y,k);
    add(y,()=>{drawPlayer(wg,x,y,kw.T,{legs:k>0&&k<1?'run':'stand',arms:'down',frame:Math.floor(now/190),skin:skinOf(kw.who.name),helmet:true,pants:kw.pants,flip:D.x<st.x});drawBat(wg,x,y,(D.x<st.x?235:-55)*RAD,D.x<st.x?'L':'R',kw.who.bat,.8)})}}
  // walk-off: the home dugout empties and mobs the plate, jumping as they arrive
- if(S.celebr&&ph==='over'){const ce=S.celebr,T=TEAMS[ce.k];
+ if(S.celebr&&(ph==='over'||ph==='play'||ph==='result')){const ce=S.celebr,T=TEAMS[ce.k];
   for(const m of ce.mob){const u=clamp((now-ce.at-m.d)/m.dur,0,1);if(now-ce.at<m.d)continue;const k=ease(u);
    const x=lerp(m.sx,m.tx,k),y=lerp(m.sy,m.ty,k);const hop=u>=1?Math.abs(Math.sin((now-ce.at)/170+m.ph))*(5+m.hj):0;
    add(y,()=>drawPlayer(wg,x,y-hop,T,{legs:u<1?'run':hop>2?'stand':'ready',arms:u<1?'run':(Math.sin((now-ce.at)/260+m.ph)>0?'cheer':'punch'),frame:Math.floor(now/150+m.ph),skin:m.sk,helmet:m.helmet,pants:m.pants,flip:u<1?m.tx<m.sx:Math.sin(now/600+m.ph)>0}))}}

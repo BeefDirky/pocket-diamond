@@ -20,6 +20,8 @@
 - [x] Hit-by-pitch ricochet + batter flinch
 - [x] Smaller line score on phones
 - [x] Club info + fun facts in the club picker; local banner slogans; city murals in left field
+- [x] Diving plays error more often; NPC pickoffs wait a beat; walk-off mob starts when the game is won; crowd cheer on the ball landing
+- [x] Suwon Foxes + Changwon Armadillos redesign (logos, mascots)
 
 ## Online failsafes
 - [ ] Rejoin after a page reload (same room code restores the game)
