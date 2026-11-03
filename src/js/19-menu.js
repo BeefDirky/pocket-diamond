@@ -31,18 +31,18 @@ function portrait(T,p,home){
 function renderCards(){
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
  $('lnTitle').textContent=`${T.city} ${T.name}`;
- $('lnHint').textContent=mine?'Tap two hitters to swap their spots in the batting order.':'Scouting report. Their gloves and their starter shape every play.';
+ $('lnHint').textContent=mine?'Tap a player to sign one of your cards into his spot, or move him in the batting order.':'Scouting report. Their gloves and their starter shape every play.';
  $('lnMine').setAttribute('aria-pressed',String(mine));$('lnCreate').hidden=!mine;$('lnOpp').setAttribute('aria-pressed',String(!mine));
  const stat=(l,v)=>`<div class="st"><span>${l}</span><i><u style="width:${Math.min(100,v)}%;background:${rcol(v)}"></u></i><b style="color:${rcol(v)}">${v}</b></div>`;
- const card=(p,slot,i)=>`<button type="button" class="pcard${lnSel===i?' sel':''}${!mine||i<0?' ro':''}${p.custom?' mine':''}" data-i="${i}" style="--tc:${T.jersey};--tc2:${T.cap}">
-  <div class="pcTop"><span class="slot">${slot}</span><span class="pcPos">${p.pos}${p.custom?' ★':''}</span><span class="pcOvr">${ovr(p)}</span></div>
+ const card=(p,slot,i)=>`<button type="button" class="pcard${lnSel===i?' sel':''}${!mine?' ro':''}${p.custom?' mine':''}${p.signed?' signed':''}" data-i="${i}" style="--tc:${T.jersey};--tc2:${T.cap}">
+  <div class="pcTop"><span class="slot">${slot}</span><span class="pcPos">${p.pos}${p.custom?' ★':''}${p.signed?' · CARD':''}</span><span class="pcOvr">${ovr(p)}</span></div>
   <div class="pcMid"><img alt="" src="${portrait(T,p,key===S.you)}"><div class="pcId"><b>${p.name}</b><span>#${p.no} · ${(p.pos==='SP'||p.pos==='RP')?'Throws '+p.hand+(p.slot==='side'?' side':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':''):'B/T '+p.hand+'/'+p.thr}</span></div></div>
   <div class="pcStats">${(p.pos==='SP'||p.pos==='RP')?stat('VEL',p.vel)+stat('MOV',p.mov)+stat('CTL',p.ctl)+stat('DEF',p.def):stat('CON',p.con)+stat('POW',p.pow)+stat('SPD',p.spd)+stat('DEF',p.def)}</div></button>`;
  $('cards').innerHTML=T.lineup.map((p,i)=>card(p,i+1,i)).join('')+T.staff.map((p,k)=>card(p,'',-1-k)).join('');
 }
 $('cards').addEventListener('click',e=>{
- const c=e.target.closest('.pcard');if(!c||lnView!=='mine')return;const i=+c.dataset.i;if(i<0)return;
- if(lnSel===null)lnSel=i;else if(lnSel===i)lnSel=null;
+ const c=e.target.closest('.pcard');if(!c||lnView!=='mine')return;const i=+c.dataset.i;
+ if(lnSel===null){openSheet(i);return}if(i<0)return;if(lnSel===i)lnSel=null;
  else{const L=TEAMS[S.you].lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];lnSel=null;const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}updateHUD()}
  renderCards();
 });

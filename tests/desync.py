@@ -14,11 +14,15 @@ try:
   exe='/usr/bin/google-chrome' if os.path.exists('/usr/bin/google-chrome') else None
   b=p.chromium.launch(executable_path=exe,args=['--no-sandbox','--disable-background-timer-throttling','--disable-renderer-backgrounding','--disable-backgrounding-occluded-windows'])
   ctx=b.new_context(viewport={'width':800,'height':1000},service_workers='block')
-  ctx.add_init_script("(()=>{const F=3,pn=performance.now.bind(performance),t0=pn();performance.now=()=>t0+(pn()-t0)*F;const raf=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=cb=>raf(()=>cb(performance.now()));})();"+mock+";localStorage.setItem('pd-opts2',JSON.stringify({cam:'broadcast',music:0,crowd:0,sfx:0,time:'day'}))")
+  ctx.add_init_script("(()=>{const F=3,pn=performance.now.bind(performance),t0=pn();performance.now=()=>t0+(pn()-t0)*F;const raf=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=cb=>raf(()=>cb(performance.now()));})();"+mock+";localStorage.setItem('pd-opts2',JSON.stringify({cam:'broadcast',music:0,crowd:0,sfx:0,time:'day'}));if(!localStorage.getItem('pd-cards')){const o={};for(let i=0;i<30;i++){o['bl:b'+i]=1;o['bl:p'+i]=1}localStorage.setItem('pd-cards',JSON.stringify({packs:0,owned:o,seen:{}}))}")
   A=ctx.new_page();B=ctx.new_page();errs=[]
   for n,pg in (('A',A),('B',B)):pg.on('pageerror',lambda e,n=n:errs.append(n+' '+str(e)))
   for pg in (A,B):pg.goto('http://localhost:8768/index.html#dbg')
   A.wait_for_timeout(4000)
+  # the host signs two card players on its own phone only: the guest must learn them from the lobby
+  A.click('#goSingle');A.click('[data-go=scrLineup]');A.wait_for_timeout(300)
+  A.click('#cards .pcard[data-i="3"]');A.click('#shList .shRow:not([disabled])');A.click('#cards .pcard[data-i="-1"]');A.click('#shList .shRow:not([disabled])')
+  A.evaluate("document.querySelector('#scrLineup .xClose').click()");A.evaluate("document.querySelector('#scrSingle .xClose').click()")
   A.click('#goMulti');A.click('#olCreate');A.wait_for_timeout(600);A.click('#olPick [data-t=seoul]')
   code=A.inner_text('#olCodeShow')
   B.click('#goMulti');B.fill('#olCode',code);B.click('#olJoin');B.wait_for_timeout(800)
@@ -26,6 +30,7 @@ try:
   B.evaluate("__pd.S.you='seoul'");B.click('#olPick [data-t=busan]');B.wait_for_timeout(800)
   print('A:',A.inner_text('#olStatus'),'| B:',B.inner_text('#olStatus'))
   A.click('#olInn [data-v="3"]');A.click('#olGo');A.wait_for_timeout(1500)
+  print('host lineup on guest phone:',B.evaluate("__pd.TEAMS.seoul.lineup[3].name+' / '+__pd.TEAMS.seoul.staff[0].name"),'| on host:',A.evaluate("__pd.TEAMS.seoul.lineup[3].name+' / '+__pd.TEAMS.seoul.staff[0].name"))
   assert A.evaluate("__pd.S.online.inGame") and B.evaluate("__pd.S.online.inGame"),'game did not start'
   bot="""()=>{let last=null;setInterval(()=>{const S=__pd.S;if(!S.online||!S.online.inGame)return;
    if(S.phase==='choose'&&Math.random()<.05){document.dispatchEvent(new KeyboardEvent('keydown',{key:String(1+Math.floor(Math.random()*3)),bubbles:true}))}

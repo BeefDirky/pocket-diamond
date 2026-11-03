@@ -468,3 +468,28 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 .clubInfo li::marker{color:var(--amber)}
 .ckSet{display:grid;grid-template-columns:1fr 1fr}
 .tc .tcHead .city{flex:1;font-size:7px;letter-spacing:.08em;color:var(--chalk);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
+
+/* lineup sheet: sign a card into a spot */
+.lnSheet{position:fixed;inset:0;z-index:60;background:rgba(4,10,7,.72);display:flex;align-items:flex-end;justify-content:center}
+.lnSheet[hidden]{display:none}
+.shBox{width:100%;max-width:560px;max-height:82dvh;display:flex;flex-direction:column;gap:8px;background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--panel-hi);padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.shHead{display:flex;align-items:center;gap:8px}.shHead b{flex:1;font-family:var(--f-px);font-weight:400;font-size:12px}.shHead b span{color:var(--amber)}
+#shSub{margin:0;font-size:12px;color:var(--dim)}
+.shActs{display:flex;gap:6px;flex-wrap:wrap}.shActs .mbtn{flex:1;text-align:center;padding:9px}
+.shList{overflow-y:auto;display:flex;flex-direction:column;gap:4px;min-height:80px}
+.shRow{display:grid;grid-template-columns:28px 1fr auto;gap:2px 8px;align-items:center;text-align:left;padding:8px;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);cursor:pointer;font-family:var(--f-hud)}
+.shRow.r2{border-color:#8a5cd6}.shRow.r3{border-color:#ffbf3c}
+.shRow:disabled{opacity:.4;cursor:default}
+.shRow img{width:26px;height:26px;grid-row:1/3}
+.shRow .nm{display:flex;flex-direction:column;min-width:0}.shRow .nm b{font-weight:400;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.shRow .nm small{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shRow .o{font-family:var(--f-px);font-size:13px}
+.shRow .sts{grid-column:2/4;display:flex;gap:10px;font-size:10px;color:var(--dim)}.shRow .sts i{font-style:normal}
+.shEmpty{color:var(--dim);font-size:13px;text-align:center;padding:20px 0}
+.pcard.signed{box-shadow:inset 0 0 0 2px #ffbf3c}
+/* close X in the top-right of every menu card */
+.card{position:relative}
+.xClose{position:absolute;top:8px;right:8px;z-index:4;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);font-size:16px;line-height:1;cursor:pointer}
+.shHead .xClose{position:static}
+.xClose:hover{border-color:var(--amber);color:var(--amber)}
+.card.hasX>h1,.card.hasX>.ckTop,.card.hasX>.lnTop{padding-right:44px}
+.mbtn.back[hidden]{display:none}

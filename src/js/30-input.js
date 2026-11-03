@@ -20,7 +20,7 @@ addEventListener('keydown',e=>{
  else if((e.key==='q'||e.key==='Q')&&!e.repeat)doPickoff(1)
  else if((e.key==='w'||e.key==='W')&&!e.repeat)doPickoff(2)
 });
-const toTitle=()=>{$('clkS').hidden=true;S.celebr=null;if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
+const toTitle=()=>{$('clkS').hidden=true;S.celebr=null;restoreNetRosters();if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
 let pendingMode=null;
 const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTING PRACTICE',playoffs:'PLAYOFFS',watch:'WATCH A GAME'};
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}
@@ -56,7 +56,7 @@ $('snd').addEventListener('click',()=>{muted=!muted;ensureAudio();applyVolumes()
 
 document.addEventListener('pointerdown',e=>{if(e.button>0||overlayOpen()||e.target===cv)return;if(e.target.closest('button,input,select,textarea,a,label,.book,.zoomCtl,.pauseBtn'))return;if(S.phase==='title'||S.phase==='over')return;swing()});
 addEventListener('pointerdown',ensureAudio,{once:true});addEventListener('keydown',ensureAudio,{once:true});
-document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();applyCustom();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
+document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();applySignings();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
 const fontsReady=Promise.race([
  Promise.all([document.fonts.load('12px "Pixelify Sans"'),document.fonts.load('12px Jua'),document.fonts.load('bold 10px "Silkscreen"'),document.fonts.load('12px "Press Start 2P"'),document.fonts.load('40px "Yellowtail"')]),
  new Promise(r=>setTimeout(r,2500))]).catch(()=>{});
@@ -66,3 +66,8 @@ fontsReady.then(()=>{
  updateHUD();refreshMenu();rebuildPark()});
 requestAnimationFrame(frame);
 })();
+
+// every menu card closes from an X in its top-right corner instead of a Back button at the bottom of a long scroll
+function addCloseX(){for(const back of document.querySelectorAll('#title .card .mbtn.back')){const card=back.closest('.card');if(!card||card.querySelector(':scope>.xClose'))continue;
+  const x=document.createElement('button');x.type='button';x.className='xClose';x.setAttribute('aria-label',back.textContent.trim()||'Close');x.textContent='✕';
+  x.addEventListener('click',e=>{e.stopPropagation();back.click()});card.prepend(x);card.classList.add('hasX');back.hidden=true}}

@@ -76,6 +76,7 @@ const PITCHES={
 };
 const SKINS=['#f1c7a1','#e0a97e','#c68a5e','#9a6440','#6e4529'];
 const isKoreanName=n=>/^[A-Z]+ [A-Z]\.[A-Z]\.$/.test(n||'');
-const skinOf=n=>isKoreanName(n)?(hash(n)%3===0?'#f6d2b0':SKINS[hash(n)%2]):SKINS[hash(n||'')%SKINS.length];
+const SKIN_OVR={};// palette overrides for signed card players
+const skinOf=n=>SKIN_OVR[n]||(isKoreanName(n)?(hash(n)%3===0?'#f6d2b0':SKINS[hash(n)%2]):SKINS[hash(n||'')%SKINS.length]);
 const CREAM='#f4f1e8',INK='#1b1f24';
 

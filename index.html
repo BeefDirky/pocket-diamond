@@ -479,6 +479,31 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 .clubInfo li::marker{color:var(--amber)}
 .ckSet{display:grid;grid-template-columns:1fr 1fr}
 .tc .tcHead .city{flex:1;font-size:7px;letter-spacing:.08em;color:var(--chalk);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
+
+/* lineup sheet: sign a card into a spot */
+.lnSheet{position:fixed;inset:0;z-index:60;background:rgba(4,10,7,.72);display:flex;align-items:flex-end;justify-content:center}
+.lnSheet[hidden]{display:none}
+.shBox{width:100%;max-width:560px;max-height:82dvh;display:flex;flex-direction:column;gap:8px;background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--panel-hi);padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.shHead{display:flex;align-items:center;gap:8px}.shHead b{flex:1;font-family:var(--f-px);font-weight:400;font-size:12px}.shHead b span{color:var(--amber)}
+#shSub{margin:0;font-size:12px;color:var(--dim)}
+.shActs{display:flex;gap:6px;flex-wrap:wrap}.shActs .mbtn{flex:1;text-align:center;padding:9px}
+.shList{overflow-y:auto;display:flex;flex-direction:column;gap:4px;min-height:80px}
+.shRow{display:grid;grid-template-columns:28px 1fr auto;gap:2px 8px;align-items:center;text-align:left;padding:8px;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);cursor:pointer;font-family:var(--f-hud)}
+.shRow.r2{border-color:#8a5cd6}.shRow.r3{border-color:#ffbf3c}
+.shRow:disabled{opacity:.4;cursor:default}
+.shRow img{width:26px;height:26px;grid-row:1/3}
+.shRow .nm{display:flex;flex-direction:column;min-width:0}.shRow .nm b{font-weight:400;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.shRow .nm small{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shRow .o{font-family:var(--f-px);font-size:13px}
+.shRow .sts{grid-column:2/4;display:flex;gap:10px;font-size:10px;color:var(--dim)}.shRow .sts i{font-style:normal}
+.shEmpty{color:var(--dim);font-size:13px;text-align:center;padding:20px 0}
+.pcard.signed{box-shadow:inset 0 0 0 2px #ffbf3c}
+/* close X in the top-right of every menu card */
+.card{position:relative}
+.xClose{position:absolute;top:8px;right:8px;z-index:4;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);font-size:16px;line-height:1;cursor:pointer}
+.shHead .xClose{position:static}
+.xClose:hover{border-color:var(--amber);color:var(--amber)}
+.card.hasX>h1,.card.hasX>.ckTop,.card.hasX>.lnTop{padding-right:44px}
+.mbtn.back[hidden]{display:none}
 </style>
 
 <div class="app">
@@ -575,6 +600,9 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
         <p id="lnHint"></p>
         <button class="mbtn" id="lnCreate" type="button" data-go="scrEdit">★ Create-a-player</button>
         <div class="cards" id="cards"></div>
+        <div class="lnSheet" id="lnSheet" hidden><div class="shBox"><div class="shHead"><b id="shTitle"></b><button type="button" class="xClose" id="shClose" aria-label="Close">✕</button></div>
+          <p id="shSub"></p><div class="shActs"><button type="button" class="mbtn" id="shMove">↕ Move in batting order</button><button type="button" class="mbtn" id="shOrig" hidden></button></div>
+          <div class="shList" id="shList"></div></div></div>
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
       <div class="card wide" id="scrCards" hidden>
@@ -950,7 +978,8 @@ const PITCHES={
 };
 const SKINS=['#f1c7a1','#e0a97e','#c68a5e','#9a6440','#6e4529'];
 const isKoreanName=n=>/^[A-Z]+ [A-Z]\.[A-Z]\.$/.test(n||'');
-const skinOf=n=>isKoreanName(n)?(hash(n)%3===0?'#f6d2b0':SKINS[hash(n)%2]):SKINS[hash(n||'')%SKINS.length];
+const SKIN_OVR={};// palette overrides for signed card players
+const skinOf=n=>SKIN_OVR[n]||(isKoreanName(n)?(hash(n)%3===0?'#f6d2b0':SKINS[hash(n)%2]):SKINS[hash(n||'')%SKINS.length]);
 const CREAM='#f4f1e8',INK='#1b1f24';
 
 // ---------- logos (vector badges) ----------
@@ -2585,18 +2614,18 @@ function portrait(T,p,home){
 function renderCards(){
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
  $('lnTitle').textContent=`${T.city} ${T.name}`;
- $('lnHint').textContent=mine?'Tap two hitters to swap their spots in the batting order.':'Scouting report. Their gloves and their starter shape every play.';
+ $('lnHint').textContent=mine?'Tap a player to sign one of your cards into his spot, or move him in the batting order.':'Scouting report. Their gloves and their starter shape every play.';
  $('lnMine').setAttribute('aria-pressed',String(mine));$('lnCreate').hidden=!mine;$('lnOpp').setAttribute('aria-pressed',String(!mine));
  const stat=(l,v)=>`<div class="st"><span>${l}</span><i><u style="width:${Math.min(100,v)}%;background:${rcol(v)}"></u></i><b style="color:${rcol(v)}">${v}</b></div>`;
- const card=(p,slot,i)=>`<button type="button" class="pcard${lnSel===i?' sel':''}${!mine||i<0?' ro':''}${p.custom?' mine':''}" data-i="${i}" style="--tc:${T.jersey};--tc2:${T.cap}">
-  <div class="pcTop"><span class="slot">${slot}</span><span class="pcPos">${p.pos}${p.custom?' ★':''}</span><span class="pcOvr">${ovr(p)}</span></div>
+ const card=(p,slot,i)=>`<button type="button" class="pcard${lnSel===i?' sel':''}${!mine?' ro':''}${p.custom?' mine':''}${p.signed?' signed':''}" data-i="${i}" style="--tc:${T.jersey};--tc2:${T.cap}">
+  <div class="pcTop"><span class="slot">${slot}</span><span class="pcPos">${p.pos}${p.custom?' ★':''}${p.signed?' · CARD':''}</span><span class="pcOvr">${ovr(p)}</span></div>
   <div class="pcMid"><img alt="" src="${portrait(T,p,key===S.you)}"><div class="pcId"><b>${p.name}</b><span>#${p.no} · ${(p.pos==='SP'||p.pos==='RP')?'Throws '+p.hand+(p.slot==='side'?' side':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':''):'B/T '+p.hand+'/'+p.thr}</span></div></div>
   <div class="pcStats">${(p.pos==='SP'||p.pos==='RP')?stat('VEL',p.vel)+stat('MOV',p.mov)+stat('CTL',p.ctl)+stat('DEF',p.def):stat('CON',p.con)+stat('POW',p.pow)+stat('SPD',p.spd)+stat('DEF',p.def)}</div></button>`;
  $('cards').innerHTML=T.lineup.map((p,i)=>card(p,i+1,i)).join('')+T.staff.map((p,k)=>card(p,'',-1-k)).join('');
 }
 $('cards').addEventListener('click',e=>{
- const c=e.target.closest('.pcard');if(!c||lnView!=='mine')return;const i=+c.dataset.i;if(i<0)return;
- if(lnSel===null)lnSel=i;else if(lnSel===i)lnSel=null;
+ const c=e.target.closest('.pcard');if(!c||lnView!=='mine')return;const i=+c.dataset.i;
+ if(lnSel===null){openSheet(i);return}if(i<0)return;if(lnSel===i)lnSel=null;
  else{const L=TEAMS[S.you].lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];lnSel=null;const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}updateHUD()}
  renderCards();
 });
@@ -2634,6 +2663,58 @@ $('pLine').addEventListener('click',()=>{lineFromPause=true;showScreen('scrLineu
 $('pQuit').addEventListener('click',()=>{S.paused=false;optsFromGame=false;try{if(AC&&AC.state==='suspended')AC.resume()}catch(e){}toTitle()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const toMenu=b.dataset.go==='scrMain'||b.dataset.go==='scrSingle';if(parkFromBP&&toMenu){backToCage();return}if(lineFromPause&&S.paused&&toMenu){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
+// ---------- signings: put any card you own into your club's lineup or staff ----------
+// A signed player takes over a lineup spot (keeping that spot's position) or a staff slot. Saved per club.
+// Online, each side sends its full roster spec in the lobby so both phones field identical teams.
+let SIGN={};try{SIGN=JSON.parse(localStorage.getItem('pd-signings')||'{}')||{}}catch(e){SIGN={}}
+const saveSign=()=>{try{localStorage.setItem('pd-signings',JSON.stringify(SIGN))}catch(e){}};
+function snapOrig(){for(const k of ORDER){const T=TEAMS[k];if(!T.orig)T.orig={L:T.lineup.slice(),P:T.staff.slice()}}}
+function signClone(c,base){const p=c.p,q={name:p.name,hand:p.hand,thr:p.thr||p.hand,pos:base.pos,natPos:p.pos,no:base.no,signed:c.id,
+  con:p.con,pow:p.pow,spd:p.spd,def:p.def==null?60:p.def,vel:p.vel,mov:p.mov,ctl:p.ctl,slot:p.slot||'over',type:p.type,bat:p.bat||base.bat||'#d9b07a'};
+ if(p.skin)SKIN_OVR[q.name]=p.skin;if(c.pit)q.ars=arsFor({...q,pos:base.pos},c.code||c.k);return q}
+// where does the original player for this slot live now (lineup order can be shuffled)
+function slotOf(T,orig,pit){const arr=pit?T.staff:T.lineup;return arr.findIndex(p=>p===orig||(p.signedFor===orig.name))}
+function signPlayer(k,origName,cardId,pit,save){const T=TEAMS[k],arr=pit?T.staff:T.lineup,orig=(pit?T.orig.P:T.orig.L).find(p=>p.name===origName),c=CARD_BY[cardId];
+ if(!orig||!c||c.pit!==pit)return false;const i=slotOf(T,orig,pit);if(i<0)return false;
+ const q=signClone(c,orig);q.signedFor=orig.name;if(arr[i].custom){T.benched=q}else arr[i]=q;
+ if(save!==false){(SIGN[k]=SIGN[k]||{})[(pit?'P:':'L:')+origName]=cardId;saveSign()}return true}
+function releasePlayer(k,origName,pit){const T=TEAMS[k],arr=pit?T.staff:T.lineup,orig=(pit?T.orig.P:T.orig.L).find(p=>p.name===origName);if(!orig)return;
+ const i=slotOf(T,orig,pit);if(i>=0){if(arr[i].custom)T.benched=orig;else arr[i]=orig}
+ if(SIGN[k]){delete SIGN[k][(pit?'P:':'L:')+origName];saveSign()}}
+function applySignings(){snapOrig();for(const k in SIGN){if(!TEAMS[k])continue;for(const key in SIGN[k]){const pit=key[0]==='P',nm=key.slice(2),id=SIGN[k][key];
+   if(!CARD_BY[id]||!COL.owned[id]){delete SIGN[k][key];continue}signPlayer(k,nm,id,pit,false)}}saveSign()}
+const usedCards=k=>new Set([...TEAMS[k].lineup,...(TEAMS[k].benched?[TEAMS[k].benched]:[]),...TEAMS[k].staff].filter(p=>p&&p.signed).map(p=>p.signed));
+// ---- online roster spec ----
+function rosterSpec(k){const T=TEAMS[k],ent=p=>{if(p.custom)p=T.benched||p;return p.signed?['c',p.signed,p.signedFor]:['n',p.name]};return{L:T.lineup.map(ent),P:T.staff.map(ent)}}
+function applyRosterSpec(k,spec){if(!spec||!spec.L||!spec.P)return;snapOrig();const T=TEAMS[k];if(!T.netBackup)T.netBackup={L:T.lineup.slice(),P:T.staff.slice()};
+ const build=(list,origs,pit)=>list.map(e=>{const base=origs.find(p=>p.name===(e[0]==='c'?e[2]:e[1]))||origs[0];if(e[0]==='c'&&CARD_BY[e[1]]){const q=signClone(CARD_BY[e[1]],base);q.signedFor=base.name;return q}return base});
+ T.lineup=build(spec.L,T.orig.L,false);T.staff=build(spec.P,T.orig.P,true)}
+function restoreNetRosters(){for(const k of ORDER){const T=TEAMS[k];if(T.netBackup){T.lineup=T.netBackup.L;T.staff=T.netBackup.P;T.netBackup=null}}}
+
+// ---- the lineup screen's player sheet ----
+let sheetFor=null;
+function openSheet(i){const T=TEAMS[S.you],pit=i<0,p=pit?T.staff[-1-i]:T.lineup[i];if(!p)return;
+ const real=p.custom?T.benched||p:p,origName=real.signedFor||real.name;sheetFor={i,pit,origName};
+ const own=CARDS.filter(c=>COL.owned[c.id]&&c.pit===pit),used=usedCards(S.you);
+ $('shTitle').innerHTML=`${pit?'STAFF':'SPOT '+(i+1)} · <span>${real.name}</span>`;
+ $('shSub').textContent=pit?'Swap in a pitcher card you own. Starters bring four pitches, relievers three.':`Sign a hitter card you own into this spot. He plays ${real.pos} here.`;
+ $('shOrig').hidden=!real.signed;$('shOrig').textContent=real.signed?`Restore ${origName}`:'';
+ $('shMove').hidden=pit;
+ const sorted=own.slice().sort((a,b)=>b.o-a.o);
+ $('shList').innerHTML=sorted.length?sorted.map(c=>{const q=c.p,T2=c.T||TEAMS[c.k],inUse=used.has(c.id),here=real.signed===c.id;
+   const st=c.pit?[['VEL',q.vel],['MOV',q.mov],['CTL',q.ctl]]:[['CON',q.con],['POW',q.pow],['SPD',q.spd],['DEF',q.def]];
+   return `<button type="button" class="shRow r${c.r}" data-id="${c.id}" ${inUse?'disabled':''}><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">
+    <span class="nm"><b>${q.name}</b><small>${c.set==='bl'?T2.city+' · Big League':T2.city+' '+T2.name} · ${q.pos} · ${RARITY[c.r]}${here?' · IN THIS SPOT':inUse?' · ALREADY SIGNED':''}</small></span>
+    <span class="o" style="color:${rcol(c.o)}">${c.o}</span><span class="sts">${st.map(([k,v])=>`<i>${k} <b style="color:${rcol(v)}">${v}</b></i>`).join('')}</span></button>`}).join('')
+  :`<p class="shEmpty">No ${pit?'pitcher':'hitter'} cards yet. Open card packs to collect players.</p>`;
+ $('lnSheet').hidden=false}
+function closeSheet(){$('lnSheet').hidden=true;sheetFor=null}
+$('shClose').addEventListener('click',closeSheet);
+$('lnSheet').addEventListener('click',e=>{if(e.target===$('lnSheet'))closeSheet()});
+$('shList').addEventListener('click',e=>{const b=e.target.closest('.shRow');if(!b||b.disabled||!sheetFor)return;
+ if(signPlayer(S.you,sheetFor.origName,b.dataset.id,sheetFor.pit)){applyDefense();updateHUD();sfx('glove')}closeSheet();renderCards()});
+$('shOrig').addEventListener('click',()=>{if(!sheetFor)return;releasePlayer(S.you,sheetFor.origName,sheetFor.pit);applyDefense();updateHUD();closeSheet();renderCards()});
+$('shMove').addEventListener('click',()=>{if(!sheetFor)return;lnSel=sheetFor.i;closeSheet();renderCards();$('lnHint').textContent='Now tap the spot to swap him with.'});
 // ---------- title picker ----------
 function buildPicker(){
  const mk=(id,key)=>{$(id).innerHTML=ORDER.map(t=>`<button type="button" class="chip" data-t="${t}"><img alt="" src="${LOGO_URL[t]}"><span class="c">${TEAMS[t].city}</span><span class="n">${TEAMS[t].name}</span><span class="c kr">${TEAMS[t].kcity} ${TEAMS[t].kname}</span></button>`).join('');
@@ -2789,6 +2870,7 @@ function netTick(now){const o=S.online,opp=o.opp;
   if(opp.sk&&S.phase==='play'&&S.play&&S.play.hrFired&&S.pitch&&opp.sk===S.pitch.pid&&S.play.t<S.play.end)S.play.t=S.play.end}}
 function startOnline(st){const o=S.online;o.gid=st.gid;o.inGame=true;o.n=0;o.seenW=o.seenR=null;
  o.prevCustom=CUSTOM.active;CUSTOM.active=false;applyCustom();
+ {const ok=o.role==='host'?st.away:st.home;if(o.opp&&o.opp.ros)applyRosterSpec(ok,o.opp.ros)}// field the opponent exactly as their phone does
  S.you=st.home;S.opp=st.away;S.night=!!st.night;syncPicker();if(FIELD){rebuildPark();SIGNS=buildSigns()}
  S.auto=false;syncAuto();o.sawIng=false;o.lostAt=0;netPresence({pt:null,dc:null,ing:st.gid});
  pendingMode=null;startGame('full');if(S.night!==!!st.night){S.night=!!st.night;SIGNS=buildSigns()}S.totalInn=st.inn;S.schedInn=st.inn;S.oppLine=Array(st.inn).fill(0);S.youLine=Array(st.inn).fill(0);
@@ -2821,10 +2903,10 @@ async function joinRoom(code,role){const note=t=>{const n=$('olNote');n.textCont
   if(o.inGame&&o.opp){if(o.opp.ing===o.gid)o.sawIng=true;else if(o.sawIng){o.sawIng=false;clearTimeout(o.lostT);o.lostAt=0;o.lostBan=false;banner('OPPONENT LEFT','They quit the game. Back to the room.');o.inGame=false;setTimeout(()=>{if(S.online!==o||o.inGame)return;toTitle();openOnline()},2500)}}
   if(o.inGame&&o.opp&&o.lostAt){o.lostAt=0;clearTimeout(o.lostT);if(o.lostBan){o.lostBan=false;hideBanner()}}
   lobbyRender()});
- netPresence({v:1,role,team:S.you});lobbyRender()}
+ netPresence({v:1,role,team:S.you,ros:rosterSpec(S.you)});lobbyRender()}
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
- S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();if(FIELD)rebuildPark();netPresence({team:t});lobbyRender()});
+ S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();if(FIELD)rebuildPark();netPresence({team:t,ros:rosterSpec(t)});lobbyRender()});
 function openOnline(){if(!S.online)S.online={mine:{},opp:null};lobbyRender();showScreen('scrOnline')}
 $('olCreate').addEventListener('click',()=>{const L='abcdefghjkmnpqrstuvwxyz';let c='';for(let i=0;i<4;i++)c+=L[Math.floor(Math.random()*L.length)];joinRoom(c,'host')});
 $('olJoin').addEventListener('click',()=>joinRoom($('olCode').value,'guest'));
@@ -3764,7 +3846,7 @@ addEventListener('keydown',e=>{
  else if((e.key==='q'||e.key==='Q')&&!e.repeat)doPickoff(1)
  else if((e.key==='w'||e.key==='W')&&!e.repeat)doPickoff(2)
 });
-const toTitle=()=>{$('clkS').hidden=true;S.celebr=null;if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
+const toTitle=()=>{$('clkS').hidden=true;S.celebr=null;restoreNetRosters();if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
 let pendingMode=null;
 const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTING PRACTICE',playoffs:'PLAYOFFS',watch:'WATCH A GAME'};
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}
@@ -3800,7 +3882,7 @@ $('snd').addEventListener('click',()=>{muted=!muted;ensureAudio();applyVolumes()
 
 document.addEventListener('pointerdown',e=>{if(e.button>0||overlayOpen()||e.target===cv)return;if(e.target.closest('button,input,select,textarea,a,label,.book,.zoomCtl,.pauseBtn'))return;if(S.phase==='title'||S.phase==='over')return;swing()});
 addEventListener('pointerdown',ensureAudio,{once:true});addEventListener('keydown',ensureAudio,{once:true});
-document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();applyCustom();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
+document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();applySignings();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
 const fontsReady=Promise.race([
  Promise.all([document.fonts.load('12px "Pixelify Sans"'),document.fonts.load('12px Jua'),document.fonts.load('bold 10px "Silkscreen"'),document.fonts.load('12px "Press Start 2P"'),document.fonts.load('40px "Yellowtail"')]),
  new Promise(r=>setTimeout(r,2500))]).catch(()=>{});
@@ -3810,6 +3892,11 @@ fontsReady.then(()=>{
  updateHUD();refreshMenu();rebuildPark()});
 requestAnimationFrame(frame);
 })();
+
+// every menu card closes from an X in its top-right corner instead of a Back button at the bottom of a long scroll
+function addCloseX(){for(const back of document.querySelectorAll('#title .card .mbtn.back')){const card=back.closest('.card');if(!card||card.querySelector(':scope>.xClose'))continue;
+  const x=document.createElement('button');x.type='button';x.className='xClose';x.setAttribute('aria-label',back.textContent.trim()||'Close');x.textContent='✕';
+  x.addEventListener('click',e=>{e.stopPropagation();back.click()});card.prepend(x);card.classList.add('hasX');back.hidden=true}}
 </script>
 <script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>
 </body></html>
