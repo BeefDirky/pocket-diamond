@@ -52,7 +52,8 @@ const sg=Math.random()<.5?-1:1;p.plateX=p.inZone?(p.q>=1?sg*.65:rand(-.35,.35)):
  if(S.pitch.remote){}else S.pitch.wild=S.mode!=='bp'&&Math.random()<(.004+Math.max(0,(S.pcOf[fldKey()]||0)-25)*.0011+(S.pitch.q!=null&&S.pitch.q<.15?.12:0));
  if(S.pitch.wild)S.wildUntil=now+1700;
  if(!onlineGame()&&(pitching()||(S.auto&&S.mode!=='bp')))cpuDecide();else if(S.auto&&S.mode==='bp'&&Math.random()<.85){const arr=S.pitch.releaseAt+S.pitch.travel,err=randn()*WIN*.3;S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)}}
- sfx('woosh',{FB:1.06,SL:1,CH:.92}[S.pitch.k]);
+ if(S.mode==='bp'&&BUF.bpthrow&&!muted)playSample('bpthrow',.8,.97+Math.random()*.06);// the machine's own thunk-and-whir
+ else sfx('woosh',{FB:1.06,SL:1,CH:.92}[S.pitch.k]);
  const tg=$('tag');tg.style.borderLeftColor=PITCHES[S.pitch.k].trail;spawnFlash(4);$('tagTxt').innerHTML=`${S.pitch.name} <em>${S.pitch.mph}</em> MPH`;tg.hidden=false;
  if(S.pitch.mph>94){S.flame=now;tg.classList.add('hot')}else{S.flame=0;tg.classList.remove('hot')}}
 // each pitch has its own flight shape (x = lateral feet, h = height feet)
