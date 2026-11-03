@@ -30,12 +30,13 @@ const isWide=()=>OPT.cam==='wide'||isLandscape();
 function camTarget(){
  if(S.camMode==='follow'&&S.play){
   const play=S.play;const t=S.phase==='result'?play.end:play.t;const b=ballAt(play,t);
-  if(!b)return clampCam(isWide()?{x:HX,y:H*.56,z:1}:CAM_FULL);
+  // ball gone (a homer is out of the park): show the trot, and the zoom buttons still work
+  if(!b)return clampCam(isWide()?{x:HX,y:H*.52,z:Math.max(zFit(),W*VA/1250*S.zoom)}:{...CAM_FULL,z:Math.max(zFit(),CAM_FULL.z*S.zoom)});
   const q=toPx(b.x,b.y),c2=toPx(0,85);const d=Math.hypot(b.x,b.y);
   const wide=isWide(),k=wide?.55:.3,cx=lerp(q.x,c2.x,k),cy=lerp(q.y,c2.y,k);
   let z=Math.max(zFit(),(wide?lerp(1.3,1,clamp(d/260,0,1)):lerp(1.8,1.25,clamp(d/320,0,1)))*S.zoom);
   // the ball is drawn lifted by its height: keep that point inside the frame (with room to spare), zooming out if needed
-  const by=q.y-(b.h||0)/FT*.5,bx=q.x,dyN=Math.abs(by-cy)*2.6,dxN=Math.abs(bx-cx)*2.4;
+  const by=q.y-(b.h||0)/FT*.5,bx=q.x,dyN=Math.abs(by-cy)*(by<cy?3.1:2.6),dxN=Math.abs(bx-cx)*2.4;// extra room up top, where the line score sits
   if(dyN>0)z=Math.min(z,W*VA/dyN);if(dxN>0)z=Math.min(z,W/dxN);
   return clampCam({x:cx,y:cy,z:Math.max(zFit(),z)});
  }

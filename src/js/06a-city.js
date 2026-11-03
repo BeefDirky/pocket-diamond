@@ -9,6 +9,9 @@ function parkOutline(){// the stadium's outer wall, in world pixels: stands end 
   // the stands only exist inside the park buffer, so the wall has to stay inside it too
   const sn=Math.abs(Math.sin(a*RAD)),cs=Math.cos(a*RAD),maxX=(W/2-6)*FT,maxUp=(HY-6)*FT,maxDn=(H-HY-6)*FT;
   if(sn>.01)r=Math.min(r,maxX/sn);if(cs>.01)r=Math.min(r,maxUp/cs);if(cs<-.01)r=Math.min(r,maxDn/-cs);
+  // behind the plate the bowl comes to a rounded point: the wall follows a curve that is deepest straight behind home
+  // and rises toward the corners (depth = tip - c*x^2), like a real ballpark's backstop end
+  if(cs<0){const tip=Math.min(54,maxDn-2),cc=tip/(150*150),s2=sn*sn,ac=-cs,rc=s2>1e-4?(-ac+Math.sqrt(ac*ac+4*cc*s2*tip))/(2*cc*s2):tip/ac;r=Math.min(r,rc)}
   pts.push({a,r})}
  // round off the corners where the wall meets the buffer's edges
  const sm=pts.map((p,i)=>{let s2=0,n=0;for(let d=-2;d<=2;d++){const q=pts[(i+d+pts.length)%pts.length];s2+=q.r;n++}return{a:p.a,r:Math.min(p.r,s2/n)}});

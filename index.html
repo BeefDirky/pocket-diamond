@@ -560,6 +560,18 @@ body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .a
 .app.deskApp .zoomCtl{top:calc(50% - 36px);bottom:auto;left:10px}
 .app.deskApp .infoBtn{top:10px;bottom:auto;left:52px;right:auto}
 .app.deskApp .autoBtn{top:12px;bottom:auto;left:118px;right:auto}
+/* full-screen layout v2: left column = matchup panels above the zoom buttons; right column = auto/info above swing/bunt */
+.app.deskApp .zoomCtl{top:auto;left:14px;bottom:14px;flex-direction:row}
+.app.deskApp>.matchup{bottom:62px;width:360px;transform:none}
+.app.deskApp>.matchup .mu{padding:10px 12px}
+.app.deskApp .infoBtn{top:auto;left:auto;right:14px;bottom:106px}
+.app.deskApp .autoBtn{top:auto;left:auto;right:84px;bottom:108px}
+.app.deskApp .skipBtn{bottom:146px}
+@media (max-width:999px){
+ .app.deskApp>.matchup{transform:scale(.64);transform-origin:bottom left;bottom:50px;width:340px}
+ .app.deskApp .infoBtn{bottom:82px}.app.deskApp .autoBtn{bottom:84px}.app.deskApp .skipBtn{bottom:116px}
+ .app.deskApp .zoomCtl{bottom:10px;left:10px}
+}
 </style>
 
 <div class="app">
@@ -1375,6 +1387,9 @@ function parkOutline(){// the stadium's outer wall, in world pixels: stands end 
   // the stands only exist inside the park buffer, so the wall has to stay inside it too
   const sn=Math.abs(Math.sin(a*RAD)),cs=Math.cos(a*RAD),maxX=(W/2-6)*FT,maxUp=(HY-6)*FT,maxDn=(H-HY-6)*FT;
   if(sn>.01)r=Math.min(r,maxX/sn);if(cs>.01)r=Math.min(r,maxUp/cs);if(cs<-.01)r=Math.min(r,maxDn/-cs);
+  // behind the plate the bowl comes to a rounded point: the wall follows a curve that is deepest straight behind home
+  // and rises toward the corners (depth = tip - c*x^2), like a real ballpark's backstop end
+  if(cs<0){const tip=Math.min(54,maxDn-2),cc=tip/(150*150),s2=sn*sn,ac=-cs,rc=s2>1e-4?(-ac+Math.sqrt(ac*ac+4*cc*s2*tip))/(2*cc*s2):tip/ac;r=Math.min(r,rc)}
   pts.push({a,r})}
  // round off the corners where the wall meets the buffer's edges
  const sm=pts.map((p,i)=>{let s2=0,n=0;for(let d=-2;d<=2;d++){const q=pts[(i+d+pts.length)%pts.length];s2+=q.r;n++}return{a:p.a,r:Math.min(p.r,s2/n)}});
@@ -1976,12 +1991,13 @@ const isWide=()=>OPT.cam==='wide'||isLandscape();
 function camTarget(){
  if(S.camMode==='follow'&&S.play){
   const play=S.play;const t=S.phase==='result'?play.end:play.t;const b=ballAt(play,t);
-  if(!b)return clampCam(isWide()?{x:HX,y:H*.56,z:1}:CAM_FULL);
+  // ball gone (a homer is out of the park): show the trot, and the zoom buttons still work
+  if(!b)return clampCam(isWide()?{x:HX,y:H*.52,z:Math.max(zFit(),W*VA/1250*S.zoom)}:{...CAM_FULL,z:Math.max(zFit(),CAM_FULL.z*S.zoom)});
   const q=toPx(b.x,b.y),c2=toPx(0,85);const d=Math.hypot(b.x,b.y);
   const wide=isWide(),k=wide?.55:.3,cx=lerp(q.x,c2.x,k),cy=lerp(q.y,c2.y,k);
   let z=Math.max(zFit(),(wide?lerp(1.3,1,clamp(d/260,0,1)):lerp(1.8,1.25,clamp(d/320,0,1)))*S.zoom);
   // the ball is drawn lifted by its height: keep that point inside the frame (with room to spare), zooming out if needed
-  const by=q.y-(b.h||0)/FT*.5,bx=q.x,dyN=Math.abs(by-cy)*2.6,dxN=Math.abs(bx-cx)*2.4;
+  const by=q.y-(b.h||0)/FT*.5,bx=q.x,dyN=Math.abs(by-cy)*(by<cy?3.1:2.6),dxN=Math.abs(bx-cx)*2.4;// extra room up top, where the line score sits
   if(dyN>0)z=Math.min(z,W*VA/dyN);if(dxN>0)z=Math.min(z,W/dxN);
   return clampCam({x:cx,y:cy,z:Math.max(zFit(),z)});
  }
