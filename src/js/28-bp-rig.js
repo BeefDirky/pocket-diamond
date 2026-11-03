@@ -314,7 +314,10 @@ function render(now){
  const scale=cv.height/vh;
  ctx.imageSmoothingEnabled=scale<1.6;ctx.imageSmoothingQuality='high';
  S.view={sx:vw>W?0:sx,sy,vw:Math.min(vw,W),vh,ox:vw>W?(cv.width-W*scale)/2:0,scale};
- if(vw>W){const dw=W*scale,ox=(cv.width-dw)/2;ctx.fillStyle='#1b232a';ctx.fillRect(0,0,cv.width,cv.height);ctx.drawImage(wb,0,sy,W,vh,ox,0,dw,cv.height)}
+ if(vw>W){const dw=W*scale,ox=(cv.width-dw)/2;ctx.fillStyle='#1b232a';ctx.fillRect(0,0,cv.width,cv.height);
+  // beyond the park walls: the city
+  const CY=cityFor();if(CY){const x0=-(vw-W)/2,sw=Math.min(vw,W+CITY_M*2),sx2=Math.max(0,(x0+CITY_M)/2),dx=Math.max(0,(-CITY_M-x0))*scale;ctx.drawImage(CY,sx2,sy/2,sw/2,vh/2,dx,0,sw*scale,cv.height)}
+  ctx.drawImage(wb,0,sy,W,vh,ox,0,dw,cv.height)}
  else ctx.drawImage(wb,sx,sy,vw,vh,0,0,cv.width,cv.height);
 }
 

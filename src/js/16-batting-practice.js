@@ -33,9 +33,9 @@ function hitAdvance(runners,tp,Pp,delay,ex){
  const ballAt=k=>{const d=dist(Pp,baseP(k));return tp+.7+(ex||0)+d/(THROW*(d>200?.86:1))};
  let cap=4;
  for(const r of runners){
-  r.start=r.batter?.65:delay;r.speed=spdFt(r.who);
+  r.start=r.batter?.65:r.L0!=null?0:delay;r.speed=spdFt(r.who);
   let d=r.from;const minD=r.batter?1:r.from;
-  while(d+1<=cap){const arr=r.start+(d+1-r.from)*LEG/r.speed;if(d+1<=minD||arr+.3<ballAt(d+1))d++;else break}
+  while(d+1<=cap){const arr=r.start+(d+1-r.from-(r.L0||0))*LEG/r.speed;if(d+1<=minD||arr+.3<ballAt(d+1))d++;else break}
   r.dest=d;cap=d===4?4:d-1;
  }
  let trail=null;
@@ -103,7 +103,7 @@ function groundOut(play,it,P,runners){
  const forced=k=>k===1?true:occ.slice(0,k-1).every(Boolean);
  const batR=runners.find(r=>r.batter),r1=runners.find(r=>r.from===1);
  const bst=P.bunt?(batR.who.spd>=85?.2:.35):.65;const batArr1=bst+LEG/spdFt(batR.who),r1Arr2=r1?.1+LEG/spdFt(r1.who):99;
- runners.forEach(r=>{r.start=r.batter?bst:.1;r.speed=spdFt(r.who)});
+ runners.forEach(r=>{r.start=r.batter?bst:r.L0!=null?0:.1;r.speed=spdFt(r.who)});
  const bob=!P.bunt&&Math.random()<errChance(i,play.dive&&play.dive.i===i?.16:.05);// a diving stop is much harder to field cleanly
  if(bob){const sq={x:Pp.x+rand(-8,8),y:Pp.y-rand(4,10)},t0=tf;
   play.segs.push(fnSeg(t0,t0+.7,tt=>{const uu=(tt-t0)/.7;return{x:lerp(Pp.x,sq.x,uu),y:lerp(Pp.y,sq.y,uu),h:Math.abs(Math.sin(uu*6))*2*(1-uu)}}));
@@ -294,13 +294,14 @@ function leadNow(k,ph,now){ // how far off the bag a runner on base k (1..3) is 
  if(ph==='ready'||ph==='choose')return full*.55*clamp(S.pt/500,0,1);return 0}
 function runnerPos(r,t){
  if(r.tagAt!=null&&t<r.start){
-  const b=baseP(r.from),nx=baseP(Math.min(4,r.from+1)),Lf=6/LEG,lead={x:lerp(b.x,nx.x,Lf),y:lerp(b.y,nx.y,Lf)};
-  const back=r.dblOff?r.outAt+.15:r.tagAt-.12,u=clamp((t-(back-.55))/.55,0,1);
+  const b=baseP(r.from),nx=baseP(Math.min(4,r.from+1)),Lf=r.L0!=null?r.L0:6/LEG,lead={x:lerp(b.x,nx.x,Lf),y:lerp(b.y,nx.y,Lf)};
+  // a runner caught off on a steal turns around from wherever he was and hustles back (no snap)
+  const dur=r.L0!=null?Math.max(.45,Lf*LEG/(r.speed*.92)):.55,back=r.dblOff?r.outAt+.15:r.L0!=null?.12+dur:r.tagAt-.12,u=clamp((t-(back-dur))/dur,0,1);
   return{x:lerp(lead.x,b.x,u),y:lerp(lead.y,b.y,u),moving:u>0&&u<1,onBag:u>=1};
  }
  const total=r.dest-r.from;
- if(r.from>=1&&r.tagAt==null){const b=baseP(r.from),nx=baseP(Math.min(4,r.from+1)),L=(LEADFT[r.from]+3)/LEG;
-  if(total<=0){const u=clamp(t/.6,0,1);return{x:lerp(lerp(b.x,nx.x,L),b.x,u),y:lerp(lerp(b.y,nx.y,L),b.y,u),moving:u<1}}
+ if(r.from>=1&&r.tagAt==null){const b=baseP(r.from),nx=baseP(Math.min(4,r.from+1)),L=r.L0!=null?r.L0:(LEADFT[r.from]+3)/LEG;
+  if(total<=0){const u=clamp(t/(r.L0!=null?Math.max(.45,L*LEG/(r.speed*.92)):.6),0,1);return{x:lerp(lerp(b.x,nx.x,L),b.x,u),y:lerp(lerp(b.y,nx.y,L),b.y,u),moving:u<1}}
   if(t<r.start){return{x:lerp(b.x,nx.x,L),y:lerp(b.y,nx.y,L),moving:false}}
   const prog0=L,prog=clamp(prog0+(t-r.start)*r.speed/LEG,0,total),leg=Math.min(Math.floor(prog),total-1),f=prog-leg,a=baseP(r.from+leg),c=baseP(r.from+leg+1);
   return{x:lerp(a.x,c.x,f),y:lerp(a.y,c.y,f),moving:prog<total}}

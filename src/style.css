@@ -505,3 +505,19 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 @keyframes holo{to{background-position:300% 0}}
 @keyframes foil{to{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){.tc::before{animation:none!important}}
+
+/* desktop (wide mode on a big screen): the park fills the window, the controls float on top of it, a bit smaller */
+body:has(.app.deskApp){padding:0!important;overflow:hidden}
+.app.deskApp{position:fixed;inset:0;max-width:none;display:block;margin:0}
+.app.deskApp>.stage{position:fixed!important;inset:0;width:100vw!important;height:100dvh;aspect-ratio:auto;max-width:none;min-width:0;border:0;margin:0;z-index:1}
+.app.deskApp>.board{position:fixed;top:10px;left:50%;transform:translateX(-50%) scale(.82);transform-origin:top center;z-index:6;width:min(560px,46vw);background:rgba(15,32,24,.86);backdrop-filter:blur(2px)}
+.app.deskApp>.matchup{position:fixed;left:14px;bottom:14px;z-index:6;width:300px;grid-template-columns:1fr;gap:6px;transform:scale(.86);transform-origin:bottom left}
+.app.deskApp>.matchup>*{background:rgba(15,32,24,.88);backdrop-filter:blur(2px)}
+.app.deskApp>.meter{position:fixed;left:50%;bottom:14px;transform:translateX(-50%) scale(.86);transform-origin:bottom center;z-index:6;width:min(460px,38vw);background:rgba(15,32,24,.86)}
+.app.deskApp>.acts,.app.deskApp>.pacts{position:fixed;right:14px;bottom:14px;z-index:6;width:330px;transform:scale(.86);transform-origin:bottom right}
+.app.deskApp>.acts{grid-template-columns:1fr 2.6fr}
+.app.deskApp>.acts .swing{min-height:70px;padding:14px 10px}
+.app.deskApp>.pacts{grid-template-columns:repeat(2,1fr)!important}
+.app.deskApp>.book{display:none}
+.app.deskApp .pcBox,.app.deskApp .bug{transform:scale(.9);transform-origin:top right}
+body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .app.deskApp>.meter,body.inMenu .app.deskApp>.acts,body.inMenu .app.deskApp>.pacts{display:none!important}

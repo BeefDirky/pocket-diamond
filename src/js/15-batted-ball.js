@@ -47,7 +47,7 @@ function intercept(gfn,t0,t1,cands,extra){
  return{i:bi,t:t1,p:{x:p.x,y:p.y}};
 }
 function runnerList(b){
- const arr=[];for(let k=3;k>=1;k--)if(S.bases[k-1])arr.push({from:k,who:S.bases[k-1],dest:k,start:0,speed:spdFt(S.bases[k-1]),out:false});
+ const arr=[];for(let k=3;k>=1;k--)if(S.bases[k-1]){const r={from:k,who:S.bases[k-1],dest:k,start:0,speed:spdFt(S.bases[k-1]),out:false};if(S.stealCarry&&S.stealCarry[k]!=null)r.L0=S.stealCarry[k];arr.push(r)}
  arr.push({from:0,who:b,batter:true,dest:0,start:.65,speed:spdFt(b),out:false});return arr;
 }
 const fieldName=s=>s<-28?'left':s<-10?'left-center':s<=10?'center':s<=28?'right-center':'right';
@@ -87,7 +87,7 @@ function finalize(play,runners,res){
   if(n&&S.outs+(res.outs||n)>=3&&!res.steal&&S.mode!=='bp'){play.endsInning=true;play.end=Math.min(play.end,lo+.75)}}
  ambient(play);   // background movement never lengthens the play
  for(const r of runners){const b=r.dest;if(b!==2&&b!==3&&!(b===4&&r.closeHome))continue;if(r.dest<=r.from)continue;
-  const L=(r.from>=1&&r.tagAt==null)?(LEADFT[r.from]+3)/LEG:0,tArr=r.start+((r.dest-r.from)-L)*LEG/r.speed;
+  const L=(r.from>=1&&r.tagAt==null)?(r.L0!=null?r.L0:(LEADFT[r.from]+3)/LEG):0,tArr=r.start+((r.dest-r.from)-L)*LEG/r.speed;
   let tThr=null;for(const sg of play.segs)if(sg.thr&&dist(sg.to,BASES[b%4])<5)tThr=sg.t1;
   if(r.steal||(r.out&&r.outAt!=null)||(tThr!=null&&Math.abs(tThr-tArr)<.7)){const tA=r.out?Math.min(tArr,r.outAt):tArr;r.slide={t0:tA-.32,t1:tA,head:r.steal||Math.random()<.4,b}}}
  {let tE=0;for(const sg of play.segs)tE=Math.max(tE,sg.t1);

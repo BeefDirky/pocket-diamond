@@ -112,10 +112,14 @@ function doContact(){
    const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});setPhase('play');return}
   S.play=netRand(()=>simulateBunt(curBatter()));sfx('crack',.1);spawnFlash(6);setPhase('play');setCam('follow');return;
  }
+ // a runner who broke on the pitch keeps his jump: how far down the line he is when the bat meets the ball
+ // (measured on the pitch's own clock, so both online screens agree)
+ S.stealCarry=null;if(S.steal&&S.pitch){const el=(S.pitch.travel+Math.max(0,S.swing.err||0))/1000*SPEED;
+  for(const k of[1,2])if(S.steal[k]&&S.bases[k-1]&&!S.bases[k]){(S.stealCarry=S.stealCarry||{})[k]=Math.min(.9,(LEADFT[k]+3)/LEG+el*spdFt(S.bases[k-1])/LEG)}}
  S.steal=null;
  const sw=S.swing;sw.done=true;if(!sw.cpu)showTiming(sw.err);spawnFlash(14);
  const b=curBatter();
- S.play=netRand(()=>simulateContact(sw.err,effHand(b),b));
+ S.play=netRand(()=>simulateContact(sw.err,effHand(b),b));S.stealCarry=null;
  {const r=S.play.res;if(S.mode!=='bp'&&!S.play.foul&&batKey()===S.you&&(r.hr||S.play.deep||r.runs>0))sfx('bigcheer')}
  const q=clamp(1-Math.pow(Math.abs(sw.err)/WIN,1.25),0,1);
  if(!S.play.foul&&(S.play.res.hr||S.play.deep)&&BUF.echo1&&!muted)playSample(pick(['echo1','echo2','echo3']),.65+.35*q,1);else sfx('crack',q);
