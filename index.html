@@ -2371,7 +2371,20 @@ $('toBracket').addEventListener('click',()=>{$('over').hidden=true;toTitle();ope
 // re-sends the full game state with every windup, so the two screens can't drift apart.
 // Everything travels in room "presence" (latest-state, re-sent on reconnect), so nothing is lost if a message drops.
 let ROOM=null;
-(async()=>{try{ROOM=await claude.use('room')}catch(e){ROOM=null}})();
+// On a self-hosted copy there is no claude.ai room, so the same calls run over Supabase Realtime presence instead.
+const SUPA={url:'https://waikmdodbrirekjmqvug.supabase.co',key:'sb_publishable_iZ3XpRVvPInDsCRI3wxlBQ_jMKzDieT'};
+function supaRoom(){let sb=null;
+ const load=()=>sb?Promise.resolve(sb):new Promise((res,rej)=>{const mk=()=>{try{sb=window.supabase.createClient(SUPA.url,SUPA.key,{realtime:{params:{eventsPerSecond:30}}});res(sb)}catch(e){rej({code:'setup'})}};
+  if(window.supabase)return mk();const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';sc.onload=mk;sc.onerror=()=>rej({code:'offline'});document.head.appendChild(sc)});
+ return{join:async name=>{const c=await load();const me=Math.random().toString(36).slice(2,10);const ch=c.channel(name,{config:{presence:{key:me}}});let cbs=[];const state={};
+  const peers=()=>{const ps=ch.presenceState(),out=[];for(const k in ps){const m=ps[k][ps[k].length-1];out.push({sameTab:k===me,presence:(m&&m.s)||{}})}return out};
+  ch.on('presence',{event:'sync'},()=>{const pl=peers();for(const f of cbs)f({peers:pl})});
+  await new Promise((res,rej)=>{const t=setTimeout(()=>rej({code:'timeout'}),10000);ch.subscribe(st=>{if(st==='SUBSCRIBED'){clearTimeout(t);res()}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED'){clearTimeout(t);rej({code:st.toLowerCase()})}})});
+  let pend=false,busy=false;const push=async()=>{if(busy)return;busy=true;while(pend){pend=false;try{await ch.track({s:JSON.parse(JSON.stringify(state))})}catch(e){}}busy=false};
+  return{presence:async patch=>{Object.assign(state,patch);pend=true;push()},onPeers:f=>{cbs.push(f);return()=>{cbs=cbs.filter(x=>x!==f)}},
+   leave:async()=>{cbs=[];try{await ch.untrack()}catch(e){}try{await c.removeChannel(ch)}catch(e){}}}}}}
+(async()=>{if(typeof claude!=='undefined'){try{ROOM=await claude.use('room')}catch(e){ROOM=null}}
+ if(!ROOM&&/^https:/.test(SUPA.url)&&typeof claude==='undefined')ROOM=supaRoom()})();
 function netRand(fn){if(!S.online||!S.online.inGame||!S.pitch||!S.pitch.pid)return fn();const r=Math.random;Math.random=mulberry32(hash(S.online.gid+'|'+S.pitch.pid));try{return fn()}finally{Math.random=r}}
 function netPresence(patch){const o=S.online;if(!o||!o.nr)return;Object.assign(o.mine,patch);o.nr.presence(patch).catch(()=>{})}
 function snapState(){const T=TEAMS[batKey()];return{i:S.inning,h:S.half,o:S.outs,b:S.balls,s:S.strikes,r:S.runs,t:S.target,hs:[S.hits,S.oppHits,S.errs||0,S.myErrs||0],bs:S.bases.map(p=>p?T.lineup.indexOf(p):-1),or:S.orderOf,pi:S.pIdxOf,pc:S.pcOf,pr:S.pRunsOf,pb:S.pBFOf,yl:S.youLine,ol:S.oppLine,n:S.totalInn}}
@@ -2413,10 +2426,13 @@ function lobbyRender(){const o=S.online;if(!o)return;$('olStart').hidden=!!o.nr;
  const same=thK&&thK===meK;
  $('olStatus').textContent=!o.opp?'Share the code. Waiting for your friend to join…':same?'You both picked the same club. One of you needs to switch (Back, then pick another).':o.role==='host'?'Both here. Start when ready.':'Both here. Waiting for the host to start.';
  $('olGo').hidden=!(o.role==='host'&&o.opp&&!same)}
-async function joinRoom(code,role){if(!ROOM){$('olNote').textContent='Online play needs this game opened on claude.ai while signed in (and your friend needs access to it).';return}
- code=code.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4);if(code.length<4){$('olNote').textContent='Room codes are 4 letters.';return}
+async function joinRoom(code,role){const note=t=>{const n=$('olNote');n.textContent=t;n.style.color='var(--amber)';n.scrollIntoView({block:'nearest'})};
+ if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on play.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
+ code=code.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4);if(code.length<4){note('Room codes are 4 letters.');return}
  if(S.online&&S.online.nr)try{await S.online.nr.leave()}catch(e){}
- let nr;try{nr=await ROOM.join('pd-'+code)}catch(e){$('olNote').textContent='Could not reach the room ('+(e&&e.code||'error')+'). Try again.';return}
+ if(joinRoom.busy)return;joinRoom.busy=true;note('Connecting…');
+ let nr;try{nr=await ROOM.join('pd-'+code)}catch(e){joinRoom.busy=false;note('Could not reach the room ('+(e&&e.code||'error')+'). Check your connection and try again.');return}
+ joinRoom.busy=false;note(role==='host'?'Room open. Send your friend the code.':'Joined room '+code.toUpperCase()+'.');
  const o=S.online={code,role,me:role==='host'?'home':'away',nr,mine:{},opp:null,inGame:false};
  nr.onPeers(ch=>{const them=ch.peers.filter(p=>!p.sameTab&&p.presence&&p.presence.v===1&&p.presence.role!==o.role);const prev=o.opp;o.opp=them.length?them[0].presence:null;
   if(o.opp&&role==='guest'&&o.opp.start&&o.opp.start.gid!==o.gid&&!o.inGame)startOnline(o.opp.start);
