@@ -130,10 +130,13 @@ function render(now){
  for(let i=0;i<9&&!bpv;i++){
   let p;
   if(inPlay)p=fpos(play,i,t);
-  else if(ph==='reset'&&play){const a=fpos(play,i,play.end);const k=ease(Math.min(1,S.pt/450));p={x:lerp(a.x,POS[i].x,k),y:lerp(a.y,POS[i].y,k)}}
+  else if((ph==='result'||ph==='reset')&&play&&!play.foul){const a=fpos(play,i,play.end),el=Math.max(0,(now-(S.postAt||now))/1000),off=S.postOff,tgt=off?{x:off*84+(i-4)*3,y:14+i}:POS[i];
+   const d=dist(a,tgt),m=Math.min(d,el*(off?9:i>=6?15:11)*SPEED);p=d>.01?{x:a.x+(tgt.x-a.x)*m/d,y:a.y+(tgt.y-a.y)*m/d}:{...tgt};
+   if(ph==='reset'&&!off){const k=ease(clamp((S.pt-260)/240,0,1));p={x:lerp(p.x,POS[i].x,k),y:lerp(p.y,POS[i].y,k)}}
+   p.mv=d-m>1&&!(ph==='reset'&&S.pt>260&&!off)}
   else p=POS[i];
   const q=toPx(p.x,p.y);
-  const moving=(inPlay&&play.fk[i]&&dist(fpos(play,i,t),fpos(play,i,Math.max(0,t-.05)))>.3)||(ph==='reset'&&play&&S.pt<450&&dist(fpos(play,i,play.end),POS[i])>2);
+  const moving=(inPlay&&play.fk[i]&&dist(fpos(play,i,t),fpos(play,i,Math.max(0,t-.05)))>.3)||!!p.mv;
   let legs=moving?'run':'stand',arms=moving?'run':'down';
   if(!moving&&live){legs='ready';arms='ready'}
   if(!moving&&!live&&!inPlay&&Math.sin(now/700+i*1.7)>.85)legs='ready';

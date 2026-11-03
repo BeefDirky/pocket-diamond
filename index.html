@@ -2076,6 +2076,8 @@ function finalize(play,runners,res){
  for(const r of runners)e=Math.max(e,r.out?r.outAt:r.start+Math.abs(r.dest-r.from)*LEG/r.speed+(r.batter&&r.dest===1?(r.round?1.45:.95):0));
  for(const k in play.fk){const ks=play.fk[k];e=Math.max(e,ks[ks.length-1].t)}
  play.end=e+.6;
+ {let lo=0,n=0;for(const r of runners)if(r.out){n++;lo=Math.max(lo,r.outAt||0)}play.lastOutAt=n?lo:null;
+  if(n&&S.outs+(res.outs||n)>=3&&!res.steal&&S.mode!=='bp'){play.endsInning=true;play.end=Math.min(play.end,lo+.75)}}
  ambient(play);   // background movement never lengthens the play
  for(const r of runners){const b=r.dest;if(b!==2&&b!==3&&!(b===4&&r.closeHome))continue;if(r.dest<=r.from)continue;
   const L=(r.from>=1&&r.tagAt==null)?(LEADFT[r.from]+3)/LEG:0,tArr=r.start+((r.dest-r.from)-L)*LEG/r.speed;
@@ -2432,6 +2434,10 @@ function hrMoment(r){const now=performance.now();$('skipBtn').hidden=!!(S.online
  if(batKey()===S.you){const pl=S.play;S.hrHype=pl;setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700);
   setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700+((BUF.horn&&BUF.horn.duration)||4.8)*1000+250)}
  if(batKey()===S.you){S.cheerUntil=now+1e9;S.fwUntil=now+4600;setTimeout(()=>{if(!S.paused&&!muted)playSample('fworks',.85,1)},350);S.jumbo={text:r.banner.replace('!',''),kr:'홈런!',until:now+5200}}}
+const sideLabel=()=>S.mode==='arcade'?'INNING OVER':'CHANGE SIDES';
+// would three outs right now end the whole game? (then the final screen does the talking)
+function willEndGame(applied){if(S.mode==='arcade')return S.inning>=S.totalInn;const n=S.schedInn||9;if(S.inning<n)return false;
+ return S.half==='top'?S.runs>S.target:S.runs!==S.target}
 function finishPlay(){
  $('skipBtn').hidden=true;
  if(S.hrHype&&S.hrHype===S.play){S.hrHype=null;S.cheerUntil=performance.now()+2600}
@@ -2453,12 +2459,14 @@ function finishPlay(){
   if(r.desc)logPA(curBatter(),r.desc,!!r.hit||runs>0);
   const runTxt=`+${runs} RUN${runs>1?'S':''}`;
   const sub=isWalkoff()?'Walk-off!':r.hr?runTxt:r.sub||(runs?runTxt:r.desc);
-  banner(r.banner,sub,r.tone);
+  if(outsAfter>=3&&!willEndGame(true)){banner(sideLabel(),r.desc||'Three outs')}else banner(r.banner,sub,r.tone);
   if(!r.hr){sfx(r.hit?'hit':'out');if(mine?(r.hit||runs):r.outs>0)S.cheerUntil=now+2200;if((r.hit||r.code==='E'||r.code==='IFH')&&!r.steal&&!S.play.reachCued)crowdReach()}
   if(r.hr){}
   else if(runs)S.jumbo={text:runs>1?`${runs} RUNS SCORE`:'RUN SCORES',until:now+3000};
   if(!r.steal)nextBatter();
+  S.postOff=outsAfter>=3?(fldKey()===S.you?1:-1):0;
  }
+ S.postAt=now;if(!(S.outs>=3))S.postOff=0;
  setPhase('result');updateHUD();
 }
 function afterPA(){
@@ -3687,10 +3695,13 @@ function render(now){
  for(let i=0;i<9&&!bpv;i++){
   let p;
   if(inPlay)p=fpos(play,i,t);
-  else if(ph==='reset'&&play){const a=fpos(play,i,play.end);const k=ease(Math.min(1,S.pt/450));p={x:lerp(a.x,POS[i].x,k),y:lerp(a.y,POS[i].y,k)}}
+  else if((ph==='result'||ph==='reset')&&play&&!play.foul){const a=fpos(play,i,play.end),el=Math.max(0,(now-(S.postAt||now))/1000),off=S.postOff,tgt=off?{x:off*84+(i-4)*3,y:14+i}:POS[i];
+   const d=dist(a,tgt),m=Math.min(d,el*(off?9:i>=6?15:11)*SPEED);p=d>.01?{x:a.x+(tgt.x-a.x)*m/d,y:a.y+(tgt.y-a.y)*m/d}:{...tgt};
+   if(ph==='reset'&&!off){const k=ease(clamp((S.pt-260)/240,0,1));p={x:lerp(p.x,POS[i].x,k),y:lerp(p.y,POS[i].y,k)}}
+   p.mv=d-m>1&&!(ph==='reset'&&S.pt>260&&!off)}
   else p=POS[i];
   const q=toPx(p.x,p.y);
-  const moving=(inPlay&&play.fk[i]&&dist(fpos(play,i,t),fpos(play,i,Math.max(0,t-.05)))>.3)||(ph==='reset'&&play&&S.pt<450&&dist(fpos(play,i,play.end),POS[i])>2);
+  const moving=(inPlay&&play.fk[i]&&dist(fpos(play,i,t),fpos(play,i,Math.max(0,t-.05)))>.3)||!!p.mv;
   let legs=moving?'run':'stand',arms=moving?'run':'down';
   if(!moving&&live){legs='ready';arms='ready'}
   if(!moving&&!live&&!inPlay&&Math.sin(now/700+i*1.7)>.85)legs='ready';
@@ -3909,6 +3920,7 @@ function update(dt,now){
     if(wo&&S.mode!=='bp'&&outsAfter<3&&S.runs+(r.runs||0)>S.target){if(r.hr)pl.woAt=pl.ballGone||0;else{const need=S.target+1-S.runs;
       const arr=(pl.runners||[]).filter(x=>x.dest===4&&!x.out).map(x=>x.start+(4-x.from)*LEG/x.speed).sort((a,b)=>a-b);pl.woAt=arr[need-1]!=null?arr[need-1]:pl.end-.4}}}
    if(pl.woAt>=0&&pl.t>=pl.woAt&&!pl.woFired){pl.woFired=true;startCelebration(true);S.cheerUntil=performance.now()+1e9}
+   if(pl.endsInning&&!pl.ioFired&&pl.t>=pl.lastOutAt&&!willEndGame()){pl.ioFired=true;banner(sideLabel(),r.desc||'Three outs')}
    if(r&&!pl.reachCued&&!r.steal&&!r.hr&&(r.hit||r.code==='E'||r.code==='IFH')&&S.mode!=='bp'&&pl.t>=pl.reachAt){pl.reachCued=true;crowdReach(r.code==='E')}
    {const dT=pl.watch!=null?pl.watch+(pl.flip?pl.flip.dur:1.1):.6;if(!pl.foul&&!pl.bp&&!(pl.res&&pl.res.steal)&&t0<dT&&pl.t>=dT)sfx('drop')}
    for(const sg of pl.segs)if(sg.snd&&!sg.sounded&&pl.t>=sg.t1){sg.sounded=true;sfx('glove')}

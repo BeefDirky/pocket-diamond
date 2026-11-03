@@ -318,6 +318,10 @@ function hrMoment(r){const now=performance.now();$('skipBtn').hidden=!!(S.online
  if(batKey()===S.you){const pl=S.play;S.hrHype=pl;setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700);
   setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700+((BUF.horn&&BUF.horn.duration)||4.8)*1000+250)}
  if(batKey()===S.you){S.cheerUntil=now+1e9;S.fwUntil=now+4600;setTimeout(()=>{if(!S.paused&&!muted)playSample('fworks',.85,1)},350);S.jumbo={text:r.banner.replace('!',''),kr:'홈런!',until:now+5200}}}
+const sideLabel=()=>S.mode==='arcade'?'INNING OVER':'CHANGE SIDES';
+// would three outs right now end the whole game? (then the final screen does the talking)
+function willEndGame(applied){if(S.mode==='arcade')return S.inning>=S.totalInn;const n=S.schedInn||9;if(S.inning<n)return false;
+ return S.half==='top'?S.runs>S.target:S.runs!==S.target}
 function finishPlay(){
  $('skipBtn').hidden=true;
  if(S.hrHype&&S.hrHype===S.play){S.hrHype=null;S.cheerUntil=performance.now()+2600}
@@ -339,12 +343,14 @@ function finishPlay(){
   if(r.desc)logPA(curBatter(),r.desc,!!r.hit||runs>0);
   const runTxt=`+${runs} RUN${runs>1?'S':''}`;
   const sub=isWalkoff()?'Walk-off!':r.hr?runTxt:r.sub||(runs?runTxt:r.desc);
-  banner(r.banner,sub,r.tone);
+  if(outsAfter>=3&&!willEndGame(true)){banner(sideLabel(),r.desc||'Three outs')}else banner(r.banner,sub,r.tone);
   if(!r.hr){sfx(r.hit?'hit':'out');if(mine?(r.hit||runs):r.outs>0)S.cheerUntil=now+2200;if((r.hit||r.code==='E'||r.code==='IFH')&&!r.steal&&!S.play.reachCued)crowdReach()}
   if(r.hr){}
   else if(runs)S.jumbo={text:runs>1?`${runs} RUNS SCORE`:'RUN SCORES',until:now+3000};
   if(!r.steal)nextBatter();
+  S.postOff=outsAfter>=3?(fldKey()===S.you?1:-1):0;
  }
+ S.postAt=now;if(!(S.outs>=3))S.postOff=0;
  setPhase('result');updateHUD();
 }
 function afterPA(){

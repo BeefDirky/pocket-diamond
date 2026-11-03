@@ -83,6 +83,8 @@ function finalize(play,runners,res){
  for(const r of runners)e=Math.max(e,r.out?r.outAt:r.start+Math.abs(r.dest-r.from)*LEG/r.speed+(r.batter&&r.dest===1?(r.round?1.45:.95):0));
  for(const k in play.fk){const ks=play.fk[k];e=Math.max(e,ks[ks.length-1].t)}
  play.end=e+.6;
+ {let lo=0,n=0;for(const r of runners)if(r.out){n++;lo=Math.max(lo,r.outAt||0)}play.lastOutAt=n?lo:null;
+  if(n&&S.outs+(res.outs||n)>=3&&!res.steal&&S.mode!=='bp'){play.endsInning=true;play.end=Math.min(play.end,lo+.75)}}
  ambient(play);   // background movement never lengthens the play
  for(const r of runners){const b=r.dest;if(b!==2&&b!==3&&!(b===4&&r.closeHome))continue;if(r.dest<=r.from)continue;
   const L=(r.from>=1&&r.tagAt==null)?(LEADFT[r.from]+3)/LEG:0,tArr=r.start+((r.dest-r.from)-L)*LEG/r.speed;
