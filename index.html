@@ -572,6 +572,9 @@ body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .a
  .app.deskApp .infoBtn{bottom:82px}.app.deskApp .autoBtn{bottom:84px}.app.deskApp .skipBtn{bottom:116px}
  .app.deskApp .zoomCtl{bottom:10px;left:10px}
 }
+body.bpMode .board{display:none!important}
+/* batting practice on the full-screen layout: the pitch picker sits to the left of Swing/Bunt */
+.app.deskApp>.acts.withBP .bpBar{position:absolute;right:calc(100% + 10px);bottom:0;width:200px;grid-column:auto}
 </style>
 
 <div class="app">
@@ -1979,7 +1982,7 @@ function sdamp(cur,target,vel,st,dt){const om=2/st,x=om*dt,e=1/(1+x+.48*x*x+.235
 let VA=H/W;
 // the world past the park walls: every park sits in its neighborhood (drawn at half resolution), so the camera may
 // pan and zoom out past the stands. EXT is how far that neighborhood reaches beyond the park buffer on each side.
-const EXT_M={mx:1100,my:900},EXT=()=>S.mode==='bp'||S.phase==='title'?{mx:0,my:0}:EXT_M;
+const EXT_M={mx:1100,my:900},EXT=()=>S.phase==='title'?{mx:0,my:0}:EXT_M;
 const zFit=()=>{const e=EXT();return e.mx?Math.max(W/(W+2*e.mx),W*VA/(H+2*e.my)):Math.min(1,W*VA/H)};// widest zoom allowed
 function viewWH(z){const HH=H+2*EXT().my;let vw=W/z,vh=vw*VA;if(vh>HH){vh=HH;vw=HH/VA}return[vw,vh]}
 function clampCam(c){const e=EXT(),[vw,vh]=viewWH(c.z),WW=W+2*e.mx,HH=H+2*e.my;
@@ -2823,7 +2826,7 @@ function logPA(b,desc,good){
  log.prepend(li);while(log.children.length>14)log.lastChild.remove();
 }
 function bulbs(id,n,on,cls){$(id).innerHTML=Array.from({length:n},(_,i)=>`<i class="bulb ${cls}${i<on?' on':''}"></i>`).join('')}
-function updateHUD(){
+function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.phase!=='title');
  const you=TEAMS[S.you],opp=TEAMS[S.opp],n=S.totalInn;
  const started=S.phase!=='title';
  let h='<tr><th></th>';for(let i=0;i<n;i++)h+=`<th>${i+1}</th>`;h+='<th>R</th><th>H</th><th>E</th></tr>';

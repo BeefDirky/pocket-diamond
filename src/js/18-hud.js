@@ -15,7 +15,7 @@ function logPA(b,desc,good){
  log.prepend(li);while(log.children.length>14)log.lastChild.remove();
 }
 function bulbs(id,n,on,cls){$(id).innerHTML=Array.from({length:n},(_,i)=>`<i class="bulb ${cls}${i<on?' on':''}"></i>`).join('')}
-function updateHUD(){
+function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.phase!=='title');
  const you=TEAMS[S.you],opp=TEAMS[S.opp],n=S.totalInn;
  const started=S.phase!=='title';
  let h='<tr><th></th>';for(let i=0;i<n;i++)h+=`<th>${i+1}</th>`;h+='<th>R</th><th>H</th><th>E</th></tr>';

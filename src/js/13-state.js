@@ -19,7 +19,7 @@ function sdamp(cur,target,vel,st,dt){const om=2/st,x=om*dt,e=1/(1+x+.48*x*x+.235
 let VA=H/W;
 // the world past the park walls: every park sits in its neighborhood (drawn at half resolution), so the camera may
 // pan and zoom out past the stands. EXT is how far that neighborhood reaches beyond the park buffer on each side.
-const EXT_M={mx:1100,my:900},EXT=()=>S.mode==='bp'||S.phase==='title'?{mx:0,my:0}:EXT_M;
+const EXT_M={mx:1100,my:900},EXT=()=>S.phase==='title'?{mx:0,my:0}:EXT_M;
 const zFit=()=>{const e=EXT();return e.mx?Math.max(W/(W+2*e.mx),W*VA/(H+2*e.my)):Math.min(1,W*VA/H)};// widest zoom allowed
 function viewWH(z){const HH=H+2*EXT().my;let vw=W/z,vh=vw*VA;if(vh>HH){vh=HH;vw=HH/VA}return[vw,vh]}
 function clampCam(c){const e=EXT(),[vw,vh]=viewWH(c.z),WW=W+2*e.mx,HH=H+2*e.my;

@@ -561,3 +561,6 @@ body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .a
  .app.deskApp .infoBtn{bottom:82px}.app.deskApp .autoBtn{bottom:84px}.app.deskApp .skipBtn{bottom:116px}
  .app.deskApp .zoomCtl{bottom:10px;left:10px}
 }
+body.bpMode .board{display:none!important}
+/* batting practice on the full-screen layout: the pitch picker sits to the left of Swing/Bunt */
+.app.deskApp>.acts.withBP .bpBar{position:absolute;right:calc(100% + 10px);bottom:0;width:200px;grid-column:auto}
