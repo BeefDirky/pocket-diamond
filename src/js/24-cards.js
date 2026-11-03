@@ -14,7 +14,7 @@ function buildCardDB(){
  for(const c of buildBigLeague()){CARDS.push(c);CARD_BY[c.id]=c}
 }
 const ART={};
-function cardArt(c){if(ART[c.id])return ART[c.id];
+function cardArt(c){if(ART[c.id])return ART[c.id];try{return ART[c.id]=cardArt2(c)}catch(e){}
  const T=c.T||TEAMS[c.k],ST2=c.set==='bl'?BL_PARK:STADIUMS[c.k],p=c.p,cv2=document.createElement('canvas');cv2.width=64;cv2.height=80;const g=cv2.getContext('2d');
  const rr=mulberry32(hash(c.id+'art'));
  // backdrop: crowd, wall, grass, dirt where he plays
@@ -44,7 +44,7 @@ function cardArt(c){if(ART[c.id])return ART[c.id];
 function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],p=c.p,own=COL.owned[c.id]|0,lock=opts.lock;
  const st=c.pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl],['DEF',p.def]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
  const tag=p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'';
- return `<div class="tc r${c.r}${lock?' lock':''}" data-id="${c.id}" style="--tj:${T.jersey};--tc:${T.cap}">
+ return `<div class="tc r${c.r}${lock?' lock':''}${c.set==='bl'?' bl':''}" data-id="${c.id}" style="--tj:${T.jersey};--tc:${T.cap}">
   <div class="tcHead"><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">${c.set==='bl'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(c.o)}"`}>${lock?'??':c.o}</span></div>
   <img class="art" alt="" src="${cardArt(c)}">
   <div class="nm">${lock?'???':p.name}</div>

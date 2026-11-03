@@ -493,3 +493,15 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 .xClose:hover{border-color:var(--amber);color:var(--amber)}
 .card.hasX>h1,.card.hasX>.ckTop,.card.hasX>.lnTop{padding-right:44px}
 .mbtn.back[hidden]{display:none}
+
+/* card finishes: epic holo, legend gold foil, big-league frame */
+.tc.r2:not(.lock) .art{filter:saturate(1.12)}
+.tc.r2:not(.lock)::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;mix-blend-mode:color-dodge;opacity:.22;background:linear-gradient(125deg,#ff6fb5,#ffe36b,#6fffd2,#6fb8ff,#c86fff,#ff6fb5);background-size:300% 300%;animation:holo 5s linear infinite}
+.tc.r3:not(.lock){border-image:linear-gradient(135deg,#fff3b0,#ffcf4a 30%,#b8860b 50%,#ffe68a 70%,#ffcf4a) 1;box-shadow:inset 0 0 0 2px rgba(0,0,0,.35),0 0 10px rgba(255,207,74,.45)}
+.tc.r3:not(.lock)::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;mix-blend-mode:overlay;background:repeating-linear-gradient(115deg,rgba(255,240,180,0) 0 18px,rgba(255,240,180,.28) 22px,rgba(255,240,180,0) 26px);background-size:200% 100%;animation:foil 3.2s linear infinite}
+.tc.bl{background:linear-gradient(160deg,var(--tj) 0 46%,var(--tc) 46% 100%),#0b1430}
+.tc.bl .tcHead{background:linear-gradient(90deg,rgba(8,12,30,.85),rgba(8,12,30,.55))}
+.tc.bl .rar::before{content:"★ BIG LEAGUE · "}
+@keyframes holo{to{background-position:300% 0}}
+@keyframes foil{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.tc::before{animation:none!important}}
