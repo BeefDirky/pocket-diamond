@@ -1384,17 +1384,15 @@ function blit(g,map,cols,x0,y0){
 // at half resolution. Neighborhood pixel (cx,cy) is world pixel (cx*2-mx, cy*2-my).
 let PARK_OUTLINE=null,OUT_CV=null,OUT_KEY='';
 function parkOutline(){
- // a classic ballpark footprint: a V behind home plate with a tight rounded tip, sides slanting up and out along
- // the lines, slanting back in at the top corners, and a gradual arc across the outfield
- const sx=W/2-8,tipY=H-8,armY=HY-150,topY=8,cornerY=90,cornerX=W*.34,sideTopY=Math.max(cornerY+120,HY-880);
- const half=[[0,tipY],[sx,armY],[sx-26,sideTopY],[cornerX,cornerY]];
- // top arc from the right corner over to the left corner
- const arc=[];for(let k=1;k<12;k++){const u=k/12,x=cornerX*(1-2*u),y=topY+(cornerY-topY)*Math.pow(Math.abs(1-2*u),1.6);arc.push([x,y])}
- let pts=[...half.map(([x,y])=>[x,y]),...arc,...half.slice(1).reverse().map(([x,y])=>[-x,y])];
- // Chaikin smoothing rounds every corner; the tip keeps a tighter radius because it gets one pass fewer
- const chaikin=(P,keep)=>{const out=[];for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];if(keep&&i===0){out.push(a)}
-   out.push([a[0]*.75+b[0]*.25,a[1]*.75+b[1]*.25],[a[0]*.25+b[0]*.75,a[1]*.25+b[1]*.75])}return out};
- pts=chaikin(pts,false);pts=chaikin(pts,false);pts=chaikin(pts,false);
+ // a ballpark footprint shaped like a wide V: a pointed (lightly rounded) tip behind home, long straight arms
+ // running up and out behind the foul lines to wide wings at the corners, then the roofline angling back in
+ // toward center field, with a short flat top. Slight smoothing keeps the corners crisp but not jagged.
+ const sx=W/2-6,tipY=H-6,wingY=Math.round(tipY-sx*1.12),wing2Y=wingY-70,shX=W*.27,shY=64,topY=14;
+ const half=[[0,tipY],[sx,wingY],[sx,wing2Y],[shX,shY],[shX*.35,topY]];
+ let pts=[...half,...half.slice(1).reverse().map(([x,y])=>[-x,y])];
+ const chaikin=P=>{const out=[];for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];
+   out.push([a[0]*.85+b[0]*.15,a[1]*.85+b[1]*.15],[a[0]*.15+b[0]*.85,a[1]*.15+b[1]*.85])}return out};
+ pts=chaikin(pts);pts=chaikin(pts);
  return pts.map(([x,y])=>({x:HX+x,y}))}
 function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
