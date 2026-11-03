@@ -49,7 +49,7 @@ function buildSigns(){
   if(night){const gr=g.createRadialGradient(tx,ty,4,tx,ty,64);gr.addColorStop(0,'rgba(255,246,210,.45)');gr.addColorStop(1,'rgba(255,246,210,0)');g.fillStyle=gr;g.fillRect(tx-64,ty-64,128,128)}
   TOWERS.push({x:tx*K,y:ty*K});
  });
- drawLandmark(g,night);
+ // (the city mural billboard was retired; the neighborhood outside the park carries the city now)
  return c;
 }
 

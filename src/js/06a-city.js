@@ -13,6 +13,7 @@ function parkOutline(){
    out.push([a[0]*.85+b[0]*.15,a[1]*.85+b[1]*.15],[a[0]*.15+b[0]*.85,a[1]*.15+b[1]*.85])}return out};
  pts=chaikin(pts);pts=chaikin(pts);
  return pts.map(([x,y])=>({x:HX+x,y}))}
+const hexRGB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
  if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();OUT_CV=buildOutside(S.you,!!S.night);OUT_FEATHER=buildFeather(OUT_CV);OUT_KEY=key}return OUT_CV}
@@ -98,22 +99,67 @@ function buildOutside(k,night){
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
  if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}// the city dims at night; the stadium stays lit
  // ---- the stands keep going past the park buffer, out to the outer wall ----
- {const ST=STADIUMS[k],hx=cx(HX),hy=cy(HY);g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
-  g.fillStyle=ST.seat[1];g.fillRect(0,0,CW,CH);
-  // rows: rings around home plate, lower bowl in the club's main color, a concourse, then the upper deck
-  // rows continue in the same seat colors the park uses, with a walkway ring every so often
-  for(let r=8;r<1500;r+=3){const ring=(r%90)<3;g.strokeStyle=ring?(night?'#2a2f36':'#8d939a'):ST.seat[(r/3|0)%2];g.lineWidth=3.2;g.beginPath();g.arc(hx,hy,r,0,Math.PI*2);g.stroke()}
-  // aisles every few degrees, and a stair every so often
-  g.strokeStyle=night?'rgba(0,0,0,.35)':'rgba(30,34,40,.35)';g.lineWidth=1.4;for(let a=0;a<360;a+=6){const A=a*RAD;g.beginPath();g.moveTo(hx,hy);g.lineTo(hx+Math.cos(A)*1600,hy+Math.sin(A)*1600);g.stroke()}
-  // the crowd
-  const shirts=['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f38d2e','#f1ecdc','#6c7a86',T.jersey,T.jersey,T.jersey,T.cap];
-  let minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;for(const q of OL){minX=Math.min(minX,q.x);maxX=Math.max(maxX,q.x);minY=Math.min(minY,q.y);maxY=Math.max(maxY,q.y)}
-  const bx0=cx(0),by0=cy(0),bx1=cx(W),by1=cy(H);
-  for(let n=0;n<60000;n++){const x=minX+rr()*(maxX-minX),y=minY+rr()*(maxY-minY);if(x>bx0&&x<bx1&&y>by0&&y<by1)continue;if(!insidePoly(OL,x,y))continue;
-   const sc=shirts[Math.floor(rr()*shirts.length)];g.fillStyle=night?shade(sc,-.35):sc;g.fillRect(Math.round(x),Math.round(y),1,1);if(rr()<.4){g.fillStyle=SKINS[Math.floor(rr()*5)];g.fillRect(Math.round(x),Math.round(y)-1,1,1)}}
-  // at night the light towers wash the whole bowl, brightest near the field
-  if(night){const gl=g.createRadialGradient(hx,cy(HY-500),60,hx,cy(HY-500),900);gl.addColorStop(0,'rgba(255,246,210,.18)');gl.addColorStop(1,'rgba(0,0,0,.25)');g.fillStyle=gl;g.fillRect(0,0,CW,CH)}
+ // Painted with the same rules the park buffer uses (rows that follow the wall, risers, aisles toward home, the upper
+ // deck colors, the outfield features) and the same crowd on the same 8px grid, so the two halves read as one bowl.
+ {const ST=STADIUMS[k],C=PARK_C,img=g.getImageData(0,0,CW,CH),d=img.data,N=CW*CH;
+  const mc=document.createElement('canvas');mc.width=CW;mc.height=CH;const mg=mc.getContext('2d');mg.beginPath();OL.forEach((q,i)=>mg[i?'lineTo':'moveTo'](q.x,q.y));mg.closePath();mg.fill();
+  const md=mg.getImageData(0,0,CW,CH).data;
+  const wX=px=>(px+.5)*2-e.mx,wY=py=>(py+.5)*2-e.my;
+  // the playing field mask (same test as the park buffer), then the distance from it
+  const A=new Int32Array(N);
+  for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const x=(wX(px)-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
+   const fair=Math.abs(th)<=45&&y>=0,perp=(Math.abs(x)-y)/Math.SQRT2,along=(Math.abs(x)+y)/Math.SQRT2;
+   A[py*CW+px]=(fair?r<fenceDist(th):((perp<40&&along<328&&along>-5)||r<34))?0:1e8}}
+  for(let py=0;py<CH;py++)for(let px=0;px<CW;px++){const i=py*CW+px;if(!A[i])continue;let v=A[i];
+   if(px>0)v=Math.min(v,A[i-1]+3);if(py>0){v=Math.min(v,A[i-CW]+3);if(px>0)v=Math.min(v,A[i-CW-1]+4);if(px<CW-1)v=Math.min(v,A[i-CW+1]+4)}A[i]=v}
+  for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!A[i])continue;let v=A[i];
+   if(px<CW-1)v=Math.min(v,A[i+1]+3);if(py<CH-1){v=Math.min(v,A[i+CW]+3);if(px<CW-1)v=Math.min(v,A[i+CW+1]+4);if(px>0)v=Math.min(v,A[i+CW-1]+4)}A[i]=v}
+  // and the distance from the stands, for the stretch of outfield grass that pokes past the buffer near the poles
+  const DI=new Int32Array(N);for(let i=0;i<N;i++)DI[i]=A[i]?0:1e8;
+  for(let py=0;py<CH;py++)for(let px=0;px<CW;px++){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
+   if(px>0)v=Math.min(v,DI[i-1]+3);if(py>0){v=Math.min(v,DI[i-CW]+3);if(px>0)v=Math.min(v,DI[i-CW-1]+4);if(px<CW-1)v=Math.min(v,DI[i-CW+1]+4)}DI[i]=v}
+  for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
+   if(px<CW-1)v=Math.min(v,DI[i+1]+3);if(py<CH-1){v=Math.min(v,DI[i+CW]+3);if(px<CW-1)v=Math.min(v,DI[i+CW+1]+4);if(px>0)v=Math.min(v,DI[i+CW-1]+4)}DI[i]=v}
+  const seatM=new Uint8Array(N);
+  // only the stretch outside the buffer (plus the strip the feather fades across) needs painting
+  const bx0=cx(0)+16,by0=cy(0)+16,bx1=cx(W)-16,by1=cy(H)-16;
+  const put=(i,c)=>{const j=i*4;d[j]=c[0];d[j+1]=c[1];d[j+2]=c[2];d[j+3]=255};
+  for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const i=py*CW+px;if(md[i*4+3]<128)continue;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;
+   const wx=wX(px),x=(wx-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fdh=fenceDist(th);let col=null,feat=null;
+   if(y>0){if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='sea';
+    else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
+    else if(ST.feature==='whale'&&ath<36&&r>fdh+14)feat='sea';
+    else if(ST.feature==='orchard'&&ath<36&&r>fdh+11)feat='orchard'}
+   if(feat==='sea'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
+   else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
+   else if(feat==='orchard'){const q=Math.round(wy),p2=Math.round(wx),cy2=Math.floor(q/22),cx2=Math.floor((p2+(cy2&1)*11)/22),lx=(p2+(cy2&1)*11)-cx2*22-11,ly=q-cy2*22-11,d2=lx*lx+ly*ly;
+    if(d2<64){col=d2<20&&lx<0&&ly<0?C.orT2:C.orT;if(((lx*7+ly*13+cx2*5+cy2*3)&15)===0)col=C.orF}else col=(q>>1)&1?C.orG:C.orG2}
+   else if(!A[i]){const dOut=DI[i]/3*2/K,fair=ath<=45&&y>=0,wallT=fair&&r>200?ST.wallFt*2:6;
+    col=dOut<wallT?(dOut<1.5?C.pad2:C.pad):(fair&&r>fdh-14)||(!fair&&dOut<wallT+12)?C.tr:(PARK_MOW(x,y,r)?C.g1:C.g2)}
+   else{const dO=A[i]/3*2/K;
+    if(dO<3)col=C.rail;
+    else if(dO>=112&&dO<124)col=C.conc;
+    else{const upper=dO>=124,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
+     if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;
+     else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;
+      if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
+   put(i,col)}}
+  // the crowd: same grid and density as the park, same club colors, drawn at this layer's half scale
+  const home=TEAMS[k],away=TEAMS[S.opp]||home,misc=['#e8d7c3','#f1ecdc','#6c7a86','#a8c6d8','#2b2b30','#c9a0dc','#7fbf6a','#d98c8c','#f4d58d'].map(hexRGB);
+  const hj=hexRGB(home.jersey),hc=hexRGB(home.cap),aj=hexRGB(away.jersey),ac=hexRGB(away.cap),sks=SKINS.map(hexRGB),hairs=['#2a1d14','#4a3020','#7a5230','#1a1a1a','#8a8a8a'].map(hexRGB),shadeC=c=>c.map(v=>v*.78|0);
+  const px4=(x,y,c)=>{if(x<0||y<0||x>=CW||y>=CH)return;const i=y*CW+x;if(md[i*4+3]<128)return;put(i,c)};
+  const g0x=((5+e.mx)/2)%4,g0y=((5+e.my)/2)%4;
+  for(let py=g0y|0;py<CH-2;py+=4)for(let px=g0x|0;px<CW-2;px+=4){const i=py*CW+px;if(!seatM[i]||!seatM[i-1]||!seatM[i+1])continue;if(px>bx0+4&&px<bx1-4&&py>by0+4&&py<by1-4)continue;if(rr()>.88)continue;
+   const wx=wX(px),wy=wY(py),ang=Math.atan2(wx-HX,HY-wy)/RAD,awaySide=ang<-50&&ang>-135,pr=rr(),pH=awaySide?.28:.6,pA=awaySide?.45:.1;
+   let sh,cap=null;if(pr<pH){sh=hj;if(rr()<.5)cap=hc}else if(pr<pH+pA){sh=aj;if(rr()<.5)cap=ac}else sh=misc[(rr()*misc.length)|0];
+   const sk=sks[(rr()*sks.length)|0];
+   px4(px-1,py,sh);px4(px,py,sh);px4(px+1,py,sh);px4(px-1,py+1,shadeC(sh));px4(px,py+1,shadeC(sh));px4(px+1,py+1,shadeC(sh));
+   px4(px,py-1,sk);px4(px,py-2,cap||hairs[(rr()*hairs.length)|0]);if(rr()<.5)px4(px-1,py-1,sk)}
+  // light: the same multiply the park gets, so day and night match across the seam
+  const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea];
+  for(let i=0;i<N;i++){if(md[i*4+3]<128)continue;const py=(i/CW)|0,px=i-py*CW;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;const j=i*4;d[j]=d[j]*lt[0]/255;d[j+1]=d[j+1]*lt[1]/255;d[j+2]=d[j+2]*lt[2]/255}
+  g.putImageData(img,0,0);
   // a soft shadow where the roof overhangs the top rows
-  g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.stroke();
-  g.restore()}
+  g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
+  g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.stroke();g.restore()}
  return c}

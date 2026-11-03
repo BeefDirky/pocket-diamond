@@ -33,7 +33,7 @@ function drawUlsan(g,now){
     for(let j=0;j<12;j++){const an=j/12*Math.PI*2;g.fillStyle=`rgba(232,246,255,${1-s})`;g.fillRect(Math.round(wp.x+Math.cos(an)*(14+s*26)),Math.round(wp.y+Math.sin(an)*(7+s*12)-Math.sin(s*Math.PI)*10),3,3)}}
    if(a>.2&&a<.6)spout(g,{x:wp.x-12,y:wp.y-10},(a-.2)/.4,true)}}
 }
-let WHALE={x:-120,y:400};
+let WHALE={x:-120,y:400},PARK_C=null,PARK_MOW=null;
 function buildField(){
  {const th=12,r=fenceDist(th)+30;WHALE={x:Math.sin(th*RAD)*r,y:Math.cos(th*RAD)*r}}
  const c=document.createElement('canvas');c.width=W;c.height=H;
@@ -65,8 +65,10 @@ function buildField(){
  const seatMask=new Uint8Array(W*H);
  Object.assign(C,{rail:hex('#5b6570'),conc:hex('#6b7480'),conc2:hex('#7a838e'),riser:hex('#26323b'),riserU:hex('#1c242c'),
   seat:hex(ST.seat[0]),seat2:hex(ST.seat[1]),seatU:hex(ST.seatU[0]),seatU2:hex(ST.seatU[1]),aisle:hex('#4d5761')});
+ PARK_C=C;
  const DUGC={1:dugoutFrame(1),'-1':dugoutFrame(-1)};
  const mowK=(x,y,r)=>ST.mow==='wave'?Math.floor((y+Math.sin(x*.06)*7)/17)&1:ST.mow==='stripe'?Math.floor(y/18)&1:ST.mow==='arc'?Math.floor(r/22)&1:ST.mow==='diag'?Math.floor((x+y)/20)&1:(Math.floor((x+y)/26)+Math.floor((x-y)/26))&1;
+ PARK_MOW=mowK;
  // pass 2: paint
  for(let py=0;py<H;py++)for(let px=0;px<W;px++){
   const i=py*W+px;const x=(px+.5-HX)*FT,y=(HY-(py+.5))*FT;const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
