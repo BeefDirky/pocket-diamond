@@ -17,8 +17,16 @@ function ensureAudio(){
    applyVolumes();
    for(const k in SND_B64){try{AC.decodeAudioData(b64buf(SND_B64[k]),bf=>{BUF[k]=bf;if(k==='organ')startOrgan();if(k==='crowd')startCrowd();if(k==='amb'&&!ambSrc)ambSrc=loopOn('amb',BUS.amb)},()=>{})}catch(e){}}}
  }
- if(AC&&AC.state==='suspended')AC.resume().catch(()=>{});
+ wakeAudio();
 }
+// Phones park the audio when you switch tabs or apps (iOS marks it "interrupted", Android "suspended").
+// It can only be woken by a tap, so every tap, key or return to the tab tries to wake it, and a silent
+// one-sample blip kicks iOS's output back on.
+function wakeAudio(){if(!AC||AC.state==='running'||AC.state==='closed'||S.paused)return;
+ try{AC.resume().then(()=>{try{const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0)}catch(e){}}).catch(()=>{})}catch(e){}}
+for(const ev of['pointerdown','touchend','keydown'])document.addEventListener(ev,()=>{if(AC&&AC.state!=='running')wakeAudio()},{capture:true,passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)wakeAudio()});
+addEventListener('pageshow',()=>wakeAudio());
 // organ ramp-up with runners in scoring position: duck the music, play the ramp, bring the music back
 function organRamp(){if(!AC||!BUF.ramp||muted||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;
  mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.7);

@@ -1683,8 +1683,16 @@ function ensureAudio(){
    applyVolumes();
    for(const k in SND_B64){fetch('audio/'+k+'.mp3').then(r=>r.arrayBuffer()).then(ab=>AC.decodeAudioData(ab,bf=>{BUF[k]=bf;if(k==='organ')startOrgan();if(k==='crowd')startCrowd();if(k==='amb'&&!ambSrc)ambSrc=loopOn('amb',BUS.amb)},()=>{})).catch(()=>{})}}
  }
- if(AC&&AC.state==='suspended')AC.resume().catch(()=>{});
+ wakeAudio();
 }
+// Phones park the audio when you switch tabs or apps (iOS marks it "interrupted", Android "suspended").
+// It can only be woken by a tap, so every tap, key or return to the tab tries to wake it, and a silent
+// one-sample blip kicks iOS's output back on.
+function wakeAudio(){if(!AC||AC.state==='running'||AC.state==='closed'||S.paused)return;
+ try{AC.resume().then(()=>{try{const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0)}catch(e){}}).catch(()=>{})}catch(e){}}
+for(const ev of['pointerdown','touchend','keydown'])document.addEventListener(ev,()=>{if(AC&&AC.state!=='running')wakeAudio()},{capture:true,passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)wakeAudio()});
+addEventListener('pageshow',()=>wakeAudio());
 // organ ramp-up with runners in scoring position: duck the music, play the ramp, bring the music back
 function organRamp(){if(!AC||!BUF.ramp||muted||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;
  mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.7);
@@ -2664,7 +2672,7 @@ function pauseGame(){if(!canPause())return;S.paused=true;pausedAt=performance.no
 function resumeGame(){if(!S.paused)return;const gap=performance.now()-pausedAt;
  if(S.pitch&&S.pitch.releaseAt)S.pitch.releaseAt+=gap;if(S.pitch&&S.meterT0)S.meterT0+=gap;if(S.swing){S.swing.at+=gap;if(S.swing.contactAt)S.swing.contactAt+=gap}
  for(const k of['cheerUntil','fwUntil','umpPunch','flame','wildUntil'])if(S[k])S[k]+=gap;
- S.paused=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');try{if(AC&&AC.state==='suspended')AC.resume()}catch(e){}}
+ S.paused=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}}
 function openOptionsInGame(){if(S.phase==='title'||S.phase==='over'){showScreen('scrOpts');return}if(!S.paused)pauseGame();optsFromGame=true;showScreen('scrOpts')}
 $('optBack').addEventListener('click',()=>{if(optsFromGame&&S.paused){optsFromGame=false;showScreen('scrPause')}else showScreen('scrMain')});
 $('pauseBtn').addEventListener('click',e=>{e.stopPropagation();pauseGame()});
@@ -2672,7 +2680,7 @@ $('pauseBtn').addEventListener('pointerdown',e=>e.stopPropagation());
 $('resume').addEventListener('click',resumeGame);
 $('pOpts').addEventListener('click',()=>{optsFromGame=true;showScreen('scrOpts')});
 $('pLine').addEventListener('click',()=>{lineFromPause=true;showScreen('scrLineup')});
-$('pQuit').addEventListener('click',()=>{S.paused=false;optsFromGame=false;try{if(AC&&AC.state==='suspended')AC.resume()}catch(e){}toTitle()});
+$('pQuit').addEventListener('click',()=>{S.paused=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const toMenu=b.dataset.go==='scrMain'||b.dataset.go==='scrSingle';if(parkFromBP&&toMenu){backToCage();return}if(lineFromPause&&S.paused&&toMenu){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
 // ---------- signings: put any card you own into your club's lineup or staff ----------

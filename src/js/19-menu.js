@@ -69,7 +69,7 @@ function pauseGame(){if(!canPause())return;S.paused=true;pausedAt=performance.no
 function resumeGame(){if(!S.paused)return;const gap=performance.now()-pausedAt;
  if(S.pitch&&S.pitch.releaseAt)S.pitch.releaseAt+=gap;if(S.pitch&&S.meterT0)S.meterT0+=gap;if(S.swing){S.swing.at+=gap;if(S.swing.contactAt)S.swing.contactAt+=gap}
  for(const k of['cheerUntil','fwUntil','umpPunch','flame','wildUntil'])if(S[k])S[k]+=gap;
- S.paused=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');try{if(AC&&AC.state==='suspended')AC.resume()}catch(e){}}
+ S.paused=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}}
 function openOptionsInGame(){if(S.phase==='title'||S.phase==='over'){showScreen('scrOpts');return}if(!S.paused)pauseGame();optsFromGame=true;showScreen('scrOpts')}
 $('optBack').addEventListener('click',()=>{if(optsFromGame&&S.paused){optsFromGame=false;showScreen('scrPause')}else showScreen('scrMain')});
 $('pauseBtn').addEventListener('click',e=>{e.stopPropagation();pauseGame()});
@@ -77,6 +77,6 @@ $('pauseBtn').addEventListener('pointerdown',e=>e.stopPropagation());
 $('resume').addEventListener('click',resumeGame);
 $('pOpts').addEventListener('click',()=>{optsFromGame=true;showScreen('scrOpts')});
 $('pLine').addEventListener('click',()=>{lineFromPause=true;showScreen('scrLineup')});
-$('pQuit').addEventListener('click',()=>{S.paused=false;optsFromGame=false;try{if(AC&&AC.state==='suspended')AC.resume()}catch(e){}toTitle()});
+$('pQuit').addEventListener('click',()=>{S.paused=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const toMenu=b.dataset.go==='scrMain'||b.dataset.go==='scrSingle';if(parkFromBP&&toMenu){backToCage();return}if(lineFromPause&&S.paused&&toMenu){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
