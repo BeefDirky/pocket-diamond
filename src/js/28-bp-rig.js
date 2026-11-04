@@ -343,7 +343,9 @@ function render(now){
  // to screen
  const C=clampCam(S.cam),[vw,vh]=viewWH(C.z),e=EXT();
  const vx0=C.x-vw/2,vy0=C.y-vh/2,scale=cv.height/vh;
- ctx.imageSmoothingEnabled=scale<1.6;ctx.imageSmoothingQuality='high';
+ // smoothing only when shrinking the park; 'high' quality re-filters the whole park every frame and stutters once
+ // zoomed out, so plain bilinear for mild shrinking and the mid setting only for the widest views
+ ctx.imageSmoothingEnabled=scale<1.6;ctx.imageSmoothingQuality=window.__sq||(scale<.5?'medium':'low');
  S.view={sx:vx0,sy:vy0,vw,vh,ox:0,scale};
  let OUT=e.mx?outsideFor():null;const inside=vx0>=0&&vy0>=0&&vx0+vw<=W&&vy0+vh<=H;
  // the usual close-up never reaches past the outer wall: skip the neighborhood and the clip entirely (cheap on phones)

@@ -23,7 +23,9 @@ function roofLights(){const key=S.you+(STADIUMS[S.you]?STADIUMS[S.you].dims.join
  return RL}
 // is bank i lit right now? (the home-run show: slow off/on blinks, each bank a little behind the one before it)
 function rlOn(){return true}// the roof ring stays on; the home-run show belongs to the light towers
-function drawRoofLights(c,vx0,vy0,scale,now){if(S.phase==='title')return;const R=roofLights(),night=!!S.night;
+let RL_GLOW=null;// one pre-drawn halo for every lamp bar (instead of a fresh gradient per lamp per frame)
+function rlGlow(){if(RL_GLOW)return RL_GLOW;const c=document.createElement('canvas');c.width=c.height=60;const g=c.getContext('2d'),gr=g.createRadialGradient(30,30,0,30,30,30);gr.addColorStop(0,'rgba(255,248,220,.4)');gr.addColorStop(1,'rgba(255,248,220,0)');g.fillStyle=gr;g.fillRect(0,0,60,60);return RL_GLOW=c}
+function drawRoofLights(c,vx0,vy0,scale,now){if(window.__noRL)return;if(S.phase==='title')return;const R=roofLights(),night=!!S.night;
  c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);
  if(night){c.save();c.clip(R.clip,'evenodd');c.globalCompositeOperation='lighter';
   for(const L of R){if(!rlOn(L,now))continue;c.save();c.translate(L.px,L.py);c.rotate(L.ang);c.drawImage(RL_POOL,-260,-170,520,340);c.restore()}
@@ -33,5 +35,5 @@ function drawRoofLights(c,vx0,vy0,scale,now){if(S.phase==='title')return;const R
   c.fillStyle='#2a3038';c.fillRect(-15,-3,30,9);c.fillStyle='#4a525c';c.fillRect(-15,-3,30,2);
   for(let k=0;k<4;k++){c.fillStyle=night?(on?'#fffbe8':'#3a3f46'):(on?'#d4dbe1':'#9aa3ab');c.fillRect(-13+k*7,1,5,4)}
   c.restore();
-  if(night&&on){c.save();c.globalCompositeOperation='lighter';const gr=c.createRadialGradient(L.x,L.y,0,L.x,L.y,30);gr.addColorStop(0,'rgba(255,248,220,.4)');gr.addColorStop(1,'rgba(255,248,220,0)');c.fillStyle=gr;c.fillRect(L.x-30,L.y-30,60,60);c.restore()}}
+  if(night&&on){c.save();c.globalCompositeOperation='lighter';c.drawImage(rlGlow(),L.x-30,L.y-30,60,60);c.restore()}}
  c.restore()}

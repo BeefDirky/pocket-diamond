@@ -13,8 +13,12 @@ function parkOutlineInner(){return outlineFrom([[0,HY+400],[1000,HY-600],[1000,H
 function parkOutline(){return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
 const hexRGB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
+// a canvas that was read back pixel by pixel (getImageData) gets parked in main memory by the browser, and then has to
+// be re-uploaded to the graphics card every frame it's drawn: an 11 MB upload, 60 times a second, once you zoom out
+// far enough to see the neighborhood. Copying it into a fresh canvas that's never read keeps it on the card.
+function gpuCopy(src){const c=document.createElement('canvas');c.width=src.width;c.height=src.height;c.getContext('2d').drawImage(src,0,0);return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(S.mode==='bp'&&S.phase!=='title'?'e':'')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
- if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();OUT_CV=buildOutside(S.you,!!S.night,S.mode==='bp'&&S.phase!=='title');OUT_FEATHER=buildFeather(OUT_CV);OUT_KEY=key}return OUT_CV}
+ if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();OUT_CV=gpuCopy(buildOutside(S.you,!!S.night,S.mode==='bp'&&S.phase!=='title'));OUT_FEATHER=buildFeather(OUT_CV);OUT_KEY=key}return OUT_CV}
 // the park buffer's straight edges would show as a seam where the extended stands begin: this overlay fades the
 // extended stands in over the last stretch of the buffer (static, so it costs one drawImage a frame)
 let OUT_FEATHER=null;
