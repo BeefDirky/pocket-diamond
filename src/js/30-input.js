@@ -14,7 +14,7 @@ addEventListener('keydown',e=>{
  if(e.code==='Space'||e.key===' '||(e.key==='Enter'&&document.activeElement===document.body)){e.preventDefault();if(!e.repeat)swing()}
  else if((e.key==='b'||e.key==='B')&&!e.repeat)bunt();
  else if((e.key==='s'||e.key==='S')&&!e.repeat){if(canSteal(2))toggleSteal(2);else toggleSteal(1)}
- else if(/^[1-6]$/.test(e.key)&&!e.repeat&&S.mode==='bp'){setBP(['FB','SL','CH','SP','CB','KN'][+e.key-1])}
+ else if(/^[1-7]$/.test(e.key)&&!e.repeat&&S.mode==='bp'){setBP(['FB','SL','CH','SP','CB','KN','RND'][+e.key-1])}
  else if(/^[1-5]$/.test(e.key)&&!e.repeat){const kk=arsOf(pitcher())[+e.key-1];if(kk)choosePitch(kk)}
  else if((e.key==='b'||e.key==='B')&&!e.repeat&&canPen())togglePen()
  else if((e.key==='q'||e.key==='Q')&&!e.repeat)doPickoff(1)

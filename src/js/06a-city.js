@@ -13,8 +13,8 @@ function parkOutlineInner(){return outlineFrom([[0,HY+400],[1000,HY-600],[1000,H
 function parkOutline(){return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
 const hexRGB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
-function outsideFor(){const key=S.you+(S.night?'n':'d')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
- if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();OUT_CV=buildOutside(S.you,!!S.night);OUT_FEATHER=buildFeather(OUT_CV);OUT_KEY=key}return OUT_CV}
+function outsideFor(){const key=S.you+(S.night?'n':'d')+(S.mode==='bp'&&S.phase!=='title'?'e':'')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
+ if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();OUT_CV=buildOutside(S.you,!!S.night,S.mode==='bp'&&S.phase!=='title');OUT_FEATHER=buildFeather(OUT_CV);OUT_KEY=key}return OUT_CV}
 // the park buffer's straight edges would show as a seam where the extended stands begin: this overlay fades the
 // extended stands in over the last stretch of the buffer (static, so it costs one drawImage a frame)
 let OUT_FEATHER=null;
@@ -25,7 +25,7 @@ function buildFeather(src){const e=EXT_M,c=document.createElement('canvas');c.wi
  strip(x0,y0,B,y1-y0,0,0,B,0);strip(x1-B,y0,B,y1-y0,B,0,0,0);strip(x0,y0,x1-x0,B,0,0,0,B);strip(x0,y1-B,x1-x0,B,0,B,0,0);
  g.globalCompositeOperation='destination-in';g.beginPath();PARK_OUTLINE.forEach((q,i)=>g[i?'lineTo':'moveTo']((q.x+e.mx)/2,(q.y+e.my)/2));g.closePath();g.fill();
  return c}
-function buildOutside(k,night){
+function buildOutside(k,night,empty){// empty: batting practice, nobody in the seats
  const e=EXT_M,CW=Math.round((W+2*e.mx)/2),CH=Math.round((H+2*e.my)/2),c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
  const rr=mulberry32(hash(k+'-outside')),R=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))};
  const cx=x=>(x+e.mx)/2,cy=y=>(y+e.my)/2,T=TEAMS[k];
@@ -158,7 +158,7 @@ function buildOutside(k,night){
   const hj=hexRGB(home.jersey),hc=hexRGB(home.cap),aj=hexRGB(away.jersey),ac=hexRGB(away.cap),sks=SKINS.map(hexRGB),hairs=['#2a1d14','#4a3020','#7a5230','#1a1a1a','#8a8a8a'].map(hexRGB),shadeC=c=>c.map(v=>v*.78|0);
   const px4=(x,y,c)=>{if(x<0||y<0||x>=CW||y>=CH)return;const i=y*CW+x;if(md[i*4+3]<128)return;put(i,c)};
   const g0x=((5+e.mx)/2)%4,g0y=((5+e.my)/2)%4;
-  for(let py=g0y|0;py<CH-2;py+=4)for(let px=g0x|0;px<CW-2;px+=4){const i=py*CW+px;if(!seatM[i]||!seatM[i-1]||!seatM[i+1])continue;if(px>bx0+4&&px<bx1-4&&py>by0+4&&py<by1-4)continue;const bh=Math.abs(Math.atan2(wX(px)-HX,HY-wY(py))/RAD)>128;if(!bh&&rr()>.88)continue;// full rows behind the plate
+  if(!empty)for(let py=g0y|0;py<CH-2;py+=4)for(let px=g0x|0;px<CW-2;px+=4){const i=py*CW+px;if(!seatM[i]||!seatM[i-1]||!seatM[i+1])continue;if(px>bx0+4&&px<bx1-4&&py>by0+4&&py<by1-4)continue;const bh=Math.abs(Math.atan2(wX(px)-HX,HY-wY(py))/RAD)>128;if(!bh&&rr()>.88)continue;// full rows behind the plate
    const wx=wX(px),wy=wY(py),ang=Math.atan2(wx-HX,HY-wy)/RAD,awaySide=ang<-50&&ang>-135,pr=rr(),pH=awaySide?.28:.6,pA=awaySide?.45:.1;
    let sh,cap=null;if(pr<pH){sh=hj;if(rr()<.5)cap=hc}else if(pr<pH+pA){sh=aj;if(rr()<.5)cap=ac}else sh=misc[(rr()*misc.length)|0];
    const sk=sks[(rr()*sks.length)|0];

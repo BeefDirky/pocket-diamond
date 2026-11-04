@@ -1,6 +1,6 @@
 // ---------- pitching ----------
 function startWindup(kf){closePen();
- const bpm=S.mode==='bp';if(bpm)kf=S.bpPitch||'FB';
+ const bpm=S.mode==='bp';if(bpm)kf=S.bpPitch==='RND'?pick(['FB','SL','CH','SP','CB','KN']):(S.bpPitch||'FB');
  const pt=bpm?{vel:70,mov:72,ctl:99,slot:'over',hand:'R'}:pitcher(),dmn=!bpm&&pt.type==='demon',knk=!bpm&&pt.type==='knuckle';
  const r=Math.random()*100;
  let k=kf;if(!k){const A=arsOf(pt),PW={FB:dmn?76:50,SL:dmn?15:21,CH:dmn?5:17,SP:dmn?4:12,CB:dmn?3:15,KN:42};let x=r/100*A.reduce((a,q)=>a+PW[q],0);k=A.find(q=>(x-=PW[q])<0)||A[0]}

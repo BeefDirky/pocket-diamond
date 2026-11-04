@@ -41,7 +41,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  $('abName').textContent=`${((S.orderOf&&S.orderOf[batKey()])||0)+1}. #${b.no} ${b.name} · ${b.pos}`;
  $('abHand').innerHTML=(b.hand==='S'?`Switch (<b>${effHand(b)}</b>)`:`Bats <b>${b.hand}</b>`)+` · CON ${rb(b.con)} POW ${rb(b.pow)} SPD ${rb(b.spd)}`;
  $('pName').textContent=`#${p.no} ${p.name}`;
- if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing <b>${PITCHES[S.bpPitch||'FB'].name}</b> · ${S.bp.sw} swings · ${S.bp.hr} HR · longest <b>${S.bp.long}</b> ft`}else $('pHand').innerHTML=`Throws <b>${p.hand}</b>${p.slot==='side'?' (sidearm)':''}${p.type==='demon'?' · <b class="dmn">SPEED DEMON</b>':p.type==='knuckle'?' · <b class="knk">KNUCKLER</b>':''} · VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}`;
+ if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing <b>${S.bpPitch==='RND'?'RANDOM PITCHES':PITCHES[S.bpPitch||'FB'].name}</b> · ${S.bp.sw} swings · ${S.bp.hr} HR · longest <b>${S.bp.long}</b> ft`}else $('pHand').innerHTML=`Throws <b>${p.hand}</b>${p.slot==='side'?' (sidearm)':''}${p.type==='demon'?' · <b class="dmn">SPEED DEMON</b>':p.type==='knuckle'?' · <b class="knk">KNUCKLER</b>':''} · VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}`;
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});
 }
