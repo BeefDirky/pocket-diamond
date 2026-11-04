@@ -3,7 +3,7 @@
 function bcPos(pl,tt){let seg=null;for(const sg of pl.segs)if(tt>=sg.t0&&tt<=sg.t1){seg=sg;break}
  if(!seg)for(const sg of pl.segs)if(sg.t1<=tt&&(!seg||sg.t1>=seg.t1))seg=sg;return seg?seg.fn(Math.min(tt,seg.t1)):null}
 function drawBallCam(now){const box=$('ballCam'),cam=S.bpCam;
- if(S.mode!=='bp'||!cam||S.phase==='title'||S.paused){if(!box.hidden)box.hidden=true;return}
+ if(S.mode!=='bp'||!cam||S.phase==='title'||S.paused||OPT.ballCam===false){if(!box.hidden)box.hidden=true;return}
  const pl=cam.pl,tt=(now-cam.at)/1000*SPEED,done=tt>=pl.fullEnd;
  if(now-cam.at>pl.fullEnd/SPEED*1000+2600){box.hidden=true;return}// it holds on the landing spot, then tucks away
  const p=bcPos(pl,Math.min(tt,pl.fullEnd));if(!p)return;
