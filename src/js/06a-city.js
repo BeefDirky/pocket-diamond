@@ -137,7 +137,7 @@ function buildOutside(k,night){
    if(!feat&&onRing&&A[i]&&md[j4+3]>128){put(i,C.conc);continue}
    if(!feat&&!inOld&&!onRing&&A[i]){// the new top deck: same rows and aisles, a darker shade of the lower bowl's color
     const dO=A[i]/3*2/K,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
-    if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;if(rr2>=4.6)col=C.riserU;else{col=(row&1)?C3a:C3b;seatM[i]=1}}
+    if(Math.abs(m-5)<(2.2/rp)/RAD){col=C.aisle;seatM[i]=2}else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;if(rr2>=4.6){col=C.riserU;seatM[i]=2}else{col=(row&1)?C3a:C3b;seatM[i]=1}}
     put(i,col);continue}
    if(feat==='sea'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
    else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
@@ -149,17 +149,17 @@ function buildOutside(k,night){
     if(dO<3)col=C.rail;
     else if(dO>=112&&dO<124)col=C.conc;
     else{const upper=dO>=124,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
-     if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;
+     if(Math.abs(m-5)<(2.2/rp)/RAD){col=C.aisle;seatM[i]=2}
      else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;
-      if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
+      if(rr2>=4.6){col=upper?C.riserU:C.riser;seatM[i]=2}else{col=upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
    put(i,col)}}
   // the crowd: same grid and density as the park, same club colors, drawn at this layer's half scale
   const home=TEAMS[k],away=TEAMS[S.opp]||home,misc=['#e8d7c3','#f1ecdc','#6c7a86','#a8c6d8','#2b2b30','#c9a0dc','#7fbf6a','#d98c8c','#f4d58d'].map(hexRGB);
   const hj=hexRGB(home.jersey),hc=hexRGB(home.cap),aj=hexRGB(away.jersey),ac=hexRGB(away.cap),sks=SKINS.map(hexRGB),hairs=['#2a1d14','#4a3020','#7a5230','#1a1a1a','#8a8a8a'].map(hexRGB),shadeC=c=>c.map(v=>v*.78|0);
   const px4=(x,y,c)=>{if(x<0||y<0||x>=CW||y>=CH)return;const i=y*CW+x;if(md[i*4+3]<128)return;put(i,c)};
   const g0x=((5+e.mx)/2)%4,g0y=((5+e.my)/2)%4;
-  for(let py=g0y|0;py<CH-2;py+=4)for(let px=g0x|0;px<CW-2;px+=4){const i=py*CW+px;if(!seatM[i]||!seatM[i-1]||!seatM[i+1])continue;if(px>bx0+4&&px<bx1-4&&py>by0+4&&py<by1-4)continue;if(rr()>.88)continue;
-   const wx=wX(px),wy=wY(py),ang=Math.atan2(wx-HX,HY-wy)/RAD,awaySide=ang<-50&&ang>-135,pr=rr(),pH=awaySide?.28:.6,pA=awaySide?.45:.1;
+  for(let py=g0y|0;py<CH-2;py+=4)for(let px=g0x|0;px<CW-2;px+=4){const i=py*CW+px;{const a0=Math.abs(Math.atan2(wX(px)-HX,HY-wY(py))/RAD)>BEHIND_HOME,ok=k=>a0?seatM[k]>0:seatM[k]===1;if(!ok(i)||!ok(i-1)||!ok(i+1))continue}if(px>bx0+4&&px<bx1-4&&py>by0+4&&py<by1-4)continue;const wx=wX(px),wy=wY(py),ang=Math.atan2(wx-HX,HY-wy)/RAD,bh=Math.abs(ang)>BEHIND_HOME;if(!bh&&rr()>.88)continue;
+   const awaySide=!bh&&ang<-50&&ang>-135,pr=rr(),pH=bh?.9:awaySide?.28:.6,pA=bh?0:awaySide?.45:.1;
    let sh,cap=null;if(pr<pH){sh=hj;if(rr()<.5)cap=hc}else if(pr<pH+pA){sh=aj;if(rr()<.5)cap=ac}else sh=misc[(rr()*misc.length)|0];
    const sk=sks[(rr()*sks.length)|0];
    px4(px-1,py,sh);px4(px,py,sh);px4(px+1,py,sh);px4(px-1,py+1,shadeC(sh));px4(px,py+1,shadeC(sh));px4(px+1,py+1,shadeC(sh));

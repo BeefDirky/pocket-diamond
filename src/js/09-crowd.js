@@ -28,7 +28,9 @@ function buildCrowd(){
   const awaySide=f.ang<-50&&f.ang>-135;const r=rnd();
   const pHome=awaySide?.28:.6,pAway=awaySide?.45:.1;
   let shirt,cap=null;
-  if(r<pHome){shirt=home.jersey;if(rnd()<.5)cap=home.cap}
+  if(f.home&&r<.9){shirt=home.jersey;if(rnd()<.65)cap=home.cap}
+  else if(f.home){shirt=misc[(rnd()*misc.length)|0]}
+  else if(r<pHome){shirt=home.jersey;if(rnd()<.5)cap=home.cap}
   else if(r<pHome+pAway){shirt=away.jersey;if(rnd()<.5)cap=away.cap}
   else shirt=misc[(rnd()*misc.length)|0];
   const team=shirt===home.jersey||shirt===away.jersey;

@@ -33,7 +33,7 @@ function drawUlsan(g,now){
     for(let j=0;j<12;j++){const an=j/12*Math.PI*2;g.fillStyle=`rgba(232,246,255,${1-s})`;g.fillRect(Math.round(wp.x+Math.cos(an)*(14+s*26)),Math.round(wp.y+Math.sin(an)*(7+s*12)-Math.sin(s*Math.PI)*10),3,3)}}
    if(a>.2&&a<.6)spout(g,{x:wp.x-12,y:wp.y-10},(a-.2)/.4,true)}}
 }
-let WHALE={x:-120,y:400},PARK_C=null,PARK_MOW=null;
+let WHALE={x:-120,y:400},PARK_C=null,PARK_MOW=null;const BEHIND_HOME=128;// |angle from center field| past which you're in the seats behind the plate
 function buildField(){
  {const th=12,r=fenceDist(th)+30;WHALE={x:Math.sin(th*RAD)*r,y:Math.cos(th*RAD)*r}}
  const c=document.createElement('canvas');c.width=W;c.height=H;
@@ -114,9 +114,9 @@ function buildField(){
    else{
     const upper=dO>=124;const rp=(Math.hypot(px-HX,py-HY)/K)||1;const ang=Math.atan2(px-HX,HY-py)/RAD;
     const m=((ang%10)+10)%10;const aisle=Math.abs(m-5)<(2.2/rp)/RAD;
-    if(aisle)col=C.aisle;
+    if(aisle){col=C.aisle;seatMask[i]=5}
     else{const row=Math.floor((dO-3)/6),rr=(dO-3)-row*6;
-     if(rr>=5)col=upper?C.riserU:C.riser;
+     if(rr>=5){col=upper?C.riserU:C.riser;seatMask[i]=5}
      else{col=upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatMask[i]=1}}
    }
   }else{
@@ -137,10 +137,15 @@ function buildField(){
  // seat fans on a grid over seat pixels
  FANS=[];
  for(let py=5;py<H-5;py+=8)for(let px=5;px<W-5;px+=8){
-  const i=py*W+px;if(!seatMask[i]||!seatMask[i-3]||!seatMask[i+3])continue;
+  const i=py*W+px,ang=Math.atan2(px-HX,HY-py)/RAD;if(Math.abs(ang)>BEHIND_HOME)continue;
+  const ok=k=>seatMask[k]&&seatMask[k]!==5;if(!ok(i)||!ok(i-3)||!ok(i+3))continue;
   const sm=seatMask[i];if(rng()>(sm===2?.22:sm===3?.32:sm===4?.16:.88))continue;
-  const j=i*4;FANS.push({x:px,y:py,bg:`rgb(${d[j]},${d[j+1]},${d[j+2]})`,ang:Math.atan2(px-HX,HY-py)/RAD,lawn:sm===2,deck:sm===3,pool:sm===4});
+  const j=i*4;FANS.push({x:px,y:py,bg:`rgb(${d[j]},${d[j+1]},${d[j+2]})`,ang,lawn:sm===2,deck:sm===3,pool:sm===4});
  }
+ // behind home plate: a sellout of home fans, packed shoulder to shoulder over seats and stairs alike
+ for(let py=4;py<H-4;py+=7)for(let px=4;px<W-4;px+=6){const ang=Math.atan2(px-HX,HY-py)/RAD;if(Math.abs(ang)<=BEHIND_HOME)continue;
+  const i=py*W+px;if(seatMask[i]!==1&&seatMask[i]!==5)continue;if(!seatMask[i-2]||!seatMask[i+2])continue;
+  const j=i*4;FANS.push({x:px,y:py,bg:`rgb(${d[j]},${d[j+1]},${d[j+2]})`,ang,home:true})}
  // concourse ring (for pennants/banners) and aisle stairways (for vendors)
  CONC=[];AISLES=[];RAIL=[];
  const dAt=(x,y)=>{x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=W||y>=H)return null;const i=y*W+x;return inside[i]?-1:DO[i]/3/K};
