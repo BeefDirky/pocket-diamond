@@ -232,7 +232,10 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .champ img{width:64px;height:64px}.champ b{font-family:var(--f-px);font-size:11px;font-weight:400;color:var(--amber)}
 @media (max-width:560px){.bracket{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .olStart{display:flex;flex-direction:column;gap:10px}
-.olJoin{display:grid;grid-template-columns:1fr auto;gap:8px}
+.olJoin{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.olJoin input{min-width:0;width:100%;box-sizing:border-box}
+/* phones: the JOIN button sits under the code box, full width, instead of being pushed off the edge */
+@media (max-width:560px){.olJoin{grid-template-columns:1fr}}
 .olJoin input{font-family:var(--f-px);font-size:16px;letter-spacing:.3em;text-transform:uppercase;text-align:center;background:var(--edge);color:var(--chalk);border:3px solid var(--panel-hi);padding:10px}
 .olRoom{display:flex;flex-direction:column;gap:10px}
 .olCodeBox{text-align:center;font-size:11px;letter-spacing:.14em;color:var(--dim)}.olCodeBox b{display:block;font-family:var(--f-px);font-weight:400;font-size:28px;letter-spacing:.3em;color:var(--amber);margin-top:6px}
