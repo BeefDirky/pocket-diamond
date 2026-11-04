@@ -1760,12 +1760,20 @@ function buildSigns(){
   g.fillStyle='rgba(255,210,63,.4)';g.fillRect(sd>0?b.x-7:b.x+1.5,b.y-H2+10,5.5,H2-22);
   g.fillStyle='#ffd23f';g.fillRect(b.x-1.5,b.y-H2,3,H2);g.fillStyle='#c9a21b';g.fillRect(b.x+.8,b.y-H2,.9,H2);
   g.fillStyle='#ffe57a';g.beginPath();g.arc(b.x,b.y-H2,2.6,0,Math.PI*2);g.fill();g.fillStyle='#59636d';g.fillRect(b.x-3,b.y-1,6,3)}
- // backstop netting behind the plate
- if(ST.net){g.strokeStyle='rgba(18,22,26,.32)';g.lineWidth=.6;const hp=toPx3(0,0);
-  for(let rr=36;rr<=60;rr+=3){g.beginPath();g.arc(hp.x,hp.y,rr/.5,(90-44)*RAD,(90+44)*RAD);g.stroke()}
-  for(let a=-44;a<=44;a+=3.5){const c=Math.cos((90+a)*RAD),s2=Math.sin((90+a)*RAD);g.beginPath();g.moveTo(hp.x+c*72,hp.y+s2*72);g.lineTo(hp.x+c*120,hp.y+s2*120);g.stroke()}
-  g.strokeStyle='rgba(30,34,40,.75)';g.lineWidth=1.2;g.beginPath();g.arc(hp.x,hp.y,120,(90-44)*RAD,(90+44)*RAD);g.stroke();
-  for(const a of[-44,-15,15,44]){const c=Math.cos((90+a)*RAD),s2=Math.sin((90+a)*RAD);const px=hp.x+c*120,py=hp.y+s2*120;g.fillStyle='rgba(0,0,0,.2)';g.fillRect(px,py,14,2);g.fillStyle='#3a4048';g.fillRect(px-1,py-34,2,34)}}
+ // backstop netting behind the plate: posts set right at the wall around home, the net rising from there and
+ // leaning in over the field (it may cover a little of the plate area)
+ {const hp=toPx3(0,0),wallAt=a=>{const sx=-Math.sin(a*RAD),sy=-Math.cos(a*RAD);let t=10;
+   for(;t<140;t+=.5){const x=sx*t,y=sy*t,perp=(Math.abs(x)-y)/Math.SQRT2,along=(Math.abs(x)+y)/Math.SQRT2;if(!((perp<40&&along<328&&along>-5)||t<34))break}
+   return t/FT/K};
+  const A0=-44,A1=44,pt=(a,r)=>({x:hp.x+Math.cos((90+a)*RAD)*r,y:hp.y+Math.sin((90+a)*RAD)*r}),NET=34;
+  g.strokeStyle='rgba(18,22,26,.32)';g.lineWidth=.6;
+  for(let f=0;f<=1.001;f+=1/8){g.beginPath();for(let a=A0;a<=A1;a+=2){const q=pt(a,wallAt(a)-NET*(1-f));g[a===A0?'moveTo':'lineTo'](q.x,q.y)}g.stroke()}
+  for(let a=A0;a<=A1;a+=3.5){const w=wallAt(a),i=pt(a,w-NET),o=pt(a,w);g.beginPath();g.moveTo(i.x,i.y);g.lineTo(o.x,o.y);g.stroke()}
+  // the cable along the top of the net, and the cable along the wall
+  g.strokeStyle='rgba(30,34,40,.75)';g.lineWidth=1.2;for(const d of[NET,0]){g.beginPath();for(let a=A0;a<=A1;a+=2){const q=pt(a,wallAt(a)-d);g[a===A0?'moveTo':'lineTo'](q.x,q.y)}g.stroke()}
+  // posts at the wall, rising toward the field, with a cast shadow
+  for(const a of[-44,-15,15,44]){const w=wallAt(a),o=pt(a,w),i=pt(a,w-NET);g.fillStyle='rgba(0,0,0,.2)';g.fillRect(o.x,o.y,14,2);
+   g.strokeStyle='#3a4048';g.lineWidth=2;g.beginPath();g.moveTo(o.x,o.y);g.lineTo(i.x,i.y);g.stroke()}}
  // light towers, drawn with height: the overhead camera sees each mast lean away from the field,
  // so the lamp bank sits outward of the base, with lit and shaded faces and a cast shadow
  TOWERS=[];const CX=HX/K,CY=H/K*.53,LEAN=.12,night=!!S.night;
