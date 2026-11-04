@@ -4619,6 +4619,10 @@ fontsReady.then(()=>{
  for(const k of ORDER){LOGO[k]=makeLogo(k,128);LOGO_URL[k]=LOGO[k].toDataURL()}
  document.querySelectorAll('.chip').forEach(c=>{const im=c.querySelector('img');if(im)im.src=LOGO_URL[c.dataset.t]});
  updateHUD();refreshMenu();rebuildPark()});
+// pitching: once the windup starts, a tap anywhere on the screen releases the pitch (not just on the field). The
+// pause button, bullpen panel and auto/info/zoom controls keep their own taps.
+document.addEventListener('pointerdown',e=>{if(!(S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null)||overlayOpen())return;
+ if(e.target.closest('.pauseBtn,#penPanel,.autoBtn,.infoBtn,.zoomCtl,.lsHot,.board'))return;ensureAudio();releaseTap()},true);
 requestAnimationFrame(frame);
 })();
 
