@@ -18,8 +18,9 @@ function tsPaint(g,k,w,h,t,alpha){const T=TEAMS[k];g.globalAlpha=alpha;
  // a band of the cap color running across, like a team scarf
  g.save();g.translate(w/2,h/2);g.rotate(-.26);g.fillStyle=shade(T.cap,-.2);g.globalAlpha=alpha*.35;g.fillRect(-w*1.5,h*.18,w*3,h*.16);g.restore();
  // the emblem wall: one pre-drawn repeating pattern, slid along each frame (a single fill, cheap on any device)
- const P=tsPat(k,Math.round(Math.max(110,Math.min(w,h)/6.5))),off=(t*.028)%P.sp;g.globalAlpha=alpha*.3;
- g.save();g.translate(w/2,h/2);g.rotate(-.26);P.pat.setTransform(new DOMMatrix([1,0,0,1,off,off*.4]));g.fillStyle=P.pat;const R=Math.hypot(w,h);g.fillRect(-R,-R,2*R,2*R);
+ const P=tsPat(k,Math.round(Math.max(110,Math.min(w,h)/6.5))),cyc=P.sp*1.5/.028,u=(t%cyc)/cyc;g.globalAlpha=alpha*.3;
+ g.save();g.translate(w/2,h/2);g.rotate(-.26);// each loop slides exactly one step of the brick layout (1.5 across, 1 down), so it wraps with no jump
+ P.pat.setTransform(new DOMMatrix([1,0,0,1,u*P.sp*1.5,u*P.sp]));g.fillStyle=P.pat;const R=Math.hypot(w,h);g.fillRect(-R,-R,2*R,2*R);
  g.restore();g.globalAlpha=1}
 function tsLoop(){TS.raf=0;const cv=$('tsBg');if(!cv||$('title').hidden||$('scrTeams').hidden)return;
  const dpr=Math.min(devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
