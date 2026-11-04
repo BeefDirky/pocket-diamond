@@ -68,19 +68,20 @@ function netTick(now){const o=S.online,opp=o.opp;
    if(o.seenW===pt.id&&pt.st==='r'&&o.seenR!==pt.id&&S.pitch&&S.pitch.pid===pt.id)applyRelease(pt)}}
  else{const dc=opp.dc;if(dc&&S.phase==='pitch'&&S.pitch&&dc.id===S.pitch.pid)applyDecision(dc);
   if(opp.sk&&S.phase==='play'&&S.play&&S.play.hrFired&&S.pitch&&opp.sk===S.pitch.pid&&S.play.t<S.play.end)S.play.t=S.play.end}}
-function startOnline(st){const o=S.online;o.gid=st.gid;o.inGame=true;o.n=0;o.seenW=o.seenR=null;
+function startOnline(st){const o=S.online;o.gid=st.gid;
+ o.series={sid:st.sid||st.gid,bo:st.bo||1,gn:st.gn||1,inn:st.inn,w:{host:(st.sw||[0,0])[0],guest:(st.sw||[0,0])[1]},done:false};$('olNext').hidden=true;$('olSeries').hidden=true;o.inGame=true;o.n=0;o.seenW=o.seenR=null;
  o.prevCustom=CUSTOM.active;CUSTOM.active=false;applyCustom();
  {const ok=o.role==='host'?st.away:st.home;if(o.opp&&o.opp.ros)applyRosterSpec(ok,o.opp.ros)}// field the opponent exactly as their phone does
  S.you=st.home;S.opp=st.away;S.night=!!st.night;syncPicker();if(FIELD){rebuildPark();SIGNS=buildSigns()}
  S.auto=false;syncAuto();o.sawIng=false;o.lostAt=0;netPresence({pt:null,dc:null,ing:st.gid});
  pendingMode=null;startGame('full');if(S.night!==!!st.night){S.night=!!st.night;SIGNS=buildSigns()}S.totalInn=st.inn;S.schedInn=st.inn;S.oppLine=Array(st.inn).fill(0);S.youLine=Array(st.inn).fill(0);
- banner('PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name} · ${st.inn} innings · you are ${o.me==='home'?'home':'away'}`);updateHUD()}
+ banner(o.series.bo>1?`GAME ${o.series.gn} · BEST OF ${o.series.bo}`:'PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name} · ${st.inn} innings · you are ${o.me==='home'?'home':'away'}${o.series.bo>1?` · series ${o.series.w[o.role]}-${o.series.w[o.role==='host'?'guest':'host']}`:''}`);updateHUD()}
 function lobbyRender(){const o=S.online;if(!o)return;$('olStart').hidden=!!o.nr;$('olRoom').hidden=!o.nr;if(!o.nr)return;
  $('olCodeShow').textContent=o.code.toUpperCase();
  const side=(k,tag)=>k&&TEAMS[k]?`<img alt="" src="${LOGO_URL[k]}"><b>${TEAMS[k].city} ${TEAMS[k].name}</b><small>${tag}</small>`:`<b>Waiting…</b><small>${tag}</small>`;
  const meK=o.mine.team,thK=o.opp&&o.opp.team;
  $('olMe').innerHTML=side(meK,`YOU · ${o.role==='host'?'HOME':'AWAY'}`);$('olThem').innerHTML=side(thK,o.role==='host'?'AWAY':'HOME');$('olThem').classList.toggle('wait',!thK);
- $('olInnRow').hidden=o.role!=='host';
+ $('olInnRow').hidden=o.role!=='host';$('olBoRow').hidden=o.role!=='host';
  if(!$('olPick').children.length){$('olPick').innerHTML=ORDER.map(t=>`<button type="button" data-t="${t}" aria-label="${TEAMS[t].city} ${TEAMS[t].name}"><img alt="" src="${LOGO_URL[t]}"><span>${TEAMS[t].name.toUpperCase()}</span></button>`).join('')}
  for(const c of $('olPick').children){c.setAttribute('aria-pressed',String(c.dataset.t===meK));c.classList.toggle('taken',c.dataset.t===thK)}
  const same=thK&&thK===meK;
@@ -112,7 +113,16 @@ $('olCreate').addEventListener('click',()=>{const L='abcdefghjkmnpqrstuvwxyz';le
 $('olJoin').addEventListener('click',()=>joinRoom($('olCode').value,'guest'));
 $('olCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')joinRoom($('olCode').value,'guest')});
 $('olInn').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const x of $('olInn').children)x.setAttribute('aria-pressed',String(x===b))});
-$('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o.mine.team){lobbyRender();return}const inn=+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v;
- const st={gid:Math.random().toString(36).slice(2,8),home:o.mine.team,away:o.opp.team,inn,night:Math.random()<.55};netPresence({start:st});startOnline(st)});
+$('olBo').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const x of $('olBo').children)x.setAttribute('aria-pressed',String(x===b))});
+// series: the host's phone keeps the tally and sends it with every game it starts, so both screens agree
+function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o.mine.team){lobbyRender();return}
+ const se=next&&o.series&&!o.series.done?o.series:null;
+ const inn=se?se.inn:+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v;
+ const bo=se?se.bo:+($('olBo').querySelector('[aria-pressed=true]')||{dataset:{v:1}}).dataset.v;
+ const st={gid:Math.random().toString(36).slice(2,8),home:o.mine.team,away:o.opp.team,inn,night:Math.random()<.55,
+  bo,sid:se?se.sid:Math.random().toString(36).slice(2,8),gn:se?se.gn+1:1,sw:se?[se.w.host,se.w.guest]:[0,0]};
+ netPresence({start:st});startOnline(st)}
+$('olGo').addEventListener('click',()=>hostStart(false));
+$('olNext').addEventListener('click',()=>hostStart(true));
 $('olLeave').addEventListener('click',async()=>{const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;openOnline()});
 $('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});

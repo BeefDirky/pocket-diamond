@@ -285,6 +285,7 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .zoomCard .tc{width:min(280px,90%);cursor:pointer}
 .zoomCard .tc .nm{font-size:18px}.zoomCard .tc .st b{font-size:18px}.zoomCard .tc .st span{font-size:10px}.zoomCard .tc .ovr{font-size:16px}.zoomCard .tc .tcHead img{width:34px;height:34px}.zoomCard .tc .ps{font-size:13px}.zoomCard .tc .rar{font-size:10px}
 .oppLine{text-align:center;font-size:13px!important;color:var(--chalk)!important}.oppLine b{color:var(--amber);font-weight:400}
+.olSeries{color:var(--amber)!important;font-family:var(--f-hud);font-size:14px!important;text-align:center}
 .packEarn{color:var(--amber)!important;font-family:var(--f-hud);font-size:14px!important}
 
 .tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px 8px;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);cursor:pointer;font-family:var(--f-hud);font-size:13px}

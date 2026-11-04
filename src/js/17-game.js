@@ -40,7 +40,14 @@ function gameOver(win){const onl=onlineGame();
  $('overT').innerHTML=win?(wo?`<span>WALK-OFF</span> WIN`:`<span>WIN</span>`):'FINAL';
  $('overS').textContent=win?`${you.city} ${you.name} ${S.runs}, ${opp.name} ${S.target}. ${you.mascot} is already on the dugout roof.`:`${opp.city} ${opp.name} ${S.target}, ${you.name} ${S.runs}.${S.mode==="arcade"?" Out of outs.":""}`;
  $('overStats').innerHTML=S.mode==='full'?`<div><b>${S.hits}</b><span>HITS</span></div><div><b>${S.hr}</b><span>HOME RUNS</span></div><div><b>${S.myK}</b><span>K'S PITCHED</span></div>`:`<div><b>${S.hits}</b><span>HITS</span></div><div><b>${S.hr}</b><span>HOME RUNS</span></div><div><b>${S.ks}</b><span>STRIKEOUTS</span></div>`;
- if(onl){const iWin=S.online.me==='home'?win:!win;$('overT').innerHTML=iWin?'<span>YOU</span> WIN':'YOU LOSE';$('overS').textContent=`Final: ${opp.city} ${opp.name} ${S.target}, ${you.city} ${you.name} ${S.runs}.`;win=iWin}
+ $('olNext').hidden=true;$('olSeries').hidden=true;
+ if(onl){const iWin=S.online.me==='home'?win:!win;$('overT').innerHTML=iWin?'<span>YOU</span> WIN':'YOU LOSE';$('overS').textContent=`Final: ${opp.city} ${opp.name} ${S.target}, ${you.city} ${you.name} ${S.runs}.`;win=iWin;
+  // best-of series: tally this game, then either crown the series winner or line up the next game
+  const o=S.online,se=o.series;if(se&&se.bo>1&&se.counted!==o.gid){se.counted=o.gid;const me=o.role,them=me==='host'?'guest':'host';se.w[iWin?me:them]++;
+   const need=Math.ceil(se.bo/2),mw=se.w[me],tw=se.w[them];se.done=mw>=need||tw>=need;
+   if(se.done)$('overT').innerHTML=mw>tw?'<span>SERIES</span> WON':'SERIES LOST';
+   $('olSeries').hidden=false;$('olSeries').textContent=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw} · ${me==='host'?`start game ${se.gn+1} when you're both ready.`:`waiting for the host to start game ${se.gn+1}…`}`;
+   $('olNext').hidden=!(me==='host'&&!se.done);$('olNext').textContent=`START GAME ${se.gn+1}`}}
  awardPacks(win);
  $('toLobby').hidden=!onl;if(onl){$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false}
