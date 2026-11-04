@@ -1,5 +1,5 @@
 // ---------- audio ----------
-const SND_B64=/*@AUDIO:bpthrow,dcatch,fworks,chant,csingle,boo,slide,ramp,fence1,clang,grass,horn,echo1,echo2,echo3,amb,woosh,weak,drop,mitt,cheer,crowd,bat,organ*/{};
+const SND_B64=/*@AUDIO:charge,klost,bpthrow,dcatch,fworks,chant,csingle,boo,slide,ramp,fence1,clang,grass,horn,echo1,echo2,echo3,amb,woosh,weak,drop,mitt,cheer,crowd,bat,organ*/{};
 let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
@@ -28,9 +28,12 @@ for(const ev of['pointerdown','touchend','keydown'])document.addEventListener(ev
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)wakeAudio()});
 addEventListener('pageshow',()=>wakeAudio());
 // organ ramp-up with runners in scoring position: duck the music, play the ramp, bring the music back
-function organRamp(){if(!AC||!BUF.ramp||muted||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;
+// (two hype tunes take turns: the classic ramp and the charge)
+function organRamp(){organCue(BUF.charge&&(S.hypeN=(S.hypeN||0)+1)%2===0?'charge':'ramp')}
+// any organ cue over the music: the background music fades out, the cue plays, the music comes back after
+function organCue(k){if(!AC||!BUF[k]||muted||S.bpOn)return;stopRamp();const t=AC.currentTime,mg=BUS.music.gain;
  mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.7);
- const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF.ramp;g.gain.value=Math.max(.25,OPT.music/100)*.95;src.connect(g).connect(MASTER);src.start(t+.35);S.rampSrc=src;
+ const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=Math.max(.25,OPT.music/100)*.95;src.connect(g).connect(MASTER);src.start(t+.35);S.rampSrc=src;
  src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
 function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=vol;src.connect(g).connect(BUS.crowd);src.start();return src}
 // someone reached base: the home crowd roars, and is much quieter for the visitors

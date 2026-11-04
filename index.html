@@ -1985,7 +1985,7 @@ function drawBat(g,bx,by,ang,hand,col){
 }
 
 // ---------- audio ----------
-const SND_B64={bpthrow:1,dcatch:1,fworks:1,chant:1,csingle:1,boo:1,slide:1,ramp:1,fence1:1,clang:1,grass:1,horn:1,echo1:1,echo2:1,echo3:1,amb:1,woosh:1,weak:1,drop:1,mitt:1,cheer:1,crowd:1,bat:1,organ:1};
+const SND_B64={charge:1,klost:1,bpthrow:1,dcatch:1,fworks:1,chant:1,csingle:1,boo:1,slide:1,ramp:1,fence1:1,clang:1,grass:1,horn:1,echo1:1,echo2:1,echo3:1,amb:1,woosh:1,weak:1,drop:1,mitt:1,cheer:1,crowd:1,bat:1,organ:1};
 let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
@@ -2014,9 +2014,12 @@ for(const ev of['pointerdown','touchend','keydown'])document.addEventListener(ev
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)wakeAudio()});
 addEventListener('pageshow',()=>wakeAudio());
 // organ ramp-up with runners in scoring position: duck the music, play the ramp, bring the music back
-function organRamp(){if(!AC||!BUF.ramp||muted||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;
+// (two hype tunes take turns: the classic ramp and the charge)
+function organRamp(){organCue(BUF.charge&&(S.hypeN=(S.hypeN||0)+1)%2===0?'charge':'ramp')}
+// any organ cue over the music: the background music fades out, the cue plays, the music comes back after
+function organCue(k){if(!AC||!BUF[k]||muted||S.bpOn)return;stopRamp();const t=AC.currentTime,mg=BUS.music.gain;
  mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.7);
- const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF.ramp;g.gain.value=Math.max(.25,OPT.music/100)*.95;src.connect(g).connect(MASTER);src.start(t+.35);S.rampSrc=src;
+ const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=Math.max(.25,OPT.music/100)*.95;src.connect(g).connect(MASTER);src.start(t+.35);S.rampSrc=src;
  src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
 function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=vol;src.connect(g).connect(BUS.crowd);src.start();return src}
 // someone reached base: the home crowd roars, and is much quieter for the visitors
@@ -2273,7 +2276,7 @@ function pitchEnd(){
 }
 function strike(swinging,b,buntMiss){
  S.strikes++;if(!swinging)S.umpPunch=performance.now()+800;
- if(S.strikes>=3){S.outs++;if(batKey()===S.you)S.ks++;else{S.myK++;S.cheerUntil=performance.now()+1800}
+ if(S.strikes>=3){S.outs++;if(batKey()===S.you)S.ks++;else{S.myK++;S.cheerUntil=performance.now()+1800;if(fldKey()===S.you)organCue('klost')}
   logPA(b,swinging?'Strikeout swinging, K':'Called strike three, backwards K',false);
   banner(swinging?'STRIKEOUT':'STRIKE THREE',swinging?`Got him with the ${S.pitch.name.toLowerCase()}`:'Caught looking','strike');sfx('out');S.koWalk={who:b,at:performance.now(),sd:batKey()===S.you?1:-1,T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5',hand:effHand(b)};nextBatter();
  }else banner(buntMiss?'MISSED THE BUNT':swinging?'SWING AND MISS':'STRIKE',`${S.balls}-${S.strikes}`,'strike');
@@ -2798,7 +2801,7 @@ function finishPlay(){
   banner(r.banner,r.sub,r.tone);logPA(curBatter(),r.desc,r.hr||r.code==='LD');
   setPhase('result');updateHUD();return}
  if(r.code==='FOUL'&&S.play.bunt&&S.strikes>=2){
-  S.outs++;S.ks++;logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
+  S.outs++;if(batKey()===S.you)S.ks++;else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
  }else if(r.code==='FOUL'){
   if(S.strikes<2)S.strikes++;
   banner(S.play.bunt?'FOUL BUNT':'FOUL BALL',S.strikes<2?`${S.balls}-${S.strikes}`:'Still two strikes');

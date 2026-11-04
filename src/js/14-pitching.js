@@ -151,7 +151,7 @@ function pitchEnd(){
 }
 function strike(swinging,b,buntMiss){
  S.strikes++;if(!swinging)S.umpPunch=performance.now()+800;
- if(S.strikes>=3){S.outs++;if(batKey()===S.you)S.ks++;else{S.myK++;S.cheerUntil=performance.now()+1800}
+ if(S.strikes>=3){S.outs++;if(batKey()===S.you)S.ks++;else{S.myK++;S.cheerUntil=performance.now()+1800;if(fldKey()===S.you)organCue('klost')}
   logPA(b,swinging?'Strikeout swinging, K':'Called strike three, backwards K',false);
   banner(swinging?'STRIKEOUT':'STRIKE THREE',swinging?`Got him with the ${S.pitch.name.toLowerCase()}`:'Caught looking','strike');sfx('out');S.koWalk={who:b,at:performance.now(),sd:batKey()===S.you?1:-1,T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5',hand:effHand(b)};nextBatter();
  }else banner(buntMiss?'MISSED THE BUNT':swinging?'SWING AND MISS':'STRIKE',`${S.balls}-${S.strikes}`,'strike');
