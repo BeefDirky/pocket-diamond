@@ -641,3 +641,5 @@ body.bpPopOpen .app:not(.deskApp) .acts .bpBar .k{font-size:12px;margin-bottom:4
 .bpScrim{display:none;position:fixed;inset:0;z-index:40;background:rgba(8,20,14,.6)}
 body.bpPopOpen:has(.app:not(.deskApp)) .bpScrim{display:block}
 body.bpMode .app:not(.deskApp):not(.wideApp) .swing{min-height:52px!important}
+/* changing parks from the batting cage: the club picker covers the whole screen, so the game's panels step aside */
+body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.meter,.acts,.pacts,.book,.bug,.pcBox,.zoomCtl,.pauseBtn,.parkBtn,.autoBtn,.infoBtn,.skipBtn,.relMeter,.lsHot){display:none!important}
