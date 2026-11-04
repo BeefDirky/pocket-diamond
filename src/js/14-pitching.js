@@ -34,8 +34,11 @@ function releaseTap(){
 }
 function choosePitch(k){if(S.phase!=='choose'||!arsOf(pitcher()).includes(k))return;closePen();hideBanner();startWindup(k);updateHUD()}
 function cpuDecide(){
- const b=curBatter(),p=S.pitch,q=p.q,arr=p.releaseAt+p.travel;if(p.hbp)return;
- let sw=p.inZone?.58+(b.con-50)*.004-(q>=1?.12:0):.2+((p.k==='SL'||p.k==='SP'||p.k==='KN'||p.k==='CB')?.18:0)-(b.con-50)*.003;
+ // q is the pitch's location quality: set by the release meter when you pitch, but a CPU pitcher (auto batting) never
+ // sets it, which turned every auto swing into NaN timing (no bat animation, always a miss). Give those a quality from
+ // the pitcher's control.
+ const b=curBatter(),p=S.pitch,q=p.q!=null?p.q:clamp(.3+pitcher().ctl*.004+randn()*.15,0,1),arr=p.releaseAt+p.travel;if(p.hbp)return;
+ let sw=p.inZone?.64+(b.con-50)*.004-(q>=1?.12:0):.2+((p.k==='SL'||p.k==='SP'||p.k==='KN'||p.k==='CB')?.18:0)-(b.con-50)*.003;
  if(S.strikes===2)sw+=.15;if(S.balls===3&&!p.inZone)sw-=.1;
  if(Math.random()>sw)return;
  const whiff=clamp(.1+{FB:0,SL:.12,CH:.08,SP:.45,KN:.22,CB:.16}[p.k]+q*.16+(p.mph-92)*.012-(b.con-50)*.004+(p.inZone?0:.2),.03,.9);
