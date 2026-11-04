@@ -275,8 +275,8 @@ function render(now){
    wg.globalAlpha=(k/tr.length)*.6;wg.fillStyle='#c3c8ce';wg.fillRect(Math.round(q.x)+ox-1,Math.round(q.y)-oy-1,2,2)}
   wg.globalAlpha=1;
   const q=toPx(p.x,p.y);
-  const spin=S.pitch.k==='SL'?Math.floor(now/30):(S.pitch.k==='CH'||S.pitch.k==='SP')?Math.floor(now/90):null;
-  dustAt(S.pitch,p.x,p.y,p.h);drawBall(wg,q.x,q.y,p.h,spin);
+  const spin=S.pitch.k==='SL'?Math.floor(now/30):S.pitch.k==='CB'?Math.floor(now/45):(S.pitch.k==='CH'||S.pitch.k==='SP')?Math.floor(now/90):null;
+  dustAt(S.pitch,p.x,p.y,p.h);drawBall(wg,q.x,q.y,p.h,spin,S.pitch.k==='CB'?Math.round(Math.max(0,p.h-4.2)/2):0);
  }else if(S.hbpFx&&now-S.hbpFx.at<1150){const f=S.hbpFx,e=(now-f.at)/1150,o=1-(1-e)*(1-e);
   // the pitch ricochets off the hitter and dribbles away
   const x=f.x0+f.dx*o,y=f.y0+f.dy*o,h=f.h0*Math.max(0,1-e*2.4)+Math.abs(Math.sin(e*Math.PI*2.2))*1.6*(1-e),q=toPx(x,y);drawBall(wg,q.x,q.y,h,null)}
@@ -327,5 +327,6 @@ function render(now){
    ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=Math.max(2,16*scale);ctx.stroke();ctx.strokeStyle=S.night?'#3a424c':'#b9b4a8';ctx.lineWidth=Math.max(1.5,9*scale);ctx.stroke();
    ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
+ drawRoofLights(ctx,vx0,vy0,scale,now);
 }
 

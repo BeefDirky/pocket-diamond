@@ -10,7 +10,8 @@
     <button type="button" class="parkBtn" id="parkBtn" hidden>PARK ▾</button>
     <div class="zoomCtl"><button type="button" id="zIn" aria-label="Zoom in">+</button><button type="button" id="zOut" aria-label="Zoom out">−</button></div>
     <div class="tag" id="tag" hidden><span id="tagTxt"></span><canvas id="flame" width="72" height="26" hidden></canvas></div>
-    <div class="bug" aria-label="Count, outs and runners">
+    <div class="bug" aria-label="Score, count, outs and runners">
+      <div class="bugSc"><div id="bsA"><i></i><span></span><b></b></div><div id="bsH"><i></i><span></span><b></b></div></div>
       <div class="bugDia"><i class="b2" id="d2"></i><i class="b3" id="d3"></i><i class="b1" id="d1"></i></div>
       <div class="bugCnt">
         <div><span>B</span><span class="bulbs" id="lb"></span></div>
@@ -214,7 +215,7 @@
 
   <div class="matchup">
     <div class="mu muBat" id="muBat" role="button" tabindex="0" title="Pick a hitter"><div class="k" id="abTeam">AT BAT</div><div class="v" id="abName">—</div><div class="h" id="abHand"></div></div>
-    <div class="mu"><div class="k" id="pTeam">PITCHING</div><div class="v" id="pName">—</div><div class="h" id="pHand"></div></div>
+    <div class="mu muPit" id="muPit" role="button" tabindex="0" title="Open the bullpen"><div class="k" id="pTeam">PITCHING</div><div class="v" id="pName">—</div><div class="h" id="pHand"></div></div>
   </div>
 
   <div class="meter" aria-live="polite">
@@ -222,8 +223,8 @@
     <div class="bar"><i class="z z1"></i><i class="z z2"></i><i class="z z3"></i><i class="mk" id="mk" hidden></i></div>
   </div>
 
-  <div class="pacts" id="actsPitch" hidden><button class="pbtn" type="button" data-k="FB">FASTBALL<small>1</small></button><button class="pbtn" type="button" data-k="SL">SLIDER<small>2</small></button><button class="pbtn" type="button" data-k="CH">CHANGEUP<small>3</small></button><button class="pbtn" type="button" data-k="SP">SPLITTER<small>4</small></button><button class="pbtn" type="button" data-k="KN" id="btnKN" hidden>KNUCKLE<small>5</small></button><button class="pbtn pen" type="button" id="penBtn" hidden>BULLPEN<small>B</small></button></div>
-  <div class="acts" id="actsBat"><button class="swing" id="swingBtn" type="button">SWING<small>or tap anywhere · Space</small></button><button class="swing bunt" id="buntBtn" type="button">BUNT</button><div class="bpBar" id="bpBar" hidden><span class="k">MACHINE</span><button class="pbtn" type="button" data-k="FB">FASTBALL<small>1</small></button><button class="pbtn" type="button" data-k="SL">SLIDER<small>2</small></button><button class="pbtn" type="button" data-k="CH">CHANGEUP<small>3</small></button><button class="pbtn" type="button" data-k="SP">SPLITTER<small>4</small></button><button class="pbtn" type="button" data-k="KN">KNUCKLE<small>5</small></button></div></div>
+  <div class="pacts" id="actsPitch" hidden><button class="pbtn" type="button" data-k="FB">FASTBALL<small>1</small></button><button class="pbtn" type="button" data-k="SL">SLIDER<small>2</small></button><button class="pbtn" type="button" data-k="CH">CHANGEUP<small>3</small></button><button class="pbtn" type="button" data-k="SP">SPLITTER<small>4</small></button><button class="pbtn" type="button" data-k="CB">CURVE<small>4</small></button><button class="pbtn" type="button" data-k="KN" id="btnKN" hidden>KNUCKLE<small>5</small></button></div>
+  <div class="acts" id="actsBat"><button class="swing" id="swingBtn" type="button">SWING<small>or tap anywhere · Space</small></button><button class="swing bunt" id="buntBtn" type="button">BUNT</button><div class="bpBar" id="bpBar" hidden><span class="k">MACHINE</span><button class="pbtn" type="button" data-k="FB">FASTBALL<small>1</small></button><button class="pbtn" type="button" data-k="SL">SLIDER<small>2</small></button><button class="pbtn" type="button" data-k="CH">CHANGEUP<small>3</small></button><button class="pbtn" type="button" data-k="SP">SPLITTER<small>4</small></button><button class="pbtn" type="button" data-k="CB">CURVE<small>5</small></button><button class="pbtn" type="button" data-k="KN">KNUCKLE<small>6</small></button></div></div>
 
   <section class="book">
     <div class="bookTop">

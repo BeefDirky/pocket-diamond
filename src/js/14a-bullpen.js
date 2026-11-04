@@ -19,7 +19,10 @@ function changePitcher(k,i,quiet){const cur=S.pIdxOf[k]||0;if(i===cur)return;use
  if(!quiet){banner('PITCHING CHANGE',`#${np.no} ${np.name} in from the pen · ${arsOf(np).map(a=>PITCHES[a].name.toLowerCase()).join(', ')}`);
   S.jumbo={text:'NEW PITCHER',kr:'투수 교체',until:performance.now()+3200}}
  updateHUD()}
-$('penBtn').addEventListener('click',e=>{e.stopPropagation();ensureAudio();togglePen()});
+// tap the pitcher's info box to open the bullpen
+$('muPit').addEventListener('click',e=>{e.stopPropagation();ensureAudio();togglePen()});
+$('muPit').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();togglePen()}});
+$('muPit').addEventListener('pointerdown',e=>e.stopPropagation());
 $('penClose').addEventListener('click',e=>{e.stopPropagation();closePen()});
 $('penPanel').addEventListener('pointerdown',e=>e.stopPropagation());
 $('penList').addEventListener('click',e=>{const b=e.target.closest('.penRow');if(!b||b.disabled||!canPen())return;

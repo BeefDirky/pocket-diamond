@@ -3,7 +3,7 @@ function startWindup(kf){closePen();
  const bpm=S.mode==='bp';if(bpm)kf=S.bpPitch||'FB';
  const pt=bpm?{vel:70,mov:72,ctl:99,slot:'over',hand:'R'}:pitcher(),dmn=!bpm&&pt.type==='demon',knk=!bpm&&pt.type==='knuckle';
  const r=Math.random()*100;
- let k=kf;if(!k){const A=arsOf(pt),PW={FB:dmn?76:50,SL:dmn?15:21,CH:dmn?5:17,SP:dmn?4:12,KN:42};let x=r/100*A.reduce((a,q)=>a+PW[q],0);k=A.find(q=>(x-=PW[q])<0)||A[0]}
+ let k=kf;if(!k){const A=arsOf(pt),PW={FB:dmn?76:50,SL:dmn?15:21,CH:dmn?5:17,SP:dmn?4:12,CB:dmn?3:15,KN:42};let x=r/100*A.reduce((a,q)=>a+PW[q],0);k=A.find(q=>(x-=PW[q])<0)||A[0]}
  const P=PITCHES[k];
  // velocity first, then flight time from velocity: every extra mph arrives visibly sooner
  let mph=k==='KN'?rand(P.mph[1],P.mph[0]):rand(P.mph[1],P.mph[0])+(pt.vel-70)*.12;
@@ -35,10 +35,10 @@ function releaseTap(){
 function choosePitch(k){if(S.phase!=='choose'||!arsOf(pitcher()).includes(k))return;closePen();hideBanner();startWindup(k);updateHUD()}
 function cpuDecide(){
  const b=curBatter(),p=S.pitch,q=p.q,arr=p.releaseAt+p.travel;if(p.hbp)return;
- let sw=p.inZone?.58+(b.con-50)*.004-(q>=1?.12:0):.2+((p.k==='SL'||p.k==='SP'||p.k==='KN')?.18:0)-(b.con-50)*.003;
+ let sw=p.inZone?.58+(b.con-50)*.004-(q>=1?.12:0):.2+((p.k==='SL'||p.k==='SP'||p.k==='KN'||p.k==='CB')?.18:0)-(b.con-50)*.003;
  if(S.strikes===2)sw+=.15;if(S.balls===3&&!p.inZone)sw-=.1;
  if(Math.random()>sw)return;
- const whiff=clamp(.1+{FB:0,SL:.12,CH:.08,SP:.45,KN:.22}[p.k]+q*.16+(p.mph-92)*.012-(b.con-50)*.004+(p.inZone?0:.2),.03,.9);
+ const whiff=clamp(.1+{FB:0,SL:.12,CH:.08,SP:.45,KN:.22,CB:.16}[p.k]+q*.16+(p.mph-92)*.012-(b.con-50)*.004+(p.inZone?0:.2),.03,.9);
  if(Math.random()<whiff){const at=arr+rand(-90,90);S.swing={at:at-60,err:at-arr,miss:true,cpu:true};return}
  const err=clamp(randn()*WIN*.36*(1.3-b.con/150)*(1+q*.6)*(p.inZone?1:1.5),-WIN*1.1,WIN*1.1);
  S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)};
@@ -53,7 +53,7 @@ const sg=Math.random()<.5?-1:1;p.plateX=p.inZone?(p.q>=1?sg*.65:rand(-.35,.35)):
  if(S.pitch.wild)S.wildUntil=now+1700;
  if(!onlineGame()&&(pitching()||(S.auto&&S.mode!=='bp')))cpuDecide();else if(S.auto&&S.mode==='bp'&&Math.random()<.85){const arr=S.pitch.releaseAt+S.pitch.travel,err=randn()*WIN*.3;S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)}}
  if(S.mode==='bp'&&BUF.bpthrow&&!muted)playSample('bpthrow',.8,.97+Math.random()*.06);// the machine's own thunk-and-whir
- else sfx('woosh',{FB:1.06,SL:1,CH:.92}[S.pitch.k]);
+ else sfx('woosh',{FB:1.06,SL:1,CH:.92,CB:.95}[S.pitch.k]);
  const tg=$('tag');tg.style.borderLeftColor=PITCHES[S.pitch.k].trail;spawnFlash(4);$('tagTxt').innerHTML=`${S.pitch.name} <em>${S.pitch.mph}</em> MPH`;tg.hidden=false;
  if(S.pitch.mph>94){S.flame=now;tg.classList.add('hot')}else{S.flame=0;tg.classList.remove('hot')}}
 // each pitch has its own flight shape (x = lateral feet, h = height feet)
@@ -64,6 +64,8 @@ function pitchPos(p,el){
   else if(p.k==='SL'){const B=(sd?19:14)*mv,a=1-uc,c1=lerp(p.relX,p.plateX,.33)-p.side*B*.35,c2=p.plateX-p.side*B*.62;
    x=a*a*a*p.relX+3*a*a*uc*c1+3*a*uc*uc*c2+uc*uc*uc*p.plateX;h=lerp(h0-.2,2.3,uc)-.8*uc*uc}
   else if(p.k==='KN'){const n=p.kn||[12,0,20,1,10,2],e=Math.sin(Math.PI*Math.min(1,uc*1.15));x+=(2.3*Math.sin(uc*n[0]+n[1])+1.1*Math.sin(uc*n[2]+n[3]))*e*mv;h=lerp(h0+.3,2.4,uc)+.9*Math.sin(Math.PI*uc)+1.1*Math.sin(uc*n[4]+n[5])*e*mv}
+  else if(p.k==='CB'){// 12-to-6: pops up out of the hand, hangs, then falls off the table late
+   x+=-p.side*1.3*mv*uc*uc;h=lerp(h0,1.7,uc)+5.4*mv*Math.sin(Math.PI*Math.min(1,uc*1.25))}
   else if(p.k==='SP'){x+=-p.side*.4*uc*(1-uc);h=Math.max(.3,lerp(h0,3.4,uc)-4.6*mv*Math.pow(uc,4))}
   else{x+=p.side*(sd?6.5:5)*mv*uc*Math.pow(1-uc,1.5);h=lerp(h0-.2,1.8,uc)+(sd?3:4.5)*Math.sin(Math.PI*uc)}
   return{x,h}};
@@ -81,7 +83,7 @@ function swing0(){
  S.swing={at:now,err};
  if(S.pitch.k==='SP'){S.swing.miss=true;showTiming(err);sfx('whiff');return}
  if(Math.abs(err)<=WIN){
-  const bb=curBatter(),wp=Math.max(0,58-bb.con)*.006+(S.pitch.k==='SL'?.1:S.pitch.k==='CH'?.04:S.pitch.k==='KN'?.14:0);
+  const bb=curBatter(),wp=Math.max(0,58-bb.con)*.006+(S.pitch.k==='SL'?.1:S.pitch.k==='CH'?.04:S.pitch.k==='KN'?.14:S.pitch.k==='CB'?.08:0);
   if(Math.random()<wp){S.swing.miss=true;showTiming(err);sfx('whiff');return}
   if(err<0)S.swing.contactAt=S.pitch.releaseAt+S.pitch.travel;else doContact()}
  else{S.swing.miss=true;showTiming(err);sfx('whiff')}

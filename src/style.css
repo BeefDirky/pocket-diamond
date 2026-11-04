@@ -66,6 +66,13 @@ button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 /* on-field scorebug + pitch tag flame */
 .bug{position:absolute;right:8px;top:8px;display:flex;gap:12px;align-items:center;background:rgba(8,20,14,.86);border:2px solid var(--edge);padding:8px 10px;pointer-events:none}
 .bugDia{position:relative;width:56px;height:56px;flex:none}
+.bugSc{display:flex;flex-direction:column;gap:6px;font-family:var(--f-hud);font-size:15px;color:var(--dim);padding-right:10px;border-right:2px solid rgba(255,255,255,.08)}
+.bugSc div{display:flex;align-items:center;gap:6px}
+.bugSc i{width:5px;height:16px;background:var(--c,#888);flex:none}
+.bugSc span{min-width:32px;letter-spacing:.04em}
+.bugSc b{font-weight:400;color:var(--chalk);min-width:20px;text-align:right;font-size:17px}
+.bugSc div.up span{color:var(--chalk)}.bugSc div.up span::after{content:'◂';color:var(--amber);font-size:10px;margin-left:3px;vertical-align:1px}
+body.bpMode .bugSc{display:none}
 .bugDia i{position:absolute;width:17px;height:17px;transform:rotate(45deg);background:var(--off);border:2px solid #0a1610}
 .bugDia i.on{background:var(--amber)}
 .bugDia i.chase{background:#fff6c8;box-shadow:0 0 10px #ffbf3c}
@@ -188,6 +195,8 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .tiles.three{grid-template-columns:repeat(3,1fr)}
 .muBat{cursor:pointer;position:relative}
 .muBat:hover{border-color:var(--amber)}
+.muPit{position:relative}.muPit.canPen{cursor:pointer}.muPit.canPen:hover{border-color:var(--amber)}
+.muPit.canPen::after{content:"▾ BULLPEN";position:absolute;right:8px;top:8px;font-size:9px;letter-spacing:.1em;color:var(--amber)}
 .muBat::after{content:"▾ PICK";position:absolute;right:8px;top:8px;font-size:9px;letter-spacing:.1em;color:var(--dim)}
 .pickList{display:flex;flex-direction:column;gap:4px}
 .pickRow{display:grid;grid-template-columns:22px 34px 1fr auto;align-items:center;gap:8px;background:var(--edge);border:2px solid var(--panel-hi);padding:5px 8px;cursor:pointer;color:var(--chalk);text-align:left;font-family:var(--f-hud)}
@@ -405,6 +414,7 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 .bugDia i{width:11px;height:11px;border-width:1.5px}
 .bugDia .b2{left:12px;top:2px}.bugDia .b1{left:23px;top:13px}.bugDia .b3{left:1px;top:13px}
 .bugCnt{gap:3px;font-size:10px}.bugCnt div{gap:5px}
+.bugSc{gap:3px;font-size:11px;padding-right:7px}.bugSc div{gap:4px}.bugSc i{width:3px;height:11px}.bugSc span{min-width:23px}.bugSc b{font-size:12px;min-width:14px}
 .bug .bulbs{gap:3px}.bug .bulb{width:9px;height:9px}
 .pcBox{right:6px;gap:8px;min-width:0;padding:3px 7px;font-size:10px;letter-spacing:.06em}
 .pcBox b,.pcBox span:first-child{font-family:var(--f-px);font-size:9px}

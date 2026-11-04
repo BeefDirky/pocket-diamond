@@ -102,10 +102,15 @@ function finalize(play,runners,res){
  return play;
 }
 function simulateContact(err,hand,b){
- const q=clamp(1-Math.pow(Math.abs(err)/WIN,1.05)+(b.con-50)*.002-(S.pitch&&S.pitch.k==='SL'?.15:S.pitch&&S.pitch.k==='KN'?.12:0),0,1);
- const EV=clamp(60+50*q+(b.pow-50)*.32+randn()*4,45,118);
+ const q0=clamp(1-Math.pow(Math.abs(err)/WIN,1.05)+(b.con-50)*.002-(S.pitch&&S.pitch.k==='SL'?.15:S.pitch&&S.pitch.k==='KN'?.12:S.pitch&&S.pitch.k==='CB'?.1:0),0,1);
+ // the curveball's hidden sweet spot: a swing that lands right on the seam between GOOD and LATE stays back on it
+ // and drives it the other way (never shown on the timing bar)
+ const sweet=S.pitch&&S.pitch.k==='CB'&&Math.abs(err-WIN*GOODK)<=WIN*.045;
+ let q=q0;if(sweet)q=Math.max(q,.94);
+ const EV=sweet?clamp(100+(b.pow-50)*.22+randn()*3,94,116):clamp(60+50*q+(b.pow-50)*.32+randn()*4,45,118);
  let L;
- if(q>.78)L=rand(10,34);
+ if(sweet)L=rand(19,31);
+ else if(q>.78)L=rand(10,34);
  else if(q>.48)L=Math.random()<.5?rand(-12,12):rand(12,40);
  else L=Math.random()<.55?rand(-25,6):rand(40,70);
  L+=(b.pow-50)*.06;
@@ -115,7 +120,7 @@ function simulateContact(err,hand,b){
  const dir={x:Math.sin(s*RAD),y:Math.cos(s*RAD)};
  const P={err,q,EV,L,s};
  if(S.mode==='bp')return buildBP(P,dir,b);
- if(q<.62&&Math.random()<.3){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
+ if(!sweet&&q<.62&&Math.random()<.3){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
  if(Math.abs(s)>45)return buildFoul(P,dir);
  if(L<10)return buildGrounder(P,dir,b);
  return buildAir(P,dir,b);

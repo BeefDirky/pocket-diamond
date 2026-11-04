@@ -26,13 +26,15 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  for(let i=0;i<n;i++){const cur=i===S.inning-1&&S.half==='bot'&&S.phase!=='over';const shown=started&&(i<S.inning-1||(i===S.inning-1&&S.half==='bot'));h+=`<td class="${cur&&started?'now':''}">${shown?S.youLine[i]:''}</td>`}
  h+=`<td class="tot">${started?S.runs:''}</td><td>${started?S.hits:''}</td><td>${started?S.myErrs:''}</td></tr>`;
  $('line').innerHTML=h;
+ {const setSc=(id,k,runs)=>{const el=$(id);el.style.setProperty('--c',TEAMS[k].jersey);el.querySelector('span').textContent=ABBR[k];el.querySelector('b').textContent=started?runs:'';el.classList.toggle('up',started&&batKey()===k)};
+  setSc('bsA',S.opp,S.target);setSc('bsH',S.you,S.runs)}
  bulbs('lb',3,S.balls,'b');bulbs('ls',2,S.strikes,'s');bulbs('lo',2,Math.min(2,S.outs),'o');
  const hrTrot=S.phase==='play'&&S.play&&S.play.hrFired;
  for(let k=1;k<=3;k++)if(!S.baseChase)$('d'+k).classList.toggle('on',!hrTrot&&!!S.bases[k-1]);
  const b=curBatter(),p=pitcher();
  $('abTeam').textContent=`${TEAMS[batKey()].name} · AT BAT`;$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE · ON THE MOUND':`${TEAMS[fldKey()].name} · PITCHING${pitching()?' (YOU)':''}`;
  const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;if(pit){const A=arsOf(pitcher());for(const pb of document.querySelectorAll('#actsPitch .pbtn[data-k]')){const i=A.indexOf(pb.dataset.k);pb.hidden=i<0;if(i>=0)pb.querySelector('small').textContent=i+1}
-  $('actsPitch').style.gridTemplateColumns=isWide()?'':`repeat(${A.length},1fr) ${canPen()?'.9fr':''}`;$('penBtn').hidden=!canPen()}document.querySelector('.meter').hidden=pit;
+  $('actsPitch').style.gridTemplateColumns=isWide()?'':`repeat(${A.length},1fr)`}$('muPit').classList.toggle('canPen',canPen());document.querySelector('.meter').hidden=pit;
  for(const pb of document.querySelectorAll('#actsPitch .pbtn'))pb.disabled=S.phase!=='choose';
  {const bg=document.querySelector('.bug'),pb=document.querySelector('.pcBox');if(bg&&pb){pb.style.top=(bg.offsetTop+bg.offsetHeight)+'px';pb.style.width=bg.offsetWidth+'px';pb.style.boxSizing='border-box'}}
  $('pcV').textContent=(S.pcOf&&S.pcOf[fldKey()])||0;$('bugInn').textContent=S.phase==='title'?'':`${S.mode==='full'&&S.half==='top'?'▲':'▼'}${S.inning}`;

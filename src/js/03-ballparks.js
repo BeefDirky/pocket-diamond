@@ -61,9 +61,9 @@ function buildRosters(){
 }
 function arsFor(p,k){const h=hash((k||'')+p.name+'ars');
  if(p.type==='knuckle')return['FB','KN','CH'];
- if(p.pos==='SP')return['FB','SL','CH','SP'];
+ if(p.pos==='SP')return['FB',...[['SL','CH','SP'],['CB','CH','SP'],['SL','CB','CH'],['SL','CB','SP'],['SL','CH','SP'],['CB','SL','CH']][h%6]];
  if(p.type==='demon')return['FB','SL',h%2?'SP':'CH'];
- return['FB',...[['SL','CH'],['SL','SP'],['CH','SP'],['SL','CH'],['CH','SP']][h%5]]}
+ return['FB',...[['SL','CH'],['SL','SP'],['CH','SP'],['CB','CH'],['CH','SP'],['SL','CB'],['CB','SP']][h%7]]}
 const arsOf=p=>(p&&p.ars)||arsFor(p||{});
 const ovr=p=>(p.pos==='SP'||p.pos==='RP')?Math.round(p.vel*.4+p.mov*.35+p.ctl*.25):Math.round(p.con*.3+p.pow*.3+p.spd*.15+p.def*.25);
 const spdFt=w=>19+((w&&w.spd)||60)*.1;
@@ -71,6 +71,7 @@ const PITCHES={
  FB:{name:'FASTBALL',w:50,ms:[500,560],mph:[99,94.5],zone:.62,trail:'#bfe3ff',tl:18},
  SL:{name:'SLIDER',w:28,ms:[640,700],mph:[88,84],zone:.48,trail:'#ff7a66',tl:26},
  CH:{name:'CHANGEUP',w:22,ms:[730,800],mph:[85,81],zone:.5,trail:'#ffd36b',tl:14},
+ CB:{name:'CURVEBALL',w:18,ms:[700,760],mph:[82,77],zone:.44,trail:'#9fe0a8',tl:24},
  SP:{name:'SPLITTER',w:12,ms:[580,630],mph:[91,87],zone:.22,trail:'#ffd36b',tl:18},
  KN:{name:'KNUCKLEBALL',w:0,ms:[800,880],mph:[78,71],zone:.46,trail:'#c9a6ff',tl:22},
 };
