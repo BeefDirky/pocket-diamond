@@ -1,5 +1,5 @@
 // ---------- audio ----------
-const SND_B64=/*@AUDIO:charge,klost,bpthrow,dcatch,fworks,chant,csingle,boo,slide,ramp,fence1,clang,grass,horn,echo1,echo2,echo3,amb,woosh,weak,drop,mitt,cheer,crowd,bat,organ*/{};
+const SND_B64=/*@AUDIO:homer,charge,klost,bpthrow,dcatch,fworks,chant,csingle,boo,slide,ramp,fence1,clang,grass,horn,echo1,echo2,echo3,amb,woosh,weak,drop,mitt,cheer,crowd,bat,organ*/{};
 let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}

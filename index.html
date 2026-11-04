@@ -1997,7 +1997,7 @@ function drawBat(g,bx,by,ang,hand,col){
 }
 
 // ---------- audio ----------
-const SND_B64={charge:1,klost:1,bpthrow:1,dcatch:1,fworks:1,chant:1,csingle:1,boo:1,slide:1,ramp:1,fence1:1,clang:1,grass:1,horn:1,echo1:1,echo2:1,echo3:1,amb:1,woosh:1,weak:1,drop:1,mitt:1,cheer:1,crowd:1,bat:1,organ:1};
+const SND_B64={homer:1,charge:1,klost:1,bpthrow:1,dcatch:1,fworks:1,chant:1,csingle:1,boo:1,slide:1,ramp:1,fence1:1,clang:1,grass:1,horn:1,echo1:1,echo2:1,echo3:1,amb:1,woosh:1,weak:1,drop:1,mitt:1,cheer:1,crowd:1,bat:1,organ:1};
 let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
@@ -2797,7 +2797,8 @@ function runnerPos(r,t){
  const a=baseP(r.from+leg),b=baseP(r.from+leg+1);
  return{x:lerp(a.x,b.x,f),y:lerp(a.y,b.y,f),moving:prog>0&&prog<total};
 }
-function hrMoment(r){const now=performance.now();if(!r.bp)S.lightShow=now;$('skipBtn').hidden=!!(S.online&&S.online.inGame&&pitching());banner(r.banner,r.sub,'hr');if(r.bp)return;S.baseChase=now;
+function hrMoment(r){const now=performance.now();if(!r.bp){S.lightShow=now;crowdClip('homer',batKey()===S.you?3:1.1)}// the ball lands in the seats: the crowd erupts (much louder for the home side)
+$('skipBtn').hidden=!!(S.online&&S.online.inGame&&pitching());banner(r.banner,r.sub,'hr');if(r.bp)return;S.baseChase=now;
  if(batKey()===S.you){const pl=S.play;S.hrHype=pl;setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700);
   setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700+((BUF.horn&&BUF.horn.duration)||4.8)*1000+250)}
  if(batKey()===S.you){S.cheerUntil=now+1e9;S.fwUntil=now+4600;setTimeout(()=>{if(!S.paused&&!muted)playSample('fworks',.85,1)},350);S.jumbo={text:r.banner.replace('!',''),kr:'홈런!',until:now+5200}}}
