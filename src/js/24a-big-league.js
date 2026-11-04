@@ -20,7 +20,7 @@ const BL_BATS=[
  ['COL','Hunter Badman','R','C','L',76,97,38,76],['DET','Kevin McGiggle','L','SS','L',98,81,80,93],['HOU','Yordan Alvarice','L','DH','M',99,99,34,48],
  ['KC','Bobby Bit Jr.','R','SS','L',93,78,99,99],['LAA','Zach Nacho','R','SS','L',87,89,90,96],['LAD','Cookie Betts','R','SS','?',93,81,78,94],
  ['MIA','Lotto Lopez','R','2B','M',98,62,87,98],['MIL','Brice Boomerang','L','2B','M',92,83,90,99],['MIN','Kody Clemens','L','1B','L',78,89,57,77],
- ['NYM','Carson Benge','L','RF','L',85,80,89,91],['NYY','Ben Lice','L','1B','L',89,98,44,77],['PHI','Bryce Harbor','L','1B','?',94,94,67,79],
+ ['NYM','Carson Benge','L','RF','L',85,80,89,91],['NYY','Ben Lice','L','1B','L',89,98,44,77],['PHI','Bryce Larper','L','1B','?',94,94,67,79],
  ['PIT','Brandon Brow','L','2B','L',83,94,45,79],['SD','Fernando Tacos Jr.','R','RF','T',94,93,93,94],['SF','Rafael Levers','L','1B','M',91,96,40,66],
  ['SEA','Randy Arroz-Arena','R','LF','T',91,87,91,82],['STL','Jordan Balker','R','RF','?',86,91,79,81],['TB','Junior Cannonero','R','3B','M',89,99,64,83],
  ['TEX','Wyatt Longball','R','LF','?',86,89,90,88],['TOR','Kazuma Okramoto','R','3B','L',80,91,39,91],['WSH','James Pood','L','LF','?',85,98,83,79],

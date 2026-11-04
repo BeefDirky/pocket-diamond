@@ -138,7 +138,7 @@ function render(now){
  if(CROWD_A&&!bpv)drawCrowdLife(wg,now);
  if(SIGNS)wg.drawImage(SIGNS,0,0);
  if(DECOR)wg.drawImage(DECOR,0,0);
- wg.save();wg.scale(K,K);if(!bpv){drawDugoutCrew(wg,now);drawCheer(wg,now)}drawFlags(wg,now);drawJumbo(wg,now);wg.restore();
+ if(!bpv)drawDugoutCrew(wg,now);wg.save();wg.scale(K,K);if(!bpv)drawCheer(wg,now);drawFlags(wg,now);drawJumbo(wg,now);wg.restore();
  const ph=S.phase,play=S.play;
  const inPlay=!!play&&(ph==='play'||ph==='result');
  const t=play?(ph==='result'?play.end:play.t):0;

@@ -4,7 +4,7 @@ let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;cons
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
 function saveOpts(){try{localStorage.setItem('pd-opts2',JSON.stringify(OPT))}catch(e){}}
-function applyVolumes(){if(!AC)return;const bpq=!!S.bpOn;BUS.music.gain.value=(bpq||S.rampSrc)?0:OPT.music/100*.7;BUS.crowd.gain.value=bpq?0:OPT.crowd/100*.4;if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
+function applyVolumes(){if(!AC)return;const bpq=!!S.bpOn;BUS.music.gain.value=(bpq||S.rampSrc||S.musicDuck)?0:OPT.music/100*.7;BUS.crowd.gain.value=bpq?0:OPT.crowd/100*.4;if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
 function b64buf(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer}
 function loopOn(k,bus){if(!BUF[k]||!AC)return null;const src=AC.createBufferSource();src.buffer=BUF[k];src.loop=true;src.connect(bus);src.start();return src}
 function startOrgan(){if(!organSrc)organSrc=loopOn('organ',BUS.music)}
@@ -40,6 +40,9 @@ function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.cre
 function crowdReach(err){crowdClip('csingle',(batKey()===S.you?3.4:1.1)*(err?1.6:1))}
 let chantSrc=null,nextChant=0;
 function crowdChant(){if(chantSrc||S.mode==='bp')return;chantSrc=crowdClip('chant',1.9);if(chantSrc)chantSrc.onended=()=>{chantSrc=null}}
+// home-run horn: the music fades out under it and comes back in when the next pitch is on its way
+function duckMusic(){if(!AC||!BUS.music||S.musicDuck)return;S.musicDuck=true;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.6)}
+function unduckMusic(){if(!S.musicDuck)return;S.musicDuck=false;if(!AC||!BUS.music||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t+1.8)}
 function stopRamp(){if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
 function playSample(k,vol,rate){if(!AC||!BUF[k])return false;const src=AC.createBufferSource(),gn=AC.createGain();src.buffer=BUF[k];src.playbackRate.value=rate||1;gn.gain.value=vol;src.connect(gn).connect(BUS.sfx);src.start();return true}
 function noise(dur,type,freq,vol,swell){

@@ -32,7 +32,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  const hrTrot=S.phase==='play'&&S.play&&S.play.hrFired;
  for(let k=1;k<=3;k++)if(!S.baseChase)$('d'+k).classList.toggle('on',!hrTrot&&!!S.bases[k-1]);
  const b=curBatter(),p=pitcher();
- $('abTeam').textContent=`${TEAMS[batKey()].name} · AT BAT`;$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE · ON THE MOUND':`${TEAMS[fldKey()].name} · PITCHING${pitching()?' (YOU)':''}`;
+ $('abTeam').textContent=`${TEAMS[batKey()].name} · AT BAT`;$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE':`${TEAMS[fldKey()].name} · PITCHING${pitching()?' (YOU)':''}`;
  const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;if(pit){const A=arsOf(pitcher());for(const pb of document.querySelectorAll('#actsPitch .pbtn[data-k]')){const i=A.indexOf(pb.dataset.k);pb.hidden=i<0;if(i>=0)pb.querySelector('small').textContent=i+1}
   $('actsPitch').style.gridTemplateColumns=isWide()?'':`repeat(${A.length},1fr)`}$('muPit').classList.toggle('canPen',canPen());document.querySelector('.meter').hidden=pit;
  for(const pb of document.querySelectorAll('#actsPitch .pbtn'))pb.disabled=S.phase!=='choose';
@@ -41,7 +41,13 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  $('abName').textContent=`${((S.orderOf&&S.orderOf[batKey()])||0)+1}. #${b.no} ${b.name} · ${b.pos}`;
  $('abHand').innerHTML=(b.hand==='S'?`Switch (<b>${effHand(b)}</b>)`:`Bats <b>${b.hand}</b>`)+` · CON ${rb(b.con)} POW ${rb(b.pow)} SPD ${rb(b.spd)}`;
  $('pName').textContent=`#${p.no} ${p.name}`;
- if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing <b>${S.bpPitch==='RND'?'RANDOM PITCHES':PITCHES[S.bpPitch||'FB'].name}</b> · ${S.bp.sw} swings · ${S.bp.hr} HR · longest <b>${S.bp.long}</b> ft`}else $('pHand').innerHTML=`Throws <b>${p.hand}</b>${p.slot==='side'?' (sidearm)':''}${p.type==='demon'?' · <b class="dmn">SPEED DEMON</b>':p.type==='knuckle'?' · <b class="knk">KNUCKLER</b>':''} · VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}`;
+ if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing: <button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button><span class="bpStat">${S.bp.sw} swings · ${S.bp.hr} HR · longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=`Throws <b>${p.hand}</b>${p.slot==='side'?' (sidearm)':''}${p.type==='demon'?' · <b class="dmn">SPEED DEMON</b>':p.type==='knuckle'?' · <b class="knk">KNUCKLER</b>':''} · VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}`;
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});
 }
+// line score peek: hover the top strip on a computer, tap it on a phone (stays down a few seconds)
+{let hideT=0;const show=ms=>{document.body.classList.add('lsShow');clearTimeout(hideT);if(ms)hideT=setTimeout(()=>document.body.classList.remove('lsShow'),ms)};
+ const hot=$('lsHot'),bd=document.querySelector('.app>.board'),fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
+ hot.addEventListener('pointerdown',e=>{e.stopPropagation();if(e.pointerType==='mouse'&&fine)return;document.body.classList.contains('lsShow')?document.body.classList.remove('lsShow'):show(4000)});
+ for(const el of[hot,bd]){el.addEventListener('mouseenter',()=>{if(fine)show(0)});el.addEventListener('mouseleave',()=>{if(fine){clearTimeout(hideT);hideT=setTimeout(()=>document.body.classList.remove('lsShow'),350)}})}
+ bd.addEventListener('pointerdown',e=>e.stopPropagation())}

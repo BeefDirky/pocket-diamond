@@ -34,9 +34,10 @@ function camTarget(){
   if(!b)return clampCam(isWide()?{x:HX,y:H*.52,z:Math.max(zFit(),W*VA/1250*S.zoom)}:{...CAM_FULL,z:Math.max(zFit(),CAM_FULL.z*S.zoom)});
   const q=toPx(b.x,b.y),c2=toPx(0,85);const d=Math.hypot(b.x,b.y);
   const wide=isWide(),k=wide?.55:.3,cx=lerp(q.x,c2.x,k),cy=lerp(q.y,c2.y,k);
-  let z=Math.max(zFit(),(wide?lerp(1.3,1,clamp(d/260,0,1)):lerp(1.8,1.25,clamp(d/320,0,1)))*S.zoom);
+  // phones (portrait) pull back further as the ball carries, so a deep fly stays in view with the outfield around it
+  let z=Math.max(zFit(),(wide?lerp(1.3,1,clamp(d/260,0,1)):lerp(1.7,.95,clamp(d/300,0,1)))*S.zoom);
   // the ball is drawn lifted by its height: keep that point inside the frame (with room to spare), zooming out if needed
-  const by=q.y-(b.h||0)/FT*.5,bx=q.x,dyN=Math.abs(by-cy)*(by<cy?3.1:2.6),dxN=Math.abs(bx-cx)*2.4;// extra room up top, where the line score sits
+  const by=q.y-(b.h||0)/FT*.5,bx=q.x,dyN=Math.abs(by-cy)*(by<cy?3.1:2.6)*(wide?1:1.25),dxN=Math.abs(bx-cx)*(wide?2.4:3);// extra room up top, where the line score sits
   if(dyN>0)z=Math.min(z,W*VA/dyN);if(dxN>0)z=Math.min(z,W/dxN);
   return clampCam({x:cx,y:cy,z:Math.max(zFit(),z)});
  }
@@ -57,7 +58,8 @@ function updateCam(dt){
  const tg=camTarget();
  if(reduced){S.cam={...tg};return}
  const k=Math.min(dt,50)/1000,V=S.camV;
- [S.cam.x,V.x]=sdamp(S.cam.x,tg.x,V.x,.42,k);[S.cam.y,V.y]=sdamp(S.cam.y,tg.y,V.y,.42,k);
+ const st=S.camMode==='follow'&&!isWide()?.3:.42;// a phone's narrow frame needs the camera to keep up
+ [S.cam.x,V.x]=sdamp(S.cam.x,tg.x,V.x,st,k);[S.cam.y,V.y]=sdamp(S.cam.y,tg.y,V.y,st,k);
  let lz;[lz,V.z]=sdamp(Math.log(S.cam.z),Math.log(tg.z),V.z,.6,k);S.cam.z=Math.exp(lz);
 }
 

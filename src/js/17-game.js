@@ -1,5 +1,5 @@
 // ---------- game flow ----------
-function startGame(mode){tsFlush();
+function startGame(mode){tsFlush();unduckMusic();
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
  S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();

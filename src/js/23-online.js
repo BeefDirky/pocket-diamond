@@ -43,7 +43,7 @@ function netRelease(){const o=S.online,p=S.pitch;netPresence({pt:{id:p.pid,st:'r
 function netDecide(k){const o=S.online,sw=S.swing||{};netPresence({dc:{id:S.pitch.pid,k,e:sw.err||0,m:!!sw.miss,sl:S.steal?{1:!!S.steal[1],2:!!S.steal[2]}:null}})}
 // batter side: start the remote pitch
 function applyWindup(pt){const o=S.online;o.seenW=pt.id;applySnap(pt.z);hideBanner();
- S.pitch={...pt.p,releaseAt:0,trail:[],remote:true};WIN=winOf(curBatter())*Math.pow(95/S.pitch.mph,1.3);S.swing=null;o.waitMsg=false;setPhase('windup');updateHUD()}
+ unduckMusic();S.pitch={...pt.p,releaseAt:0,trail:[],remote:true};WIN=winOf(curBatter())*Math.pow(95/S.pitch.mph,1.3);S.swing=null;o.waitMsg=false;setPhase('windup');updateHUD()}
 function applyRelease(pt){const o=S.online;o.seenR=pt.id;Object.assign(S.pitch,{plateX:pt.p.plateX,inZone:pt.p.inZone,q:pt.p.q,wild:pt.p.wild,hbp:pt.p.hbp,relRecv:true});
  if(S.phase==='windup'&&S.pt<S.pitch.wind)S.pt=S.pitch.wind}
 // pitcher side: the batter swung, bunted or took
