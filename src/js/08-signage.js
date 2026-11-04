@@ -47,7 +47,7 @@ function buildSigns(){
   g.fillStyle='#8b96a0';g.fillRect(-27,-13,54,2);g.fillStyle='#59636d';for(let k=-24;k<=24;k+=6)g.fillRect(k,-13,1,2);   // catwalk rail
   g.restore();
   if(night){const gr=g.createRadialGradient(tx,ty,4,tx,ty,64);gr.addColorStop(0,'rgba(255,246,210,.45)');gr.addColorStop(1,'rgba(255,246,210,0)');g.fillStyle=gr;g.fillRect(tx-64,ty-64,128,128)}
-  TOWERS.push({x:tx*K,y:ty*K});
+  TOWERS.push({x:tx*K,y:ty*K,kx:tx,ky:ty,a});
  });
  // (the city mural billboard was retired; the neighborhood outside the park carries the city now)
  return c;

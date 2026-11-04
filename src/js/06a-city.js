@@ -2,17 +2,15 @@
 // The park buffer is W x H; the neighborhood reaches EXT().mx/my beyond it and is drawn once per park and time of day
 // at half resolution. Neighborhood pixel (cx,cy) is world pixel (cx*2-mx, cy*2-my).
 let PARK_OUTLINE=null,OUT_CV=null,OUT_KEY='';
-function parkOutline(){
- // the ballpark's outer wall, shaped like a wide V: a pointed tip well behind home, long straight arms out behind
- // the foul lines to wide wings, then the roofline angling back in to a short top over center field. It reaches
- // past the park buffer on every side; the stands are extended out there (drawn with the neighborhood).
- const tipY=HY+400,wingX=1000,wingY=HY-600,wing2Y=HY-800,shX=430,shY=-150,topY=-200;
- const half=[[0,tipY],[wingX,wingY],[wingX,wing2Y],[shX,shY],[shX*.4,topY]];
- let pts=[...half,...half.slice(1).reverse().map(([x,y])=>[-x,y])];
+// the original single-deck footprint; the infield grandstand now juts out one more deck past it (Dodger Stadium style)
+function outlineFrom(half){let pts=[...half,...half.slice(1).reverse().map(([x,y])=>[-x,y])];
  const chaikin=P=>{const out=[];for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];
    out.push([a[0]*.85+b[0]*.15,a[1]*.85+b[1]*.15],[a[0]*.15+b[0]*.85,a[1]*.15+b[1]*.85])}return out};
- pts=chaikin(pts);pts=chaikin(pts);
- return pts.map(([x,y])=>({x:HX+x,y}))}
+ pts=chaikin(pts);pts=chaikin(pts);return pts.map(([x,y])=>({x:HX+x,y}))}
+function parkOutlineInner(){return outlineFrom([[0,HY+400],[1000,HY-600],[1000,HY-800],[430,-150],[172,-200]])}
+// the ballpark's outer wall: a wide V with a pointed tip behind home. The home-plate grandstand is one deck deeper
+// than the rest, so the wall steps back in to the outfield pavilions out by the corners.
+function parkOutline(){return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
 const hexRGB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
@@ -104,6 +102,11 @@ function buildOutside(k,night){
  {const ST=STADIUMS[k],C=PARK_C,img=g.getImageData(0,0,CW,CH),d=img.data,N=CW*CH;
   const mc=document.createElement('canvas');mc.width=CW;mc.height=CH;const mg=mc.getContext('2d');mg.beginPath();OL.forEach((q,i)=>mg[i?'lineTo':'moveTo'](q.x,q.y));mg.closePath();mg.fill();
   const md=mg.getImageData(0,0,CW,CH).data;
+  const IL=parkOutlineInner().map(q=>({x:cx(q.x),y:cy(q.y)}));
+  const ic=document.createElement('canvas');ic.width=CW;ic.height=CH;const ig=ic.getContext('2d');ig.beginPath();IL.forEach((q,i)=>ig[i?'lineTo':'moveTo'](q.x,q.y));ig.closePath();ig.fillStyle='#000';ig.fill();
+  ig.strokeStyle='#ff0000';ig.lineWidth=9;ig.stroke();
+  const imd=ig.getImageData(0,0,CW,CH).data;// alpha: inside the old wall; red: the walkway ring along it
+  const C3a=hexRGB(shade(ST.seat[0],-.18)),C3b=hexRGB(shade(ST.seat[1],-.18));
   const wX=px=>(px+.5)*2-e.mx,wY=py=>(py+.5)*2-e.my;
   // the playing field mask (same test as the park buffer), then the distance from it
   const A=new Int32Array(N);
@@ -130,6 +133,12 @@ function buildOutside(k,night){
     else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
     else if(ST.feature==='whale'&&ath<36&&r>fdh+14)feat='sea';
     else if(ST.feature==='orchard'&&ath<36&&r>fdh+11)feat='orchard'}
+   const j4=i*4,onRing=imd[j4]>200&&imd[j4+3]>128,inOld=imd[j4+3]>128&&!onRing;
+   if(!feat&&onRing&&A[i]&&md[j4+3]>128){put(i,C.conc);continue}
+   if(!feat&&!inOld&&!onRing&&A[i]){// the new top deck: same rows and aisles, a darker shade of the lower bowl's color
+    const dO=A[i]/3*2/K,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
+    if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;if(rr2>=4.6)col=C.riserU;else{col=(row&1)?C3a:C3b;seatM[i]=1}}
+    put(i,col);continue}
    if(feat==='sea'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
    else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
    else if(feat==='orchard'){const q=Math.round(wy),p2=Math.round(wx),cy2=Math.floor(q/22),cx2=Math.floor((p2+(cy2&1)*11)/22),lx=(p2+(cy2&1)*11)-cx2*22-11,ly=q-cy2*22-11,d2=lx*lx+ly*ly;

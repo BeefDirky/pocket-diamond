@@ -60,6 +60,13 @@ function dustAt(key,x,y,h){let st=GROUND.get(key);if(!st){GROUND.set(key,{h,n:0}
 function drawDust(g,now){const dt=Math.min(.05,(now-(dustT||now))/1000);dustT=now;
  for(const d of DUST){d.m+=dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.vy+=70*dt;d.vx*=.92;const a=Math.max(0,1-d.m/d.life);if(a<=0)continue;g.globalAlpha=a*.85;g.fillStyle=d.c;g.fillRect(Math.round(d.x),Math.round(d.y),2,2)}
  g.globalAlpha=1;DUST=DUST.filter(d=>d.m<d.life)}
+// light towers: on all night, off by day; after a home run each bank blinks off and on, one after another
+function towerOn(i,now){const s=S.lightShow,base=!!S.night;if(!s)return base;const t=now-s-i*380;if(t<0||t>4400)return base;return Math.floor(t/440)%2===(base?0:1)?!base:base}
+// paint each bank's lamp face for its current state over the static signage
+function drawTowerLamps(g,now){if(!S.lightShow)return;for(const[i,t]of TOWERS.entries()){const on=towerOn(i,now);if(on===!!S.night)continue;
+ g.save();g.scale(K,K);g.translate(t.kx,t.ky);g.rotate(t.a+Math.PI/2);g.fillStyle='#1d2228';g.fillRect(-25,-9,50,18);
+ for(let r=0;r<3;r++)for(let k=0;k<6;k++){const lx=-23+k*8,ly=-8+r*5.6;g.fillStyle=on?((r+k)%2?'#fffdf0':'#fff3c4'):'#3a4048';g.fillRect(lx,ly,6.5,4.4)}
+ g.restore();if(on){g.save();g.globalCompositeOperation='lighter';const gr=g.createRadialGradient(t.x,t.y,4,t.x,t.y,110);gr.addColorStop(0,'rgba(255,250,225,.6)');gr.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=gr;g.fillRect(t.x-110,t.y-110,220,220);g.restore()}}}
 function nightPass(g,now){
  if(!NIGHT_MASK){const c=document.createElement('canvas');c.width=W;c.height=H;const m=c.getContext('2d');
   // darkness everywhere, then the whole playing field (fair ground to the wall, plus the foul ground around home) lit up with soft edges
@@ -73,23 +80,29 @@ function nightPass(g,now){
   // a touch of extra light on the lower bowl right behind the field
   m.save();m.globalCompositeOperation='lighter';m.filter='blur(30px)';m.fillStyle='rgba(70,70,80,.9)';fieldPath(90);m.fill();m.restore();
   NIGHT_MASK=c;
-  // rectangular spotlight beams from each bank, aimed into the field, ending in a bright rectangular pool
-  const b=document.createElement('canvas');b.width=W;b.height=H;const bg=b.getContext('2d');
+  // spotlight beams from each bank, one canvas per tower (so a bank can go dark on its own), plus the patch of
+  // field each bank lights (used to dim that section when the bank is off)
   const aims=[toPx(-40,250),toPx(40,250),toPx(-20,90),toPx(20,90)];
-  TOWERS.forEach((t,k)=>{const aim=aims[k]||toPx(0,150),dx=aim.x-t.x,dy=aim.y-t.y,L=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);
-   bg.save();bg.translate(t.x,t.y);bg.rotate(ang);
-   // a cone of light that widens and tapers away to nothing as it falls onto the field
+  NIGHT_BEAMS=TOWERS.map((t,k)=>{const aim=aims[k]||toPx(0,150),dx=aim.x-t.x,dy=aim.y-t.y,L=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);
+   const pad=40,ca=Math.cos(ang),sa=Math.sin(ang),pts=[[0,-20],[L*1.1,-170],[L*1.1,170],[0,20],[L*1.25,-300],[L*1.25,300]].map(([u,v])=>({x:t.x+u*ca-v*sa,y:t.y+u*sa+v*ca}));
+   const x0=Math.floor(Math.min(...pts.map(p=>p.x))-pad),y0=Math.floor(Math.min(...pts.map(p=>p.y))-pad),x1=Math.ceil(Math.max(...pts.map(p=>p.x))+pad),y1=Math.ceil(Math.max(...pts.map(p=>p.y))+pad);
+   const mk=()=>{const c=document.createElement('canvas');c.width=x1-x0;c.height=y1-y0;const g=c.getContext('2d');g.translate(t.x-x0,t.y-y0);g.rotate(ang);return[c,g]};
+   const[bc,bg]=mk();
    const gr=bg.createLinearGradient(0,0,L*1.1,0);gr.addColorStop(0,'rgba(255,248,222,.30)');gr.addColorStop(.25,'rgba(255,248,222,.17)');gr.addColorStop(.6,'rgba(255,248,222,.06)');gr.addColorStop(1,'rgba(255,248,222,0)');
    bg.filter='blur(10px)';bg.fillStyle=gr;bg.beginPath();bg.moveTo(0,-20);bg.lineTo(L*1.1,-170);bg.lineTo(L*1.1,170);bg.lineTo(0,20);bg.closePath();bg.fill();
    const g2=bg.createLinearGradient(0,0,L*.8,0);g2.addColorStop(0,'rgba(255,252,235,.22)');g2.addColorStop(1,'rgba(255,252,235,0)');
    bg.fillStyle=g2;bg.beginPath();bg.moveTo(0,-10);bg.lineTo(L*.8,-60);bg.lineTo(L*.8,60);bg.lineTo(0,10);bg.closePath();bg.fill();
    const pg2=bg.createRadialGradient(L*.82,0,0,L*.82,0,150);pg2.addColorStop(0,'rgba(255,246,215,.05)');pg2.addColorStop(1,'rgba(255,246,215,0)');
    bg.filter='none';bg.fillStyle=pg2;bg.fillRect(L*.82-150,-150,300,300);
-   bg.restore()});
-  NIGHT_BEAMS=b}
+   // the section of field this bank lights: a wide soft wedge ending past its aim point
+   const[sc,sg]=mk();sg.filter='blur(40px)';sg.fillStyle='#333a5c';sg.beginPath();sg.moveTo(L*.15,-60);sg.lineTo(L*1.25,-300);sg.lineTo(L*1.25,300);sg.lineTo(L*.15,60);sg.closePath();sg.fill();
+   return{beam:bc,shade:sc,x:x0,y:y0}});}
+
  g.save();g.globalCompositeOperation='multiply';g.drawImage(NIGHT_MASK,0,0);
- g.globalCompositeOperation='lighter';if(NIGHT_BEAMS)g.drawImage(NIGHT_BEAMS,0,0);let gr;
- for(const t of TOWERS){const fl=.92+Math.sin(now/90+t.x)*.04;gr=g.createRadialGradient(t.x,t.y,6,t.x,t.y,150);gr.addColorStop(0,`rgba(255,250,225,${.55*fl})`);gr.addColorStop(.25,`rgba(255,240,200,${.16*fl})`);gr.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=gr;g.fillRect(t.x-150,t.y-150,300,300)}
+ // a dark bank leaves its section of the field dim
+ if(NIGHT_BEAMS)NIGHT_BEAMS.forEach((B,i)=>{if(!towerOn(i,now)){g.globalAlpha=.55;g.drawImage(B.shade,B.x,B.y);g.globalAlpha=1}});
+ g.globalCompositeOperation='lighter';if(NIGHT_BEAMS)NIGHT_BEAMS.forEach((B,i)=>{if(towerOn(i,now))g.drawImage(B.beam,B.x,B.y)});let gr;
+ for(const[i,t]of TOWERS.entries()){if(!towerOn(i,now))continue;const fl=.92+Math.sin(now/90+t.x)*.04;gr=g.createRadialGradient(t.x,t.y,6,t.x,t.y,150);gr.addColorStop(0,`rgba(255,250,225,${.55*fl})`);gr.addColorStop(.25,`rgba(255,240,200,${.16*fl})`);gr.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=gr;g.fillRect(t.x-150,t.y-150,300,300)}
  g.restore();
 }
 function dayPass(g){g.save();g.globalCompositeOperation='multiply';g.fillStyle='#fff7ea';g.fillRect(0,0,W,H);g.restore()}
@@ -309,6 +322,7 @@ function render(now){
    wg.fillStyle=gr;wg.fillRect(f.x-16,f.y-16,32,32);if(a<50){wg.fillStyle='#ffffff';wg.fillRect(f.x-1,f.y-1,3,3);wg.fillRect(f.x-6,f.y,13,1);wg.fillRect(f.x,f.y-6,1,13)}}
   wg.restore()}
  else dayPass(wg);
+ drawTowerLamps(wg,now);
  // to screen
  const C=clampCam(S.cam),[vw,vh]=viewWH(C.z),e=EXT();
  const vx0=C.x-vw/2,vy0=C.y-vh/2,scale=cv.height/vh;

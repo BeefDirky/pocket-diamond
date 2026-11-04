@@ -1,6 +1,5 @@
 // ---------- roof lights: banks of floodlights along the stadium's outer rim, aimed down into the stands ----------
-// At night each bank throws a pool of light onto the seats below it (added on top of the darkened bowl, never on the
-// field). After a home run the banks flicker off and on, the ripple running around the stadium.
+// At night each bank throws a pool of light onto the seats below it (added on top of the darkened bowl, never on the field).
 let RL=null,RL_KEY='',RL_POOL=null;
 function roofLights(){const key=S.you+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');if(RL&&RL_KEY===key)return RL;RL_KEY=key;
  const OL=PARK_OUTLINE||parkOutline(),cxp=HX,cyp=HY-420;
@@ -23,9 +22,8 @@ function roofLights(){const key=S.you+(STADIUMS[S.you]?STADIUMS[S.you].dims.join
   gr.addColorStop(0,'rgba(255,244,214,.2)');gr.addColorStop(.5,'rgba(255,238,200,.09)');gr.addColorStop(1,'rgba(255,238,200,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);RL_POOL=c}
  return RL}
 // is bank i lit right now? (the home-run show: slow off/on blinks, each bank a little behind the one before it)
-function rlOn(L,now){const s=S.lightShow;if(!s)return true;const t=now-s-L.ord*900;if(t<0||t>4200)return true;return Math.floor(t/420)%2===1}
+function rlOn(){return true}// the roof ring stays on; the home-run show belongs to the light towers
 function drawRoofLights(c,vx0,vy0,scale,now){if(S.phase==='title')return;const R=roofLights(),night=!!S.night;
- if(S.lightShow&&now-S.lightShow>5400)S.lightShow=0;
  c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);
  if(night){c.save();c.clip(R.clip,'evenodd');c.globalCompositeOperation='lighter';
   for(const L of R){if(!rlOn(L,now))continue;c.save();c.translate(L.px,L.py);c.rotate(L.ang);c.drawImage(RL_POOL,-260,-170,520,340);c.restore()}
