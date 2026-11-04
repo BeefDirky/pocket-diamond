@@ -158,7 +158,7 @@ function buildOutside(k,night){
   const hj=hexRGB(home.jersey),hc=hexRGB(home.cap),aj=hexRGB(away.jersey),ac=hexRGB(away.cap),sks=SKINS.map(hexRGB),hairs=['#2a1d14','#4a3020','#7a5230','#1a1a1a','#8a8a8a'].map(hexRGB),shadeC=c=>c.map(v=>v*.78|0);
   const px4=(x,y,c)=>{if(x<0||y<0||x>=CW||y>=CH)return;const i=y*CW+x;if(md[i*4+3]<128)return;put(i,c)};
   const g0x=((5+e.mx)/2)%4,g0y=((5+e.my)/2)%4;
-  for(let py=g0y|0;py<CH-2;py+=4)for(let px=g0x|0;px<CW-2;px+=4){const i=py*CW+px;if(!seatM[i]||!seatM[i-1]||!seatM[i+1])continue;if(px>bx0+4&&px<bx1-4&&py>by0+4&&py<by1-4)continue;if(rr()>.88)continue;
+  for(let py=g0y|0;py<CH-2;py+=4)for(let px=g0x|0;px<CW-2;px+=4){const i=py*CW+px;if(!seatM[i]||!seatM[i-1]||!seatM[i+1])continue;if(px>bx0+4&&px<bx1-4&&py>by0+4&&py<by1-4)continue;const bh=Math.abs(Math.atan2(wX(px)-HX,HY-wY(py))/RAD)>128;if(!bh&&rr()>.88)continue;// full rows behind the plate
    const wx=wX(px),wy=wY(py),ang=Math.atan2(wx-HX,HY-wy)/RAD,awaySide=ang<-50&&ang>-135,pr=rr(),pH=awaySide?.28:.6,pA=awaySide?.45:.1;
    let sh,cap=null;if(pr<pH){sh=hj;if(rr()<.5)cap=hc}else if(pr<pH+pA){sh=aj;if(rr()<.5)cap=ac}else sh=misc[(rr()*misc.length)|0];
    const sk=sks[(rr()*sks.length)|0];

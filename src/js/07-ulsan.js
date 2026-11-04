@@ -137,8 +137,9 @@ function buildField(){
  // seat fans on a grid over seat pixels
  FANS=[];
  for(let py=5;py<H-5;py+=8)for(let px=5;px<W-5;px+=8){
-  const i=py*W+px;if(!seatMask[i]||!seatMask[i-3]||!seatMask[i+3])continue;
-  const sm=seatMask[i];if(rng()>(sm===2?.22:sm===3?.32:sm===4?.16:.88))continue;
+  // behind home plate the seats are full: every seat gets a fan (elsewhere a few are empty)
+  const i=py*W+px,bh=Math.abs(Math.atan2(px-HX,HY-py)/RAD)>128;if(!seatMask[i]||(!bh&&(!seatMask[i-3]||!seatMask[i+3])))continue;
+  const sm=seatMask[i];if(!bh&&rng()>(sm===2?.22:sm===3?.32:sm===4?.16:.88))continue;
   const j=i*4;FANS.push({x:px,y:py,bg:`rgb(${d[j]},${d[j+1]},${d[j+2]})`,ang:Math.atan2(px-HX,HY-py)/RAD,lawn:sm===2,deck:sm===3,pool:sm===4});
  }
  // concourse ring (for pennants/banners) and aisle stairways (for vendors)
