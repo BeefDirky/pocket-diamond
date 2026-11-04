@@ -643,3 +643,12 @@ body.bpPopOpen:has(.app:not(.deskApp)) .bpScrim{display:block}
 body.bpMode .app:not(.deskApp):not(.wideApp) .swing{min-height:52px!important}
 /* changing parks from the batting cage: the club picker covers the whole screen, so the game's panels step aside */
 body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.meter,.acts,.pacts,.book,.bug,.pcBox,.zoomCtl,.pauseBtn,.parkBtn,.autoBtn,.infoBtn,.skipBtn,.relMeter,.lsHot){display:none!important}
+
+/* batting practice ball cam */
+.ballCam{position:absolute;top:8px;right:8px;width:min(34%,240px);aspect-ratio:4/3;z-index:3;border:3px solid var(--edge);box-shadow:0 0 0 2px var(--panel-hi),4px 4px 0 rgba(0,0,0,.35);background:#1b232a;pointer-events:none;overflow:hidden}
+.ballCam[hidden]{display:none}
+.ballCam canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+.ballCam i{position:absolute;left:5px;top:4px;font-style:normal;font-family:var(--f-hud);font-size:10px;letter-spacing:.12em;color:#fff;background:rgba(200,40,40,.85);padding:1px 5px}
+.ballCam span{position:absolute;left:0;right:0;bottom:0;text-align:center;white-space:nowrap;overflow:hidden;font-family:var(--f-hud);font-size:clamp(9px,2.6vw,12px);color:var(--chalk);background:rgba(8,20,14,.75);padding:2px 4px}
+.ballCam.hr span{color:var(--edge);background:var(--amber)}
+.app.deskApp .ballCam{top:14px;right:14px;width:280px}

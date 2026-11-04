@@ -654,6 +654,15 @@ body.bpPopOpen:has(.app:not(.deskApp)) .bpScrim{display:block}
 body.bpMode .app:not(.deskApp):not(.wideApp) .swing{min-height:52px!important}
 /* changing parks from the batting cage: the club picker covers the whole screen, so the game's panels step aside */
 body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.meter,.acts,.pacts,.book,.bug,.pcBox,.zoomCtl,.pauseBtn,.parkBtn,.autoBtn,.infoBtn,.skipBtn,.relMeter,.lsHot){display:none!important}
+
+/* batting practice ball cam */
+.ballCam{position:absolute;top:8px;right:8px;width:min(34%,240px);aspect-ratio:4/3;z-index:3;border:3px solid var(--edge);box-shadow:0 0 0 2px var(--panel-hi),4px 4px 0 rgba(0,0,0,.35);background:#1b232a;pointer-events:none;overflow:hidden}
+.ballCam[hidden]{display:none}
+.ballCam canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+.ballCam i{position:absolute;left:5px;top:4px;font-style:normal;font-family:var(--f-hud);font-size:10px;letter-spacing:.12em;color:#fff;background:rgba(200,40,40,.85);padding:1px 5px}
+.ballCam span{position:absolute;left:0;right:0;bottom:0;text-align:center;white-space:nowrap;overflow:hidden;font-family:var(--f-hud);font-size:clamp(9px,2.6vw,12px);color:var(--chalk);background:rgba(8,20,14,.75);padding:2px 4px}
+.ballCam.hr span{color:var(--edge);background:var(--amber)}
+.app.deskApp .ballCam{top:14px;right:14px;width:280px}
 </style>
 
 <div class="app">
@@ -685,6 +694,7 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
     <div class="relMeter" id="relMeter" hidden><div class="rmBar"><i class="rmG"></i><i class="rmP" id="rmP"></i><b id="rmMk"></b></div><span id="rmTxt">TAP TO RELEASE</span></div>
     <div class="pkBar" id="pkBar" hidden><span>PICKOFF</span><button type="button" id="pk1" data-b="1" hidden>1B <small>Q</small></button><button type="button" id="pk2" data-b="2" hidden>2B <small>W</small></button></div>
     <div class="penPanel" id="penPanel" hidden><div class="penHead"><b>BULLPEN</b><span id="penSub"></span><button type="button" id="penClose" aria-label="Close bullpen">✕</button></div><div class="penList" id="penList"></div></div>
+    <div class="ballCam" id="ballCam" hidden><canvas id="ballCamCv"></canvas><span id="ballCamTxt"></span><i>BALL CAM</i></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
 
     <div class="overlay" id="title">
@@ -2355,7 +2365,7 @@ function doContact(){
   const sw=S.swing;sw.done=true;
   if(netRand(()=>Math.random()<.08)||S.pitch.k==='SP'){sw.miss=true;return}
   if(S.mode==='bp'){const s0=rand(-38,38),P={err:0,q:.5,EV:rand(22,38),L:rand(-18,-4),s:s0};S.play=buildBP(P,{x:Math.sin(s0*RAD),y:Math.cos(s0*RAD)},curBatter());S.play.res.banner='BUNT';sfx('crack',.1);
-   const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});setPhase('play');return}
+   const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});S.bpCam={pl,at:performance.now()};setPhase('play');return}
   S.play=netRand(()=>simulateBunt(curBatter()));sfx('crack',.1);spawnFlash(6);setPhase('play');setCam('follow');return;
  }
  // a runner who broke on the pitch keeps his jump: how far down the line he is when the bat meets the ball
@@ -2369,7 +2379,7 @@ function doContact(){
  {const r=S.play.res;if(S.mode!=='bp'&&!S.play.foul&&batKey()===S.you&&(r.hr||S.play.deep||r.runs>0))sfx('bigcheer')}
  const q=clamp(1-Math.pow(Math.abs(sw.err)/WIN,1.25),0,1);
  if(!S.play.foul&&(S.play.res.hr||S.play.deep)&&BUF.echo1&&!muted)playSample(pick(['echo1','echo2','echo3']),.65+.35*q,1);else sfx('crack',q);
- if(S.mode==='bp'){const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});setPhase('play');return}
+ if(S.mode==='bp'){const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});S.bpCam={pl,at:performance.now()};setPhase('play');return}
  setPhase('play');setCam('follow');
 }
 function pitchEnd(){
@@ -4455,6 +4465,7 @@ function render(now){
    ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
+ drawBallCam(now);
 }
 
 // ---------- roof lights: banks of floodlights along the stadium's outer rim, aimed down into the stands ----------
@@ -4496,6 +4507,32 @@ function drawRoofLights(c,vx0,vy0,scale,now){if(window.__noRL)return;if(S.phase=
   c.restore();
   if(night&&on){c.save();c.globalCompositeOperation='lighter';c.drawImage(rlGlow(),L.x-30,L.y-30,60,60);c.restore()}}
  c.restore()}
+// ---------- batting practice ball cam: a little zoomed-in camera in the top-right corner that rides along with the
+// last ball you hit, then holds on where it came down (with the distance) for a few seconds ----------
+function bcPos(pl,tt){let seg=null;for(const sg of pl.segs)if(tt>=sg.t0&&tt<=sg.t1){seg=sg;break}
+ if(!seg)for(const sg of pl.segs)if(sg.t1<=tt&&(!seg||sg.t1>=seg.t1))seg=sg;return seg?seg.fn(Math.min(tt,seg.t1)):null}
+function drawBallCam(now){const box=$('ballCam'),cam=S.bpCam;
+ if(S.mode!=='bp'||!cam||S.phase==='title'||S.paused){if(!box.hidden)box.hidden=true;return}
+ const pl=cam.pl,tt=(now-cam.at)/1000*SPEED,done=tt>=pl.fullEnd;
+ if(now-cam.at>pl.fullEnd/SPEED*1000+2600){box.hidden=true;return}// it holds on the landing spot, then tucks away
+ const p=bcPos(pl,Math.min(tt,pl.fullEnd));if(!p)return;
+ if(box.hidden)box.hidden=false;
+ const cv=$('ballCamCv'),dpr=Math.min(devicePixelRatio||1,2),cw=Math.round(cv.clientWidth*dpr),ch=Math.round(cv.clientHeight*dpr);if(!cw||!ch)return;
+ if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch}
+ const q=toPx(p.x,p.y),lift=(p.h||0)/FT,tx=q.x-lift*.2,ty=q.y-lift*.5;
+ if(cam.cx==null){cam.cx=tx;cam.cy=ty}cam.cx+=(tx-cam.cx)*.3;cam.cy+=(ty-cam.cy)*.3;
+ const VW=170,VH=VW*ch/cw,s=cw/VW,x0=cam.cx-VW/2,y0=cam.cy-VH/2,g=cv.getContext('2d'),e=EXT_M;
+ g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=false;g.fillStyle='#1b232a';g.fillRect(0,0,cw,ch);
+ const O=outsideFor();if(O)g.drawImage(O,(x0+e.mx)/2,(y0+e.my)/2,VW/2,VH/2,0,0,cw,ch);
+ g.save();if(PARK_OUTLINE){g.beginPath();PARK_OUTLINE.forEach((pt,i)=>g[i?'lineTo':'moveTo']((pt.x-x0)*s,(pt.y-y0)*s));g.closePath();g.clip()}
+ const ix0=Math.max(0,x0),iy0=Math.max(0,y0),ix1=Math.min(W,x0+VW),iy1=Math.min(H,y0+VH);
+ if(ix1>ix0&&iy1>iy0)g.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,(ix0-x0)*s,(iy0-y0)*s,(ix1-ix0)*s,(iy1-iy0)*s);
+ g.restore();
+ // the ball on top (a homer leaves the park buffer, so the cam draws it itself)
+ g.save();g.scale(s,s);g.translate(-x0,-y0);drawBall(g,q.x,q.y,p.h||0);g.restore();
+ const r=pl.res||{},live=Math.round(Math.hypot(p.x,p.y-2));
+ $('ballCamTxt').textContent=done?`${r.hr?'HOME RUN · ':r.code==='FOUL'?'FOUL · ':''}${r.dist||live} FT`:`${live} FT`;
+ box.classList.toggle('hr',!!(done&&r.hr))}
 // ---------- loop ----------
 function update(dt,now){
  if(S.paused)return;

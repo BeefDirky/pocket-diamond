@@ -115,7 +115,7 @@ function doContact(){
   const sw=S.swing;sw.done=true;
   if(netRand(()=>Math.random()<.08)||S.pitch.k==='SP'){sw.miss=true;return}
   if(S.mode==='bp'){const s0=rand(-38,38),P={err:0,q:.5,EV:rand(22,38),L:rand(-18,-4),s:s0};S.play=buildBP(P,{x:Math.sin(s0*RAD),y:Math.cos(s0*RAD)},curBatter());S.play.res.banner='BUNT';sfx('crack',.1);
-   const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});setPhase('play');return}
+   const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});S.bpCam={pl,at:performance.now()};setPhase('play');return}
   S.play=netRand(()=>simulateBunt(curBatter()));sfx('crack',.1);spawnFlash(6);setPhase('play');setCam('follow');return;
  }
  // a runner who broke on the pitch keeps his jump: how far down the line he is when the bat meets the ball
@@ -129,7 +129,7 @@ function doContact(){
  {const r=S.play.res;if(S.mode!=='bp'&&!S.play.foul&&batKey()===S.you&&(r.hr||S.play.deep||r.runs>0))sfx('bigcheer')}
  const q=clamp(1-Math.pow(Math.abs(sw.err)/WIN,1.25),0,1);
  if(!S.play.foul&&(S.play.res.hr||S.play.deep)&&BUF.echo1&&!muted)playSample(pick(['echo1','echo2','echo3']),.65+.35*q,1);else sfx('crack',q);
- if(S.mode==='bp'){const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});setPhase('play');return}
+ if(S.mode==='bp'){const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});S.bpCam={pl,at:performance.now()};setPhase('play');return}
  setPhase('play');setCam('follow');
 }
 function pitchEnd(){
