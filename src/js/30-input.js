@@ -33,7 +33,7 @@ $('goBP').addEventListener('click',()=>chooseMode('bp'));
 $('goPO').addEventListener('click',()=>chooseMode('playoffs'));
 $('goWatch').addEventListener('click',()=>chooseMode('watch'));
 $('goMulti').addEventListener('click',()=>{ensureAudio();openOnline()});
-$('playGo').addEventListener('click',()=>{if(parkFromBP){backToCage();return}const m=pendingMode;pendingMode=null;$('playGo').hidden=true;
+$('playGo').addEventListener('click',()=>{tsFlush();tsInfoOpen(false);if(parkFromBP){backToCage();return}const m=pendingMode;pendingMode=null;$('playGo').hidden=true;
  if(m==='playoffs'){openBracket(true);return}if(m==='online'){openOnline();return}if(m==='watch'){S.auto=true;syncAuto();startGame('full');return}
  if(m){S.auto=false;syncAuto();startGame(m)}});
 const setBP=k=>{S.bpPitch=k;for(const b of $('bpBar').querySelectorAll('.pbtn'))b.setAttribute('aria-pressed',String(b.dataset.k===k));updateHUD()};

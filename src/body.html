@@ -29,6 +29,7 @@
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
 
     <div class="overlay" id="title">
+      <canvas class="tsBg" id="tsBg" aria-hidden="true"></canvas>
       <div class="card menuMain" id="scrMain">
         <div class="mmLogo"><h1>POCKET <span>DIAMOND</span></h1><small>KBO-STYLE PIXEL BASEBALL</small></div>
         <nav class="mmBtns">
@@ -78,15 +79,33 @@
         </div>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
-      <div class="card wide" id="scrTeams" hidden>
+      <div class="card wide tsCard" id="scrTeams" hidden>
         <h1>PICK <span>TEAMS</span></h1>
-        <div class="mapWrap"><canvas id="koreaMap" width="720" height="900" aria-label="Map of Korea with every club. Tap a logo to pick your home club."></canvas><span class="mapHint">Tap a logo to pick your club</span></div>
-        <div class="pick"><span class="k">YOUR CLUB</span><div class="chips" id="pickYou"></div></div>
-        <div class="pick" id="oppPick" hidden><span class="k">VISITORS (THEY PITCH AND FIELD)</span><div class="chips" id="pickOpp"></div></div>
-        <div class="masc"><canvas id="mascCv" width="11" height="17"></canvas><div id="mascTxt"></div></div>
-        <div class="clubInfo" id="clubInfo"></div>
-        <p class="oppLine" id="oppLine"></p>
+        <div class="tsHero">
+          <button type="button" class="tsArrow" id="tsPrev" aria-label="Previous club (left arrow)">◀</button>
+          <div class="tsCenter">
+            <img id="tsLogo" alt="">
+            <b id="tsName"></b><small id="tsSub"></small>
+            <button type="button" class="tsAbout" id="tsAbout" aria-label="About this club"><i>i</i>ABOUT</button>
+          </div>
+          <button type="button" class="tsArrow" id="tsNext" aria-label="Next club (right arrow)">▶</button>
+        </div>
+        <div class="tsDots" id="tsDots"></div>
         <button class="big" id="playGo" type="button" hidden>PLAY BALL</button>
+        <p class="oppLine" id="oppLine"></p>
+        <div class="pick" id="oppPick" hidden><span class="k">VISITORS (THEY PITCH AND FIELD)</span><div class="chips" id="pickOpp"></div></div>
+        <button type="button" class="mbtn tsMapBtn" id="tsMapBtn">League map ▾</button>
+        <div class="tsMapSec" id="tsMapSec" hidden>
+          <div class="mapWrap"><canvas id="koreaMap" width="720" height="900" aria-label="Map of Korea with every club. Tap a logo to pick your home club."></canvas><span class="mapHint">Tap a logo to pick your club</span></div>
+          <div class="pick"><span class="k">YOUR CLUB</span><div class="chips" id="pickYou"></div></div>
+        </div>
+        <div class="tsInfo" id="tsInfo" hidden>
+          <div class="tsInfoCard">
+            <button type="button" class="xClose" id="tsInfoX" aria-label="Close">✕</button>
+            <div class="masc"><canvas id="mascCv" width="11" height="17"></canvas><div id="mascTxt"></div></div>
+            <div class="clubInfo" id="clubInfo"></div>
+          </div>
+        </div>
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
       <div class="card wide" id="scrLineup" hidden>

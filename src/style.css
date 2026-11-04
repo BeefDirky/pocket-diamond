@@ -575,3 +575,35 @@ body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .a
 body.bpMode .board{display:none!important}
 /* batting practice on the full-screen layout: the pitch picker sits to the left of Swing/Bunt */
 .app.deskApp>.acts.withBP .bpBar{position:absolute;right:calc(100% + 10px);bottom:0;width:200px;grid-column:auto}
+/* ---------- club select ---------- */
+.tsBg{position:fixed;inset:0;width:100%;height:100%;display:none;z-index:0;pointer-events:none}
+.overlay:has(#scrTeams:not([hidden])) .tsBg{display:block}
+.overlay:has(#scrTeams:not([hidden])){background:#0b1410}
+#title>.card{z-index:1}
+.card.tsCard{background:transparent;border:0;box-shadow:none;max-width:760px;align-items:center;text-align:center}
+.tsCard>h1{text-shadow:0 3px 0 rgba(0,0,0,.45)}
+.tsHero{display:flex;align-items:center;justify-content:center;gap:clamp(12px,4vw,40px);width:100%;margin-top:4px}
+.tsArrow{flex:none;width:clamp(44px,8vw,66px);height:clamp(44px,8vw,66px);font-size:clamp(18px,3vw,26px);background:rgba(8,20,14,.6);color:var(--chalk);border:3px solid var(--edge);box-shadow:0 4px 0 var(--edge);cursor:pointer}
+.tsArrow:hover{background:var(--amber);color:var(--edge)}.tsArrow:active{transform:translateY(3px);box-shadow:0 1px 0 var(--edge)}
+.tsCenter{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+#tsLogo{width:clamp(150px,30vmin,250px);height:auto;image-rendering:pixelated;filter:drop-shadow(0 10px 0 rgba(0,0,0,.35));animation:tsBob 2.6s ease-in-out infinite}
+#tsLogo.pop{animation:tsPop .35s ease-out,tsBob 2.6s ease-in-out .35s infinite}
+@keyframes tsBob{50%{transform:translateY(-7px)}}
+@keyframes tsPop{0%{transform:scale(.7);opacity:.2}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+#tsName{font-family:var(--f-hud);font-weight:400;font-size:clamp(20px,3.4vw,30px);color:var(--chalk);text-shadow:0 3px 0 rgba(0,0,0,.5)}
+#tsSub{font-size:12px;letter-spacing:.12em;color:rgba(244,241,232,.82);text-shadow:0 2px 0 rgba(0,0,0,.5)}
+.tsAbout{margin-top:6px;display:inline-flex;align-items:center;gap:8px;background:rgba(8,20,14,.65);color:var(--chalk);border:2px solid var(--edge);padding:6px 14px 6px 8px;font-family:var(--f-hud);font-size:12px;letter-spacing:.14em;cursor:pointer}
+.tsAbout:hover{border-color:var(--amber);color:var(--amber)}
+.tsAbout i{font-style:normal;width:20px;height:20px;border-radius:50%;background:var(--amber);color:var(--edge);display:grid;place-items:center;font-family:Georgia,serif;font-weight:700;font-size:13px}
+.tsDots{display:flex;gap:6px;justify-content:center}.tsDots i{width:8px;height:8px;background:rgba(255,255,255,.28)}.tsDots i.on{background:var(--amber)}
+.tsCard #playGo{width:min(380px,92%)}
+.tsCard .oppLine{background:rgba(8,20,14,.62);padding:6px 12px}
+.tsCard .pick{width:100%;background:rgba(8,20,14,.7);padding:8px}
+.tsMapBtn{background:rgba(8,20,14,.6)}
+.tsMapSec{width:100%;display:flex;flex-direction:column;gap:10px;background:var(--panel);border:3px solid var(--edge);padding:10px}
+.tsMapSec[hidden]{display:none}
+.tsCard>.mbtn.back{background:rgba(8,20,14,.6)}
+.tsInfo{position:fixed;inset:0;z-index:30;background:rgba(8,20,14,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+.tsInfo[hidden]{display:none}
+.tsInfoCard{position:relative;background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--panel-hi),6px 6px 0 rgba(0,0,0,.35);padding:16px;padding-top:48px;max-width:540px;width:100%;max-height:86vh;overflow:auto;display:flex;flex-direction:column;gap:10px;text-align:left}
+.tsInfoCard .masc canvas{width:66px;height:96px}

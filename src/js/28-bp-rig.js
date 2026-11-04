@@ -67,18 +67,35 @@ function drawTowerLamps(g,now){if(!S.lightShow)return;for(const[i,t]of TOWERS.en
  g.save();g.scale(K,K);g.translate(t.kx,t.ky);g.rotate(t.a+Math.PI/2);g.fillStyle='#1d2228';g.fillRect(-25,-9,50,18);
  for(let r=0;r<3;r++)for(let k=0;k<6;k++){const lx=-23+k*8,ly=-8+r*5.6;g.fillStyle=on?((r+k)%2?'#fffdf0':'#fff3c4'):'#3a4048';g.fillRect(lx,ly,6.5,4.4)}
  g.restore();if(on){g.save();g.globalCompositeOperation='lighter';const gr=g.createRadialGradient(t.x,t.y,4,t.x,t.y,110);gr.addColorStop(0,'rgba(255,250,225,.6)');gr.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=gr;g.fillRect(t.x-110,t.y-110,220,220);g.restore()}}}
+// ---------- soft (blurred) shapes that look the same on every browser ----------
+// Safari (iPhone/iPad) has no canvas blur filter, which left the night lighting with hard edges on phones. There the
+// shape is painted on a small scratch canvas, blurred by hand (three box passes, about a Gaussian) and laid back on.
+const CANVAS_BLUR=!/nofilter/.test(location.hash)&&(()=>{try{const c=document.createElement('canvas');c.width=c.height=9;const g=c.getContext('2d');g.filter='blur(2px)';g.fillStyle='#fff';g.fillRect(4,4,1,1);return g.getImageData(2,4,1,1).data[3]>0}catch(e){return false}})();
+function boxBlurRGBA(id,w,h,sigma){const d=id.data,n=w*h,ch=[0,1,2,3].map(()=>new Float32Array(n)),tmp=new Float32Array(Math.max(w,h));
+ for(let i=0;i<n;i++){const a=d[i*4+3]/255;ch[0][i]=d[i*4]*a;ch[1][i]=d[i*4+1]*a;ch[2][i]=d[i*4+2]*a;ch[3][i]=d[i*4+3]}
+ const br=Math.max(1,Math.round((Math.sqrt(4*sigma*sigma+1)-1)/2));
+ const line=(A,start,step,len)=>{let acc=0;for(let k=0;k<len;k++)tmp[k]=A[start+k*step];
+  for(let k=-br;k<=br;k++)if(k>=0&&k<len)acc+=tmp[k];
+  for(let k=0;k<len;k++){A[start+k*step]=acc/(2*br+1);const o=k-br,ni=k+br+1;if(o>=0)acc-=tmp[o];if(ni<len)acc+=tmp[ni]}};
+ for(const A of ch)for(let p=0;p<3;p++){for(let y=0;y<h;y++)line(A,y*w,1,w);for(let x=0;x<w;x++)line(A,x,w,h)}
+ for(let i=0;i<n;i++){const a=ch[3][i],f=a>0?255/a:0;d[i*4]=ch[0][i]*f;d[i*4+1]=ch[1][i]*f;d[i*4+2]=ch[2][i]*f;d[i*4+3]=a}}
+function softDraw(g,r,draw){if(CANVAS_BLUR){g.save();g.filter=`blur(${r}px)`;draw(g);g.restore();return}
+ const W0=g.canvas.width,H0=g.canvas.height,ds=r>=16?4:2,sc=document.createElement('canvas');sc.width=Math.ceil(W0/ds);sc.height=Math.ceil(H0/ds);
+ const s=sc.getContext('2d'),T=g.getTransform();s.setTransform(T.a/ds,T.b/ds,T.c/ds,T.d/ds,T.e/ds,T.f/ds);draw(s);
+ const id=s.getImageData(0,0,sc.width,sc.height);boxBlurRGBA(id,sc.width,sc.height,r/ds);s.putImageData(id,0,0);
+ g.save();g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(sc,0,0,W0,H0);g.restore()}
 function nightPass(g,now){
  if(!NIGHT_MASK){const c=document.createElement('canvas');c.width=W;c.height=H;const m=c.getContext('2d');
   // darkness everywhere, then the whole playing field (fair ground to the wall, plus the foul ground around home) lit up with soft edges
   m.fillStyle='#5a6494';m.fillRect(0,0,W,H);
-  const fieldPath=(inset)=>{m.beginPath();const a=toPx(-60,-36);m.moveTo(a.x,a.y);
+  const fieldPath=(m,inset)=>{m.beginPath();const a=toPx(-60,-36);m.moveTo(a.x,a.y);
    for(const[x,y]of[[-112,22]]){const q=toPx(x,y);m.lineTo(q.x,q.y)}
    for(let th=-45;th<=45;th+=3){const r=fenceDist(th)+inset,q=toPx(Math.sin(th*RAD)*r,Math.cos(th*RAD)*r);m.lineTo(q.x,q.y)}
    for(const[x,y]of[[112,22],[60,-36]]){const q=toPx(x,y);m.lineTo(q.x,q.y)}m.closePath()};
-  m.save();m.filter='blur(34px)';m.fillStyle='#d9dbe6';fieldPath(18);m.fill();m.restore();
-  m.save();m.filter='blur(22px)';m.fillStyle='#e9e8e6';fieldPath(-6);m.fill();m.restore();
+  softDraw(m,34,c=>{c.fillStyle='#d9dbe6';fieldPath(c,18);c.fill()});
+  softDraw(m,22,c=>{c.fillStyle='#e9e8e6';fieldPath(c,-6);c.fill()});
   // a touch of extra light on the lower bowl right behind the field
-  m.save();m.globalCompositeOperation='lighter';m.filter='blur(30px)';m.fillStyle='rgba(70,70,80,.9)';fieldPath(90);m.fill();m.restore();
+  m.save();m.globalCompositeOperation='lighter';softDraw(m,30,c=>{c.fillStyle='rgba(70,70,80,.9)';fieldPath(c,90);c.fill()});m.restore();
   NIGHT_MASK=c;
   // spotlight beams from each bank, one canvas per tower (so a bank can go dark on its own), plus the patch of
   // field each bank lights (used to dim that section when the bank is off)
@@ -88,14 +105,14 @@ function nightPass(g,now){
    const x0=Math.floor(Math.min(...pts.map(p=>p.x))-pad),y0=Math.floor(Math.min(...pts.map(p=>p.y))-pad),x1=Math.ceil(Math.max(...pts.map(p=>p.x))+pad),y1=Math.ceil(Math.max(...pts.map(p=>p.y))+pad);
    const mk=()=>{const c=document.createElement('canvas');c.width=x1-x0;c.height=y1-y0;const g=c.getContext('2d');g.translate(t.x-x0,t.y-y0);g.rotate(ang);return[c,g]};
    const[bc,bg]=mk();
-   const gr=bg.createLinearGradient(0,0,L*1.1,0);gr.addColorStop(0,'rgba(255,248,222,.30)');gr.addColorStop(.25,'rgba(255,248,222,.17)');gr.addColorStop(.6,'rgba(255,248,222,.06)');gr.addColorStop(1,'rgba(255,248,222,0)');
-   bg.filter='blur(10px)';bg.fillStyle=gr;bg.beginPath();bg.moveTo(0,-20);bg.lineTo(L*1.1,-170);bg.lineTo(L*1.1,170);bg.lineTo(0,20);bg.closePath();bg.fill();
-   const g2=bg.createLinearGradient(0,0,L*.8,0);g2.addColorStop(0,'rgba(255,252,235,.22)');g2.addColorStop(1,'rgba(255,252,235,0)');
-   bg.fillStyle=g2;bg.beginPath();bg.moveTo(0,-10);bg.lineTo(L*.8,-60);bg.lineTo(L*.8,60);bg.lineTo(0,10);bg.closePath();bg.fill();
+   softDraw(bg,10,c=>{const gr=c.createLinearGradient(0,0,L*1.1,0);gr.addColorStop(0,'rgba(255,248,222,.30)');gr.addColorStop(.25,'rgba(255,248,222,.17)');gr.addColorStop(.6,'rgba(255,248,222,.06)');gr.addColorStop(1,'rgba(255,248,222,0)');
+    c.fillStyle=gr;c.beginPath();c.moveTo(0,-20);c.lineTo(L*1.1,-170);c.lineTo(L*1.1,170);c.lineTo(0,20);c.closePath();c.fill();
+    const g2=c.createLinearGradient(0,0,L*.8,0);g2.addColorStop(0,'rgba(255,252,235,.22)');g2.addColorStop(1,'rgba(255,252,235,0)');
+    c.fillStyle=g2;c.beginPath();c.moveTo(0,-10);c.lineTo(L*.8,-60);c.lineTo(L*.8,60);c.lineTo(0,10);c.closePath();c.fill()});
    const pg2=bg.createRadialGradient(L*.82,0,0,L*.82,0,150);pg2.addColorStop(0,'rgba(255,246,215,.05)');pg2.addColorStop(1,'rgba(255,246,215,0)');
-   bg.filter='none';bg.fillStyle=pg2;bg.fillRect(L*.82-150,-150,300,300);
+   bg.fillStyle=pg2;bg.fillRect(L*.82-150,-150,300,300);
    // the section of field this bank lights: a wide soft wedge ending past its aim point
-   const[sc,sg]=mk();sg.filter='blur(40px)';sg.fillStyle='#333a5c';sg.beginPath();sg.moveTo(L*.15,-60);sg.lineTo(L*1.25,-300);sg.lineTo(L*1.25,300);sg.lineTo(L*.15,60);sg.closePath();sg.fill();
+   const[sc,sg]=mk();softDraw(sg,40,c=>{c.fillStyle='#333a5c';c.beginPath();c.moveTo(L*.15,-60);c.lineTo(L*1.25,-300);c.lineTo(L*1.25,300);c.lineTo(L*.15,60);c.closePath();c.fill()});
    return{beam:bc,shade:sc,x:x0,y:y0}});}
 
  g.save();g.globalCompositeOperation='multiply';g.drawImage(NIGHT_MASK,0,0);

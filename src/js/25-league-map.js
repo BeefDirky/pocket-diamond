@@ -58,6 +58,7 @@ function syncPicker(){
   <dl><dt>City</dt><dd>${I.city}</dd><dt>Ballpark</dt><dd>${ST.name} (${ST.kname}) · ${ST.dims[0]}-${ST.dims[2]}-${ST.dims[4]} ft${ST.wallFt>8?` · ${ST.wallFt} ft wall`:''}</dd></dl>
   <ul>${I.facts.map(f=>`<li>${f}</li>`).join('')}</ul>`}
  if($('mLogoY'))refreshMenu();
- drawKoreaMap();
+ if(!$('tsMapSec')||!$('tsMapSec').hidden)drawKoreaMap();
+ if(typeof tsRender==='function')tsRender();
 }
 
