@@ -53,5 +53,5 @@ function update(dt,now){
 }
 let last=performance.now();
 function updateRelMeter(now){if(S.phase==='windup'&&pitching()&&S.pitch){const m=S.pitch.mFreeze!=null?S.pitch.mFreeze:meterPos(now);$('rmMk').style.left=`${m*100}%`}}
-function frame(now){const dt=Math.min(50,now-last);last=now;update(dt,now);render(now);updateRelMeter(now);drawFlame(now);baseChase(now);requestAnimationFrame(frame)}
+function frame(now){const dt=Math.min(50,now-last);last=now;update(dt,now);if(!(TS.cur&&!$('scrTeams').hidden&&!$('title').hidden))render(now);/* the club-select wall covers the park, so skip drawing it */updateRelMeter(now);drawFlame(now);baseChase(now);requestAnimationFrame(frame)}
 

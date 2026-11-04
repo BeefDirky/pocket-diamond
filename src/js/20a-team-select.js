@@ -8,14 +8,18 @@ function tsTile(k){if(TS_TILE[k])return TS_TILE[k];const T=TEAMS[k],s=128,c=docu
  g.imageSmoothingEnabled=false;g.drawImage(LOGO[k],24,24,80,80);const id=g.getImageData(0,0,s,s),d=id.data,tc=hexRGB(shade(T.jersey,.55));
  for(let i=0;i<d.length;i+=4){if(d[i+3]<40){d[i+3]=0;continue}const l=(d[i]*.3+d[i+1]*.59+d[i+2]*.11)/255;d[i]=tc[0];d[i+1]=tc[1];d[i+2]=tc[2];d[i+3]=l>.6?255:l>.35?140:55}
  g.putImageData(id,0,0);return TS_TILE[k]=c}
+const TS_PAT={};
+function tsPat(k,S2){const key=k+'|'+S2;if(TS_PAT[key])return TS_PAT[key];const sp=Math.round(S2*1.25),c=document.createElement('canvas');c.width=sp;c.height=sp*2;const g=c.getContext('2d'),tile=tsTile(k);
+ // two emblems per repeat: one on the corner, one half a step over on the next row (a brick layout)
+ for(const[x,y]of[[0,0],[sp,0],[0,sp*2],[sp,sp*2],[sp/2,sp]])g.drawImage(tile,x-S2/2,y-S2/2,S2,S2);
+ return TS_PAT[key]={pat:g.createPattern(c,'repeat'),sp}}
 function tsPaint(g,k,w,h,t,alpha){const T=TEAMS[k];g.globalAlpha=alpha;
  const bg=g.createLinearGradient(0,0,w,h);bg.addColorStop(0,shade(T.jersey,-.25));bg.addColorStop(1,shade(T.jersey,-.62));g.fillStyle=bg;g.fillRect(0,0,w,h);
  // a band of the cap color running across, like a team scarf
  g.save();g.translate(w/2,h/2);g.rotate(-.26);g.fillStyle=shade(T.cap,-.2);g.globalAlpha=alpha*.35;g.fillRect(-w*1.5,h*.18,w*3,h*.16);g.restore();
- const S2=Math.max(110,Math.min(w,h)/6.5),tile=tsTile(k),sp=S2*1.25,off=(t*.028)%sp;g.globalAlpha=alpha*.3;
- g.save();g.translate(w/2,h/2);g.rotate(-.26);const R=Math.hypot(w,h)/2+sp;
- for(let row=-Math.ceil(R/sp);row<=Math.ceil(R/sp);row++){const dx=(row&1)?sp/2:0;
-  for(let col=-Math.ceil(R/sp)-1;col<=Math.ceil(R/sp);col++){const x=col*sp+dx+off,y=row*sp+off*.4;g.save();g.translate(x,y);g.rotate(Math.sin(t/900+row+col)*.08);g.drawImage(tile,-S2/2,-S2/2,S2,S2);g.restore()}}
+ // the emblem wall: one pre-drawn repeating pattern, slid along each frame (a single fill, cheap on any device)
+ const P=tsPat(k,Math.round(Math.max(110,Math.min(w,h)/6.5))),off=(t*.028)%P.sp;g.globalAlpha=alpha*.3;
+ g.save();g.translate(w/2,h/2);g.rotate(-.26);P.pat.setTransform(new DOMMatrix([1,0,0,1,off,off*.4]));g.fillStyle=P.pat;const R=Math.hypot(w,h);g.fillRect(-R,-R,2*R,2*R);
  g.restore();g.globalAlpha=1}
 function tsLoop(){TS.raf=0;const cv=$('tsBg');if(!cv||$('title').hidden||$('scrTeams').hidden)return;
  const dpr=Math.min(devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
@@ -31,9 +35,11 @@ function tsRender(){if(!$('tsLogo'))return;const k=S.you,T=TEAMS[k],ST2=STADIUMS
  $('tsDots').innerHTML=ORDER.map(t=>`<i class="${t===k?'on':''}"></i>`).join('');tsStart()}
 function tsGo(d){const i=ORDER.indexOf(S.you),k=ORDER[(i+d+ORDER.length)%ORDER.length];if(k===S.opp)S.opp=S.you;S.you=k;
  syncPicker();applyCustom();updateHUD();
- // rebuilding the ballpark is the slow part, so it waits until you stop flipping
- clearTimeout(TS.rebuildT);TS.rebuildT=setTimeout(()=>{TS.rebuildT=0;if(FIELD)rebuildPark()},350)}
-function tsFlush(){if(TS.rebuildT){clearTimeout(TS.rebuildT);TS.rebuildT=0;if(FIELD)rebuildPark()}}
+ parkDirty()}
+// building a ballpark takes most of a second, so flipping through clubs only marks it; the new park is built once,
+// when the game actually starts
+function parkDirty(){TS.dirty=true}
+function tsFlush(){if(TS.dirty){TS.dirty=false;if(FIELD)rebuildPark()}}
 $('tsPrev').addEventListener('click',()=>tsGo(-1));$('tsNext').addEventListener('click',()=>tsGo(1));
 const tsInfoOpen=v=>{$('tsInfo').hidden=!v};
 $('tsAbout').addEventListener('click',()=>tsInfoOpen(true));$('tsInfoX').addEventListener('click',()=>tsInfoOpen(false));

@@ -46,7 +46,7 @@ function drawKoreaMap(){
 }
 $('koreaMap').addEventListener('click',e=>{const r=e.currentTarget.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*360,y=(e.clientY-r.top)/r.height*450;
  let best=null,bd=1e9;for(const h of MAP_HIT){const d=Math.hypot(h.x-x,h.y-y);if(d<h.r+8&&d<bd){bd=d;best=h}}
- if(!best)return;if(best.t===S.you)return;if(best.t===S.opp)S.opp=S.you;S.you=best.t;syncPicker();applyCustom();updateHUD();if(FIELD)rebuildPark()});
+ if(!best)return;if(best.t===S.you)return;if(best.t===S.opp)S.opp=S.you;S.you=best.t;syncPicker();applyCustom();updateHUD();parkDirty()});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>drawKoreaMap());
 function syncPicker(){
  if(S.you===S.opp)S.opp=pick(ORDER.filter(t=>t!==S.you));if(typeof updateOppLine==='function'&&$('oppLine'))try{updateOppLine()}catch(e){}
