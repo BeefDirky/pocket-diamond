@@ -332,7 +332,7 @@ function finishPlay(){
   banner(r.banner,r.sub,r.tone);logPA(curBatter(),r.desc,r.hr||r.code==='LD');
   setPhase('result');updateHUD();return}
  if(r.code==='FOUL'&&S.play.bunt&&S.strikes>=2){
-  S.outs++;if(batKey()===S.you)S.ks++;else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
+  S.outs++;if(batKey()===S.you){S.ks++;crowdSad()}else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
  }else if(r.code==='FOUL'){
   if(S.strikes<2)S.strikes++;
   banner(S.play.bunt?'FOUL BUNT':'FOUL BALL',S.strikes<2?`${S.balls}-${S.strikes}`:'Still two strikes');
@@ -346,7 +346,7 @@ function finishPlay(){
   const runTxt=`+${runs} RUN${runs>1?'S':''}`;
   const sub=isWalkoff()?'Walk-off!':r.hr?runTxt:r.sub||(runs?runTxt:r.desc);
   if(outsAfter>=3&&!willEndGame(true)){banner(sideLabel(),r.desc||'Three outs')}else banner(r.banner,sub,r.tone);
-  if(!r.hr){sfx(r.hit?'hit':'out');if(mine?(r.hit||runs):r.outs>0)S.cheerUntil=now+2200;if((r.hit||r.code==='E'||r.code==='IFH')&&!r.steal&&!S.play.reachCued)crowdReach()}
+  if(!r.hr){sfx(r.hit?'hit':'out');if(mine?(r.hit||runs):r.outs>0)S.cheerUntil=now+2200;if((r.hit||r.code==='E'||r.code==='IFH')&&!r.steal&&!S.play.reachCued){crowdReach();if(r.code==='E'&&fldKey()===S.you)crowdSad()}}
   if(r.hr){}
   else if(runs)S.jumbo={text:runs>1?`${runs} RUNS SCORE`:'RUN SCORES',until:now+3000};
   if(!r.steal)nextBatter();

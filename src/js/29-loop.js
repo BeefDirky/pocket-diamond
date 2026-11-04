@@ -36,11 +36,11 @@ function update(dt,now){
       const arr=(pl.runners||[]).filter(x=>x.dest===4&&!x.out).map(x=>x.start+(4-x.from)*LEG/x.speed).sort((a,b)=>a-b);pl.woAt=arr[need-1]!=null?arr[need-1]:pl.end-.4}}}
    if(pl.woAt>=0&&pl.t>=pl.woAt&&!pl.woFired){pl.woFired=true;startCelebration(true);S.cheerUntil=performance.now()+1e9}
    if(pl.endsInning&&!pl.ioFired&&pl.t>=pl.lastOutAt&&!willEndGame()){pl.ioFired=true;banner(sideLabel(),r.desc||'Three outs')}
-   if(r&&!pl.reachCued&&!r.steal&&!r.hr&&(r.hit||r.code==='E'||r.code==='IFH')&&S.mode!=='bp'&&pl.t>=pl.reachAt){pl.reachCued=true;crowdReach(r.code==='E')}
+   if(r&&!pl.reachCued&&!r.steal&&!r.hr&&(r.hit||r.code==='E'||r.code==='IFH')&&S.mode!=='bp'&&pl.t>=pl.reachAt){pl.reachCued=true;crowdReach(r.code==='E');if(r.code==='E'&&fldKey()===S.you)crowdSad()}
    {const dT=pl.watch!=null?pl.watch+(pl.flip?pl.flip.dur:1.1):.6;if(!pl.foul&&!pl.bp&&!(pl.res&&pl.res.steal)&&t0<dT&&pl.t>=dT)sfx('drop')}
    for(const sg of pl.segs)if(sg.snd&&!sg.sounded&&pl.t>=sg.t1){sg.sounded=true;sfx('glove')}
-   if(pl.dive&&!pl.diveSnd&&pl.t>=pl.dive.t&&fldKey()===S.opp&&batKey()===S.you){pl.diveSnd=true;crowdClip('dcatch',2)}
-   if(pl.jump&&!pl.jumpSnd&&pl.t>=pl.jump.t-.05&&fldKey()===S.opp&&batKey()===S.you){pl.jumpSnd=true;crowdClip('dcatch',1.6)}
+   if(pl.dive&&!pl.diveSnd&&pl.t>=pl.dive.t&&fldKey()===S.opp&&batKey()===S.you){pl.diveSnd=true;crowdSad()}
+   if(pl.jump&&!pl.jumpSnd&&pl.t>=pl.jump.t-.05&&fldKey()===S.opp&&batKey()===S.you){pl.jumpSnd=true;crowdSad()}
    if(pl.runners)for(const r of pl.runners)if(r.slide&&!r.slide.sd&&pl.t>=r.slide.t0){r.slide.sd=true;if(!muted)playSample('slide',.85,1)}
    if(pl.clang&&!pl.clang.done&&pl.t>=pl.clang.t){pl.clang.done=true;if(!muted)playSample('clang',pl.clang.k==='board'?.75:.9,pl.clang.k==='pole'?1.08:1)}
    if(r.hr&&!r.bp&&!S.play.hrFired&&S.play.t>=S.play.ballGone){S.play.hrFired=true;hrMoment(r)}

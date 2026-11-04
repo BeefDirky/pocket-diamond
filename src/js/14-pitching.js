@@ -143,7 +143,7 @@ function pitchEnd(){
   {const hp=pitchPos(S.pitch,S.pitch.travel*.97),sg=hp.x<0?-1:1;S.hbpFx={at:performance.now(),x0:hp.x,y0:hp.y,h0:Math.max(2.5,hp.h),dx:sg*rand(7,13),dy:rand(5,11),who:b,hand:effHand(b),T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5'}}
   if(nb[0]){if(nb[1]){if(nb[2])runs++;nb[2]=nb[1]}nb[1]=nb[0]}nb[0]=b;S.bases=nb;addRuns(runs);S.steal=null;
   logPA(b,'Hit by pitch, HBP'+(runs?' · 1 run scores':''),!!runs);banner('HIT BY PITCH',runs?'Forces in a run':'Take your base','ball');
-  noise(.07,'lowpass',380,.6);crowdReach();if(batKey()===S.you)crowdClip('boo',1.7);nextBatter();setPhase('call');updateHUD();return}
+  noise(.07,'lowpass',380,.6);crowdReach();crowdSad();nextBatter();setPhase('call');updateHUD();return}
  const stealOn=S.steal&&(S.steal[1]||S.steal[2])&&!S.pitch.wild,outsB=S.outs,ballsB=S.balls;
  if(S.swing&&S.swing.bunt){S.swing.miss=true;strike(true,b,true)}else if(S.swing)strike(true,b);else if(S.pitch.inZone)strike(false,b);else ball(b);
  if(stealOn){const walked=S.balls===0&&ballsB===3,ko=S.outs>outsB;
@@ -154,7 +154,7 @@ function pitchEnd(){
 }
 function strike(swinging,b,buntMiss){
  S.strikes++;if(!swinging)S.umpPunch=performance.now()+800;
- if(S.strikes>=3){S.outs++;if(batKey()===S.you)S.ks++;else{S.myK++;S.cheerUntil=performance.now()+1800;if(fldKey()===S.you)organCue('klost')}
+ if(S.strikes>=3){S.outs++;if(batKey()===S.you){S.ks++;if(S.mode!=='bp')crowdSad()}else{S.myK++;S.cheerUntil=performance.now()+1800;if(fldKey()===S.you)organCue('klost')}
   logPA(b,swinging?'Strikeout swinging, K':'Called strike three, backwards K',false);
   banner(swinging?'STRIKEOUT':'STRIKE THREE',swinging?`Got him with the ${S.pitch.name.toLowerCase()}`:'Caught looking','strike');sfx('out');S.koWalk={who:b,at:performance.now(),sd:batKey()===S.you?1:-1,T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5',hand:effHand(b)};nextBatter();
  }else banner(buntMiss?'MISSED THE BUNT':swinging?'SWING AND MISS':'STRIKE',`${S.balls}-${S.strikes}`,'strike');

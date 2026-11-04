@@ -1,5 +1,5 @@
 // ---------- audio ----------
-const SND_B64=/*@AUDIO:homer,charge,klost,bpthrow,dcatch,fworks,chant,csingle,boo,slide,ramp,fence1,clang,grass,horn,echo1,echo2,echo3,amb,woosh,weak,drop,mitt,cheer,crowd,bat,organ*/{};
+const SND_B64=/*@AUDIO:sad,homer,charge,klost,bpthrow,fworks,chant,csingle,boo,slide,ramp,fence1,clang,grass,horn,echo1,echo2,echo3,amb,woosh,weak,drop,mitt,cheer,crowd,bat,organ*/{};
 let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
@@ -37,6 +37,8 @@ function organCue(k){if(!AC||!BUF[k]||muted||S.bpOn)return;stopRamp();const t=AC
  src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
 function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=vol;src.connect(g).connect(BUS.crowd);src.start();return src}
 // someone reached base: the home crowd roars, and is much quieter for the visitors
+// the home crowd's groan: a home K, a home error, a diving catch that robs a home hitter, any hit batter
+function crowdSad(){crowdClip('sad',3.6)}
 function crowdReach(err){crowdClip('csingle',(batKey()===S.you?3.4:1.1)*(err?1.6:1))}
 let chantSrc=null,nextChant=0;
 function crowdChant(){if(chantSrc||S.mode==='bp')return;chantSrc=crowdClip('chant',1.9);if(chantSrc)chantSrc.onended=()=>{chantSrc=null}}

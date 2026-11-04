@@ -2106,7 +2106,7 @@ function drawBat(g,bx,by,ang,hand,col){
 }
 
 // ---------- audio ----------
-const SND_B64={homer:1,charge:1,klost:1,bpthrow:1,dcatch:1,fworks:1,chant:1,csingle:1,boo:1,slide:1,ramp:1,fence1:1,clang:1,grass:1,horn:1,echo1:1,echo2:1,echo3:1,amb:1,woosh:1,weak:1,drop:1,mitt:1,cheer:1,crowd:1,bat:1,organ:1};
+const SND_B64={sad:1,homer:1,charge:1,klost:1,bpthrow:1,fworks:1,chant:1,csingle:1,boo:1,slide:1,ramp:1,fence1:1,clang:1,grass:1,horn:1,echo1:1,echo2:1,echo3:1,amb:1,woosh:1,weak:1,drop:1,mitt:1,cheer:1,crowd:1,bat:1,organ:1};
 let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
@@ -2144,6 +2144,8 @@ function organCue(k){if(!AC||!BUF[k]||muted||S.bpOn)return;stopRamp();const t=AC
  src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
 function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=vol;src.connect(g).connect(BUS.crowd);src.start();return src}
 // someone reached base: the home crowd roars, and is much quieter for the visitors
+// the home crowd's groan: a home K, a home error, a diving catch that robs a home hitter, any hit batter
+function crowdSad(){crowdClip('sad',3.6)}
 function crowdReach(err){crowdClip('csingle',(batKey()===S.you?3.4:1.1)*(err?1.6:1))}
 let chantSrc=null,nextChant=0;
 function crowdChant(){if(chantSrc||S.mode==='bp')return;chantSrc=crowdClip('chant',1.9);if(chantSrc)chantSrc.onended=()=>{chantSrc=null}}
@@ -2394,7 +2396,7 @@ function pitchEnd(){
   {const hp=pitchPos(S.pitch,S.pitch.travel*.97),sg=hp.x<0?-1:1;S.hbpFx={at:performance.now(),x0:hp.x,y0:hp.y,h0:Math.max(2.5,hp.h),dx:sg*rand(7,13),dy:rand(5,11),who:b,hand:effHand(b),T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5'}}
   if(nb[0]){if(nb[1]){if(nb[2])runs++;nb[2]=nb[1]}nb[1]=nb[0]}nb[0]=b;S.bases=nb;addRuns(runs);S.steal=null;
   logPA(b,'Hit by pitch, HBP'+(runs?' · 1 run scores':''),!!runs);banner('HIT BY PITCH',runs?'Forces in a run':'Take your base','ball');
-  noise(.07,'lowpass',380,.6);crowdReach();if(batKey()===S.you)crowdClip('boo',1.7);nextBatter();setPhase('call');updateHUD();return}
+  noise(.07,'lowpass',380,.6);crowdReach();crowdSad();nextBatter();setPhase('call');updateHUD();return}
  const stealOn=S.steal&&(S.steal[1]||S.steal[2])&&!S.pitch.wild,outsB=S.outs,ballsB=S.balls;
  if(S.swing&&S.swing.bunt){S.swing.miss=true;strike(true,b,true)}else if(S.swing)strike(true,b);else if(S.pitch.inZone)strike(false,b);else ball(b);
  if(stealOn){const walked=S.balls===0&&ballsB===3,ko=S.outs>outsB;
@@ -2405,7 +2407,7 @@ function pitchEnd(){
 }
 function strike(swinging,b,buntMiss){
  S.strikes++;if(!swinging)S.umpPunch=performance.now()+800;
- if(S.strikes>=3){S.outs++;if(batKey()===S.you)S.ks++;else{S.myK++;S.cheerUntil=performance.now()+1800;if(fldKey()===S.you)organCue('klost')}
+ if(S.strikes>=3){S.outs++;if(batKey()===S.you){S.ks++;if(S.mode!=='bp')crowdSad()}else{S.myK++;S.cheerUntil=performance.now()+1800;if(fldKey()===S.you)organCue('klost')}
   logPA(b,swinging?'Strikeout swinging, K':'Called strike three, backwards K',false);
   banner(swinging?'STRIKEOUT':'STRIKE THREE',swinging?`Got him with the ${S.pitch.name.toLowerCase()}`:'Caught looking','strike');sfx('out');S.koWalk={who:b,at:performance.now(),sd:batKey()===S.you?1:-1,T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5',hand:effHand(b)};nextBatter();
  }else banner(buntMiss?'MISSED THE BUNT':swinging?'SWING AND MISS':'STRIKE',`${S.balls}-${S.strikes}`,'strike');
@@ -2931,7 +2933,7 @@ function finishPlay(){
   banner(r.banner,r.sub,r.tone);logPA(curBatter(),r.desc,r.hr||r.code==='LD');
   setPhase('result');updateHUD();return}
  if(r.code==='FOUL'&&S.play.bunt&&S.strikes>=2){
-  S.outs++;if(batKey()===S.you)S.ks++;else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
+  S.outs++;if(batKey()===S.you){S.ks++;crowdSad()}else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
  }else if(r.code==='FOUL'){
   if(S.strikes<2)S.strikes++;
   banner(S.play.bunt?'FOUL BUNT':'FOUL BALL',S.strikes<2?`${S.balls}-${S.strikes}`:'Still two strikes');
@@ -2945,7 +2947,7 @@ function finishPlay(){
   const runTxt=`+${runs} RUN${runs>1?'S':''}`;
   const sub=isWalkoff()?'Walk-off!':r.hr?runTxt:r.sub||(runs?runTxt:r.desc);
   if(outsAfter>=3&&!willEndGame(true)){banner(sideLabel(),r.desc||'Three outs')}else banner(r.banner,sub,r.tone);
-  if(!r.hr){sfx(r.hit?'hit':'out');if(mine?(r.hit||runs):r.outs>0)S.cheerUntil=now+2200;if((r.hit||r.code==='E'||r.code==='IFH')&&!r.steal&&!S.play.reachCued)crowdReach()}
+  if(!r.hr){sfx(r.hit?'hit':'out');if(mine?(r.hit||runs):r.outs>0)S.cheerUntil=now+2200;if((r.hit||r.code==='E'||r.code==='IFH')&&!r.steal&&!S.play.reachCued){crowdReach();if(r.code==='E'&&fldKey()===S.you)crowdSad()}}
   if(r.hr){}
   else if(runs)S.jumbo={text:runs>1?`${runs} RUNS SCORE`:'RUN SCORES',until:now+3000};
   if(!r.steal)nextBatter();
@@ -4573,11 +4575,11 @@ function update(dt,now){
       const arr=(pl.runners||[]).filter(x=>x.dest===4&&!x.out).map(x=>x.start+(4-x.from)*LEG/x.speed).sort((a,b)=>a-b);pl.woAt=arr[need-1]!=null?arr[need-1]:pl.end-.4}}}
    if(pl.woAt>=0&&pl.t>=pl.woAt&&!pl.woFired){pl.woFired=true;startCelebration(true);S.cheerUntil=performance.now()+1e9}
    if(pl.endsInning&&!pl.ioFired&&pl.t>=pl.lastOutAt&&!willEndGame()){pl.ioFired=true;banner(sideLabel(),r.desc||'Three outs')}
-   if(r&&!pl.reachCued&&!r.steal&&!r.hr&&(r.hit||r.code==='E'||r.code==='IFH')&&S.mode!=='bp'&&pl.t>=pl.reachAt){pl.reachCued=true;crowdReach(r.code==='E')}
+   if(r&&!pl.reachCued&&!r.steal&&!r.hr&&(r.hit||r.code==='E'||r.code==='IFH')&&S.mode!=='bp'&&pl.t>=pl.reachAt){pl.reachCued=true;crowdReach(r.code==='E');if(r.code==='E'&&fldKey()===S.you)crowdSad()}
    {const dT=pl.watch!=null?pl.watch+(pl.flip?pl.flip.dur:1.1):.6;if(!pl.foul&&!pl.bp&&!(pl.res&&pl.res.steal)&&t0<dT&&pl.t>=dT)sfx('drop')}
    for(const sg of pl.segs)if(sg.snd&&!sg.sounded&&pl.t>=sg.t1){sg.sounded=true;sfx('glove')}
-   if(pl.dive&&!pl.diveSnd&&pl.t>=pl.dive.t&&fldKey()===S.opp&&batKey()===S.you){pl.diveSnd=true;crowdClip('dcatch',2)}
-   if(pl.jump&&!pl.jumpSnd&&pl.t>=pl.jump.t-.05&&fldKey()===S.opp&&batKey()===S.you){pl.jumpSnd=true;crowdClip('dcatch',1.6)}
+   if(pl.dive&&!pl.diveSnd&&pl.t>=pl.dive.t&&fldKey()===S.opp&&batKey()===S.you){pl.diveSnd=true;crowdSad()}
+   if(pl.jump&&!pl.jumpSnd&&pl.t>=pl.jump.t-.05&&fldKey()===S.opp&&batKey()===S.you){pl.jumpSnd=true;crowdSad()}
    if(pl.runners)for(const r of pl.runners)if(r.slide&&!r.slide.sd&&pl.t>=r.slide.t0){r.slide.sd=true;if(!muted)playSample('slide',.85,1)}
    if(pl.clang&&!pl.clang.done&&pl.t>=pl.clang.t){pl.clang.done=true;if(!muted)playSample('clang',pl.clang.k==='board'?.75:.9,pl.clang.k==='pole'?1.08:1)}
    if(r.hr&&!r.bp&&!S.play.hrFired&&S.play.t>=S.play.ballGone){S.play.hrFired=true;hrMoment(r)}
