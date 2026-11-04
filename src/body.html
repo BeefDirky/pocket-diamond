@@ -39,9 +39,33 @@
           <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
-          <button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button>
+          <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
         </nav>
+        <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
         <small class="mmFoot">AN IMUGI LABS GAME</small>
+      </div>
+      <div class="card" id="scrAcct" hidden>
+        <h1><span>ACCOUNT</span></h1>
+        <div class="acPane" id="acSignedOut">
+          <p class="acLead">Sign in to keep your cards, lineup, playoff run and settings in the cloud, on every device. You can keep playing as a guest; your progress stays on this device and uploads the first time you sign in.</p>
+          <input class="acIn" id="acEmail" type="email" placeholder="EMAIL" autocomplete="email" inputmode="email" spellcheck="false">
+          <input class="acIn" id="acPass" type="password" placeholder="PASSWORD (6+ CHARACTERS)" autocomplete="current-password">
+          <div class="acRow"><button class="big" id="acSignIn" type="button">SIGN IN</button><button class="big alt" id="acSignUp" type="button">CREATE ACCOUNT</button></div>
+          <button class="ghost" id="acForgot" type="button">Forgot password?</button>
+        </div>
+        <div class="acPane" id="acSignedIn" hidden>
+          <p class="acLead">Signed in as <b id="acWho"></b></p>
+          <p class="acSync" id="acSync"></p>
+          <button class="big" id="acSaveNow" type="button">SAVE NOW</button>
+          <button class="mbtn" id="acSignOut" type="button">Sign out</button>
+        </div>
+        <div class="acPane" id="acConflict" hidden>
+          <p class="acLead" id="acCfTxt"></p>
+          <button class="big" id="acUseCloud" type="button">USE MY ACCOUNT'S SAVE</button>
+          <button class="big alt" id="acUseLocal" type="button">KEEP THIS DEVICE'S SAVE</button>
+        </div>
+        <p class="acMsg" id="acMsg"></p>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="card" id="scrSingle" hidden>
         <h1>SINGLE <span>PLAYER</span></h1>

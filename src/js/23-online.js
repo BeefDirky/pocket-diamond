@@ -7,9 +7,11 @@
 let ROOM=null;const PCLOCK=15;
 // On a self-hosted copy there is no claude.ai room, so the same calls run over Supabase Realtime presence instead.
 const SUPA={url:'__SUPA_URL__',key:'__SUPA_KEY__'};
-function supaRoom(){let sb=null;
- const load=()=>sb?Promise.resolve(sb):new Promise((res,rej)=>{const mk=()=>{try{sb=window.supabase.createClient(SUPA.url,SUPA.key);res(sb)}catch(e){rej({code:'setup'})}};
-  if(window.supabase)return mk();const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';sc.onload=mk;sc.onerror=()=>rej({code:'offline'});document.head.appendChild(sc)});
+// one Supabase client for the whole game (online rooms and accounts share it, so a signed-in player's rooms are too)
+let SB_P=null;const supaOK=()=>/^https:/.test(SUPA.url)&&typeof claude==='undefined';
+function supaClient(){return SB_P||(SB_P=new Promise((res,rej)=>{const mk=()=>{try{res(window.supabase.createClient(SUPA.url,SUPA.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}))}catch(e){SB_P=null;rej({code:'setup'})}};
+  if(window.supabase)return mk();const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';sc.onload=mk;sc.onerror=()=>{SB_P=null;rej({code:'offline'})};document.head.appendChild(sc)}))}
+function supaRoom(){const load=supaClient;
  // State travels as broadcast messages (fast), re-sent every 2s as a heartbeat so a dropped message or a
  // reconnect heals itself. A peer only counts as gone after 12s of silence, or when it says goodbye.
  return{join:async name=>{const c=await load();const me=Math.random().toString(36).slice(2,10);

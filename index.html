@@ -663,6 +663,16 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .ballCam span{position:absolute;left:0;right:0;bottom:0;text-align:center;white-space:nowrap;overflow:hidden;font-family:var(--f-hud);font-size:clamp(9px,2.6vw,12px);color:var(--chalk);background:rgba(8,20,14,.75);padding:2px 4px}
 .ballCam.hr span{color:var(--edge);background:var(--amber)}
 .app.deskApp .ballCam{top:14px;right:14px;width:280px}
+/* account */
+.mmAcct{text-align:center;font-size:9px;letter-spacing:.2em;color:var(--amber);text-shadow:2px 2px 0 var(--edge)}
+.acPane{display:flex;flex-direction:column;gap:10px}.acPane[hidden]{display:none}
+.acLead{font-size:13px;color:var(--chalk);line-height:1.45;margin:0}.acLead b{color:var(--amber);font-weight:400}
+.acSync{font-size:12px;color:var(--dim);margin:0}
+.acIn{font-family:var(--f-hud);font-size:15px;background:var(--edge);color:var(--chalk);border:3px solid var(--panel-hi);padding:11px 12px;width:100%;box-sizing:border-box;min-width:0}
+.acIn:focus{outline:none;border-color:var(--amber)}
+.acRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:420px){.acRow{grid-template-columns:1fr}}
+.acMsg{font-size:12px;color:var(--amber);margin:0;min-height:1em}
 </style>
 
 <div class="app">
@@ -705,9 +715,33 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
           <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
-          <button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button>
+          <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
         </nav>
+        <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
         <small class="mmFoot">AN IMUGI LABS GAME</small>
+      </div>
+      <div class="card" id="scrAcct" hidden>
+        <h1><span>ACCOUNT</span></h1>
+        <div class="acPane" id="acSignedOut">
+          <p class="acLead">Sign in to keep your cards, lineup, playoff run and settings in the cloud, on every device. You can keep playing as a guest; your progress stays on this device and uploads the first time you sign in.</p>
+          <input class="acIn" id="acEmail" type="email" placeholder="EMAIL" autocomplete="email" inputmode="email" spellcheck="false">
+          <input class="acIn" id="acPass" type="password" placeholder="PASSWORD (6+ CHARACTERS)" autocomplete="current-password">
+          <div class="acRow"><button class="big" id="acSignIn" type="button">SIGN IN</button><button class="big alt" id="acSignUp" type="button">CREATE ACCOUNT</button></div>
+          <button class="ghost" id="acForgot" type="button">Forgot password?</button>
+        </div>
+        <div class="acPane" id="acSignedIn" hidden>
+          <p class="acLead">Signed in as <b id="acWho"></b></p>
+          <p class="acSync" id="acSync"></p>
+          <button class="big" id="acSaveNow" type="button">SAVE NOW</button>
+          <button class="mbtn" id="acSignOut" type="button">Sign out</button>
+        </div>
+        <div class="acPane" id="acConflict" hidden>
+          <p class="acLead" id="acCfTxt"></p>
+          <button class="big" id="acUseCloud" type="button">USE MY ACCOUNT'S SAVE</button>
+          <button class="big alt" id="acUseLocal" type="button">KEEP THIS DEVICE'S SAVE</button>
+        </div>
+        <p class="acMsg" id="acMsg"></p>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="card" id="scrSingle" hidden>
         <h1>SINGLE <span>PLAYER</span></h1>
@@ -3164,7 +3198,7 @@ $('lnOpp').addEventListener('click',()=>{lnView='opp';lnSel=null;renderCards()})
 let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.fillStyle='#1b1f24';g.beginPath();g.arc(48,48,44,0,Math.PI*2);g.fill();g.strokeStyle='#3a4048';g.lineWidth=6;g.stroke();g.fillStyle='#ffbf3c';g.font='48px "Press Start 2P", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('?',50,52);return Q_URL=c.toDataURL()}
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
-function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='PICK <span>TEAMS</span>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline'])$(k).hidden=k!==id;if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='PICK <span>TEAMS</span>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct'])$(k).hidden=k!==id;if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
 {let lastDesk=null;addEventListener('resize',()=>{const d=isDesk();if(lastDesk===null||d!==lastDesk)applyWide();lastDesk=d})}
 function applyWide(){$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize()})}
@@ -3394,9 +3428,11 @@ $('toBracket').addEventListener('click',()=>{$('over').hidden=true;toTitle();ope
 let ROOM=null;const PCLOCK=15;
 // On a self-hosted copy there is no claude.ai room, so the same calls run over Supabase Realtime presence instead.
 const SUPA={url:'https://waikmdodbrirekjmqvug.supabase.co',key:'sb_publishable_iZ3XpRVvPInDsCRI3wxlBQ_jMKzDieT'};
-function supaRoom(){let sb=null;
- const load=()=>sb?Promise.resolve(sb):new Promise((res,rej)=>{const mk=()=>{try{sb=window.supabase.createClient(SUPA.url,SUPA.key);res(sb)}catch(e){rej({code:'setup'})}};
-  if(window.supabase)return mk();const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';sc.onload=mk;sc.onerror=()=>rej({code:'offline'});document.head.appendChild(sc)});
+// one Supabase client for the whole game (online rooms and accounts share it, so a signed-in player's rooms are too)
+let SB_P=null;const supaOK=()=>/^https:/.test(SUPA.url)&&typeof claude==='undefined';
+function supaClient(){return SB_P||(SB_P=new Promise((res,rej)=>{const mk=()=>{try{res(window.supabase.createClient(SUPA.url,SUPA.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}))}catch(e){SB_P=null;rej({code:'setup'})}};
+  if(window.supabase)return mk();const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';sc.onload=mk;sc.onerror=()=>{SB_P=null;rej({code:'offline'})};document.head.appendChild(sc)}))}
+function supaRoom(){const load=supaClient;
  // State travels as broadcast messages (fast), re-sent every 2s as a heartbeat so a dropped message or a
  // reconnect heals itself. A peer only counts as gone after 12s of silence, or when it says goodbye.
  return{join:async name=>{const c=await load();const me=Math.random().toString(36).slice(2,10);
@@ -3513,6 +3549,71 @@ $('olGo').addEventListener('click',()=>hostStart(false));
 $('olNext').addEventListener('click',()=>hostStart(true));
 $('olLeave').addEventListener('click',async()=>{const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;openOnline()});
 $('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
+// ---------- accounts + cloud saves (Supabase email/password; guests keep playing on this device) ----------
+// What's saved: every pd-* progress key in local storage (cards, signings, playoff run, custom lineup, options).
+// The device keeps working offline exactly as before; each change is pushed to the player's row in `saves` a few
+// seconds later. Signing in on a device that already has guest progress uploads it, unless the account already
+// has a different save, in which case the player chooses which one to keep.
+const SAVE_KEYS=['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-opts2'];
+const ACC={user:null,state:'out',msg:'',pushT:0,busy:false,cloud:null};
+const accMeta=()=>{try{return JSON.parse(localStorage.getItem('pd-acct')||'{}')}catch(e){return{}}};
+const accSetMeta=m=>{try{RAW_SET('pd-acct',JSON.stringify(m))}catch(e){}};
+const RAW_SI=Storage.prototype.setItem,RAW_SET=(k,v)=>RAW_SI.call(localStorage,k,v);
+// every progress write marks the save as changed and schedules an upload
+try{Storage.prototype.setItem=function(k,v){RAW_SI.call(this,k,v);if(this===localStorage&&SAVE_KEYS.includes(k))accDirty()}}catch(e){}
+function localBlob(){const o={};for(const k of SAVE_KEYS){const v=localStorage.getItem(k);if(v!=null)o[k]=v}return o}
+const hasProgress=o=>!!(o['pd-cards']||o['pd-signings']||o['pd-playoffs']||o['pd-custom']);
+function accDirty(){const m=accMeta();m.localAt=Date.now();accSetMeta(m);if(ACC.user){clearTimeout(ACC.pushT);ACC.pushT=setTimeout(accPush,4000)}}
+async function accPush(){if(!ACC.user||ACC.state==='conflict')return;try{const c=await supaClient(),at=new Date().toISOString();
+  const {error}=await c.from('saves').upsert({user_id:ACC.user.id,data:localBlob(),updated_at:at});if(error)throw error;
+  const m=accMeta();m.uid=ACC.user.id;m.syncedAt=at;m.pushedAt=Date.now();accSetMeta(m);ACC.msg='';acRender()}
+ catch(e){ACC.msg=/relation|saves/.test(e.message||'')?'Cloud saves are not set up on the server yet.':'Could not reach the cloud; your progress is safe on this device and will upload later.';acRender()}}
+function accApply(data){for(const k of SAVE_KEYS){if(data[k]!=null)RAW_SET(k,data[k]);else localStorage.removeItem(k)}}
+// after sign-in (or a remembered session on load): line the device up with the account's save
+async function accSync(){const c=await supaClient(),u=ACC.user;if(!u)return;
+ const {data:row,error}=await c.from('saves').select('data,updated_at').eq('user_id',u.id).maybeSingle();
+ if(error){ACC.msg=/relation|saves/.test(error.message||'')?'Cloud saves are not set up on the server yet.':'Could not reach the cloud.';acRender();return}
+ const m=accMeta(),local=localBlob(),unsynced=!m.pushedAt||(m.localAt||0)>m.pushedAt;
+ if(!row){await accPush();return}
+ if(m.uid===u.id&&!unsynced){if(row.updated_at!==m.syncedAt){accApply(row.data);m.syncedAt=row.updated_at;m.pushedAt=Date.now();m.localAt=m.pushedAt;accSetMeta(m);location.reload()}return}
+ if(m.uid===u.id&&row.updated_at===m.syncedAt){await accPush();return}
+ if(!hasProgress(local)){accApply(row.data);const mm={uid:u.id,syncedAt:row.updated_at,pushedAt:Date.now()};mm.localAt=mm.pushedAt;accSetMeta(mm);location.reload();return}
+ // both this device and the account have progress that the other hasn't seen: the player decides
+ ACC.cloud=row;ACC.state='conflict';acRender();showScreen('scrAcct')}
+function acWhen(t){if(!t)return'never';const d=new Date(t),s=(Date.now()-d)/1000;return s<60?'just now':s<3600?`${Math.round(s/60)} min ago`:d.toLocaleString()}
+function acRender(){const on=!!ACC.user,cf=ACC.state==='conflict';$('mmAcct').textContent=on?`SIGNED IN · ${ACC.user.email.toUpperCase()}`:'GUEST · SAVED ON THIS DEVICE';
+ if(!$('acSignedOut'))return;$('acSignedOut').hidden=on||cf;$('acSignedIn').hidden=!on||cf;$('acConflict').hidden=!cf;
+ if(on){$('acWho').textContent=ACC.user.email;const m=accMeta();$('acSync').textContent=`Cloud save: ${acWhen(m.syncedAt)}${(m.localAt||0)>(m.pushedAt||0)?' · uploading changes…':''}`}
+ if(cf){const c=ACC.cloud;$('acCfTxt').innerHTML=`This device has progress, and your account already has a save from <b>${acWhen(c.updated_at)}</b>. Which one do you want to keep? The other one is replaced.`}
+ if(!supaOK()&&!on){$('acMsg').textContent='Accounts work in the website version of the game.';for(const id of['acSignIn','acSignUp','acForgot'])$(id).disabled=true}else $('acMsg').textContent=ACC.msg}
+const acCreds=()=>({email:$('acEmail').value.trim(),password:$('acPass').value});
+async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=acCreds();
+ if(!/^\S+@\S+\.\S+$/.test(email)){ACC.msg='Enter your email address.';acRender();return}
+ if(kind!=='forgot'&&password.length<6){ACC.msg='Passwords are at least 6 characters.';acRender();return}
+ ACC.busy=true;ACC.msg=kind==='up'?'Creating your account…':kind==='in'?'Signing in…':'Sending…';acRender();
+ try{const c=await supaClient(),back=location.origin+location.pathname;
+  if(kind==='forgot'){const {error}=await c.auth.resetPasswordForEmail(email,{redirectTo:back});if(error)throw error;ACC.msg='Check your email for a link to set a new password.'}
+  else if(kind==='up'){const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:back}});if(error)throw error;
+   ACC.msg=data.session?'':'Almost there: open the confirmation link we just emailed you, then sign in.'}
+  else{const {error}=await c.auth.signInWithPassword({email,password});if(error)throw error;ACC.msg=''}
+ }catch(e){ACC.msg=(e&&e.message)||'Something went wrong. Try again.'}
+ ACC.busy=false;acRender()}
+async function accWatch(){if(!supaOK())return;const c=await supaClient();
+ c.auth.onAuthStateChange((ev,session)=>{const u=session&&session.user||null,was=ACC.user&&ACC.user.id;ACC.user=u;
+  if(ev==='PASSWORD_RECOVERY'){const np=prompt('Choose a new password (6+ characters):');if(np&&np.length>=6)c.auth.updateUser({password:np}).then(({error})=>{ACC.msg=error?error.message:'Password updated.';acRender()})}
+  if(u&&u.id!==was)accSync().catch(()=>{});if(!u)ACC.state='out';acRender()})}
+$('acSignIn').addEventListener('click',()=>acDo('in'));$('acSignUp').addEventListener('click',()=>acDo('up'));$('acForgot').addEventListener('click',()=>acDo('forgot'));
+for(const id of['acEmail','acPass'])$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')acDo('in')});
+$('acSaveNow').addEventListener('click',()=>{ACC.msg='Saving…';acRender();accPush()});
+$('acSignOut').addEventListener('click',async()=>{clearTimeout(ACC.pushT);if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut();ACC.user=null;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
+$('acUseCloud').addEventListener('click',()=>{const r=ACC.cloud;accApply(r.data);accSetMeta({uid:ACC.user.id,syncedAt:r.updated_at,pushedAt:Date.now(),localAt:Date.now()});location.reload()});
+$('acUseLocal').addEventListener('click',()=>{ACC.state='in';ACC.cloud=null;accPush()});
+// leaving the page: get the last changes up if we can
+addEventListener('visibilitychange',()=>{if(document.hidden&&ACC.user&&(accMeta().localAt||0)>(accMeta().pushedAt||0))accPush()});
+// a remembered session (or a confirmation/reset link) loads the client right away; guests never load it
+if(supaOK()&&(Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k))||/access_token|type=recovery|code=/.test(location.hash+location.search)))accWatch().catch(()=>{});
+else if(supaOK())$('goAcct').addEventListener('click',()=>accWatch().catch(()=>{}),{once:true});
+acRender();
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'];
 let CARDS=[],CARD_BY={};
