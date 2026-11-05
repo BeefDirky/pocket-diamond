@@ -213,7 +213,9 @@ function render(now){
     // one continuous glide from where he left his feet to the bag (a tagged-out runner comes up a foot short)
     if(!r.slide.p0)r.slide.p0=runnerPos(r,r.slide.t0);const p0=r.slide.p0,E=r.out?{x:lerp(bb.x,p0.x,.12),y:lerp(bb.y,p0.y,.12)}:bb,k3=1-(1-u)*(1-u);
     const sp={x:lerp(p0.x,E.x,k3),y:lerp(p0.y,E.y,k3)},sq=toPx(sp.x,sp.y);
-    if(t<r.slide.t1&&Math.random()<.5){DUST.push({x:sq.x+rand(-4,4),y:sq.y+rand(-1,1),vx:rand(-20,20),vy:rand(-26,-6),life:rand(.3,.55),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f'])})}
+    // a rooster tail of dirt kicked up along the slide, and a puff at the bag when he gets there
+    if(t<r.slide.t1){for(let n=0;n<2;n++)if(Math.random()<.85)DUST.push({x:sq.x+rand(-4,4),y:sq.y+rand(-1,1),vx:rand(-26,26)-dir*12,vy:rand(-30,-8),life:rand(.3,.6),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
+    else if(!r.slide.puff){r.slide.puff=true;const bq2=toPx(bb.x,bb.y);for(let n=0;n<14;n++)DUST.push({x:bq2.x+rand(-5,5),y:bq2.y+rand(-2,2),vx:rand(-40,40),vy:rand(-34,-6),life:rand(.4,.8),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
     const back=dir*9*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// keep the leading hand (or spikes) on the bag, then get up onto it
     add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},r.slide.head?dir:-dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));
@@ -329,7 +331,7 @@ function render(now){
  }else if(S.hbpFx&&now-S.hbpFx.at<1150){const f=S.hbpFx,e=(now-f.at)/1150,o=1-(1-e)*(1-e);
   // the pitch ricochets off the hitter and dribbles away
   const x=f.x0+f.dx*o,y=f.y0+f.dy*o,h=f.h0*Math.max(0,1-e*2.4)+Math.abs(Math.sin(e*Math.PI*2.2))*1.6*(1-e),q=toPx(x,y);drawBall(wg,q.x,q.y,h,null)}
- if(false){}else if(inPlay&&!play.hide){const p=ballAt(play,t);if(p){let q=toPx(p.x,p.y),hh=p.h;const dv=play.dive,sg=play.curSeg;
+ if(false){}else if(inPlay&&!play.hide&&!(ph==='result'&&!play.foul&&!(play.res&&play.res.hr))){const p=ballAt(play,t);if(p){let q=toPx(p.x,p.y),hh=p.h;const dv=play.dive,sg=play.curSeg;
   const inGlove=dv&&!play.bobble&&t>=dv.t-.03&&t<=dv.t+.95&&(!sg||sg.hold===dv.i||(!sg.thr&&sg.hold==null&&t>=sg.t1-.03));
   if(inGlove){const f=fpos(play,dv.i,t),fq=toPx(f.x,f.y),lf=t<dv.t?4:0;q={x:fq.x+dv.dir*15,y:fq.y-6-lf};hh=0}
   else if(sg&&sg.hold!=null&&t>=sg.t0&&t<=sg.t1){const f=fpos(play,sg.hold,t),fq=toPx(f.x,f.y);q={x:fq.x+4,y:fq.y-9};hh=0}
