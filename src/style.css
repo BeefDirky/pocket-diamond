@@ -575,11 +575,11 @@ body.inMenu .app.deskApp>.board,body.inMenu .app.deskApp>.matchup,body.inMenu .a
 .app.deskApp>.matchup{bottom:62px;width:360px;transform:none}
 .app.deskApp>.matchup .mu{padding:10px 12px}
 .app.deskApp .infoBtn{top:auto;left:auto;right:14px;bottom:106px}
-.app.deskApp .autoBtn{top:auto;left:auto;right:84px;bottom:108px}
+.app.deskApp .autoBtn{top:auto;left:auto;right:84px;bottom:106px}
 .app.deskApp .skipBtn{bottom:146px}
 @media (max-width:999px){
  .app.deskApp>.matchup{transform:scale(.64);transform-origin:bottom left;bottom:50px;width:340px}
- .app.deskApp .infoBtn{bottom:82px}.app.deskApp .autoBtn{bottom:84px}.app.deskApp .skipBtn{bottom:116px}
+ .app.deskApp .infoBtn{bottom:82px}.app.deskApp .autoBtn{bottom:82px}.app.deskApp .skipBtn{bottom:116px}
  .app.deskApp .zoomCtl{bottom:10px;left:10px}
 }
 body.bpMode .board{display:none!important}
@@ -662,3 +662,7 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .acRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (max-width:420px){.acRow{grid-template-columns:1fr}}
 .acMsg{font-size:12px;color:var(--amber);margin:0;min-height:1em}
+
+/* AUTO and INFO: same size and baseline, side by side */
+.autoBtn,.infoBtn{font-size:10px!important;padding:0 7px!important;height:26px;display:flex;align-items:center;gap:4px;box-sizing:border-box;line-height:1}
+.autoBtn{bottom:max(8px,env(safe-area-inset-bottom,0px))}
