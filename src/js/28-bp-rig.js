@@ -265,20 +265,37 @@ function render(now){
  if(batterVisible){
   add(bx.y,()=>{
    const sq=S.swing&&S.swing.bunt&&(ph==='pitch'||ph==='call'||(inPlay&&t<.6));
-   const A0=(hand==='R'?125:55)*RAD,A1=(hand==='R'?-140:320)*RAD,AV=(hand==='R'?-235:-90)*RAD;
-   let ang=A0,bl=1;const sw=S.swing,st=S.stance||{vert:false,ph:0};
-   // pre-pitch: some hitters hold the bat straight up and only drop it into the load late in the windup; everyone buckles the knees
-   let legsB=flipping?'stand':'ready';
+   const sw=S.swing,st=S.stance||{vert:false,ph:0};
+   // the swing, as a righty sees it (a lefty is the mirror image): bat up over the back shoulder in the stance, drops
+   // into the slot behind him, whips through the zone (pointing at the plate at contact), then finishes high over the
+   // front shoulder. Angles are on screen, going around counter-clockwise; ls is how much of the bat's length shows
+   // (short = standing up toward the camera).
+   const mir=a=>hand==='R'?a:180-a;
+   let A=-112,ls=.6,legsB=flipping?'stand':'ready',armsB='bat',dx=0,ghost=null;
    const pre=ph==='ready'||ph==='windup'||ph==='choose';
    if(pre&&!flipping){const kk=ph==='windup'?S.pt/S.pitch.wind:0,bob=Math.sin(now/300+st.ph);
     legsB=(ph==='windup'&&kk>.55)?'ready':(bob>-.1?'ready':'stand');
-    if(st.vert){const u=ph==='windup'?clamp((kk-.45)/.35,0,1):0;ang=lerp(AV,A0,u)+Math.sin(now/240+st.ph)*.06*(1-u);bl=lerp(.5,1,u)}
-    else ang=A0+Math.sin(now/260+st.ph)*.14}
-   drawPlayer(wg,bx.x,bx.y,bat,{legs:legsB,arms:flipping?(play.res.hr?(play.flip?play.flip.arms:'punch'):'down'):sq?'bunt':'bat',skin:runSkin(cb),helmet:true,flip:hand==='L'});
-   if(sq)ang=(hand==='R'?-8:188)*RAD;
-   else if(sw&&(ph==='pitch'||ph==='call'||inPlay))ang=lerp(A0,A1,clamp((now-sw.at)/150,0,1));
-   else if(ph==='pitch'&&!sw)ang=A0+Math.sin(now/200)*.05;
-   if(!flipping)drawBat(wg,bx.x,bx.y,ang,hand,cb.bat,bl);
+    // waggle, then a small load (hands back, bat tipping toward the catcher) as the pitcher comes set
+    const load=ph==='windup'?clamp((kk-.5)/.4,0,1):0;A=-112-load*28+Math.sin(now/260+st.ph)*7*(1-load);ls=st.vert?.5:.6+load*.08}
+   else if(sw&&!sq&&(ph==='pitch'||ph==='call'||inPlay)){
+    const T=now-sw.at,pose=T=>{
+     if(T<0)return{A:-140,ls:.66};
+     if(T<50){const u=T/50,e=u*u;return{A:-140-e*92,ls:lerp(.66,1,u)}}           // drop into the slot
+     if(T<95){const u=(T-50)/45,e=u*u*(3-2*u);return{A:-232-e*128,ls:1}}       // whip through the zone
+     if(T<175){const u=(T-95)/80,e=1-(1-u)*(1-u);return{A:-360-e*148,ls:lerp(1,.58,e)}}// follow-through, up over the front shoulder
+     if(T<480)return{A:-508,ls:.58};
+     const u=clamp((T-480)/260,0,1),e=u*u*(3-2*u);return{A:lerp(-508,-472,e),ls:.58}};// relax the finish
+    const P0=pose(T);A=P0.A;ls=P0.ls;
+    legsB=T<12?'ready':T<95?'stride':'follow';dx=T<12?0:T<95?1:2;
+    // motion blur through the fast part of the swing
+    if(T>30&&T<150)ghost=[pose(T-10),pose(T-20),pose(T-30)]}
+   else if(ph==='pitch'&&!sw){A=-140+Math.sin(now/200)*3;ls=.66;legsB='ready'}
+   const sd=hand==='R'?1:-1,X=bx.x+dx*sd;
+   drawPlayer(wg,X,bx.y,bat,{legs:legsB,arms:flipping?(play.res.hr?(play.flip?play.flip.arms:'punch'):'down'):sq?'bunt':armsB,skin:runSkin(cb),helmet:true,flip:hand==='L'});
+   if(flipping){}
+   else if(sq)drawBat(wg,X,bx.y,(hand==='R'?-8:188)*RAD,hand,cb.bat,1);
+   else{if(ghost){wg.save();[.32,.18,.08].forEach((al,k)=>{wg.globalAlpha=al;drawBat(wg,X,bx.y,mir(ghost[k].A)*RAD,hand,cb.bat,ghost[k].ls)});wg.restore()}
+    drawBat(wg,X,bx.y,mir(A)*RAD,hand,cb.bat,ls)}
   });
  }else if(!hrPlay){wg.fillStyle=cb.bat||'#d9b07a';wg.fillRect(Math.round(bx.x)+3,Math.round(bx.y)+3,11,1);wg.fillStyle='#5a3820';wg.fillRect(Math.round(bx.x)+3,Math.round(bx.y)+3,3,1)}
  // bullpens: relievers playing catch

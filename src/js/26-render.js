@@ -4,7 +4,7 @@ const wb=document.createElement('canvas');wb.width=W;wb.height=H;const wg=wb.get
 let TOWERS=[];
 let FIELD=null,DECOR=null,SIGNS=null,CROWD_A=null,CROWD_B=null,FANS=[],CONC=[],AISLES=[],RAIL=[],FLAGFANS=[];
 function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,3);cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
-new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
+new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 function drawJumbo(g,now){
  const cx=HX/K,x0=cx-95,y0=10,w=190,h=66;
@@ -27,20 +27,26 @@ function drawJumbo(g,now){
  }
  g.fillStyle='rgba(0,0,0,.28)';for(let yy=y0;yy<y0+h;yy+=2)g.fillRect(x0,yy,w,1);
 }
-// the benches: real-size players (same sprite as on the field) pacing their dugout, pausing, and jumping on big hits
+// the benches: a row of players leaning on the front rail, mostly still (a weight shift, a look around now and then),
+// and a few in the back of the dugout wandering up and down. A touch smaller than the players on the field.
 function drawDugoutCrew(g,now){
  [[S.you,1],[S.opp,-1]].forEach(([k,sd])=>{const T=TEAMS[k],c=dugoutFrame(sd),a=-sd*45*RAD,ca=Math.cos(a),sa=Math.sin(a);
   const at=(lx,ly)=>({x:(c.x+lx*ca-ly*sa)*K,y:(c.y+lx*sa+ly*ca)*K});
-  const party=k===S.you&&now<S.cheerUntil,pants=k===S.you?'#eeeae0':'#a9b0b5',names=(T.staff||[]).slice(1).concat(T.lineup||[]),out=[];
   if(S.celebr&&S.celebr.k===k)return;// they're all out on the field mobbing the plate
-  for(let j=0;j<7;j++){const h=hash(T.name+'|'+j),ph=(h%1000)/159;
-   // each one paces a short stretch of the bench at his own speed, standing still at the turns
-   const span=5+(h%8),w=.00032+(h%5)*.00008,pos=Math.sin(now*w+ph),vel=Math.cos(now*w+ph),moving=Math.abs(vel)>.45;
-   const lx=-58+j*19+pos*span,ly=j%3===1?-5:3;
-   let legs=moving?'run':'stand',arms=moving?'run':(h%4===0?'ready':'down'),hop=0;
-   if(party){legs='stand';arms=Math.floor(now/220+j)%2?'catch':'down';hop=Math.round(Math.abs(Math.sin(now/130+j*1.7))*4)}
-   const nm=names[j]&&names[j].name;out.push({p:at(lx,ly),hop,legs,arms,frame:Math.floor(now/170)+j,flip:(vel*sd<0)!==(h%2===0&&!moving),skin:nm?skinOf(nm):SKINS[h%5]})}
-  out.sort((u,v)=>u.p.y-v.p.y).forEach(o=>drawPlayer(g,o.p.x,o.p.y-o.hop,T,{legs:o.legs,arms:o.arms,frame:o.frame,skin:o.skin,pants,flip:o.flip}));
+  const party=k===S.you&&now<S.cheerUntil,pants=k===S.you?'#eeeae0':'#a9b0b5',names=(T.staff||[]).slice(1).concat(T.lineup||[]),out=[];
+  const skinFor=j=>{const nm=names[j]&&names[j].name;return nm?skinOf(nm):SKINS[hash(T.name+j)%5]};
+  // front rail (the field side of the dugout): five guys, standing still
+  for(let j=0;j<5;j++){const h=hash(T.name+'|f'+j),lx=-52+j*26+(h%5)-2,ph=(h%1000)/159;
+   const shift=Math.sin(now/2600+ph)>.6;// every so often he shifts his weight and turns to look down the bench
+   let legs=shift?'ready':'stand',arms=h%3===0?'ready':'down',hop=0;
+   if(party){arms=Math.floor(now/220+j)%2?'catch':'down';hop=Math.round(Math.abs(Math.sin(now/130+j*1.7))*3)}
+   out.push({p:at(lx,-10),hop,legs,arms,frame:0,flip:(h&1)?!shift:shift,skin:skinFor(j)})}
+  // back of the dugout, in front of the bench: three wandering up and down
+  for(let j=0;j<3;j++){const h=hash(T.name+'|b'+j),span=18+(h%14),w=.00022+(h%4)*.00006,ph=(h%1000)/159,pos=Math.sin(now*w+ph),vel=Math.cos(now*w+ph),moving=Math.abs(vel)>.3;
+   const lx=-40+j*40+pos*span;let legs=moving?'run':'stand',arms=moving?'run':'down',hop=0;
+   if(party){legs='stand';arms=Math.floor(now/200+j)%2?'catch':'down';hop=Math.round(Math.abs(Math.sin(now/140+j))*3)}
+   out.push({p:at(lx,2),hop,legs,arms,frame:Math.floor(now/230)+j,flip:vel*sd<0,skin:skinFor(5+j)})}
+  out.sort((u,v)=>u.p.y-v.p.y).forEach(o=>drawPlayer(g,o.p.x,o.p.y-o.hop,T,{legs:o.legs,arms:o.arms,frame:o.frame,skin:o.skin,pants,flip:o.flip,sc:1.02}));
  })}
 function drawCheer(g,now){
  const T=TEAMS[S.you],c=cheerFrame(),hype=now<S.cheerUntil;

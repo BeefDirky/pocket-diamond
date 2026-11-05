@@ -52,7 +52,7 @@ function drawPlayer(g,X,Y,T,o){
  const sk=o.skin||SKINS[1],pa=o.pants||'#eeeae0',f=o.flip?-1:1,fr=(((o.frame|0)%4)+4)%4;
  const legs=o.legs||'stand',arms=o.arms||'down';
  let u=0;if(legs==='ready'||legs==='stride'||legs==='drive'||legs==='follow')u=1;if(legs==='run'&&(fr===1||fr===3))u=-1;
- const SC=1.2,sc=v=>Math.round(v*SC);
+ const SC=o.sc||1.2,sc=v=>Math.round(v*SC);
  const R=(c,dx,dy,w,h,up)=>{g.fillStyle=c;const yy=dy+(up?u:0),x0=sc(dx),x1=sc(dx+w),y0=sc(yy),y1=sc(yy+h);g.fillRect(f>0?x+x0:x-x1+1,y+y0,Math.max(1,x1-x0),Math.max(1,y1-y0))};
  g.fillStyle='rgba(6,18,10,.3)';g.fillRect(x-5,y,11,1);g.fillRect(x-4,y+1,9,1);
  // legs
@@ -131,10 +131,16 @@ function drawCatcher(g,X,Y,T,o){
  if(o.target){R(sk,-1,-8,1,1);R(GLOVE,-2,-11,3,3)}else R(GLOVE,-6,-7,2,2);
 }
 function drawBat(g,bx,by,ang,hand,col,ls){
- col=col||'#d9b07a';ls=ls||1;
- const hx=bx+(hand==='R'?1:-1)*2,hy=by-12;
- for(let k=1;k<=15;k++){const xx=Math.round(hx+Math.cos(ang)*k*ls),yy=Math.round(hy+Math.sin(ang)*k*.8*(ls<1?1:1));
-  g.fillStyle=k<4?'#2b2420':col;g.fillRect(xx,yy,1,1);if(k>7){g.fillRect(xx,yy+1,1,1);if(k>10)g.fillRect(xx+1,yy,1,1)}}
+ // a tapered bat from the hands out: knob and dark grip, then the barrel thickening toward the end, with a light edge.
+ // ls (0..1) shortens the whole bat when it's standing up toward the camera.
+ col=col||'#d9b07a';ls=ls==null?1:ls;
+ const hx=bx+(hand==='R'?1:-1)*2,hy=by-12,L=Math.max(5,Math.round(15*ls)),cx=Math.cos(ang),cy=Math.sin(ang)*.8,lite=shade(col,.35),dark=shade(col,-.3);
+ g.fillStyle='#2b2420';g.fillRect(Math.round(hx-cx),Math.round(hy-cy),1,1);// knob
+ for(let k=0;k<=L;k++){const xx=Math.round(hx+cx*k),yy=Math.round(hy+cy*k),f=k/L;
+  if(f<.27){g.fillStyle='#2b2420';g.fillRect(xx,yy,1,1);continue}
+  g.fillStyle=col;g.fillRect(xx,yy,1,1);
+  if(f>.5){g.fillStyle=dark;g.fillRect(xx,yy+1,1,1)}
+  if(f>.68){g.fillStyle=col;g.fillRect(xx+(cx>0?0:1)*0,yy-1,1,1);g.fillStyle=lite;g.fillRect(xx,yy-1,1,1)}}
 }
 function drawBatFree(g,cx,cy,ang,col,ls){
  ls=ls==null?1:ls;for(let k=-7;k<=7;k++){const kk=k*ls,xx=Math.round(cx+Math.cos(ang)*kk),yy=Math.round(cy+Math.sin(ang)*kk*.8);g.fillStyle=k<-4?'#2b2420':col;g.fillRect(xx,yy,1,1);if(k>0)g.fillRect(xx,yy+1,1,1)}
