@@ -26,8 +26,18 @@ function buildFoul(P,dir){
   const T=clamp(P.EV*1.467*Math.sin(P.L*RAD)/16*.8,.8,2.6);
   play.segs.push(airSeg(0,T,C,{x:dir.x*D,y:dir.y*D},Math.max(10,D*.25)));play.ballGone=T;
  }
+ // straight back into the backstop net: the ball stops dead on the net and drops to the dirt (no sound; it's
+ // cleared away when the next pitch comes)
+ {const sAng=Math.abs(Math.atan2(dir.x,dir.y)/RAD),RN=35,sg=play.segs[0];
+  if(sAng>=136&&S.mode!=='bp'){const far=sg.fn(sg.t1),Dg=Math.hypot(far.x-C.x,far.y-C.y);
+   if(Dg>RN){let tHit=sg.t1;for(let k=1;k<=60;k++){const tt=sg.t1*k/60,q=sg.fn(tt);if(Math.hypot(q.x-C.x,q.y-C.y)>=RN){tHit=tt;break}}
+    const hit=sg.fn(tHit),h0=Math.max(0,hit.h||0),fall=Math.max(.25,Math.sqrt(2*h0/32)),inward={x:hit.x*.97,y:hit.y*.97+.06};
+    const f0=sg.fn;play.segs[0]=fnSeg(0,tHit,f0);
+    play.segs.push(fnSeg(tHit,tHit+fall+.35,t=>{const u=t-tHit;if(u<fall){const e=u/fall;return{x:lerp(hit.x,inward.x,e),y:lerp(hit.y,inward.y,e),h:h0*(1-e*e)}}
+     const b=(u-fall)/.35;return{x:inward.x,y:inward.y,h:Math.max(0,Math.sin(b*Math.PI)*.6*(1-b))}}));
+    play.ballGone=null;play.netHit=true;play.segs[0].t1=tHit}}}
  finalize(play,[],{code:'FOUL',runs:0,outs:0});
- play.end=play.segs[0].t1+.2;return play;
+ play.end=play.segs[play.segs.length-1].t1+.2;return play;
 }
 function hitAdvance(runners,tp,Pp,delay,ex){
  const ballAt=k=>{const d=dist(Pp,baseP(k));return tp+.7+(ex||0)+d/(THROW*(d>200?.86:1))};
