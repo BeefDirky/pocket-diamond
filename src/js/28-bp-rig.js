@@ -84,6 +84,10 @@ function softDraw(g,r,draw){if(CANVAS_BLUR){g.save();g.filter=`blur(${r}px)`;dra
  const s=sc.getContext('2d'),T=g.getTransform();s.setTransform(T.a/ds,T.b/ds,T.c/ds,T.d/ds,T.e/ds,T.f/ds);draw(s);
  const id=s.getImageData(0,0,sc.width,sc.height);boxBlurRGBA(id,sc.width,sc.height,r/ds);s.putImageData(id,0,0);
  g.save();g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(sc,0,0,W0,H0);g.restore()}
+// a W x H canvas of one colour that is clear in the middle and solid at the edges (a frame fading in over B px)
+const EDGE_FADE={};function edgeFade(w,h,B,col){const k=w+'x'+h+B+col;if(EDGE_FADE[k])return EDGE_FADE[k];const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
+ const side=(x0,y0,x1,y1,rx,ry,rw,rh)=>{const gr=g.createLinearGradient(x0,y0,x1,y1);gr.addColorStop(0,col);gr.addColorStop(1,col.length===7?`rgba(${parseInt(col.slice(1,3),16)},${parseInt(col.slice(3,5),16)},${parseInt(col.slice(5,7),16)},0)`:'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(rx,ry,rw,rh)};
+ g.save();side(0,0,B,0,0,0,B,h);side(w,0,w-B,0,w-B,0,B,h);side(0,0,0,B,0,0,w,B);side(0,h,0,h-B,0,h-B,w,B);g.restore();return EDGE_FADE[k]=c}
 function nightPass(g,now){
  if(!NIGHT_MASK){const c=document.createElement('canvas');c.width=W;c.height=H;const m=c.getContext('2d');
   // darkness everywhere, then the whole playing field (fair ground to the wall, plus the foul ground around home) lit up with soft edges
@@ -96,6 +100,8 @@ function nightPass(g,now){
   softDraw(m,22,c=>{c.fillStyle='#e9e8e6';fieldPath(c,-6);c.fill()});
   // a touch of extra light on the lower bowl right behind the field
   m.save();m.globalCompositeOperation='lighter';softDraw(m,30,c=>{c.fillStyle='rgba(70,70,80,.9)';fieldPath(c,90);c.fill()});m.restore();
+  // the park buffer stops at a hard rectangle; let the light die away before its edges so it meets the neighborhood smoothly
+  {const ov=edgeFade(W,H,90,'#5a6494');m.drawImage(ov,0,0)}
   NIGHT_MASK=c;
   // spotlight beams from each bank, one canvas per tower (so a bank can go dark on its own), plus the patch of
   // field each bank lights (used to dim that section when the bank is off)
@@ -113,13 +119,14 @@ function nightPass(g,now){
    bg.fillStyle=pg2;bg.fillRect(L*.82-150,-150,300,300);
    // the section of field this bank lights: a wide soft wedge ending past its aim point
    const[sc,sg]=mk();softDraw(sg,40,c=>{c.fillStyle='#333a5c';c.beginPath();c.moveTo(L*.15,-60);c.lineTo(L*1.25,-300);c.lineTo(L*1.25,300);c.lineTo(L*.15,60);c.closePath();c.fill()});
+   {bg.setTransform(1,0,0,1,0,0);bg.globalCompositeOperation='destination-out';bg.drawImage(edgeFade(W,H,110,'#000'),-x0,-y0)}
    return{beam:bc,shade:sc,x:x0,y:y0}});}
 
  g.save();g.globalCompositeOperation='multiply';g.drawImage(NIGHT_MASK,0,0);
  // a dark bank leaves its section of the field dim
  if(NIGHT_BEAMS)NIGHT_BEAMS.forEach((B,i)=>{if(!towerOn(i,now)){g.globalAlpha=.55;g.drawImage(B.shade,B.x,B.y);g.globalAlpha=1}});
  g.globalCompositeOperation='lighter';if(NIGHT_BEAMS)NIGHT_BEAMS.forEach((B,i)=>{if(towerOn(i,now))g.drawImage(B.beam,B.x,B.y)});let gr;
- for(const[i,t]of TOWERS.entries()){if(!towerOn(i,now))continue;const fl=.92+Math.sin(now/90+t.x)*.04;gr=g.createRadialGradient(t.x,t.y,6,t.x,t.y,150);gr.addColorStop(0,`rgba(255,250,225,${.55*fl})`);gr.addColorStop(.25,`rgba(255,240,200,${.16*fl})`);gr.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=gr;g.fillRect(t.x-150,t.y-150,300,300)}
+ for(const[i,t]of TOWERS.entries()){if(!towerOn(i,now))continue;const fl=.92+Math.sin(now/90+t.x)*.04;const gR=Math.max(20,Math.min(150,t.x,t.y,W-t.x,H-t.y));gr=g.createRadialGradient(t.x,t.y,6,t.x,t.y,gR);gr.addColorStop(0,`rgba(255,250,225,${.55*fl})`);gr.addColorStop(.25,`rgba(255,240,200,${.16*fl})`);gr.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=gr;g.fillRect(t.x-150,t.y-150,300,300)}
  g.restore();
 }
 function dayPass(g){g.save();g.globalCompositeOperation='multiply';g.fillStyle='#fff7ea';g.fillRect(0,0,W,H);g.restore()}
@@ -377,9 +384,9 @@ function render(now){
   if(OUT&&PARK_OUTLINE){// the stands end at the stadium's outer wall; the neighborhood shows past it
    ctx.save();ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();ctx.clip();
    ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh);if(OUT_FEATHER)ctx.drawImage(OUT_FEATHER,(vx0+e.mx)/2,(vy0+e.my)/2,vw/2,vh/2,0,0,cv.width,cv.height);ctx.restore();
-   ctx.save();ctx.lineJoin='round';ctx.lineCap='round';if(ST.openTop)outlinePath(PARK_OUTLINE,x=>(x-vx0)*scale,y=>(y-vy0)*scale,ctx);else{ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath()}
+   if(!ST.harbor){ctx.save();ctx.lineJoin='round';ctx.lineCap='round';if(ST.openTop)outlinePath(PARK_OUTLINE,x=>(x-vx0)*scale,y=>(y-vy0)*scale,ctx);else{ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath()}
    ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=Math.max(2,16*scale);ctx.stroke();ctx.strokeStyle=S.night?'#3a424c':'#b9b4a8';ctx.lineWidth=Math.max(1.5,9*scale);ctx.stroke();
-   ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}
+   ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}}
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
  if(ST.harbor&&S.phase!=='title'){ctx.save();ctx.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);drawUlsan(ctx,now);ctx.restore()}// the harbor's whales and ships, out past the park

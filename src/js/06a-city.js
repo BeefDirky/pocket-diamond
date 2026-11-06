@@ -10,11 +10,11 @@ function outlineFrom(half,right){let pts=[...(right||half),...half.slice(1).reve
 function parkOutlineInner(){return outlineFrom([[0,HY+400],[1000,HY-600],[1000,HY-800],[430,-150],[172,-200]])}
 // the ballpark's outer wall: a wide V with a pointed tip behind home. The home-plate grandstand is one deck deeper
 // than the rest, so the wall steps back in to the outfield pavilions out by the corners.
-function parkOutlineClosed(){if(ST&&ST.harbor)return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]],hRightHalf());return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
+function parkOutlineClosed(){if(ST&&ST.harbor)return hOutline();return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
 // Some parks leave the outfield open: the bowl stops in the corners and the country runs right up to the fence.
 // The outline keeps its shape (it still decides where the park buffer shows), but the stretch across the outfield is
 // flagged open: no outer wall, plaza or roof lights there. Both layers paint the same countryside, so it reads as one.
-function parkOutline(){const B=parkOutlineClosed(),cut=ST&&ST.openTop;if(!cut)return B;
+function parkOutline(){if(ST&&ST.harbor)return hOutline();const B=parkOutlineClosed(),cut=ST&&ST.openTop;if(!cut)return B;
  const ang=q=>Math.atan2(q.x-HX,HY-q.y)/RAD,isOpen=ST.harbor?q=>{const x=(q.x-HX)*FT,y=(HY-q.y)*FT,th=Math.atan2(x,y)/RAD;return hOwn(x,y,th,Math.hypot(x,y),y>0?fenceDist(th):0)>0}:q=>q.y<HY&&Math.abs(ang(q))<cut;
  const out=[];for(let i=0;i<B.length;i++){const a=B[i],b=B[(i+1)%B.length];a.open=isOpen(a);out.push(a);
   if(isOpen(a)!==isOpen(b)){let lo=0,hi=1;for(let k=0;k<30;k++){const m=(lo+hi)/2,q={x:a.x+(b.x-a.x)*m,y:a.y+(b.y-a.y)*m};if(isOpen(q)===isOpen(a))lo=m;else hi=m}
@@ -119,10 +119,10 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
  if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}}
- if(STADIUMS[k].harbor){// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
+ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
   const mc=document.createElement('canvas');mc.width=CW;mc.height=CH;const mg=mc.getContext('2d');mg.beginPath();OL.forEach((q,i)=>mg[i?'lineTo':'moveTo'](q.x,q.y));mg.closePath();mg.fill();const md=mg.getImageData(0,0,CW,CH).data;
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea],img=g.getImageData(0,0,CW,CH),d=img.data;
-  for(let py=0;py<CH;py++){const wy=(py+.5)*2-e.my;for(let px=0;px<CW;px++){const j=(py*CW+px)*4;if(md[j+3]>200)continue;const c=harborCol((px+.5)*2-e.mx,wy);if(!c)continue;d[j]=c[0]*lt[0]/255;d[j+1]=c[1]*lt[1]/255;d[j+2]=c[2]*lt[2]/255;d[j+3]=255}}
+  for(let py=0;py<CH;py++){const wy=(py+.5)*2-e.my;for(let px=0;px<CW;px++){const j=(py*CW+px)*4;if(md[j+3]>200)continue;const c=harborCol((px+.5)*2-e.mx,wy);if(!c){if(H_SHADE){d[j]*=.7;d[j+1]*=.7;d[j+2]*=.74}continue}const em=H_EMIS&&night;d[j]=em?c[0]:c[0]*lt[0]/255;d[j+1]=em?c[1]:c[1]*lt[1]/255;d[j+2]=em?c[2]:c[2]*lt[2]/255;d[j+3]=255}}
   g.putImageData(img,0,0)}// the city dims at night; the stadium stays lit (the village is lit like the park)
  // ---- the stands keep going past the park buffer, out to the outer wall ----
  // Painted with the same rules the park buffer uses (rows that follow the wall, risers, aisles toward home, the upper
@@ -151,13 +151,14 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
    if(px>0)v=Math.min(v,DI[i-1]+3);if(py>0){v=Math.min(v,DI[i-CW]+3);if(px>0)v=Math.min(v,DI[i-CW-1]+4);if(px<CW-1)v=Math.min(v,DI[i-CW+1]+4)}DI[i]=v}
   for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
    if(px<CW-1)v=Math.min(v,DI[i+1]+3);if(py<CH-1){v=Math.min(v,DI[i+CW]+3);if(px<CW-1)v=Math.min(v,DI[i+CW+1]+4);if(px>0)v=Math.min(v,DI[i+CW-1]+4)}DI[i]=v}
-  const seatM=new Uint8Array(N);
+  const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.harbor)H_NIGHT=night;
   // only the stretch outside the buffer (plus the strip the feather fades across) needs painting
   const bx0=cx(0)+16,by0=cy(0)+16,bx1=cx(W)-16,by1=cy(H)-16;
   const put=(i,c)=>{const j=i*4;d[j]=c[0];d[j+1]=c[1];d[j+2]=c[2];d[j+3]=255};
   for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const i=py*CW+px;if(md[i*4+3]<128)continue;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;
    const wx=wX(px),x=(wx-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fdh=fenceDist(th);let col=null,feat=null;
-   if(ST.harbor&&hOwn(x,y,th,r,y>0?fdh:0))feat='harbor';else if(y>0){if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='sea';
+   if(ST.harbor){col=harborCol(wx,wy);if(!col)col=H_SHADE?[140,139,134]:[200,198,192];if(H_SEAT&&!empty)seatM[i]=1;if(H_EMIS)EMIS[i]=1;put(i,col);continue}
+   if(y>0){if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='sea';
     else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
     else if(ST.feature==='whale'&&!ST.harbor&&ath<36&&r>fdh+14)feat='sea';
     else if(ST.feature==='orchard'&&ath<36&&r>fdh+11)feat=ST.openTop&&ath<ST.openTop?'country':'orchard'}
@@ -196,12 +197,12 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
    px4(px,py-1,sk);px4(px,py-2,cap||hairs[(rr()*hairs.length)|0]);if(rr()<.5)px4(px-1,py-1,sk)}
   // light: the same multiply the park gets, so day and night match across the seam
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea];
-  for(let i=0;i<N;i++){if(md[i*4+3]<128)continue;const py=(i/CW)|0,px=i-py*CW;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;const j=i*4;d[j]=d[j]*lt[0]/255;d[j+1]=d[j+1]*lt[1]/255;d[j+2]=d[j+2]*lt[2]/255}
+  for(let i=0;i<N;i++){if(md[i*4+3]<128||(night&&EMIS[i]))continue;const py=(i/CW)|0,px=i-py*CW;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;const j=i*4;d[j]=d[j]*lt[0]/255;d[j+1]=d[j+1]*lt[1]/255;d[j+2]=d[j+2]*lt[2]/255}
   g.putImageData(img,0,0);
   // a soft shadow where the roof overhangs the top rows
   g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
   g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';if(ST.openTop)outlinePath(OL,x=>x,y=>y,g);else{g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath()}g.stroke();g.restore()}
-  if(ST.harbor){drawHarborRoof(g,night,OL);
+  if(ST.harbor){
    // the shore's buildings, ships and the gate, drawn by day and then lit like the rest of this layer
    const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');drawHarbor(lg,k,false,CW,CH,cx,cy,OL,e);
    if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}

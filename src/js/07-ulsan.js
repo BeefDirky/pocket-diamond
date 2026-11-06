@@ -60,7 +60,7 @@ function drawUlsan(g,now){
    if(a>.2&&a<.6)spout(g,{x:wp.x-12,y:wp.y-10},(a-.2)/.4,true)}}
 }
 let WHALE={x:-120,y:400},PARK_C=null,PARK_MOW=null;
-function buildField(){
+function buildField(){H_NIGHT=false;
  {const th=12,r=fenceDist(th)+30;WHALE=ST.harbor?{x:-60,y:660}:{x:Math.sin(th*RAD)*r,y:Math.cos(th*RAD)*r}}
  const c=document.createElement('canvas');c.width=W;c.height=H;
  const g=c.getContext('2d');const img=g.createImageData(W,H),d=img.data;
@@ -104,7 +104,7 @@ function buildField(){
    if(Math.abs(lx)<92&&ly>-22&&ly<30){dug=(Math.abs(lx)>88||ly>26)?2:1;break}}}
   const inPen=!inside[i]&&y>0&&ath>=29&&ath<=41&&r>=fdh&&r<fdh+18;
   let feat=null;
-  if(ST.harbor&&!inside[i]&&!inPen&&hOwn(x,y,th,r,y>0?fdh:0))feat='harbor';
+  if(ST.harbor&&!inside[i]&&!inPen&&!dug)feat='harbor';
   else if(!inside[i]&&!inPen&&y>0){
    if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='ocean';
    else if(ST.feature==='lawn'&&th>7&&th<27&&r>fdh+4&&r<fdh+80)feat='lawn';
@@ -122,7 +122,7 @@ function buildField(){
   else if(feat==='pool'){if(r<fdh+9||r>fdh+49)col=((px>>2)+(py>>2))&1?C.tile:C.tile2;else{const w=Math.sin(x*.42+y*.31)+Math.sin(y*.53-x*.19);col=w>1.35?C.poolHi:C.pool;seatMask[i]=4}}
   else if(feat==='fort'){const rw=Math.floor(py/7),off=(rw&1)*7;col=(py%7===0||(px+off)%14===0)?C.mortar:(((px+off)/14|0)+rw)%3===0?C.st2:C.st1;if(r<fdh+13&&((px>>3)&1))col=C.st2}
   else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
-  else if(feat==='harbor'){col=harborCol(px+.5,py+.5)||C.sea;if(H_SEAT)seatMask[i]=1}
+  else if(feat==='harbor'){col=harborCol(px+.5,py+.5)||[200,198,192];if(H_SEAT)seatMask[i]=1}
   else if(feat==='whale'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea;
    const wx=WHALE.x,wy=WHALE.y,dx=x-wx,dy=y-wy,e=(dx/30)**2+(dy/(9-Math.max(0,dx)*.12))**2;
    if(e<1)col=dy<-3&&e>.35?C.whB:C.wh1;else{const tx=x-(wx+30),ty=y-wy;if(tx>0&&tx<12&&Math.abs(ty)<tx*.85&&Math.abs(ty)>tx*.25)col=C.wh2}}
