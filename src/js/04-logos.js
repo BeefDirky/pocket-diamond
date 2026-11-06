@@ -179,7 +179,7 @@ function stampEmblem(g,key,cx,cy,d,rot,outline,ow){
  if(sil)for(let a=0;a<8;a++)g.drawImage(sil,-d+Math.cos(a*Math.PI/4)*ow,-d+Math.sin(a*Math.PI/4)*ow,2*d,2*d);
  g.drawImage(em,-d,-d,2*d,2*d);g.restore();
 }
-function makeLogo(key,size){
+function makeLogoDrawn(key,size){
  const c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d');const T=TEAMS[key],R=size/2,l=T.logo;
  const script=(t,y,em,fill,stroke,x)=>{const cx=R+(x||0)*R;g.save();g.setTransform(1,0,0,1,0,0);g.font=`${em*R}px Yellowtail, "Brush Script MT", cursive`;g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';
   if(stroke){g.lineWidth=R*.1;g.strokeStyle=stroke;g.strokeText(t,cx,R+y*R)}g.fillStyle=fill;g.fillText(t,cx,R+y*R);g.restore()};
@@ -292,6 +292,12 @@ function makeLogo(key,size){
  }
  return c;
 }
+// the club emblem: the pixel-art version when there is one (drawn at a whole-number scale so every pixel stays square),
+// otherwise the older drawn badge
+function makeLogo(k,size){const P=PIXEL_LOGOS[k];if(!P)return makeLogoDrawn(k,size);
+ const rows=P.px.split('/'),N=rows.length,sc=Math.max(1,Math.floor(size/N)),off=Math.floor((size-N*sc)/2),c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d');
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const ch=rows[y][x];if(ch==='.')continue;g.fillStyle=P.pal[parseInt(ch,36)];g.fillRect(off+x*sc,off+y*sc,sc,sc)}
+ return c}
 const LOGO={},LOGO_URL={};
 for(const k of ORDER){LOGO[k]=makeLogo(k,128);LOGO_URL[k]=LOGO[k].toDataURL()}
 
