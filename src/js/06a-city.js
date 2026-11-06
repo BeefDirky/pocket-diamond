@@ -10,11 +10,11 @@ function outlineFrom(half,right){let pts=[...(right||half),...half.slice(1).reve
 function parkOutlineInner(){return outlineFrom([[0,HY+400],[1000,HY-600],[1000,HY-800],[430,-150],[172,-200]])}
 // the ballpark's outer wall: a wide V with a pointed tip behind home. The home-plate grandstand is one deck deeper
 // than the rest, so the wall steps back in to the outfield pavilions out by the corners.
-function parkOutlineClosed(){if(ST&&ST.harbor)return hOutline();return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
+function parkOutlineClosed(){if(ST&&ST.bowl)return hOutline();return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
 // Some parks leave the outfield open: the bowl stops in the corners and the country runs right up to the fence.
 // The outline keeps its shape (it still decides where the park buffer shows), but the stretch across the outfield is
 // flagged open: no outer wall, plaza or roof lights there. Both layers paint the same countryside, so it reads as one.
-function parkOutline(){if(ST&&ST.harbor)return hOutline();const B=parkOutlineClosed(),cut=ST&&ST.openTop;if(!cut)return B;
+function parkOutline(){if(ST&&ST.bowl)return hOutline();const B=parkOutlineClosed(),cut=ST&&ST.openTop;if(!cut)return B;
  const ang=q=>Math.atan2(q.x-HX,HY-q.y)/RAD,isOpen=ST.harbor?q=>{const x=(q.x-HX)*FT,y=(HY-q.y)*FT,th=Math.atan2(x,y)/RAD;return hOwn(x,y,th,Math.hypot(x,y),y>0?fenceDist(th):0)>0}:q=>q.y<HY&&Math.abs(ang(q))<cut;
  const out=[];for(let i=0;i<B.length;i++){const a=B[i],b=B[(i+1)%B.length];a.open=isOpen(a);out.push(a);
   if(isOpen(a)!==isOpen(b)){let lo=0,hi=1;for(let k=0;k<30;k++){const m=(lo+hi)/2,q={x:a.x+(b.x-a.x)*m,y:a.y+(b.y-a.y)*m};if(isOpen(q)===isOpen(a))lo=m;else hi=m}
@@ -72,7 +72,7 @@ H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  const roadsV=[],roadsH=[];for(let x=18;x<CW;x+=90+Math.floor(rr()*40))roadsV.push(x);for(let y=16;y<CH;y+=80+Math.floor(rr()*36))roadsH.push(y);
  // city blocks between the avenues, skipping the park, the plaza and the water
  for(let bi=0;bi<roadsV.length;bi++)for(let bj=0;bj<roadsH.length;bj++){const x0=roadsV[bi]+7,y0=roadsH[bj]+7,x1=(roadsV[bi+1]||CW+7)-5,y1=(roadsH[bj+1]||CH+7)-5;if(x1-x0<16||y1-y0<16)continue;
-  if(STADIUMS[k].harbor){const cl=[[x0,y0],[x1,y0],[x0,y1],[x1,y1],[(x0+x1)/2,(y0+y1)/2]].every(([x,y])=>!near(x,y,40)&&!inWater(y,1));if(cl){hCityBlock(g,x0,y0,x1,y1,night,rr);continue}}
+  if(STADIUMS[k].bowl){const cl=[[x0,y0],[x1,y0],[x0,y1],[x1,y1],[(x0+x1)/2,(y0+y1)/2]].every(([x,y])=>!near(x,y,40)&&!inWater(y,1));if(cl){hCityBlock(g,x0,y0,x1,y1,night,rr);continue}}
   // split each block into lots
   for(let y=y0;y<y1-8;){const lh=Math.min(y1-y,14+Math.floor(rr()*22));for(let x=x0;x<x1-8;){const lw=Math.min(x1-x,14+Math.floor(rr()*26));
     if(!near(x+lw/2,y+lh/2,Math.max(lw,lh)*.6+46)&&!inWater(y,lh)){
@@ -87,7 +87,7 @@ H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  for(const x of roadsV)for(let y=0;y<CH;y+=2)if(!near(x+3,y,40)&&!inWater(y,2)){R(x,y,6,2,col.road);if(y%8===0)R(x+2.5,y,1,1,col.lane);if(night&&y%14===0){R(x-1,y,1,1,'#ffe0a0');R(x+6,y,1,1,'#ffe0a0')}}
  for(const y of roadsH)for(let x=0;x<CW;x+=2)if(!near(x,y+3,40)&&!inWater(y,6)){R(x,y,2,6,col.road);if(x%8===0)R(x,y+2.5,1,1,col.lane)}
  // the harbor city's avenues are lined with cherry trees, and city buses run them
- if(STADIUMS[k].harbor){for(const x of roadsV)for(let y=6;y<CH;y+=15)for(const sd of[-3,9])if(!near(x+sd,y,44)){const pink=((x*7+y*13)>>2)%5<3;if(pink)hBlossom(g,x+sd,y,3,night);else hGreenTree(g,x+sd,y,3,night)}
+ if(STADIUMS[k].bowl){for(const x of roadsV)for(let y=6;y<CH;y+=15)for(const sd of[-3,9])if(!near(x+sd,y,44)){const pink=((x*7+y*13)>>2)%5<3;if(pink)hBlossom(g,x+sd,y,3,night);else hGreenTree(g,x+sd,y,3,night)}
   for(const y of roadsH)for(let x=10;x<CW;x+=15)for(const sd of[-3,9])if(!near(x,y+sd,44)){const pink=((x*11+y*5)>>2)%5<3;if(pink)hBlossom(g,x,y+sd,3,night);else hGreenTree(g,x,y+sd,3,night)}
   for(let i=0;i<26;i++){const vert=rr()<.5,x=vert?roadsV[Math.floor(rr()*roadsV.length)]+1:rr()*CW,y=vert?rr()*CH:roadsH[Math.floor(rr()*roadsH.length)]+1;if(near(x,y,44))continue;
    g.fillStyle='rgba(0,0,0,.3)';g.fillRect(x+1,y+1,vert?4:11,vert?11:4);g.fillStyle='#2f6fd0';g.fillRect(x,y,vert?4:11,vert?11:4);g.fillStyle=night?'#ffe0a0':'#bfe3ff';if(vert)for(let q=1;q<10;q+=2)g.fillRect(x+.5,y+q,3,1);else for(let q=1;q<10;q+=2)g.fillRect(x+q,y+.5,1,3)}}
@@ -123,7 +123,7 @@ H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
   {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
  if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}}
-if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
+if(STADIUMS[k].bowl){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
   const mc=document.createElement('canvas');mc.width=CW;mc.height=CH;const mg=mc.getContext('2d');mg.beginPath();OL.forEach((q,i)=>mg[i?'lineTo':'moveTo'](q.x,q.y));mg.closePath();mg.fill();const md=mg.getImageData(0,0,CW,CH).data;
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea],img=g.getImageData(0,0,CW,CH),d=img.data;
   // most of the canvas is plain city: sample each 8px tile on a 3x3 grid and skip it whole when nothing harbor-ish is there
@@ -146,7 +146,7 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
   const C3a=hexRGB(shade(ST.seat[0],-.18)),C3b=hexRGB(shade(ST.seat[1],-.18));
   const wX=px=>(px+.5)*2-e.mx,wY=py=>(py+.5)*2-e.my;
   // the playing field mask (same test as the park buffer), then the distance from it
-  const A=new Int32Array(N),HB0=ST.harbor;// (the harbor park paints its own stands and needs none of this)
+  const A=new Int32Array(N),HB0=ST.bowl;// (the harbor park paints its own stands and needs none of this)
   if(!HB0)for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const x=(wX(px)-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
    const fair=Math.abs(th)<=45&&y>=0,perp=(Math.abs(x)-y)/Math.SQRT2,along=(Math.abs(x)+y)/Math.SQRT2;
    A[py*CW+px]=(fair?r<fenceDist(th):((perp<40&&along<328&&along>-5)||r<34))?0:1e8}}
@@ -160,13 +160,13 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
    if(px>0)v=Math.min(v,DI[i-1]+3);if(py>0){v=Math.min(v,DI[i-CW]+3);if(px>0)v=Math.min(v,DI[i-CW-1]+4);if(px<CW-1)v=Math.min(v,DI[i-CW+1]+4)}DI[i]=v}
   if(!HB0)for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
    if(px<CW-1)v=Math.min(v,DI[i+1]+3);if(py<CH-1){v=Math.min(v,DI[i+CW]+3);if(px<CW-1)v=Math.min(v,DI[i+CW+1]+4);if(px>0)v=Math.min(v,DI[i+CW-1]+4)}DI[i]=v}
- const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.harbor)H_NIGHT=night;
+ const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.bowl)H_NIGHT=night;
   // only the stretch outside the buffer (plus the strip the feather fades across) needs painting
   const bx0=cx(0)+16,by0=cy(0)+16,bx1=cx(W)-16,by1=cy(H)-16;
   const put=(i,c)=>{const j=i*4;d[j]=c[0];d[j+1]=c[1];d[j+2]=c[2];d[j+3]=255};
   for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const i=py*CW+px;if(md[i*4+3]<128)continue;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;
    const wx=wX(px),x=(wx-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fdh=fenceDist(th);let col=null,feat=null;
-   if(ST.harbor){col=harborCol(wx,wy);if(!col)col=H_SHADE?[140,139,134]:[200,198,192];if(H_SEAT&&!empty)seatM[i]=1;if(H_EMIS)EMIS[i]=1;put(i,col);continue}
+   if(ST.bowl){col=harborCol(wx,wy);if(!col)col=H_SHADE?[140,139,134]:[200,198,192];if(H_SEAT&&!empty)seatM[i]=1;if(H_EMIS)EMIS[i]=1;put(i,col);continue}
    if(y>0){if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='sea';
     else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
     else if(ST.feature==='whale'&&!ST.harbor&&ath<36&&r>fdh+14)feat='sea';
@@ -175,7 +175,7 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
    if(!feat&&onRing&&A[i]&&md[j4+3]>128){put(i,C.conc);continue}
    if(!feat&&!inOld&&!onRing&&A[i]){// the new top deck: same rows and aisles, a darker shade of the lower bowl's color
     const dO=A[i]/3*2/K,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
-    if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;if(rr2>=4.6)col=C.riserU;else{col=ST.harbor?hSeat(ang,row,true):(row&1)?C3a:C3b;seatM[i]=1}}
+    if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;if(rr2>=4.6)col=C.riserU;else{col=ST.bowl?hSeat(ang,row,true):(row&1)?C3a:C3b;seatM[i]=1}}
     put(i,col);continue}
    if(feat==='sea'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
    else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
@@ -191,7 +191,7 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
     else{const upper=dO>=124,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
      if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;
      else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;
-      if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=ST.harbor?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
+      if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=ST.bowl?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
    put(i,col)}}
  
   // the crowd: same grid and density as the park, same club colors, drawn at this layer's half scale
@@ -212,12 +212,12 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
   // a soft shadow where the roof overhangs the top rows
   g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
   g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';if(ST.openTop)outlinePath(OL,x=>x,y=>y,g);else{g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath()}g.stroke();g.restore()}
-  if(ST.harbor){{const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);hDecor(lg);
+  if(ST.bowl){{const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);hDecor(lg);
     if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}g.drawImage(L,0,0)}
    // the shore's buildings, ships and the gate, drawn by day and then lit like the rest of this layer
-   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');drawHarbor(lg,k,false,CW,CH,cx,cy,OL,e);
+   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');(ST.harbor?drawHarbor:drawFortress)(lg,k,false,CW,CH,cx,cy,OL,e);
    if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}
-   g.drawImage(L,0,0);if(night)drawHarborGlow(g,cx,cy,OL)}
+   g.drawImage(L,0,0);if(night&&ST.harbor)drawHarborGlow(g,cx,cy,OL)}
   if(ST.village){// the town's buildings, lit like everything else on this layer
    const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);const glows=[];vTownDraw(lg,night?glows:null);
    const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);

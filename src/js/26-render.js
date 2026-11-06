@@ -7,7 +7,25 @@ function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.d
 new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 // Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
-function drawJumbo(g,now){if(S.you!=='ulsan')return drawJumbo0(g,now);
+// Suwon's board is built into the fortress: a stone bastion around it, a purple frame, a tiled pavilion roof above
+function drawJumboFort(g,now){const cx=HX/K,sc=1.18,y0=-18,h=66,w=190,x0=cx-95,yb=(HY-fenceDist(0)/FT)/K-8,night=!!S.night;
+ g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);
+ // the bastion: stone courses, crenellated top, and its shadow
+ const bx=x0-22,bw=w+44,by=y0-14,bh=h+44;g.fillStyle='rgba(0,0,0,.32)';g.fillRect(bx+6,by+6,bw,bh);
+ for(let y=0;y<bh;y+=2)for(let x=0;x<bw;x+=2){const c=fStone(x*.55,y*.55,1.6,false);g.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;g.fillRect(bx+x,by+y,2,2)}
+ g.fillStyle='rgba(0,0,0,.18)';g.fillRect(bx,by+bh-6,bw,6);
+ for(let x=bx;x<bx+bw;x+=10){g.fillStyle='#d4cab2';g.fillRect(x,by-5,6,5);g.fillStyle='#8a806a';g.fillRect(x+6,by-3,4,3)}
+ if(night){const gr=g.createLinearGradient(0,by+bh,0,by);gr.addColorStop(0,'rgba(255,190,100,.45)');gr.addColorStop(1,'rgba(255,190,100,0)');g.fillStyle=gr;g.fillRect(bx,by,bw,bh)}
+ // banners either side of the board
+ for(const sd of[-1,1]){const fx=sd<0?bx+4:bx+bw-14;g.fillStyle='#4a2a8a';g.fillRect(fx,y0+4,10,34);g.beginPath();g.moveTo(fx,y0+38);g.lineTo(fx+5,y0+43);g.lineTo(fx+10,y0+38);g.fill();g.fillStyle='#ffd23f';g.fillRect(fx+4,y0+18,2,2);g.fillRect(fx+3,y0+19,4,1)}
+ g.restore();
+ g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);drawJumbo0(g,now,true);
+ // the purple frame and the pavilion roof on top
+ g.strokeStyle='#8a5ae0';g.lineWidth=2;g.strokeRect(x0-3,y0-3,w+6,h+6);if(night){g.strokeStyle='rgba(176,124,255,.5)';g.lineWidth=5;g.strokeRect(x0-5,y0-5,w+10,h+10)}
+ kRoof(g,cx,y0-26,170,30,0,S.night);kRoof(g,cx,y0-30,96,16,0,S.night);
+ {const p=y0-14;g.fillStyle='#5a2a2a';for(const px of[cx-70,cx-40,cx+40,cx+70]){g.fillRect(px-2,p,4,6)}}// the pavilion's red posts
+ g.restore()}
+function drawJumbo(g,now){if(S.you==='suwon')return drawJumboFort(g,now);if(S.you!=='ulsan')return drawJumbo0(g,now);
  const cx=HX/K,fy=(HY-fenceDist(0)/FT)/K,sc=1.22,yb=fy-8;g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);
  {const y0=-18,h=66,night=!!S.night,yc=y0+h/2;// the deck it stands on, and the flippers
   g.fillStyle='rgba(0,0,0,.25)';g.fillRect(cx-118,yb-4,250,16);g.fillStyle=night?'#3a4048':'#9aa3ad';g.fillRect(cx-122,yb-8,244,12);g.fillStyle=night?'#4a525c':'#c3cad1';g.fillRect(cx-122,yb-8,244,3);
@@ -16,10 +34,10 @@ function drawJumbo(g,now){if(S.you!=='ulsan')return drawJumbo0(g,now);
    g.fillStyle='#2f6fd0';g.beginPath();g.moveTo(bx,y0-2);g.quadraticCurveTo(bx+sd*34,yc-12,bx+sd*24,y0+h+4);g.quadraticCurveTo(bx+sd*12,y0+h-6,bx,y0+h-4);g.closePath();g.fill();
    g.fillStyle='#9fd8f6';for(let k=0;k<4;k++)g.fillRect(bx+sd*(8+k*5)-(sd<0?3:0),y0+10+k*10,3,2)}}
  drawJumbo0(g,now);g.restore()}
-function drawJumbo0(g,now){
+function drawJumbo0(g,now,noLegs){
  const cx=HX/K,x0=cx-95,y0=-18,w=190,h=66;
  // the board stands on steel: lattice legs down to concrete footings just behind the wall, braced across the middle
- {const fy=(HY-fenceDist(0)/FT)/K,yb=fy-8,yt=y0+h+2,night=!!S.night,legs=[x0+26,cx,x0+w-26];
+ if(!noLegs){const fy=(HY-fenceDist(0)/FT)/K,yb=fy-8,yt=y0+h+2,night=!!S.night,legs=[x0+26,cx,x0+w-26];
   g.fillStyle='rgba(0,0,0,.24)';g.beginPath();g.moveTo(x0+8,yb+1);g.lineTo(x0+w-8,yb+1);g.lineTo(x0+w+30,yb+12);g.lineTo(x0+46,yb+12);g.closePath();g.fill();
   for(const lx of legs){g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.moveTo(lx-2,yb);g.lineTo(lx+2,yb);g.lineTo(lx+24,yb+13);g.lineTo(lx+20,yb+14);g.closePath();g.fill()}
   // the horizontal brace between the legs

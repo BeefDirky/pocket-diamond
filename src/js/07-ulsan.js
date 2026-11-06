@@ -108,7 +108,7 @@ function buildField(){H_NIGHT=false;
    if(Math.abs(lx)<92&&ly>-22&&ly<30){dug=(Math.abs(lx)>88||ly>26)?2:1;break}}}
   const inPen=!inside[i]&&y>0&&ath>=29&&ath<=41&&r>=fdh&&r<fdh+18;
   let feat=null;
-  if(ST.harbor&&!inside[i]&&!inPen&&!dug)feat='harbor';
+  if(ST.bowl&&!inside[i]&&!inPen&&!dug)feat='harbor';
   else if(!inside[i]&&!inPen&&y>0){
    if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='ocean';
    else if(ST.feature==='lawn'&&th>7&&th<27&&r>fdh+4&&r<fdh+80)feat='lawn';
@@ -150,12 +150,12 @@ function buildField(){H_NIGHT=false;
     if(aisle)col=C.aisle;
     else{const row=Math.floor((dO-3)/6),rr=(dO-3)-row*6;
      if(rr>=5)col=upper?C.riserU:C.riser;
-     else{col=ST.harbor?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatMask[i]=1}}
+     else{col=ST.bowl?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatMask[i]=1}}
    }
   }else{
    const dOut=D[i]/3/K;const wallT=fairBig[i]?ST.wallFt*2:6;
    const fair=Math.abs(th)<=45&&y>=0;
-   if(dOut<wallT&&ST.harbor&&fair){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
+   if(dOut<wallT&&ST.bowl&&fair){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
     const sF=r*th*RAD,m=((sF%18)+18)%18,id=Math.floor(sF/18);
     col=dOut<1.4?HB.wallY:dOut<2.4?HB.wallCap:m<.9?HB.seam:dOut>wallT-2.5?hMul((id&1)?HB.pad2:HB.pad1,.72):(id&1)?HB.pad2:HB.pad1}
    else if(dOut<wallT)col=dOut<1.5?C.pad2:C.pad;
@@ -210,7 +210,7 @@ function buildField(){H_NIGHT=false;
  // on-deck circles
  for(const s of[1,-1]){const p=P(s*38,-6);g.strokeStyle='rgba(243,238,224,.7)';g.beginPath();g.arc(p.x,p.y,7,0,Math.PI*2);g.stroke()}
  // distance markers on the warning track
- if(!ST.harbor)[[-43,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[43,DIMS[4]]].forEach(([th,t])=>{// (the harbor park paints them on its wall)
+ if(!ST.bowl)[[-43,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[43,DIMS[4]]].forEach(([th,t])=>{// (the harbor park paints them on its wall)
   const r=fenceDist(th)-13;const p=P(r*Math.sin(th*RAD),r*Math.cos(th*RAD));
   g.save();g.translate(p.x,p.y);g.rotate(th*RAD);g.fillStyle='#ffd23f';g.font='bold 18px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText(t,0,0);g.restore();
  });
@@ -219,7 +219,7 @@ function buildField(){H_NIGHT=false;
   g.fillStyle='#c48c56';g.beginPath();g.arc(m.x,m.y,15,0,Math.PI*2);g.fill();g.beginPath();g.arc(k.x,k.y,10,0,Math.PI*2);g.fill();
   g.fillStyle='#f3eee0';g.fillRect(Math.round(m.x)-3,Math.round(m.y),6,2);g.fillRect(Math.round(k.x)-2,Math.round(k.y)+3,5,3);}
  if(ST.village)vTownDraw(g,null);// the buildings behind the open outfield
- if(ST.harbor)hDecor(g);
+ if(ST.bowl)hDecor(g);
  return c;
 }
 

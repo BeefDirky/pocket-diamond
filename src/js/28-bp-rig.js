@@ -384,12 +384,13 @@ function render(now){
   if(OUT&&PARK_OUTLINE){// the stands end at the stadium's outer wall; the neighborhood shows past it
    ctx.save();ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();ctx.clip();
    ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh);if(OUT_FEATHER)ctx.drawImage(OUT_FEATHER,(vx0+e.mx)/2,(vy0+e.my)/2,vw/2,vh/2,0,0,cv.width,cv.height);ctx.restore();
-   if(!ST.harbor){ctx.save();ctx.lineJoin='round';ctx.lineCap='round';if(ST.openTop)outlinePath(PARK_OUTLINE,x=>(x-vx0)*scale,y=>(y-vy0)*scale,ctx);else{ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath()}
+   if(!ST.bowl){ctx.save();ctx.lineJoin='round';ctx.lineCap='round';if(ST.openTop)outlinePath(PARK_OUTLINE,x=>(x-vx0)*scale,y=>(y-vy0)*scale,ctx);else{ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath()}
    ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=Math.max(2,16*scale);ctx.stroke();ctx.strokeStyle=S.night?'#3a424c':'#b9b4a8';ctx.lineWidth=Math.max(1.5,9*scale);ctx.stroke();
    ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}}
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
  drawHarborLights(ctx,vx0,vy0,scale,now);
+ drawFortLights(ctx,vx0,vy0,scale,now);
  drawSplashes(ctx,vx0,vy0,scale,now);
  if(ST.harbor&&S.phase!=='title'){ctx.save();ctx.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);drawUlsan(ctx,now);ctx.restore()}// the harbor's whales and ships, out past the park
  drawNeon(ctx,vx0,vy0,scale,now);

@@ -7,7 +7,7 @@ const BASES=[{x:0,y:0},{x:63.64,y:63.64},{x:0,y:127.28},{x:-63.64,y:63.64}];
 const baseP=k=>k===4?BASES[0]:BASES[k];
 let DIMS=[325,375,400,375,325],ST=null;
 function fenceDist(th){const a=clamp(th,-45,45),pts=[-45,-22,0,22,45];for(let k=0;k<4;k++)if(a<=pts[k+1]){const u=(a-pts[k])/(pts[k+1]-pts[k]);return lerp(DIMS[k],DIMS[k+1],u)}return DIMS[4]}
-function setStadium(){ST=STADIUMS[S.you];DIMS=ST.dims}
+function setStadium(){ST=STADIUMS[S.you];DIMS=ST.dims;if(typeof hTheme==='function')hTheme()}
 const POS=[
  {n:'pitcher',x:0,y:60.5,sp:19,re:.25,reach:5},
  {n:'catcher',x:0,y:-4.5,sp:17,re:.3,reach:4},

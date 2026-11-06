@@ -1057,7 +1057,7 @@ const BASES=[{x:0,y:0},{x:63.64,y:63.64},{x:0,y:127.28},{x:-63.64,y:63.64}];
 const baseP=k=>k===4?BASES[0]:BASES[k];
 let DIMS=[325,375,400,375,325],ST=null;
 function fenceDist(th){const a=clamp(th,-45,45),pts=[-45,-22,0,22,45];for(let k=0;k<4;k++)if(a<=pts[k+1]){const u=(a-pts[k])/(pts[k+1]-pts[k]);return lerp(DIMS[k],DIMS[k+1],u)}return DIMS[4]}
-function setStadium(){ST=STADIUMS[S.you];DIMS=ST.dims}
+function setStadium(){ST=STADIUMS[S.you];DIMS=ST.dims;if(typeof hTheme==='function')hTheme()}
 const POS=[
  {n:'pitcher',x:0,y:60.5,sp:19,re:.25,reach:5},
  {n:'catcher',x:0,y:-4.5,sp:17,re:.3,reach:4},
@@ -1206,12 +1206,12 @@ const STADIUMS={
   seat:['#1f57c3','#1b4dad'],seatU:['#e8b730','#d4a62a'],pad:'#1b1b1f',pad2:'#111114',wallFt:8,feature:'honey',net:true},
  daejeon:{name:'BREAD BOWL PARK',kname:'빵그릇파크',dims:[325,360,400,355,315],grass:['#3fa23c','#4cb447','#56bd50'],mow:'stripe',
   seat:['#24396e','#1f3262'],seatU:['#c8202a','#b01c26'],pad:'#14244e',pad2:'#0c1834',wallFt:8,feature:'pool',net:true},
- suwon:{name:'FORTRESS FIELD',kname:'화성필드',dims:[330,380,400,380,330],grass:['#389a3a','#44ab44','#4fb54d'],mow:'diag',
-  seat:['#4b2a8a','#42257a'],seatU:['#1b1b22','#16161c'],pad:'#2a2a30',pad2:'#1d1d22',wallFt:8,feature:'fortress',net:true},
+ suwon:{name:'FORTRESS FIELD',kname:'화성필드',dims:[330,395,400,375,318],grass:['#3d9e3c','#49af46','#54b950'],mow:'diag',
+  seat:['#4b2a8a','#42257a'],seatU:['#1b1b22','#16161c'],pad:'#2a1650',pad2:'#1d0f3a',wallFt:8,feature:'fortress',net:true,bowl:'fortress'},
  changwon:{name:'FOSSIL YARD',kname:'화석야드',dims:[324,370,400,370,324],grass:['#3c9f37','#48b142','#52ba4b'],mow:'arc',
   seat:['#1e8a6e','#1a7a62'],seatU:['#123a32','#0f322b'],pad:'#2c1d5c',pad2:'#1c1240',wallFt:8,feature:'trees'},
  ulsan:{name:'WHALE BAY PARK',kname:'고래만파크',dims:[322,365,400,365,322],grass:['#3a9a3c','#46ab46','#50b44f'],mow:'wave',
-  seat:['#3f86c4','#3878b0'],seatU:['#1b2f5e','#172851'],pad:'#14325a',pad2:'#0d2442',wallFt:10,feature:'whale',net:true,openTop:36,harbor:true},
+  seat:['#3f86c4','#3878b0'],seatU:['#1b2f5e','#172851'],pad:'#14325a',pad2:'#0d2442',wallFt:10,feature:'whale',net:true,openTop:36,harbor:true,bowl:'harbor'},
  jeju:{name:'HALLA FIELD',kname:'한라필드',dims:[330,375,402,375,330],grass:['#3fa23c','#4cb447','#56bd50'],mow:'check',
   seat:['#e0781c','#c96b18'],seatU:['#2f7a3a','#296b33'],pad:'#2f2f33',pad2:'#202024',wallFt:8,feature:'orchard',openTop:36,village:true},
 };
@@ -1634,11 +1634,11 @@ function outlineFrom(half,right){let pts=[...(right||half),...half.slice(1).reve
 function parkOutlineInner(){return outlineFrom([[0,HY+400],[1000,HY-600],[1000,HY-800],[430,-150],[172,-200]])}
 // the ballpark's outer wall: a wide V with a pointed tip behind home. The home-plate grandstand is one deck deeper
 // than the rest, so the wall steps back in to the outfield pavilions out by the corners.
-function parkOutlineClosed(){if(ST&&ST.harbor)return hOutline();return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
+function parkOutlineClosed(){if(ST&&ST.bowl)return hOutline();return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
 // Some parks leave the outfield open: the bowl stops in the corners and the country runs right up to the fence.
 // The outline keeps its shape (it still decides where the park buffer shows), but the stretch across the outfield is
 // flagged open: no outer wall, plaza or roof lights there. Both layers paint the same countryside, so it reads as one.
-function parkOutline(){if(ST&&ST.harbor)return hOutline();const B=parkOutlineClosed(),cut=ST&&ST.openTop;if(!cut)return B;
+function parkOutline(){if(ST&&ST.bowl)return hOutline();const B=parkOutlineClosed(),cut=ST&&ST.openTop;if(!cut)return B;
  const ang=q=>Math.atan2(q.x-HX,HY-q.y)/RAD,isOpen=ST.harbor?q=>{const x=(q.x-HX)*FT,y=(HY-q.y)*FT,th=Math.atan2(x,y)/RAD;return hOwn(x,y,th,Math.hypot(x,y),y>0?fenceDist(th):0)>0}:q=>q.y<HY&&Math.abs(ang(q))<cut;
  const out=[];for(let i=0;i<B.length;i++){const a=B[i],b=B[(i+1)%B.length];a.open=isOpen(a);out.push(a);
   if(isOpen(a)!==isOpen(b)){let lo=0,hi=1;for(let k=0;k<30;k++){const m=(lo+hi)/2,q={x:a.x+(b.x-a.x)*m,y:a.y+(b.y-a.y)*m};if(isOpen(q)===isOpen(a))lo=m;else hi=m}
@@ -1696,7 +1696,7 @@ H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  const roadsV=[],roadsH=[];for(let x=18;x<CW;x+=90+Math.floor(rr()*40))roadsV.push(x);for(let y=16;y<CH;y+=80+Math.floor(rr()*36))roadsH.push(y);
  // city blocks between the avenues, skipping the park, the plaza and the water
  for(let bi=0;bi<roadsV.length;bi++)for(let bj=0;bj<roadsH.length;bj++){const x0=roadsV[bi]+7,y0=roadsH[bj]+7,x1=(roadsV[bi+1]||CW+7)-5,y1=(roadsH[bj+1]||CH+7)-5;if(x1-x0<16||y1-y0<16)continue;
-  if(STADIUMS[k].harbor){const cl=[[x0,y0],[x1,y0],[x0,y1],[x1,y1],[(x0+x1)/2,(y0+y1)/2]].every(([x,y])=>!near(x,y,40)&&!inWater(y,1));if(cl){hCityBlock(g,x0,y0,x1,y1,night,rr);continue}}
+  if(STADIUMS[k].bowl){const cl=[[x0,y0],[x1,y0],[x0,y1],[x1,y1],[(x0+x1)/2,(y0+y1)/2]].every(([x,y])=>!near(x,y,40)&&!inWater(y,1));if(cl){hCityBlock(g,x0,y0,x1,y1,night,rr);continue}}
   // split each block into lots
   for(let y=y0;y<y1-8;){const lh=Math.min(y1-y,14+Math.floor(rr()*22));for(let x=x0;x<x1-8;){const lw=Math.min(x1-x,14+Math.floor(rr()*26));
     if(!near(x+lw/2,y+lh/2,Math.max(lw,lh)*.6+46)&&!inWater(y,lh)){
@@ -1711,7 +1711,7 @@ H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  for(const x of roadsV)for(let y=0;y<CH;y+=2)if(!near(x+3,y,40)&&!inWater(y,2)){R(x,y,6,2,col.road);if(y%8===0)R(x+2.5,y,1,1,col.lane);if(night&&y%14===0){R(x-1,y,1,1,'#ffe0a0');R(x+6,y,1,1,'#ffe0a0')}}
  for(const y of roadsH)for(let x=0;x<CW;x+=2)if(!near(x,y+3,40)&&!inWater(y,6)){R(x,y,2,6,col.road);if(x%8===0)R(x,y+2.5,1,1,col.lane)}
  // the harbor city's avenues are lined with cherry trees, and city buses run them
- if(STADIUMS[k].harbor){for(const x of roadsV)for(let y=6;y<CH;y+=15)for(const sd of[-3,9])if(!near(x+sd,y,44)){const pink=((x*7+y*13)>>2)%5<3;if(pink)hBlossom(g,x+sd,y,3,night);else hGreenTree(g,x+sd,y,3,night)}
+ if(STADIUMS[k].bowl){for(const x of roadsV)for(let y=6;y<CH;y+=15)for(const sd of[-3,9])if(!near(x+sd,y,44)){const pink=((x*7+y*13)>>2)%5<3;if(pink)hBlossom(g,x+sd,y,3,night);else hGreenTree(g,x+sd,y,3,night)}
   for(const y of roadsH)for(let x=10;x<CW;x+=15)for(const sd of[-3,9])if(!near(x,y+sd,44)){const pink=((x*11+y*5)>>2)%5<3;if(pink)hBlossom(g,x,y+sd,3,night);else hGreenTree(g,x,y+sd,3,night)}
   for(let i=0;i<26;i++){const vert=rr()<.5,x=vert?roadsV[Math.floor(rr()*roadsV.length)]+1:rr()*CW,y=vert?rr()*CH:roadsH[Math.floor(rr()*roadsH.length)]+1;if(near(x,y,44))continue;
    g.fillStyle='rgba(0,0,0,.3)';g.fillRect(x+1,y+1,vert?4:11,vert?11:4);g.fillStyle='#2f6fd0';g.fillRect(x,y,vert?4:11,vert?11:4);g.fillStyle=night?'#ffe0a0':'#bfe3ff';if(vert)for(let q=1;q<10;q+=2)g.fillRect(x+.5,y+q,3,1);else for(let q=1;q<10;q+=2)g.fillRect(x+q,y+.5,1,3)}}
@@ -1747,7 +1747,7 @@ H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
   {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
  if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}}
-if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
+if(STADIUMS[k].bowl){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
   const mc=document.createElement('canvas');mc.width=CW;mc.height=CH;const mg=mc.getContext('2d');mg.beginPath();OL.forEach((q,i)=>mg[i?'lineTo':'moveTo'](q.x,q.y));mg.closePath();mg.fill();const md=mg.getImageData(0,0,CW,CH).data;
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea],img=g.getImageData(0,0,CW,CH),d=img.data;
   // most of the canvas is plain city: sample each 8px tile on a 3x3 grid and skip it whole when nothing harbor-ish is there
@@ -1770,7 +1770,7 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
   const C3a=hexRGB(shade(ST.seat[0],-.18)),C3b=hexRGB(shade(ST.seat[1],-.18));
   const wX=px=>(px+.5)*2-e.mx,wY=py=>(py+.5)*2-e.my;
   // the playing field mask (same test as the park buffer), then the distance from it
-  const A=new Int32Array(N),HB0=ST.harbor;// (the harbor park paints its own stands and needs none of this)
+  const A=new Int32Array(N),HB0=ST.bowl;// (the harbor park paints its own stands and needs none of this)
   if(!HB0)for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const x=(wX(px)-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
    const fair=Math.abs(th)<=45&&y>=0,perp=(Math.abs(x)-y)/Math.SQRT2,along=(Math.abs(x)+y)/Math.SQRT2;
    A[py*CW+px]=(fair?r<fenceDist(th):((perp<40&&along<328&&along>-5)||r<34))?0:1e8}}
@@ -1784,13 +1784,13 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
    if(px>0)v=Math.min(v,DI[i-1]+3);if(py>0){v=Math.min(v,DI[i-CW]+3);if(px>0)v=Math.min(v,DI[i-CW-1]+4);if(px<CW-1)v=Math.min(v,DI[i-CW+1]+4)}DI[i]=v}
   if(!HB0)for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
    if(px<CW-1)v=Math.min(v,DI[i+1]+3);if(py<CH-1){v=Math.min(v,DI[i+CW]+3);if(px<CW-1)v=Math.min(v,DI[i+CW+1]+4);if(px>0)v=Math.min(v,DI[i+CW-1]+4)}DI[i]=v}
- const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.harbor)H_NIGHT=night;
+ const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.bowl)H_NIGHT=night;
   // only the stretch outside the buffer (plus the strip the feather fades across) needs painting
   const bx0=cx(0)+16,by0=cy(0)+16,bx1=cx(W)-16,by1=cy(H)-16;
   const put=(i,c)=>{const j=i*4;d[j]=c[0];d[j+1]=c[1];d[j+2]=c[2];d[j+3]=255};
   for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const i=py*CW+px;if(md[i*4+3]<128)continue;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;
    const wx=wX(px),x=(wx-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fdh=fenceDist(th);let col=null,feat=null;
-   if(ST.harbor){col=harborCol(wx,wy);if(!col)col=H_SHADE?[140,139,134]:[200,198,192];if(H_SEAT&&!empty)seatM[i]=1;if(H_EMIS)EMIS[i]=1;put(i,col);continue}
+   if(ST.bowl){col=harborCol(wx,wy);if(!col)col=H_SHADE?[140,139,134]:[200,198,192];if(H_SEAT&&!empty)seatM[i]=1;if(H_EMIS)EMIS[i]=1;put(i,col);continue}
    if(y>0){if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='sea';
     else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
     else if(ST.feature==='whale'&&!ST.harbor&&ath<36&&r>fdh+14)feat='sea';
@@ -1799,7 +1799,7 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
    if(!feat&&onRing&&A[i]&&md[j4+3]>128){put(i,C.conc);continue}
    if(!feat&&!inOld&&!onRing&&A[i]){// the new top deck: same rows and aisles, a darker shade of the lower bowl's color
     const dO=A[i]/3*2/K,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
-    if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;if(rr2>=4.6)col=C.riserU;else{col=ST.harbor?hSeat(ang,row,true):(row&1)?C3a:C3b;seatM[i]=1}}
+    if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;if(rr2>=4.6)col=C.riserU;else{col=ST.bowl?hSeat(ang,row,true):(row&1)?C3a:C3b;seatM[i]=1}}
     put(i,col);continue}
    if(feat==='sea'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
    else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
@@ -1815,7 +1815,7 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
     else{const upper=dO>=124,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
      if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;
      else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;
-      if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=ST.harbor?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
+      if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=ST.bowl?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
    put(i,col)}}
  
   // the crowd: same grid and density as the park, same club colors, drawn at this layer's half scale
@@ -1836,12 +1836,12 @@ if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier
   // a soft shadow where the roof overhangs the top rows
   g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
   g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';if(ST.openTop)outlinePath(OL,x=>x,y=>y,g);else{g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath()}g.stroke();g.restore()}
-  if(ST.harbor){{const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);hDecor(lg);
+  if(ST.bowl){{const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);hDecor(lg);
     if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}g.drawImage(L,0,0)}
    // the shore's buildings, ships and the gate, drawn by day and then lit like the rest of this layer
-   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');drawHarbor(lg,k,false,CW,CH,cx,cy,OL,e);
+   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');(ST.harbor?drawHarbor:drawFortress)(lg,k,false,CW,CH,cx,cy,OL,e);
    if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}
-   g.drawImage(L,0,0);if(night)drawHarborGlow(g,cx,cy,OL)}
+   g.drawImage(L,0,0);if(night&&ST.harbor)drawHarborGlow(g,cx,cy,OL)}
   if(ST.village){// the town's buildings, lit like everything else on this layer
    const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);const glows=[];vTownDraw(lg,night?glows:null);
    const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);
@@ -2204,6 +2204,20 @@ const HC=(()=>{const h=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),p
  wallTop:h('#8a939b'),riser:h('#26323b'),aisle:h('#4d5761'),conc:h('#b8bec4'),conc2:h('#aeb4ba'),edge:h('#e2e6ea'),edgeD:h('#4a545e'),pole:h('#2b3038'),
  deck:h('#c9a77a'),deck2:h('#b8956a'),rail:h('#f1f1ee'),tetra:h('#9aa3ad'),tetra2:h('#7d8790'),tetraD:h('#5b646d'),
  yard:h('#9aa1a8'),yard2:h('#90979e'),yline:h('#e8d27a'),quay:h('#c9ced3')}})();
+// ---- per-park look for the shared bowl (Ulsan's harbor park, Suwon's fortress) ----
+const HB0={};let H_THEME='harbor';
+const H_THEMES={
+ harbor:{},
+ fortress:{dk:{R:[[60,0],[72,34],[90,76],[116,114],[148,150],[180,168]],L:[[50,0],[60,20],[80,62],[110,114],[148,150],[180,168]]},roof:[70,70,181],gates:[180,-142,142,-108,108],tile:124,stone:true,
+  seats:[['#3d2470','#36205f'],['#5a35a0','#512f90'],['#7a52c4','#6e48b2']],seatU:[[44,24,82],[38,20,72]],cheer:2,
+  pal:{pad1:'#2a1650',pad2:'#3a2068',pad3:'#e8dcff',pad4:'#7a52c4',seam:'#120826',led1:'#b07cff',led2:'#f2e8ff',led3:'#6a3fd0',ledD:'#1e0f3a',
+   fTop:'#b9ad98',fTop2:'#ab9f8a',mull:'#6e6452',glass:'#4a4a5e',glass2:'#3f4052',glassN:'#ffc76a',glassN2:'#ffb24a',fEdge:'#4c4436',par:'#5a5242',gate:'#2a2430',gateN:'#ffd08a',
+   roof:'#c6cad1',roof2:'#b9bec6',rib:'#a3a9b2',roofEdge:'#e6e9ee',gutter:'#7a808a',conc:'#3a3444',rail:'#c9c2d6',railD:'#5a5268',wallCap:'#cfc6b4',wallCap2:'#9c937f'}}};
+function hTheme(){const k=(ST&&ST.bowl)||'harbor';if(!HB0.rail)for(const k2 in HB)HB0[k2]=HB[k2].slice();H_THEME=k;const T=H_THEMES[k]||{};
+ for(const k2 in HB0)HB[k2]=HB0[k2].slice();for(const k2 in (T.pal||{}))HB[k2]=hRGB(T.pal[k2]);
+ H_DK=T.dk||{R:[[68,0],[80,44],[96,82],[118,114],[148,150],[180,168]],L:[[34,0],[52,64],[78,122],[112,148],[180,168]]};H_ROOF=T.roof||[62,84,166];H_GATES=T.gates||[180,-146,146,-112,114];
+ const sp=(T.seats||[['#1f3f7a','#1b3870'],['#2f6fd0','#2a63bb'],['#5aa0e6','#5193d6']]).map(p=>p.map(hRGB));H_SEATS.splice(0,3,...sp);H_SEATU.splice(0,2,...(T.seatU||[[27,47,94],[24,42,84]]));H_CHEERI=T.cheer!=null?T.cheer:2}
+let H_CHEERI=2;
 let H_KIND=0,H_SEAT=false,H_EMIS=false,H_SHADE=false,H_NIGHT=false;
 const hRGB=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)];
 const HB=Object.fromEntries(Object.entries({rail:'#c9ced3',railD:'#59626c',conc:'#3a4048',concLit:'#ffcf7a',led1:'#5fd4ff',led2:'#e8f6ff',led3:'#2f6fd0',ledD:'#14325a',
@@ -2219,7 +2233,7 @@ const hMul=(c,f)=>[c[0]*f|0,c[1]*f|0,c[2]*f|0];
 // round arcs behind home and in the corners; the depth changes gently with the angle: a deep front behind home, a big
 // left-field grandstand curling to left-centre, a shorter right side that ends at the right-field corner, the outfield open.
 const H_CC={x:0,y:180};// the bowl's centre, for its angle (feet)
-const H_DK={R:[[68,0],[80,44],[96,82],[118,114],[148,150],[180,168]],L:[[34,0],[52,64],[78,122],[112,148],[180,168]]};
+let H_DK={R:[[68,0],[80,44],[96,82],[118,114],[148,150],[180,168]],L:[[34,0],[52,64],[78,122],[112,148],[180,168]]};
 function hD(phi){const a=Math.abs(phi),K=phi>=0?H_DK.R:H_DK.L;if(a<=K[0][0])return 0;
  for(let i=0;i<K.length-1;i++)if(a<=K[i+1][0]){const u=(a-K[i][0])/(K[i+1][0]-K[i][0]),t=(1-Math.cos(u*Math.PI))/2;return K[i][1]+(K[i+1][1]-K[i][1])*t}return K[K.length-1][1]}
 const hPhi=(x,y)=>Math.atan2(x,y-H_CC.y)/RAD;
@@ -2238,8 +2252,9 @@ function hAlong(x,y){const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
  if(m===A.d&&A.al>-5)return{s:A.al,piece:1};if(m===B.d&&B.al>-5)return{s:-B.al,piece:2};
  if(m===dS)return{s:th*RAD*fenceDist(th),piece:3};return{s:Math.atan2(x,y)*60,piece:4}}
 // is the roof over this angle, and how far in it reaches as a share of the depth? left and right differ on purpose
-function hRoofIn(phi){const L=phi<0,a=Math.abs(phi),lo=L?62:84,hi=166;if(a<lo||a>hi)return 9;const e=Math.min(a-lo,hi-a),t=clamp(e/9,0,1),sm=t*t*(3-2*t);return .70+(1-sm)*.32}
-const H_GATES=[180,-146,146,-112,114];
+let H_ROOF=[62,84,166];
+function hRoofIn(phi){const L=phi<0,a=Math.abs(phi),lo=L?H_ROOF[0]:H_ROOF[1],hi=H_ROOF[2];if(a<lo||a>hi)return 9;const e=Math.min(a-lo,hi-a),t=clamp(e/9,0,1),sm=t*t*(3-2*t);return .70+(1-sm)*.32}
+let H_GATES=[180,-146,146,-112,114];
 // the cove: a compact round bay cut into the shore past right field, a breakwater sheltering its mouth
 const H_COVE_C={x:250,y:430,r:122};
 const H_JETTY=[[430,597],[362,642],[296,656]];
@@ -2252,7 +2267,7 @@ function hJetD(x,y){if(x<270||y<560)return 1e9;let m=1e9;for(let k=0;k<H_JETTY.l
 // the bowl's outer edge as a radius from its centre at each degree: traced where the stands would end, then smoothed
 // hard so the outside of the stadium runs in clean continuous curves (the rows inside still follow the field)
 let H_RS=null,H_RS_K='';
-function hRS(){const key=DIMS.join(',');if(H_RS&&H_RS_K===key)return H_RS;H_RS_K=key;const raw=new Float32Array(360),open=new Uint8Array(360);
+function hRS(){const key=(ST&&ST.bowl)+DIMS.join(',');if(H_RS&&H_RS_K===key)return H_RS;H_RS_K=key;const raw=new Float32Array(360),open=new Uint8Array(360);
  for(let i=0;i<360;i++){const phi=i-180,D=hD(phi),De=Math.max(D,26),dx=Math.sin(phi*RAD),dy=Math.cos(phi*RAD);let t0=0,t1=0;
   for(let t=10;t<1600;t+=10){if(hFieldD(H_CC.x+dx*t,H_CC.y+dy*t)>=De){t1=t;break}t0=t}
   for(let k=0;k<18;k++){const m=(t0+t1)/2;if(hFieldD(H_CC.x+dx*m,H_CC.y+dy*m)>=De)t1=m;else t0=m}raw[i]=t1;open[i]=D<10?1:0}
@@ -2274,7 +2289,7 @@ const H_SEATS=[['#1f3f7a','#1b3870'],['#2f6fd0','#2a63bb'],['#5aa0e6','#5193d6']
  H_SEATU=[[27,47,94],[24,42,84]],H_WHITE=[232,238,245],H_CHEER=[[255,210,63],[240,196,50]];
 function hSeat(ang,row,upper,secId){const sec=secId!=null?secId+1000:Math.floor((ang+400)/10),h=vHash(sec,77);
  if(upper)return H_SEATU[row&1];
- if((ang>14&&ang<34)||(ang<-14&&ang>-34)){if(ang>0)return H_SEATS[2][row&1]}// the home cheering block on the first-base side
+ if((ang>14&&ang<34)||(ang<-14&&ang>-34)){if(ang>0)return H_SEATS[H_CHEERI][row&1]}// the home cheering block on the first-base side
  const p=H_SEATS[h%3];return p[row&1]}
 // the boardwalk: warm planks, blue-and-white parasols over tables, a cafe kiosk every so often
 const H_PARA=[[47,111,208],[244,246,250]];
@@ -2308,11 +2323,16 @@ function hWall(q,s,n){if(q<.9)return HB.wallY;
 function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(x,y)||1,n=vHash(Math.floor(wx/2),Math.floor(wy/2));
  const rC=Math.hypot(x,y-H_CC.y),sF=phi*RAD*rC;
  const T=D>100?12+10*clamp((D-100)/50,0,1):D>40?12:2.5,fac=D-T;
+ const TH=H_THEMES[H_THEME]||{};
  if(d>=fac){const k=d-fac;
   if(D<=40)return k<1.4?HB.par:HB.fEdge;
   let gate=false;for(const gg of H_GATES){const dg=Math.abs(((phi-gg+540)%360)-180)*RAD*rC;if(dg<6){gate=true;break}}
   if(gate){if(k<1.5)return HB.par;H_EMIS=H_NIGHT;return H_NIGHT?(k>9?HB.gateN:hMul(HB.gateN,.75)):HB.gate}
   if(k<1.6)return HB.par;if(k<5.6){if(((sF%22)+22)%22<3&&k>2.4&&k<4.6)return HB.wallCap2;return (Math.floor(sF/6)&1)?HB.fTop:HB.fTop2}// facade top, with rooftop plant
+  if(TH.stone&&k<T-1.4){// stone masonry with arched windows, a floor at a time; warm light in them at night
+   const fl=((k-5.6)%5.2+5.2)%5.2,band=Math.floor((k-5.6)/5.2),m=((sF%12)+12)%12,wx2=m-6,inW=Math.abs(wx2)<2.8&&fl>1&&fl<4.6&&!(fl<2.2&&Math.abs(wx2)>1.6);
+   if(inW){H_EMIS=H_NIGHT;return H_NIGHT?((vHash(Math.floor(sF/12),band)&7)===0?hMul(HB.glassN,.4):HB.glassN):(fl<2.2?HB.glass2:HB.glass)}
+   const st=vHash(Math.floor((sF+(Math.floor(fl/1.3)&1)*1.5)/3),Math.floor((k-5.6)/1.3)+band*9);if(((sF%3)+3)%3<.35||fl%1.3<.25)return hMul(HB.fTop,.78);return st%3===0?hMul(HB.fTop,.92):st%5===0?hMul(HB.fTop,1.05):HB.fTop}
   if(k<T-1.4){const m=((sF%4)+4)%4,fl=((k-5.6)%4.2+4.2)%4.2;if(m<.8||fl<.7)return HB.mull;const band=Math.floor((k-5.6)/4.2);H_EMIS=H_NIGHT;// window bands, one per floor
    return H_NIGHT?((vHash(Math.floor(sF/4),band)&7)===0?hMul(HB.glassN,.45):band&1?HB.glassN2:HB.glassN):(band&1?HB.glass2:HB.glass)}
   return HB.fEdge}
@@ -2331,7 +2351,12 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
  else if(d<C1){const p=vPerson(wx,wy,12);if(p)return hMul(p,.6);if(H_NIGHT&&((Math.floor(sF/9)+Math.floor(d))&7)===0){H_EMIS=true;return HB.concLit}return (n&3)?HB.conc:hMul(HB.conc,.85)}
  else if(d<U0){const m=((sF%6)+6)%6;H_EMIS=H_NIGHT;if(d<C1+.4||d>U0-.3)return HB.ledD;return m<2?HB.led1:m<4?HB.led2:HB.led3}
  else if(d<RI){c=seat(U0,true);if(RI<fac&&d>RI-13)c=hMul(c,.42+.36*clamp((RI-d)/13,0,1))}// the roof's shadow on the top rows
- else{const k=d-RI;if(k<.8)return HB.gutter;if(k<1.8)return HB.roofEdge;if(d>fac-1.4)return HB.gutter;const m=((sF%10)+10)%10;if(m<1)return HB.rib;return (Math.floor(sF/10)&1)?HB.roof:HB.roof2}
+ else{const k=d-RI;
+  if(TH.tile&&Math.abs(phi)>TH.tile){// a Korean tiled roof: charcoal tile rows running down to a pale lifted eave, a light ridge on top
+   const kk=fac-d;if(k<1)return [24,22,30];if(k<2.2)return [214,206,190];if(kk<1.4)return [178,172,160];
+   const m=((sF%2.1)+2.1)%2.1,sh=.8+.3*clamp(k/Math.max(4,fac-RI),0,1),c0=m<.55?[26,26,34]:m<1.15?[70,70,84]:[50,50,62];// channels run ridge to eave; the cap tiles catch the light
+   if(((kk%5.5)+5.5)%5.5<.35)return [36,36,46];return hMul(c0,sh)}
+  if(k<.8)return HB.gutter;if(k<1.8)return HB.roofEdge;if(d>fac-1.4)return HB.gutter;const m=((sF%10)+10)%10;if(m<1)return HB.rib;return (Math.floor(sF/10)&1)?HB.roof:HB.roof2}
  return c}
 // the colour of harbor ground at a world pixel, or null where the plain city carries on
 function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const x=(wx-HX)*FT,y=(HY-wy)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th);
@@ -2341,6 +2366,7 @@ function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const
  if(d<=0&&PARK_C)return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2;// the last of the foul ground, past the park buffer's edge
  if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
  const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
+ if(H_THEME==='fortress'){const c=fortCol(x,y,wx,wy,r,th,ath,q,s,n,fair);if(c)return c;if(D>8){const x2=x-6,y2=y+6,p2=hPhi(x2,y2);if(hD(p2)>8&&Math.hypot(x2-H_CC.x,y2-H_CC.y)<hRout(p2))H_SHADE=true}return null}
  // past the open outfield wall: a terrace behind centre, a boardwalk behind right field, then the sea wall
  if(fair&&th>8){const q0=hPenOff(th)+H_WALLW,dw=hDeckW(th);if(q<q0)return HB.wallCap;if(q<q0+dw)return hTerr(wx,wy,s,q-q0,dw,th)}
  if(fair&&q<26){const m=((s%26)+26)%26;
@@ -2506,14 +2532,15 @@ function hCafe(g,x,y,ang,sc){g.save();g.translate(x,y);g.rotate(ang);if(sc)g.sca
  for(let k=0;k<w;k+=4){g.fillStyle=(k/4)&1?'#f4f6fa':'#2f6fd0';g.fillRect(-w/2+k,h/2-7,4,6)}g.fillStyle='rgba(0,0,0,.18)';g.fillRect(-w/2,h/2-1,w,1);// the striped awning over the counter
  g.restore()}
 function hDecor(g){
- for(const p of hSpots()){if(p.kind==='cafe')hCafe(g,p.x,p.y,p.ang,p.sc);else hParasol(g,p.x,p.y,p.col,p.sc)}
+ if(H_THEME==='harbor')for(const p of hSpots()){if(p.kind==='cafe')hCafe(g,p.x,p.y,p.ang,p.sc);else hParasol(g,p.x,p.y,p.col,p.sc)}
  // the wall: club and sponsor boards painted on the pads, distances at the poles, the gaps and dead centre
  const wallAt=th=>fenceDist(th)-4.6;// the middle of the padded face, just inside the fence
  g.save();g.textAlign='center';g.textBaseline='middle';
  const paint=(th,txt,col,font)=>{const p=hW(th,wallAt(th));g.save();g.translate(p.x,p.y);g.rotate(th*RAD);g.font=font;g.fillStyle='rgba(0,0,0,.35)';g.fillText(txt,1,1);g.fillStyle=col;g.fillText(txt,0,0);g.restore()};
- [-36,-30,-15,-8,8,15,30,36].forEach((th,i)=>{const[t,c]=H_ADS[i%H_ADS.length];paint(th,t,c,/[A-Z]/.test(t)?'bold 12px "Pixelify Sans", monospace':'14px Jua, sans-serif')});
- [[-42.5,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[42.5,DIMS[4]]].forEach(([th,v])=>paint(th,v+'','#ffffff','bold 15px "Pixelify Sans", monospace'));
+ const ADS=H_THEME==='fortress'?F_ADS:H_ADS;[-36,-30,-15,-8,8,15,30,36].forEach((th,i)=>{const[t,c]=ADS[i%ADS.length];paint(th,t,c,/[A-Z]/.test(t)?'bold 12px "Pixelify Sans", monospace':'14px Jua, sans-serif')});
+ [[-42.5,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[42.5,DIMS[4]]].forEach(([th,v])=>paint(th,v+'',H_THEME==='fortress'?'#ffd23f':'#ffffff','bold 15px "Pixelify Sans", monospace'));
  g.restore();
+ if(H_THEME!=='harbor'){fDecor(g);return}
  // benches facing the water round the cove, and lamp posts
  for(let a=-180;a<180;a+=5.5){const ar=a*RAD,R=hCoveR(H_COVE_C.x+Math.sin(ar),H_COVE_C.y+Math.cos(ar))+15.5,x=H_COVE_C.x+Math.sin(ar)*R,y=H_COVE_C.y+Math.cos(ar)*R;if(!hEastLand(x,y))continue;
   const p={x:HX+x/FT,y:HY-y/FT};g.save();g.translate(p.x,p.y);g.rotate(-ar+Math.PI/2);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(-6,1,13,4);g.fillStyle='#8a5a32';g.fillRect(-7,-2,14,3);g.fillStyle='#a8743f';g.fillRect(-7,-2,14,1);g.restore()}
@@ -2577,6 +2604,165 @@ function hCityBlock(g,x0,y0,x1,y1,night,rr){const w=x1-x0,h=y1-y0,R=(x,y,ww,hh,c
    if(!night&&rr()<.35)R(x+1,row?ry-1:ry+bh,bw-4,1.5,['#e0473d','#3f82e6','#f5c935','#3faa5b'][(rr()*4)|0]);// a shop awning
    x+=bw}}
  if(lane){R(x0,lane-1,w,3,night?'#1e2126':'#8d8a84')}}
+// ---------- Suwon: Fortress Field. The bowl is the shared one (06c); past the outfield wall stands a stretch of
+// Hwaseong-style fortress wall behind centre, a stone concourse with food stalls behind left field, and a walled
+// garden with a rock waterfall and a watchtower behind right field. Ground colours are one pure function of world
+// position (fortCol), so the park buffer and the neighbourhood layer meet without a seam; roofs, banners and trees
+// are drawn as shapes by fDecor (both layers), the main gate by drawFortress (neighbourhood layer). ----------
+const F_ADS=[['수원 화성','#e8dcff'],['WIZARD MART','#ffd23f'],['팔달 은행','#e8dcff'],['HWASEONG','#c9b3ff'],['수원 갈비','#ffd23f'],['MAGIC AIR','#e8dcff'],['행궁 커피','#c9b3ff'],['SUWON TEC','#e8dcff']];
+const FC=(()=>{const h=hRGB;return{
+ st1:h('#b8ad97'),st2:h('#aa9f88'),st3:h('#c6bca6'),mort:h('#7d735f'),stD:h('#6e6452'),stS:h('#4a4336'),
+ walk:h('#cbc1aa'),walk2:h('#c0b69f'),merl:h('#d4cab2'),cren:h('#8a806a'),
+ berm:h('#2f5f2c'),berm2:h('#285426'),grass:h('#4f8f3c'),grass2:h('#478535'),
+ tr1:h('#244d24'),tr2:h('#2f6230'),tr3:h('#3f7a3c'),trG:h('#1d3b1f'),
+ rock:h('#8d8a84'),rock2:h('#a4a19a'),rockD:h('#5f5c58'),pool:h('#3a8fb0'),pool2:h('#4fa8c4'),poolD:h('#2a6f8c'),foam:h('#e8f6fb'),
+ tSeat:h('#6a44b8'),tSeat2:h('#5a35a0'),fall:h('#bfe6f2'),pave:h('#cfc4ad'),pave2:h('#c2b79f'),paveJ:h('#a89d86')}})();
+// stone masonry: courses `ch` ft tall, blocks 3.5-5 ft long, every other course staggered; a block's own tone, mortar lines
+function fStone(s,v,ch,dark){const row=Math.floor(v/ch),off=(row&1)*2.2,L=4.2,bi=Math.floor((s+off)/L),fs=((s+off)%L+L)%L,fv=((v%ch)+ch)%ch;
+ if(fs<.35||fv<.3)return dark?FC.stS:FC.mort;const h=vHash(bi+977,row);const c=h%4===0?FC.st2:h%5===0?FC.st3:FC.st1;return dark?hMul(c,.62):c}
+// trees seen from above on a loose 14 ft lattice, over dark ground
+function fTrees(wx,wy){const cs=16,i=Math.floor(wx/cs),j=Math.floor(wy/cs),h=vHash(i,j);const cx=(i+.5)*cs+((h&7)-3.5),cy=(j+.5)*cs+(((h>>3)&7)-3.5),r=6+(h>>6&3);
+ const dx=wx-cx,dy=wy-cy,d2=dx*dx+dy*dy;if(d2<r*r){if(dx+dy<-r*.5)return FC.tr3;if(dx+dy>r*.6)return FC.tr1;return FC.tr2}
+ const sx=dx-3,sy=dy-3;if(sx*sx+sy*sy<r*r)return hMul(FC.trG,.85);return FC.trG}
+// the sector boundaries, in degrees off centre field (left is negative)
+const F_WALL=[-33,23],F_POOL={th:27.5,a:40,rs:10,ra:6.5},F_TOWER={th:35,a:36,hs:16},F_CONC=[-45,-33];
+// paving slabs on a 9 ft grid, with a share of people about
+function fPave(wx,wy,pp){const sl=vHash(Math.floor(wx/9),Math.floor(wy/9));if((((wx%9)+9)%9)<.7||(((wy%9)+9)%9)<.7)return FC.paveJ;
+ const p=vPerson(wx,wy,pp);if(p)return p;return sl%4===0?FC.pave2:FC.pave}
+function fortCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
+ if(!fair||q<0)return null;
+ const a=q-hPenOff(th)-H_WALLW;if(a<0)return null;
+ // ---- square bastions closing each end of the wall, standing proud of it ----
+ for(const te of F_WALL){const ds=(th-te)*RAD*r;if(Math.abs(ds)<11&&a>2&&a<46){const e=Math.min(11-Math.abs(ds),a-2,46-a);
+  if(e<1.1)return FC.stS;if(e<3.2){const m=(((ds+a)%6)+6)%6;return m<3.6?FC.merl:FC.cren}return fStone(ds,a,1.6,false)}}
+ // ---- the fortress wall behind centre ----
+ if(th>F_WALL[0]&&th<F_WALL[1]){
+  if(a<5){const k=vHash(Math.floor(wx/5),Math.floor(wy/5));return k%7===0?FC.tr2:(Math.floor(s/6)&1)?FC.berm:FC.berm2}// planted strip at the foot of the wall
+  if(a<9){const sl=Math.floor(s/16);if(((s%16)+16)%16<1.6&&a>6)return FC.stS;return fStone(s,a,1.6,true)}// the inner face in its own shadow, with arrow slits
+  if(a<12){const m=((s%8)+8)%8;return m<5?(a<9.6?FC.stD:FC.merl):FC.cren}// inner parapet: merlons and crenels
+  if(a<30){if(((s%5)+5)%5<.3||((a%5)+5)%5<.3)return FC.paveJ;const sl=vHash(Math.floor(s/5)+(Math.floor(a/5)&1)*2,Math.floor(a/5));
+   const p=vPerson(wx,wy,5);if(p)return p;return sl%3===0?FC.walk2:FC.walk}// the wall walk
+  if(a<34){const m=((s%8)+8)%8;return m<5?(a>33.4?FC.stD:FC.merl):FC.cren}// outer parapet
+  if(a<41)return fStone(s,a,1.6,true);// the outer face, falling away into shadow
+  if(a<100)return fTrees(wx,wy);
+  return null}
+ // ---- left field: stepped terraces by the wall, then the stone concourse with its stalls and cherry trees ----
+ if(th<=F_WALL[0]){
+  if(a<2.5)return FC.stD;
+  if(a<15){const rw=Math.floor((a-2.5)/2.5),f=(a-2.5)%2.5;if(f<.5)return FC.walk2;if(((s%22)+22)%22<2)return FC.walk;// stairs every 22 ft
+   const p=vPerson(wx,wy,34);if(p)return p;return rw&1?FC.tSeat:FC.tSeat2}
+  if(a<16.5)return FC.stS;
+  if(a<64)return fPave(wx,wy,7);
+  if(a<67)return fStone(s,a,1.6,false);
+  if(a<100)return fTrees(wx,wy);
+  return null}
+ // ---- right field: a paved walk by the wall, then the garden: watchtower on its stone base, a rock waterfall and pool ----
+ if(a<2.5)return FC.stD;
+ if(a<13)return fPave(wx,wy,9);
+ if(a<14.5)return FC.stS;
+ {const ds=(th-F_TOWER.th)*RAD*r,da=a-F_TOWER.a,m=Math.max(Math.abs(ds),Math.abs(da));if(m<F_TOWER.hs){const e=F_TOWER.hs-m;
+   if(e<1)return FC.stS;if(e<3){const k=(((ds+da)%5)+5)%5;return k<3?FC.merl:FC.cren}return fStone(ds,da,1.5,false)}// crenellated stone platform
+  if(Math.abs(ds-7)<F_TOWER.hs&&Math.abs(da+6)<F_TOWER.hs)return hMul((Math.floor((wx+wy)/7)&1)?FC.grass:FC.grass2,.6)}// the tall tower's shadow on the lawn
+ {const ds=(th-F_POOL.th)*RAD*r,da=a-F_POOL.a,ph=Math.atan2(da,ds),e=(ds*ds)/(F_POOL.rs*F_POOL.rs)+(da*da)/(F_POOL.ra*F_POOL.ra),rim=1.5+.18*Math.sin(ph*5+1)+.1*Math.sin(ph*9);
+  const fx=ds+1;// the fall comes down the rocks behind the pool
+  if(e<1){if(Math.abs(fx)<2.4&&da>F_POOL.ra*.45){return ((Math.floor(da*1.3))&1)?FC.foam:FC.pool2}// white water where the fall lands
+   const w=Math.sin(wx*.4+wy*.3)+Math.sin(wy*.5-wx*.2);return e>.74?FC.poolD:w>1.25?FC.pool2:FC.pool}
+  if(e<rim){const l=-ds*.6-da;return l>3?FC.rock2:l<-3?FC.rockD:FC.rock}// a ring of boulders, lit from the top left
+  const oh=da-F_POOL.ra*.6,ow=8.5-oh*.35;// the rock outcrop the water falls from, in ledges
+  if(oh>0&&oh<13&&Math.abs(fx)<ow){if(Math.abs(fx)<2.2){const st=Math.floor(oh/3.2);return ((oh%3.2)<.9)?FC.foam:(st&1)?FC.pool2:FC.fall}
+   const st=Math.floor(oh/3.2),f=oh%3.2;if(f<.7)return FC.rockD;const l=-fx*.5;return l>2?FC.rock2:(st&1)?FC.rock:hMul(FC.rock,.9)}}
+ if(a<64)return (Math.floor((wx+wy)/7)&1)?FC.grass:FC.grass2;
+ if(a<67)return fStone(s,a,1.6,false);
+ if(a<100)return fTrees(wx,wy);
+ return null}
+// a point a ft past the wall at angle th (world px)
+function fAt(th,a){const r=fenceDist(Math.max(-45,Math.min(45,th)))+hPenOff(th)+H_WALLW+a;return{x:HX+Math.sin(th*RAD)*r/FT,y:HY-Math.cos(th*RAD)*r/FT}}
+// a Korean hip roof seen from above: charcoal tile courses running round all four sides, light ridges from the corners up
+// to the top ridge, pale lifted eaves flaring out at the corners, a soft shadow on the ground
+function kRoof(g,cx,cy,w,h,ang,night){g.save();g.translate(Math.round(cx),Math.round(cy));g.rotate(ang||0);const W2=w/2,H2=h/2,fl=Math.max(1.5,Math.min(w,h)*.09),rl=Math.max(0,W2-H2);
+ // the shadow the overhang throws, long for a tall building
+ g.fillStyle=night?'rgba(4,4,10,.45)':'rgba(10,8,16,.34)';g.fillRect(-W2-fl+5,-H2-fl+6,w+2*fl+2,h+2*fl+1);
+ const out=()=>{g.beginPath();g.moveTo(-W2-fl,-H2-fl);g.quadraticCurveTo(0,-H2+fl*.5,W2+fl,-H2-fl);g.quadraticCurveTo(W2-fl*.5,0,W2+fl,H2+fl);g.quadraticCurveTo(0,H2-fl*.5,-W2-fl,H2+fl);g.quadraticCurveTo(-W2+fl*.5,0,-W2-fl,-H2-fl);g.closePath()};
+ const P=night?{n:'#2c2c38',s:'#22222c',e:'#262632',w:'#30303c',ch:'#18181f',hi:'#40404e',eave:'#a8a090',rid:'#8e897e'}:
+  {n:'#4a4a58',s:'#30303c',e:'#383846',w:'#525262',ch:'#24242e',hi:'#686878',eave:'#ddd3bf',rid:'#d6cfbf'};
+ out();g.fillStyle=P.eave;g.fill();// the pale lifted eave line
+ // four faces, each with tile channels running from the ridge down to its eave
+ const face=(pts,col,dir)=>{g.save();g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(const q of pts.slice(1))g.lineTo(q[0],q[1]);g.closePath();g.clip();
+  g.fillStyle=col;g.fillRect(-W2-fl,-H2-fl,w+2*fl,h+2*fl);
+  if(dir==='v')for(let x=Math.floor(-W2);x<W2;x+=2){g.fillStyle=P.ch;g.fillRect(x,-H2,1,h)}else for(let y=Math.floor(-H2);y<H2;y+=2){g.fillStyle=P.ch;g.fillRect(-W2,y,w,1)}
+  g.restore()};
+ const e=.4;g.save();out();g.clip();
+ face([[-W2-fl,-H2-fl],[W2+fl,-H2-fl],[rl,0],[-rl,0]],P.n,'v');face([[-W2-fl,H2+fl],[W2+fl,H2+fl],[rl,0],[-rl,0]],P.s,'v');
+ face([[-W2-fl,-H2-fl],[-rl,0],[-W2-fl,H2+fl]],P.w,'h');face([[W2+fl,-H2-fl],[rl,0],[W2+fl,H2+fl]],P.e,'h');
+ // the bottom course of round end tiles just inside the eave
+ g.strokeStyle=P.hi;g.lineWidth=1;g.strokeRect(-W2+e,-H2+e,w-2*e,h-2*e);
+ g.restore();
+ // ridges: corner hips and the long top ridge, with raised ends
+ g.strokeStyle=P.rid;g.lineWidth=1.4;g.beginPath();g.moveTo(-W2,-H2);g.lineTo(-rl,0);g.lineTo(rl,0);g.lineTo(W2,-H2);g.moveTo(-W2,H2);g.lineTo(-rl,0);g.moveTo(rl,0);g.lineTo(W2,H2);g.stroke();
+ if(rl>0){g.lineWidth=2.4;g.beginPath();g.moveTo(-rl,0);g.lineTo(rl,0);g.stroke();g.fillStyle=P.rid;g.fillRect(-rl-2,-2,3,4);g.fillRect(rl-1,-2,3,4)}
+ else{g.fillStyle=P.rid;g.fillRect(-1.5,-1.5,3,3)}
+ g.strokeStyle='#14121a';g.lineWidth=1;out();g.stroke();g.restore()}
+// purple banner with a gold star, seen from above as a short cloth strip on the wall
+function fBanner(g,x,y,ang){g.save();g.translate(x,y);g.rotate(ang);g.fillStyle='rgba(0,0,0,.3)';g.fillRect(-4,1,9,5);g.fillStyle='#4a2a8a';g.fillRect(-5,-2,10,5);g.fillStyle='#6a44b8';g.fillRect(-5,-2,10,1);g.fillStyle='#ffd23f';g.fillRect(-1,-1,2,2);g.restore()}
+// everything drawn as shapes past the outfield wall (world px; both layers)
+function fDecor(g){
+ // wall-top flags and banners hung on the inner face, skipping the scoreboard
+ for(let th=-30;th<=21;th+=4.5){if(Math.abs(th)<9)continue;const p=fAt(th,7);fBanner(g,p.x,p.y,th*RAD)}
+ for(const th of[-24,-14,13,20]){const p=fAt(th,32);g.fillStyle='rgba(0,0,0,.3)';g.fillRect(p.x+2,p.y+2,3,3);g.fillStyle='#2b2630';g.fillRect(p.x-1,p.y-1,3,3);g.fillStyle='#6a44b8';g.fillRect(p.x+2,p.y-5,7,4);g.fillStyle='#ffd23f';g.fillRect(p.x+4,p.y-4,1,1)}
+ // the watchtower: its roof over the stone base
+ {const p=fAt(F_TOWER.th,F_TOWER.a),sz=F_TOWER.hs*1.3/FT;kRoof(g,p.x,p.y,sz,sz,F_TOWER.th*RAD,false);kRoof(g,p.x-1,p.y-2,sz*.5,sz*.5,F_TOWER.th*RAD,false)}
+ // food stalls on the left-field concourse: small buildings under dark purple hip roofs, tables with parasols between
+ for(const[th,a]of[[-41,30],[-37.5,30],[-41,52]]){const p=fAt(th,a);g.save();g.translate(p.x,p.y);g.rotate(-th*RAD);g.fillStyle='rgba(0,0,0,.3)';g.fillRect(-15,-9,34,22);
+  g.fillStyle='#2a1a48';g.fillRect(-17,-11,34,22);g.fillStyle='#3d2670';g.fillRect(-15,-9,30,8);g.fillStyle='#2f1d56';g.fillRect(-15,-1,30,8);g.fillStyle='#8a6ad0';g.fillRect(-17,-1,34,1);
+  for(let k=-16;k<16;k+=4){g.fillStyle=(k/4)&1?'#f2e8ff':'#5a35a0';g.fillRect(k,11,4,4)}g.restore()}
+ for(const[th,a]of[[-39,42],[-43,42],[-35.5,42],[-37,58],[-43.5,59]]){const p=fAt(th,a);fParasol(g,p.x,p.y)}
+ for(const[th,a]of[[-44,21],[-34.5,22],[-39,62],[-35,52]]){const p=fAt(th,a);hBlossom(g,p.x,p.y,7,false)}
+ // the garden's trees and shrubs
+ for(const[th,a,r,pink]of[[25.5,22,6,0],[31,58,8,1],[38.5,58,7,0],[24.5,56,6,0],[30.5,22,5,1],[40.5,20,5,0],[42,40,6,1],[32,30,3,0],[23.5,40,4,0],[31.5,47,3,1],[25,48,3,0]]){const p=fAt(th,a);if(pink)hBlossom(g,p.x,p.y,r,false);else hGreenTree(g,p.x,p.y,r,false)}}
+function fParasol(g,x,y){const r=8;g.fillStyle='rgba(16,10,24,.3)';g.beginPath();g.arc(x+4,y+3,r,0,7);g.fill();
+ for(let k=0;k<8;k++){const a0=k*Math.PI/4;g.fillStyle=k&1?'#f2e8ff':'#5a35a0';g.beginPath();g.moveTo(x,y);g.arc(x,y,r,a0,a0+Math.PI/4);g.closePath();g.fill()}g.fillStyle='#2b2630';g.fillRect(Math.round(x-1),Math.round(y-1),2,2)}
+// ---- the neighbourhood layer (half resolution): the grand gate behind home plate and its plaza ----
+function drawFortress(g,k,night,CW,CH,cx,cy,OL,e){
+ const tip=OL.reduce((m,q)=>q.y>m.y?q:m,OL[0]),gx=cx(HX),gy=tip.y;
+ // the plaza: big pale slabs, a purple-paved path to the gate, planted beds, cherry trees and banner poles
+ g.fillStyle='#c9bea6';g.beginPath();g.moveTo(gx-120,gy-6);g.lineTo(gx+120,gy-6);g.lineTo(gx+150,gy+120);g.lineTo(gx-150,gy+120);g.closePath();g.fill();
+ g.save();g.clip();g.fillStyle='#b4a990';for(let y=gy;y<gy+125;y+=7)g.fillRect(gx-160,y,320,1);for(let x=gx-160;x<gx+160;x+=11)g.fillRect(x,gy,1,125);g.restore();
+ g.fillStyle='#6a4a9a';g.fillRect(gx-16,gy+8,32,114);g.fillStyle='#7c5ab0';for(let y=gy+10;y<gy+120;y+=6)g.fillRect(gx-16,y,32,1);
+ for(const sd of[-1,1]){for(let k=0;k<4;k++){const bx=gx+sd*(44+k*24),by=gy+48+k*16;g.fillStyle='#4f7a3a';g.fillRect(bx-10,by-6,20,12);hBlossom(g,bx,by,6,false)}
+  for(let k=0;k<3;k++){const px=gx+sd*(26+k*30),py=gy+28+k*30;g.fillStyle='#2b2630';g.fillRect(px,py-8,1,9);g.fillStyle='#4a2a8a';g.fillRect(px+1,py-8,4,7);g.fillStyle='#ffd23f';g.fillRect(px+2,py-6,1,1)}}
+ // the gatehouse: a broad stone block with three arched gateways, square bastions either side, a two-tier pavilion roof
+ const GW=150,GH=46,sx0=gx-GW/2,sy0=gy-40;g.fillStyle='rgba(0,0,0,.35)';g.fillRect(sx0+6,sy0+6,GW,GH);
+ const stone=(x0,y0,w,h)=>{for(let y=0;y<h;y++)for(let x=0;x<w;x++){const c=fStone(x*.9,y*.9,1.6,false);g.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;g.fillRect(x0+x,y0+y,1,1)}};
+ for(const sd of[-1,1]){const bx=gx+sd*(GW/2+12)-15;g.fillStyle='rgba(0,0,0,.35)';g.fillRect(bx+5,sy0+5,30,34);stone(bx,sy0-2,30,34);
+  for(let x=bx;x<bx+30;x+=5){g.fillStyle='#d4cab2';g.fillRect(x,sy0-4,3,3)}}
+ stone(sx0,sy0,GW,GH);g.fillStyle='rgba(0,0,0,.18)';g.fillRect(sx0,sy0+GH-5,GW,5);
+ for(const ax of[-46,0,46]){const w=ax?16:24;g.fillStyle='#d8cdb6';g.fillRect(gx+ax-w/2-2,gy-6,w+4,16);g.beginPath();g.arc(gx+ax,gy-6,w/2+2,Math.PI,0);g.fill();
+  g.fillStyle='#1c1622';g.fillRect(gx+ax-w/2,gy-6,w,16);g.beginPath();g.arc(gx+ax,gy-6,w/2,Math.PI,0);g.fill();if(night){g.fillStyle='#ffcf7a';g.fillRect(gx+ax-w/2+2,gy-2,w-4,10)}}
+ for(const sd of[-1,1]){g.fillStyle='#4a2a8a';g.fillRect(gx+sd*23-4,gy-30,8,18);g.fillStyle='#ffd23f';g.fillRect(gx+sd*23-1,gy-24,2,2)}
+ kRoof(g,gx,gy-44,138,30,0,night);kRoof(g,gx,gy-47,80,16,0,night);
+ for(const sd of[-1,1])kRoof(g,gx+sd*(GW/2+12),sy0+12,24,20,0,night);
+ g.fillStyle='#4a2a8a';g.fillRect(gx-10,gy-34,20,24);g.fillStyle='#6a44b8';g.fillRect(gx-10,gy-34,20,2);g.beginPath();g.moveTo(gx-10,gy-10);g.lineTo(gx,gy-5);g.lineTo(gx+10,gy-10);g.fill();
+ if(LOGO[k]){g.imageSmoothingEnabled=false;g.drawImage(LOGO[k],gx-8,gy-31,16,16)}}
+// ---- night: warm uplight washing the fortress stone, the tower, the stalls and the gate, laid over the frame ----
+let F_NL=null,F_NL_K='';
+function drawFortLights(c,vx0,vy0,scale,now){if(!ST||ST.bowl!=='fortress'||!S.night||S.phase==='title')return;const key=DIMS.join(',');
+ if(!F_NL||F_NL_K!==key){F_NL_K=key;const pts=[];for(let th=-44;th<=44;th+=1)pts.push(fAt(th,0));const x0=Math.min(...pts.map(p=>p.x))-260,y0=Math.min(...pts.map(p=>p.y))-260,x1=Math.max(...pts.map(p=>p.x))+260,y1=Math.max(...pts.map(p=>p.y))+80;
+  const cv=document.createElement('canvas'),S2=.5;cv.width=Math.ceil((x1-x0)*S2);cv.height=Math.ceil((y1-y0)*S2);const g=cv.getContext('2d');g.scale(S2,S2);g.translate(-x0,-y0);
+  const glow=(x,y,r,col,a)=>{const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(${col},${a})`);gr.addColorStop(1,`rgba(${col},0)`);g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)};
+  // uplights at the foot of the wall every few degrees: a gold wash up the inner face and across the wall walk
+  for(let th=F_WALL[0]+1;th<F_WALL[1];th+=2.2){const p=fAt(th,6),q=fAt(th,20);glow(p.x,p.y,30,'255,170,70',.5);glow(q.x,q.y,44,'255,190,110',.14)}
+  {const p=fAt(F_TOWER.th,F_TOWER.a);glow(p.x,p.y,70,'255,200,120',.34)}
+  {const p=fAt(F_POOL.th,F_POOL.a);glow(p.x,p.y,40,'120,200,255',.22)}
+  for(const[th,a]of[[-41,30],[-37.5,30],[-41,52],[-39,42]]){const p=fAt(th,a);glow(p.x,p.y,44,'255,184,110',.32)}
+  // a warm cast over the stone itself (multiplied in, so the masonry keeps its pattern)
+  const tc=document.createElement('canvas');tc.width=cv.width;tc.height=cv.height;const t=tc.getContext('2d');t.scale(S2,S2);t.translate(-x0,-y0);t.fillStyle='rgb(255,206,140)';
+  const band=(t0,t1,a0,a1)=>{t.beginPath();for(let th=t0;th<=t1+.01;th+=.5){const p=fAt(th,a0);t.lineTo(p.x,p.y)}for(let th=t1;th>=t0-.01;th-=.5){const p=fAt(th,a1);t.lineTo(p.x,p.y)}t.closePath();t.fill()};
+  band(F_WALL[0]-1.8,F_WALL[1]+1.8,4,46)
+  F_NL={cv,tc,x0,y0,x1,y1}
+  // the gate and its plaza, on a canvas of their own
+  {const OL=hOutline(),tip=OL.reduce((m,q)=>q.y>m.y?q:m,OL[0]),gc=document.createElement('canvas');gc.width=360;gc.height=300;const q=gc.getContext('2d'),gl=(x,y,r,col,a)=>{const gr=q.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(${col},${a})`);gr.addColorStop(1,`rgba(${col},0)`);q.fillStyle=gr;q.fillRect(x-r,y-r,r*2,r*2)};
+   gl(180,40,120,'255,200,120',.45);for(const sd of[-1,1])for(let k=0;k<3;k++)gl(180+sd*(52+k*60),96+k*60,40,'255,214,150',.3);gl(180,130,70,'176,124,255',.18);F_NL.gate={cv:gc,x:tip.x-360,y:tip.y-80}}}
+ const N=F_NL;c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);c.globalCompositeOperation='multiply';c.drawImage(N.tc,N.x0,N.y0,N.x1-N.x0,N.y1-N.y0);c.globalCompositeOperation='lighter';c.drawImage(N.cv,N.x0,N.y0,N.x1-N.x0,N.y1-N.y0);if(N.gate)c.drawImage(N.gate.cv,N.gate.x,N.gate.y,720,600);c.restore()}
 // ---------- Ulsan: whale bay, shipyard and the harbor traffic ----------
 function spout(g,q,ph,big){const a=ph;for(let k=0;k<(big?20:14);k++){const s=(k*37%11)/11,h=a*(big?44:34)*(.5+s*.6),dx=(k%2?1:-1)*s*a*(big?18:14);g.globalAlpha=Math.max(0,1-a)*.9;g.fillStyle=k%3?'#e8f6ff':'#9fd8f6';g.fillRect(Math.round(q.x+dx),Math.round(q.y-h),3,3)}g.globalAlpha=1}
 function drawUlsan(g,now){
@@ -2687,7 +2873,7 @@ function buildField(){H_NIGHT=false;
    if(Math.abs(lx)<92&&ly>-22&&ly<30){dug=(Math.abs(lx)>88||ly>26)?2:1;break}}}
   const inPen=!inside[i]&&y>0&&ath>=29&&ath<=41&&r>=fdh&&r<fdh+18;
   let feat=null;
-  if(ST.harbor&&!inside[i]&&!inPen&&!dug)feat='harbor';
+  if(ST.bowl&&!inside[i]&&!inPen&&!dug)feat='harbor';
   else if(!inside[i]&&!inPen&&y>0){
    if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='ocean';
    else if(ST.feature==='lawn'&&th>7&&th<27&&r>fdh+4&&r<fdh+80)feat='lawn';
@@ -2729,12 +2915,12 @@ function buildField(){H_NIGHT=false;
     if(aisle)col=C.aisle;
     else{const row=Math.floor((dO-3)/6),rr=(dO-3)-row*6;
      if(rr>=5)col=upper?C.riserU:C.riser;
-     else{col=ST.harbor?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatMask[i]=1}}
+     else{col=ST.bowl?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatMask[i]=1}}
    }
   }else{
    const dOut=D[i]/3/K;const wallT=fairBig[i]?ST.wallFt*2:6;
    const fair=Math.abs(th)<=45&&y>=0;
-   if(dOut<wallT&&ST.harbor&&fair){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
+   if(dOut<wallT&&ST.bowl&&fair){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
     const sF=r*th*RAD,m=((sF%18)+18)%18,id=Math.floor(sF/18);
     col=dOut<1.4?HB.wallY:dOut<2.4?HB.wallCap:m<.9?HB.seam:dOut>wallT-2.5?hMul((id&1)?HB.pad2:HB.pad1,.72):(id&1)?HB.pad2:HB.pad1}
    else if(dOut<wallT)col=dOut<1.5?C.pad2:C.pad;
@@ -2789,7 +2975,7 @@ function buildField(){H_NIGHT=false;
  // on-deck circles
  for(const s of[1,-1]){const p=P(s*38,-6);g.strokeStyle='rgba(243,238,224,.7)';g.beginPath();g.arc(p.x,p.y,7,0,Math.PI*2);g.stroke()}
  // distance markers on the warning track
- if(!ST.harbor)[[-43,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[43,DIMS[4]]].forEach(([th,t])=>{// (the harbor park paints them on its wall)
+ if(!ST.bowl)[[-43,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[43,DIMS[4]]].forEach(([th,t])=>{// (the harbor park paints them on its wall)
   const r=fenceDist(th)-13;const p=P(r*Math.sin(th*RAD),r*Math.cos(th*RAD));
   g.save();g.translate(p.x,p.y);g.rotate(th*RAD);g.fillStyle='#ffd23f';g.font='bold 18px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText(t,0,0);g.restore();
  });
@@ -2798,7 +2984,7 @@ function buildField(){H_NIGHT=false;
   g.fillStyle='#c48c56';g.beginPath();g.arc(m.x,m.y,15,0,Math.PI*2);g.fill();g.beginPath();g.arc(k.x,k.y,10,0,Math.PI*2);g.fill();
   g.fillStyle='#f3eee0';g.fillRect(Math.round(m.x)-3,Math.round(m.y),6,2);g.fillRect(Math.round(k.x)-2,Math.round(k.y)+3,5,3);}
  if(ST.village)vTownDraw(g,null);// the buildings behind the open outfield
- if(ST.harbor)hDecor(g);
+ if(ST.bowl)hDecor(g);
  return c;
 }
 
@@ -2832,7 +3018,7 @@ function buildSigns(){
  // light towers, drawn with height: the overhead camera sees each mast lean away from the field,
  // so the lamp bank sits outward of the base, with lit and shaded faces and a cast shadow
  TOWERS=[];const CX=HX/K,CY=H/K*.53,LEAN=.12,night=!!S.night;
- (ST.harbor?[[CX-175,70],[CX+175,70],[104,872],[856,872]]:[[44,222],[916,222],[104,872],[856,872]]).forEach(([tx,ty])=>{
+ (ST.bowl==='fortress'?[[CX-215,92],[CX+205,96],[104,872],[856,872]]:ST.harbor?[[CX-175,70],[CX+175,70],[104,872],[856,872]]:[[44,222],[916,222],[104,872],[856,872]]).forEach(([tx,ty])=>{
   const bx=CX+(tx-CX)/(1+LEAN),by=CY+(ty-CY)/(1+LEAN);      // ground footprint
   const ox=tx-bx,oy=ty-by,ol=Math.hypot(ox,oy),ux=ox/ol,uy=oy/ol,nx=-uy,ny=ux;
   // cast shadow (sun from the upper left by day, faint spill by night)
@@ -4882,7 +5068,25 @@ function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.d
 new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 // Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
-function drawJumbo(g,now){if(S.you!=='ulsan')return drawJumbo0(g,now);
+// Suwon's board is built into the fortress: a stone bastion around it, a purple frame, a tiled pavilion roof above
+function drawJumboFort(g,now){const cx=HX/K,sc=1.18,y0=-18,h=66,w=190,x0=cx-95,yb=(HY-fenceDist(0)/FT)/K-8,night=!!S.night;
+ g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);
+ // the bastion: stone courses, crenellated top, and its shadow
+ const bx=x0-22,bw=w+44,by=y0-14,bh=h+44;g.fillStyle='rgba(0,0,0,.32)';g.fillRect(bx+6,by+6,bw,bh);
+ for(let y=0;y<bh;y+=2)for(let x=0;x<bw;x+=2){const c=fStone(x*.55,y*.55,1.6,false);g.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;g.fillRect(bx+x,by+y,2,2)}
+ g.fillStyle='rgba(0,0,0,.18)';g.fillRect(bx,by+bh-6,bw,6);
+ for(let x=bx;x<bx+bw;x+=10){g.fillStyle='#d4cab2';g.fillRect(x,by-5,6,5);g.fillStyle='#8a806a';g.fillRect(x+6,by-3,4,3)}
+ if(night){const gr=g.createLinearGradient(0,by+bh,0,by);gr.addColorStop(0,'rgba(255,190,100,.45)');gr.addColorStop(1,'rgba(255,190,100,0)');g.fillStyle=gr;g.fillRect(bx,by,bw,bh)}
+ // banners either side of the board
+ for(const sd of[-1,1]){const fx=sd<0?bx+4:bx+bw-14;g.fillStyle='#4a2a8a';g.fillRect(fx,y0+4,10,34);g.beginPath();g.moveTo(fx,y0+38);g.lineTo(fx+5,y0+43);g.lineTo(fx+10,y0+38);g.fill();g.fillStyle='#ffd23f';g.fillRect(fx+4,y0+18,2,2);g.fillRect(fx+3,y0+19,4,1)}
+ g.restore();
+ g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);drawJumbo0(g,now,true);
+ // the purple frame and the pavilion roof on top
+ g.strokeStyle='#8a5ae0';g.lineWidth=2;g.strokeRect(x0-3,y0-3,w+6,h+6);if(night){g.strokeStyle='rgba(176,124,255,.5)';g.lineWidth=5;g.strokeRect(x0-5,y0-5,w+10,h+10)}
+ kRoof(g,cx,y0-26,170,30,0,S.night);kRoof(g,cx,y0-30,96,16,0,S.night);
+ {const p=y0-14;g.fillStyle='#5a2a2a';for(const px of[cx-70,cx-40,cx+40,cx+70]){g.fillRect(px-2,p,4,6)}}// the pavilion's red posts
+ g.restore()}
+function drawJumbo(g,now){if(S.you==='suwon')return drawJumboFort(g,now);if(S.you!=='ulsan')return drawJumbo0(g,now);
  const cx=HX/K,fy=(HY-fenceDist(0)/FT)/K,sc=1.22,yb=fy-8;g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);
  {const y0=-18,h=66,night=!!S.night,yc=y0+h/2;// the deck it stands on, and the flippers
   g.fillStyle='rgba(0,0,0,.25)';g.fillRect(cx-118,yb-4,250,16);g.fillStyle=night?'#3a4048':'#9aa3ad';g.fillRect(cx-122,yb-8,244,12);g.fillStyle=night?'#4a525c':'#c3cad1';g.fillRect(cx-122,yb-8,244,3);
@@ -4891,10 +5095,10 @@ function drawJumbo(g,now){if(S.you!=='ulsan')return drawJumbo0(g,now);
    g.fillStyle='#2f6fd0';g.beginPath();g.moveTo(bx,y0-2);g.quadraticCurveTo(bx+sd*34,yc-12,bx+sd*24,y0+h+4);g.quadraticCurveTo(bx+sd*12,y0+h-6,bx,y0+h-4);g.closePath();g.fill();
    g.fillStyle='#9fd8f6';for(let k=0;k<4;k++)g.fillRect(bx+sd*(8+k*5)-(sd<0?3:0),y0+10+k*10,3,2)}}
  drawJumbo0(g,now);g.restore()}
-function drawJumbo0(g,now){
+function drawJumbo0(g,now,noLegs){
  const cx=HX/K,x0=cx-95,y0=-18,w=190,h=66;
  // the board stands on steel: lattice legs down to concrete footings just behind the wall, braced across the middle
- {const fy=(HY-fenceDist(0)/FT)/K,yb=fy-8,yt=y0+h+2,night=!!S.night,legs=[x0+26,cx,x0+w-26];
+ if(!noLegs){const fy=(HY-fenceDist(0)/FT)/K,yb=fy-8,yt=y0+h+2,night=!!S.night,legs=[x0+26,cx,x0+w-26];
   g.fillStyle='rgba(0,0,0,.24)';g.beginPath();g.moveTo(x0+8,yb+1);g.lineTo(x0+w-8,yb+1);g.lineTo(x0+w+30,yb+12);g.lineTo(x0+46,yb+12);g.closePath();g.fill();
   for(const lx of legs){g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.moveTo(lx-2,yb);g.lineTo(lx+2,yb);g.lineTo(lx+24,yb+13);g.lineTo(lx+20,yb+14);g.closePath();g.fill()}
   // the horizontal brace between the legs
@@ -5620,12 +5824,13 @@ function render(now){
   if(OUT&&PARK_OUTLINE){// the stands end at the stadium's outer wall; the neighborhood shows past it
    ctx.save();ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath();ctx.clip();
    ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh);if(OUT_FEATHER)ctx.drawImage(OUT_FEATHER,(vx0+e.mx)/2,(vy0+e.my)/2,vw/2,vh/2,0,0,cv.width,cv.height);ctx.restore();
-   if(!ST.harbor){ctx.save();ctx.lineJoin='round';ctx.lineCap='round';if(ST.openTop)outlinePath(PARK_OUTLINE,x=>(x-vx0)*scale,y=>(y-vy0)*scale,ctx);else{ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath()}
+   if(!ST.bowl){ctx.save();ctx.lineJoin='round';ctx.lineCap='round';if(ST.openTop)outlinePath(PARK_OUTLINE,x=>(x-vx0)*scale,y=>(y-vy0)*scale,ctx);else{ctx.beginPath();PARK_OUTLINE.forEach((q,k)=>ctx[k?'lineTo':'moveTo']((q.x-vx0)*scale,(q.y-vy0)*scale));ctx.closePath()}
    ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=Math.max(2,16*scale);ctx.stroke();ctx.strokeStyle=S.night?'#3a424c':'#b9b4a8';ctx.lineWidth=Math.max(1.5,9*scale);ctx.stroke();
    ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}}
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
  drawHarborLights(ctx,vx0,vy0,scale,now);
+ drawFortLights(ctx,vx0,vy0,scale,now);
  drawSplashes(ctx,vx0,vy0,scale,now);
  if(ST.harbor&&S.phase!=='title'){ctx.save();ctx.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);drawUlsan(ctx,now);ctx.restore()}// the harbor's whales and ships, out past the park
  drawNeon(ctx,vx0,vy0,scale,now);

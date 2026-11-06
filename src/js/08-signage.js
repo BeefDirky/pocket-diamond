@@ -28,7 +28,7 @@ function buildSigns(){
  // light towers, drawn with height: the overhead camera sees each mast lean away from the field,
  // so the lamp bank sits outward of the base, with lit and shaded faces and a cast shadow
  TOWERS=[];const CX=HX/K,CY=H/K*.53,LEAN=.12,night=!!S.night;
- (ST.harbor?[[CX-175,70],[CX+175,70],[104,872],[856,872]]:[[44,222],[916,222],[104,872],[856,872]]).forEach(([tx,ty])=>{
+ (ST.bowl==='fortress'?[[CX-215,92],[CX+205,96],[104,872],[856,872]]:ST.harbor?[[CX-175,70],[CX+175,70],[104,872],[856,872]]:[[44,222],[916,222],[104,872],[856,872]]).forEach(([tx,ty])=>{
   const bx=CX+(tx-CX)/(1+LEAN),by=CY+(ty-CY)/(1+LEAN);      // ground footprint
   const ox=tx-bx,oy=ty-by,ol=Math.hypot(ox,oy),ux=ox/ol,uy=oy/ol,nx=-uy,ny=ux;
   // cast shadow (sun from the upper left by day, faint spill by night)
