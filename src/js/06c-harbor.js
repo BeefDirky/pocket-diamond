@@ -11,8 +11,8 @@ const HC=(()=>{const h=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),p
 const HB0={};let H_THEME='harbor';
 const H_THEMES={
  harbor:{},
- brick:{dk:{L:[[74,0],[82,22],[98,70],[120,110],[148,148],[180,168]],R:[[60,0],[68,26],[86,74],[114,112],[148,150],[180,168]]},roof:[94,86,181],gates:[-140,140,-104,104],brick:true,roofIn:.62,facT:1.5,
-  seats:[['#e8642a','#d65a25'],['#1d3f78','#1a386c'],['#dc5e2c','#c95426']],seatU:[[26,54,108],[22,47,96]],cheer:0,
+ brick:{dk:{L:[[50,0],[58,22],[78,66],[108,108],[148,146],[180,164]],R:[[47,0],[55,24],[76,70],[110,110],[148,148],[180,164]]},roof:[94,86,181],gates:[-140,140,-104,104],brick:true,roofIn:.62,facT:1.5,
+  seats:[['#1d3f78','#1a386c'],['#2f5fb0','#2a56a0'],['#24488a','#20407c']],seatU:[[22,40,82],[19,35,72]],cheer:1,
   pal:{pad1:'#13254a',pad2:'#182c56',pad3:'#e8eef5',pad4:'#3a6ab0',seam:'#08142a',wallY:'#ffcc48',led1:'#ffb04a',led2:'#fff1d0',led3:'#e8642a',ledD:'#2a1608',
    fTop:'#8e8a86',fTop2:'#837f7b',mull:'#1c222a',glass:'#33475c',glass2:'#2a3c50',glassN:'#ffc46a',glassN2:'#ffb04a',fEdge:'#1a1d22',par:'#2a2e34',gate:'#1a1d22',gateN:'#ffd08a',
    roof:'#5c6169',roof2:'#555a62',rib:'#4a4f56',roofEdge:'#9aa0a8',gutter:'#25292e',conc:'#2e3238',rail:'#c9ced3',railD:'#4a525c',wallCap:'#a3a9b1',wallCap2:'#727880'}},
@@ -166,7 +166,7 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
  else if(d<C1){const p=vPerson(wx,wy,12);if(p)return hMul(p,.6);if(H_NIGHT&&((Math.floor(sF/9)+Math.floor(d))&7)===0){H_EMIS=true;return HB.concLit}return (n&3)?HB.conc:hMul(HB.conc,.85)}
  else if(d<U0){const m=((sF%6)+6)%6;H_EMIS=H_NIGHT;if(d<C1+.4||d>U0-.3)return HB.ledD;return m<2?HB.led1:m<4?HB.led2:HB.led3}
  else if(d<RI){c=seat(U0,true);if(RI<fac&&d>RI-13)c=hMul(c,.42+.36*clamp((RI-d)/13,0,1))}// the roof's shadow on the top rows
- else{const k=d-RI;if(TH.steel)return sRoof(k,fac-RI,phi,sF,()=>seat(U0,true));if(TH.brick)return bRoof(k,fac-RI,phi,sF);
+ else{const k=d-RI;if(TH.steel)return sRoof(k,fac-RI,phi,sF,()=>seat(U0,true));if(TH.brick)return bRoof(k,fac-RI,phi,sF,()=>seat(U0,true));
   if(TH.tile&&Math.abs(phi)>TH.tile){// a Korean tiled roof: charcoal tile rows running down to a pale lifted eave, a light ridge on top
    const kk=fac-d;if(k<1)return [24,22,30];if(k<2.2)return [214,206,190];if(kk<1.4)return [178,172,160];
    const m=((sF%2.1)+2.1)%2.1,sh=.8+.3*clamp(k/Math.max(4,fac-RI),0,1),c0=m<.55?[26,26,34]:m<1.15?[70,70,84]:[50,50,62];// channels run ridge to eave; the cap tiles catch the light

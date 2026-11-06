@@ -5,7 +5,7 @@
 // a short navy steel truss footbridge with shops underneath and a row of brick kiosks beyond. The sea lies off to the upper
 // left, kept back from the park by a coastal road, a tree-lined promenade, a seawall and a band of tetrapods.
 // Every colour is a pure function of world position (brickCol); seagulls, the bridge sign and the entrance are shapes. ----------
-const B_ADS=[['부산 은행','#ffcc48'],['GULL AIR','#e8eef5'],['광안리','#ffb04a'],['HARBOR LOGISTICS','#e8eef5'],['어묵 BAR','#ffcc48'],['SEA SALT SODA','#e8eef5'],['해운대','#ffb04a'],['BUSAN PORT','#e8eef5']];
+const B_ADS=[['부산 은행','#ffcc48'],['GULL AIR','#e8eef5'],['광안리','#ffb04a'],['HARBOR LOGISTICS','#e8eef5'],['어묵 BAR','#ffcc48'],['SEA SALT SODA','#e8eef5'],['BUSAN SEAGULLS','#e8eef5'],['','#e8eef5']];
 const BC=(()=>{const h=hRGB;return{
  brick:h('#9a4430'),brick2:h('#8c3c2a'),brick3:h('#a84d35'),brickL:h('#b85a3e'),mort:h('#6e4a40'),stD:h('#22262c'),stL:h('#4a5260'),cap:h('#2a2e34'),capL:h('#7a828e'),
  gD:h('#33475c'),gD2:h('#2a3c50'),gRef:h('#4e6680'),
@@ -37,25 +37,29 @@ function bFacade(k,T,sF){const SEC=92,m92=((sF%SEC)+SEC)%SEC;
  if(H_NIGHT){const dim=(vHash(Math.floor(sF/20.75),band)&7)===0;const c=dim?hMul(HB.glassN,.4):band&1?HB.glassN2:HB.glassN;return sh?hMul(c,.6):c}
  const c=(wm*.13+fl*.2)%1<.15?BC.gRef:band&1?BC.gD2:BC.gD;return sh?hMul(c,.72):c}
 // ---- the roofs: charcoal panels in sections, a lit fascia showing their thickness, exposed beams with their shadows ----
-function bRoof(k,Rd,phi,sF){
+function bRoof(k,Rd,phi,sF,gapSeat){
+ // separate roof pavilions, each a shallow gable: the lit inner slope, a ridge, the shaded outer slope; between them the
+ // seats show through under an open steel truss
+ const SEG=74,sm=((sF%SEG)+SEG)%SEG;
+ if(sm<10){if(sm<1.2||sm>8.8)return sm<1.2?BC.stL:BC.stD;const t=(sm-1.2)/7.6,dg=Math.abs(k/Rd-t)*Rd,dg2=Math.abs(k/Rd-(1-t))*Rd;
+  if(k<1.2||Math.abs(k-Rd*.5)<.55||dg<.55||dg2<.55)return BC.stL;if(Math.abs(k-Rd*.5)<1.3||dg<1.3)return hMul(gapSeat(),.3);return hMul(gapSeat(),.62)}
+ if(sm<11.2)return hMul(BC.stD,.8);// the end of a pavilion, in shade
  if(k<.7)return BC.capL;if(k<1.7)return hMul(HB.gutter,.8);// the lit lip, then the fascia's face
- const SEG=38,sm=((sF%SEG)+SEG)%SEG;if(sm<1.4)return sm<.7?hMul(HB.gutter,.7):BC.stD;// a break between roof sections
  if(k>Rd-1)return HB.gutter;
- const bm=((sF%12.7)+12.7)%12.7,beam=bm<1,lb=Math.abs(k-Rd*.46)<.6;
- if(beam||lb)return beam&&bm<.5?BC.stL:hMul(BC.stL,.8);// exposed steel beams across the top
- if((bm>=1&&bm<1.8)||(k>Rd*.46+.6&&k<Rd*.46+1.4))return hMul(HB.roof2,.72);// and their shadows
- if(((sF%2.2)+2.2)%2.2<.35)return HB.rib;// standing seams
- const id=Math.floor(sF/SEG),c=id&1?HB.roof2:HB.roof;return hMul(c,1.06-.16*(k/Rd))}
+ const rid=Rd*.5;if(Math.abs(k-rid)<.5)return BC.capL;// the ridge
+ const bm=((sm-11.2)%12.6+12.6)%12.6;if(bm<.8)return hMul(BC.stL,k<rid?1:.75);// steel purlins across
+ if(((sF%2.2)+2.2)%2.2<.35)return hMul(HB.rib,k<rid?1.08:.9);// standing seams
+ const c=k<rid?hMul(HB.roof,1.18):hMul(HB.roof2,.8);return c}
 // ---- where the outfield ring closes: 74 ft past the wall, measured along each ray from the bowl's centre ----
 function bOpenR(phi,t0){const dx=Math.sin(phi*RAD),dy=Math.cos(phi*RAD);let lo=0,hi=1400;for(let i=0;i<22;i++){const m=(lo+hi)/2,x=H_CC.x+dx*m,y=H_CC.y+dy*m,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
-  const q=y>0&&Math.abs(th)<=45?r-fenceDist(th)-hPenOff(th)-H_WALLW:(y>0?r-fenceDist(Math.sign(th)*45)-H_WALLW:-1);if(q>66)hi=m;else lo=m}return Math.max(t0,lo)}
+  const q=y>0&&Math.abs(th)<=45?r-fenceDist(th)-hPenOff(th)-H_WALLW:(y>0?r-fenceDist(Math.sign(th)*45)-H_WALLW:-1);if(q>84)hi=m;else lo=m}return Math.max(t0,lo)}
 // ---- the coast: a shoreline off to the upper left, everything measured as t (ft seaward) and u (ft along it) ----
 let B_EXT=null,B_EXT_K='',B_OR=null,B_OR_K='';
 function bInOL(x,y){const k=DIMS.join(',');if(!B_OR||B_OR_K!==k){B_OR_K=k;const T=hRS();B_OR=new Float32Array(360);for(let i=0;i<360;i++)B_OR[i]=T.open[i]?bOpenR(i-180,T.R[i]):T.R[i]}
  const phi=Math.atan2(x-H_CC.x,y-H_CC.y)/RAD,f=phi+180,i=Math.floor(f)%360,j=(i+1)%360,R=B_OR[i]+(B_OR[j]-B_OR[i])*(f-Math.floor(f));return Math.hypot(x-H_CC.x,y-H_CC.y)<R+2}
 function bExt(){const k=DIMS.join(',');if(B_EXT!=null&&B_EXT_K===k)return B_EXT;B_EXT_K=k;let m=0;for(let ph=-180;ph<180;ph+=1){const T=hRS(),i=((ph+180)%360+360)%360;let t=T.R[i];if(T.open[i])t=bOpenR(ph,t);
   const x=Math.sin(ph*RAD)*t,y=Math.cos(ph*RAD)*t;m=Math.max(m,-.8*x+.6*y)}return B_EXT=m}
-function bCoast(x,y){const u=.6*x+.8*(y-180),t=-.8*x+.6*(y-180)-(bExt()+128+16*Math.sin(u/150)+7*Math.sin(u/61));return{t,u}}
+function bCoast(x,y){const u=.6*x+.8*(y-180),t=-.8*x+.6*(y-180)-(bExt()+34+16*Math.sin(u/150)+7*Math.sin(u/61));return{t,u}}
 function bOcean(x,y){return bCoast(x,y).t>4}
 function bTet(u,t){// tetrapods on a jittered 7 ft lattice: four stubby legs from a hub, lit on top
  const cs=7,i=Math.floor(u/cs),j=Math.floor(t/cs);for(let di=0;di<2;di++)for(let dj=0;dj<2;dj++){const ii=i-di+1,jj=j-dj+1,h=vHash(ii+977,jj+313);if(h%7===0)continue;
@@ -90,7 +94,7 @@ function bBridgeA(th){const f=(th-B_BR.t0)/(B_BR.t1-B_BR.t0);return 2.2*Math.sin
 function brickCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
  if(!fair||q<0){const c=bCoastCol(x,y,wx,wy);if(c)return c;if(!bInOL(x,y))return null;if(y>0&&th<-40){const p=vPerson(wx,wy,6);if(p)return p;return bPave(r*th*RAD,r)}return BC.ring}
  const a=q-hPenOff(th)-H_WALLW;if(a<0)return null;
- if(a>62){const c=bCoastCol(x,y,wx,wy);return c||(bInOL(x,y)?BC.ring:null)}
+ if(a>80){const c=bCoastCol(x,y,wx,wy);if(c)return c;return !bInOL(x,y)?null:th>-24?fTrees(wx,wy):BC.ring}
  // ---- right field: the footbridge ----
  if(th>B_BR.t0-1.5&&th<B_BR.t1+1.5){const b=a-bBridgeA(th),ends=Math.min((th-B_BR.t0)*RAD*r,(B_BR.t1-th)*RAD*r);
   if(b<2.5)return (Math.floor(s/9)&1)?BC.conc:BC.conc2;// the walk behind the wall
@@ -98,6 +102,8 @@ function brickCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
   if(ends>-6&&b<34){if(ends<0){if(b>6&&b<24){const st=Math.floor(-ends/1.6);return st&1?BC.conc2:BC.concJ}return BC.conc}// stairs down at each end
    if(b<9){if(pier)return bBrick(s,b,false);const p=vPerson(wx,wy,10);if(p)return hMul(p,.55);if((vHash(Math.floor(s/7),1)&3)===0&&b<4.4){H_EMIS=H_NIGHT;return BC.shop}if(((s%9)+9)%9<1&&b>4.4)return BC.navyD;return (n&7)?BC.under:BC.under2}// the shade under the walkway, shop lights in it
    if(b<10.2)return b<9.6?BC.navy:BC.navyL;// the inner chord and rail
+   if(b<18.5&&!pier){// the canopy over the inner half of the walk: navy metal on a steel frame, a lit edge
+    if(b<11)return BC.navyL;if(b>17.9)return hMul(BC.navyD,.8);const fm=((s%9)+9)%9;if(fm<.7)return BC.navyL;if(((s%1.8)+1.8)%1.8<.3)return BC.navyD;return b<14.4?BC.navy:hMul(BC.navy,.82)}
    if(b<23){// the deck, with lamps along both rails and people crossing
     if((b<11.2||b>22)&&((s%14)+14)%14<1.1){H_EMIS=H_NIGHT;return BC.lamp}
     const p=vPerson(wx,wy,14);if(p)return p;
@@ -114,9 +120,9 @@ function brickCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
    const k0=a-36,kw=24,km=((s%(kw+6))+(kw+6))%(kw+6);
    if(k0>0&&k0<18&&km<kw){if(k0<1.6){H_EMIS=H_NIGHT;return km%6<.6?BC.stD:BC.shop}// lit shopfronts facing the field
     if(k0>16.6)return hMul(BC.conc2,.6);if(Math.abs(k0-9)<.6)return BC.kRidge;if(km<.8||km>kw-.8)return bBrick(s,k0,false);return ((s%2)+2)%2<.3?BC.kRoof:k0<9?BC.kRoof2:BC.kRoof}
-   const p=vPerson(wx,wy,8);if(p)return p;return bPave(s,a)}}
+   if(a>=58)return fTrees(wx,wy);const p=vPerson(wx,wy,8);if(p)return p;return bPave(s,a)}}
  // ---- centre: a planted batter's eye under the board ----
- if(ath<=B_BR.t0-1.5&&th>-9){if(a<34){const k=vHash(Math.floor(wx/4),Math.floor(wy/4));return k%5===0?BC.hedge2:BC.hedge}}
+ if(ath<=B_BR.t0-1.5&&th>-9){if(a<34){const k=vHash(Math.floor(wx/4),Math.floor(wy/4));return k%5===0?BC.hedge2:BC.hedge}return fTrees(wx,wy)}
  // ---- left-centre and left: stepped food-and-drink terraces, then a brick-paved concourse ----
  if(th<=-9||th<B_BR.t0){
   if(a<2.5)return BC.conc;
@@ -126,7 +132,7 @@ function brickCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
    if(H_NIGHT&&f>4.8&&f<5.2&&((s%3)+3)%3<.6){H_EMIS=true;return BC.lamp}// string lights over each step
    const p=vPerson(wx,wy,22);if(p)return p;return (rw&1)?BC.terr:BC.terr2}
   if(a<25.4&&th<-9&&th>-38)return BC.railW;
-  if(a>56)return a>62?BC.ring:((Math.floor(s/7)&1)?BC.conc:BC.conc2);
+  if(a>56){if(a>62)return th>-30?fTrees(wx,wy):BC.ring;return (Math.floor(s/7)&1)?BC.conc:BC.conc2}
   {const tr=th<-30||a>40?bTree(s,a,48,22,4.6):null;if(tr)return tr}
   const p=vPerson(wx,wy,8);if(p)return p;return bPave(s,a)}
  return null}
@@ -134,9 +140,9 @@ function brickCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
 const B_GULL=['X.....X','.X...X.','..X.X..','...X...'];
 function bXY(th,a){const r=fenceDist(Math.max(-45,Math.min(45,th)))+hPenOff(th)+a;return{x:Math.round(HX+Math.sin(th*RAD)*r/FT),y:Math.round(HY-Math.cos(th*RAD)*r/FT)}}
 function bDecor(g){
- for(let th=-40;th<=40;th+=7.5){if(Math.abs(th)<4)continue;const p=bXY(th,4.2),wave=(Math.round(th/7.5)&1);
-  if(wave){g.fillStyle='#3a6ab0';for(let i=0;i<10;i++){const yy=Math.round(Math.sin(i*.9)*1.2);g.fillRect(p.x-5+i,p.y+yy,1,1)}g.fillStyle='#8fb6e8';for(let i=0;i<10;i+=3)g.fillRect(p.x-5+i,p.y+Math.round(Math.sin(i*.9)*1.2)-1,1,1)}
-  else{g.fillStyle='#e8eef5';B_GULL.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='X')g.fillRect(p.x-3+i,p.y-2+j,1,1)})}}
+ const wv=(th,len)=>{for(let i=-len;i<=len;i++){const t=th+i*.22,p=bXY(t,4.6+Math.sin(i*.42)*1.4),q=bXY(t,3.4+Math.sin(i*.42)*1.4);g.fillStyle='#3a6ab0';g.fillRect(p.x,p.y,1,1);if((i&3)===0){g.fillStyle='#8fb6e8';g.fillRect(q.x,q.y,1,1)}}};
+ for(const th of[-25,-19,-4,4,19,24])wv(th,10);
+ for(const th of[-33,-11.5,11.5]){const p=bXY(th,4.2);g.fillStyle='#e8eef5';B_GULL.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='X')g.fillRect(p.x-3+i,p.y-2+j,1,1)})}
  // the team's name on the bridge's outer face, mid-span
  {const p=bXY((B_BR.t0+B_BR.t1)/2,H_WALLW+27.5+bBridgeA((B_BR.t0+B_BR.t1)/2));g.save();g.translate(p.x,p.y);g.rotate(((B_BR.t0+B_BR.t1)/2)*RAD);
   g.fillStyle='#101a30';g.fillRect(-30,-6,60,12);g.fillStyle='#e8642a';g.fillRect(-30,-6,60,2);g.fillStyle='#e8eef5';g.font='bold 9px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('SEAGULLS',0,1.5);g.restore()}}
