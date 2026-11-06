@@ -15,25 +15,43 @@ function supaRoom(){const load=supaClient;
  // State travels as broadcast messages (fast), re-sent every 2s as a heartbeat so a dropped message or a
  // reconnect heals itself. A peer only counts as gone after 12s of silence, or when it says goodbye.
  return{join:async name=>{const c=await load();const me=Math.random().toString(36).slice(2,10);
-  const ch=c.channel(name,{config:{broadcast:{self:false,ack:false},presence:{key:me}}});let cbs=[];const state={};const peers=new Map();let live=true;
+  let cbs=[],scbs=[];const state={};const peers=new Map();let live=true,ch=null,up=false,retryT=0,tries=0;
   const list=()=>{const out=[{sameTab:true,presence:{...state}}];for(const[k,v] of peers)out.push({sameTab:false,presence:v.s});return out};
   const fire=()=>{const pl=list();for(const f of cbs)f({peers:pl})};
-  const send=()=>{if(!live)return;ch.send({type:'broadcast',event:'s',payload:{k:me,s:state}}).catch(()=>{})};
-  ch.on('broadcast',{event:'s'},({payload:m})=>{if(!m||m.k===me)return;const had=peers.get(m.k);peers.set(m.k,{s:m.s,t:Date.now()});
-   if(!had)send();if(!had||JSON.stringify(had.s)!==JSON.stringify(m.s))fire()});
-  ch.on('broadcast',{event:'bye'},({payload:m})=>{if(m&&peers.delete(m.k))fire()});
-  ch.on('presence',{event:'join'},()=>send());
-  let first=true;
-  await new Promise((res,rej)=>{const t=setTimeout(()=>rej({code:'timeout'}),10000);ch.subscribe(st=>{
-   if(st==='SUBSCRIBED'){clearTimeout(t);ch.track({on:1}).catch(()=>{});send();if(first){first=false;res()}}
-   else if(first&&(st==='CHANNEL_ERROR'||st==='TIMED_OUT')){clearTimeout(t);rej({code:st.toLowerCase()})}})});
-  const hb=setInterval(()=>{send();const now=Date.now();let ch2=false;for(const[k,v] of peers)if(now-v.t>12000){peers.delete(k);ch2=true}if(ch2)fire()},2000);
-  const vis=()=>{if(!document.hidden)send()};document.addEventListener('visibilitychange',vis);
+  const setUp=v=>{if(up===v)return;up=v;for(const f of scbs)f(v)};
+  const send=()=>{if(!live||!ch||!up)return;ch.send({type:'broadcast',event:'s',payload:{k:me,s:state}}).catch(()=>{})};
+  // open (or re-open) the channel; resolves on the first SUBSCRIBED
+  const open=()=>new Promise((res,rej)=>{const mine=c.channel(name,{config:{broadcast:{self:false,ack:false},presence:{key:me}}});ch=mine;
+   mine.on('broadcast',{event:'s'},({payload:m})=>{if(!m||m.k===me)return;const had=peers.get(m.k);peers.set(m.k,{s:m.s,t:Date.now()});
+    if(!had)send();if(!had||JSON.stringify(had.s)!==JSON.stringify(m.s))fire()});
+   mine.on('broadcast',{event:'bye'},({payload:m})=>{if(m&&peers.delete(m.k))fire()});
+   mine.on('presence',{event:'join'},()=>send());
+   let done=false;const t=setTimeout(()=>{if(!done){done=true;rej({code:'timeout'})}},10000);
+   mine.subscribe(st=>{if(ch!==mine)return;
+    if(st==='SUBSCRIBED'){tries=0;setUp(true);mine.track({on:1}).catch(()=>{});send();if(!done){done=true;clearTimeout(t);res()}}
+    else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED'){setUp(false);if(!done){done=true;clearTimeout(t);rej({code:st.toLowerCase()})}else reopen()}})});
+  // tear down and try again: 1s, 2s, 4s… capped at 8s, for as long as the player stays in the room
+  const reopen=()=>{if(!live||retryT)return;setUp(false);const old=ch;ch=null;if(old)c.removeChannel(old).catch(()=>{});
+   const wait=Math.min(8000,1000*Math.pow(2,tries++));retryT=setTimeout(async()=>{retryT=0;if(!live)return;try{await open()}catch(e){reopen()}},wait)};
+  await open();
+  let lastPeer=Date.now();
+  const hb=setInterval(()=>{send();const now=Date.now();let ch2=false;for(const[k,v] of peers){if(v.t>lastPeer)lastPeer=v.t;if(now-v.t>12000){peers.delete(k);ch2=true}}if(ch2)fire();
+   if(!navigator.onLine)setUp(false)},2000);
+  const vis=()=>{if(!document.hidden){if(!up)reopen();else send()}};document.addEventListener('visibilitychange',vis);
+  const onl=()=>{tries=0;if(retryT){clearTimeout(retryT);retryT=0}reopen()},offl=()=>setUp(false);
+  window.addEventListener('online',onl);window.addEventListener('offline',offl);
   return{presence:async patch=>{Object.assign(state,patch);send()},onPeers:f=>{cbs.push(f);setTimeout(()=>f({peers:list()}),0);return()=>{cbs=cbs.filter(x=>x!==f)}},
-   leave:async()=>{cbs=[];clearInterval(hb);document.removeEventListener('visibilitychange',vis);try{await ch.send({type:'broadcast',event:'bye',payload:{k:me}})}catch(e){}live=false;try{await c.removeChannel(ch)}catch(e){}}}}}}
+   onStatus:f=>{scbs.push(f);setTimeout(()=>f(up),0)},
+   reconnect:()=>{tries=0;if(retryT){clearTimeout(retryT);retryT=0}reopen()},
+   leave:async()=>{cbs=[];scbs=[];clearInterval(hb);clearTimeout(retryT);document.removeEventListener('visibilitychange',vis);window.removeEventListener('online',onl);window.removeEventListener('offline',offl);
+    try{if(ch&&up)await ch.send({type:'broadcast',event:'bye',payload:{k:me}})}catch(e){}live=false;try{if(ch)await c.removeChannel(ch)}catch(e){}}}}}}
 (async()=>{if(typeof claude!=='undefined'){try{ROOM=await claude.use('room')}catch(e){ROOM=null}}
  if(!ROOM&&/^https:/.test(SUPA.url)&&typeof claude==='undefined')ROOM=supaRoom()})();
 function netRand(fn){if(!S.online||!S.online.inGame||!S.pitch||!S.pitch.pid)return fn();const r=Math.random;Math.random=mulberry32(hash(S.online.gid+'|'+S.pitch.pid));try{return fn()}finally{Math.random=r}}
+const RESUME_KEY='pd-olresume';
+function resumeSave(){const o=S.online;if(!o||!o.inGame||!o.code)return;try{localStorage.setItem(RESUME_KEY,JSON.stringify({code:o.code,role:o.role,team:o.mine.team,ros:o.mine.ros,start:o.start,gid:o.gid,z:snapState(),t:Date.now()}))}catch(e){}}
+function resumeGet(){try{const r=JSON.parse(localStorage.getItem(RESUME_KEY)||'null');if(r&&Date.now()-r.t<30*60*1000)return r}catch(e){}return null}
+function resumeClear(){try{localStorage.removeItem(RESUME_KEY)}catch(e){}}
 function netPresence(patch){const o=S.online;if(!o||!o.nr)return;Object.assign(o.mine,patch);o.nr.presence(patch).catch(()=>{})}
 function snapState(){const T=TEAMS[batKey()];return{i:S.inning,h:S.half,o:S.outs,b:S.balls,s:S.strikes,r:S.runs,t:S.target,hs:[S.hits,S.oppHits,S.errs||0,S.myErrs||0],bs:S.bases.map(p=>p?T.lineup.indexOf(p):-1),or:S.orderOf,pi:S.pIdxOf,pc:S.pcOf,pr:S.pRunsOf,pb:S.pBFOf,yl:S.youLine,ol:S.oppLine,n:S.totalInn,u:S.usedOf||{}}}
 function applySnap(z){const fk0=fldKey(),was=S.pIdxOf[fk0]||0;S.usedOf=JSON.parse(JSON.stringify(z.u||{}));S.pIdxOf={...z.pi};S.orderOf={...z.or};S.inning=z.i;S.half=z.h;setSides();S.outs=z.o;S.balls=z.b;S.strikes=z.s;S.runs=z.r;S.target=z.t;
@@ -54,6 +72,7 @@ function applyDecision(dc){const p=S.pitch;if(!p||p.decided||dc.id!==p.pid)retur
  if(dc.k==='bunt'){if(!S.swing)S.swing={at:arr-200,bunt:true,err:0,contactAt:arr}}
  else if(dc.k==='swing'&&!S.swing){S.swing={at:arr+dc.e-60,err:dc.e,cpu:true};if(dc.m)S.swing.miss=true;else S.swing.contactAt=arr+Math.max(0,dc.e)}}
 function netTick(now){const o=S.online,opp=o.opp;
+ if(o.inGame&&now-(o.szAt||0)>2000&&(S.phase==='ready'||S.phase==='choose')){o.szAt=now;const z=snapState(),j=JSON.stringify(z);if(j!==o.szJ){o.szJ=j;netPresence({sz:{gid:o.gid,z,t:Date.now()}});resumeSave()}}
  // pitch clock: the pitcher has PCLOCK seconds to pick a pitch; both screens show the countdown
  if(o.inGame){let left=-1;
   if(pitching()){if(S.phase==='choose'){if(!o.clkEnd){o.clkEnd=now+PCLOCK*1000;o.clkN=(o.clkN||0)+1;netPresence({ck:{id:o.role[0]+o.clkN,ms:PCLOCK*1000}})}
@@ -70,7 +89,7 @@ function netTick(now){const o=S.online,opp=o.opp;
    if(o.seenW===pt.id&&pt.st==='r'&&o.seenR!==pt.id&&S.pitch&&S.pitch.pid===pt.id)applyRelease(pt)}}
  else{const dc=opp.dc;if(dc&&S.phase==='pitch'&&S.pitch&&dc.id===S.pitch.pid)applyDecision(dc);
   if(opp.sk&&S.phase==='play'&&S.play&&S.play.hrFired&&S.pitch&&opp.sk===S.pitch.pid&&S.play.t<S.play.end)S.play.t=S.play.end}}
-function startOnline(st){const o=S.online;o.gid=st.gid;
+function startOnline(st){const o=S.online;o.gid=st.gid;o.start=st;
  o.series={sid:st.sid||st.gid,bo:st.bo||1,gn:st.gn||1,inn:st.inn,w:{host:(st.sw||[0,0])[0],guest:(st.sw||[0,0])[1]},done:false};$('olNext').hidden=true;$('olSeries').hidden=true;o.inGame=true;o.n=0;o.seenW=o.seenR=null;
  o.prevCustom=CUSTOM.active;CUSTOM.active=false;applyCustom();
  {const ok=o.role==='host'?st.away:st.home;if(o.opp&&o.opp.ros)applyRosterSpec(ok,o.opp.ros)}// field the opponent exactly as their phone does
@@ -78,7 +97,7 @@ function startOnline(st){const o=S.online;o.gid=st.gid;
  S.auto=false;syncAuto();o.sawIng=false;o.lostAt=0;netPresence({pt:null,dc:null,ing:st.gid});
  pendingMode=null;startGame('full');if(S.night!==!!st.night){S.night=!!st.night;SIGNS=buildSigns()}S.totalInn=st.inn;S.schedInn=st.inn;S.oppLine=Array(st.inn).fill(0);S.youLine=Array(st.inn).fill(0);
  banner(o.series.bo>1?`GAME ${o.series.gn} · BEST OF ${o.series.bo}`:'PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name} · ${st.inn} innings · you are ${o.me==='home'?'home':'away'}${o.series.bo>1?` · series ${o.series.w[o.role]}-${o.series.w[o.role==='host'?'guest':'host']}`:''}`);updateHUD()}
-function lobbyRender(){const o=S.online;if(!o)return;$('olStart').hidden=!!o.nr;$('olRoom').hidden=!o.nr;if(!o.nr)return;
+function lobbyRender(){const o=S.online;netPill();if(!o)return;{const r=resumeGet();const rb=$('olRejoin');rb.hidden=!r||!!o.nr;if(r)rb.textContent=`REJOIN GAME · ROOM ${r.code.toUpperCase()}`}$('olStart').hidden=!!o.nr;$('olRoom').hidden=!o.nr;if(!o.nr)return;
  $('olCodeShow').textContent=o.code.toUpperCase();
  const side=(k,tag)=>k&&TEAMS[k]?`<img alt="" src="${LOGO_URL[k]}"><b>${TEAMS[k].city} ${TEAMS[k].name}</b><small>${tag}</small>`:`<b>Waiting…</b><small>${tag}</small>`;
  const meK=o.mine.team,thK=o.opp&&o.opp.team;
@@ -91,7 +110,7 @@ function lobbyRender(){const o=S.online;if(!o)return;$('olStart').hidden=!!o.nr;
  $('olStatus').classList.toggle('olWarn',!!same);
  $('olStatus').textContent=!o.opp?(o.role==='host'?'Share the code. Waiting for your friend to join…':'Waiting for the host…'):same?`You both picked the ${TEAMS[meK].name}. The same club can't play itself. One of you needs to pick another.`:o.role==='host'?'Both here. Start when ready.':'Both here. Waiting for the host to start.';
  $('olGo').hidden=!(o.role==='host'&&o.opp&&!same)}
-async function joinRoom(code,role){const note=t=>{const n=$('olNote');n.textContent=t;n.style.color='var(--amber)';n.scrollIntoView({block:'nearest'})};
+async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.textContent=t;n.style.color='var(--amber)';n.scrollIntoView({block:'nearest'})};
  if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on play.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
  code=code.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4);if(code.length<4){note('Room codes are 4 letters.');return}
  if(S.online&&S.online.nr)try{await S.online.nr.leave()}catch(e){}
@@ -99,14 +118,23 @@ async function joinRoom(code,role){const note=t=>{const n=$('olNote');n.textCont
  let nr;try{nr=await ROOM.join('pd-'+code)}catch(e){joinRoom.busy=false;note('Could not reach the room ('+(e&&e.code||'error')+'). Check your connection and try again.');return}
  joinRoom.busy=false;note(role==='host'?'Room open. Send your friend the code.':'Joined room '+code.toUpperCase()+'.');
  const o=S.online={code,role,me:role==='host'?'home':'away',nr,mine:{},opp:null,inGame:false};
+ if(resume){o.gid=resume.gid;o.resume=resume}
+ if(nr.onStatus)nr.onStatus(up=>{if(S.online!==o)return;o.selfDown=!up;
+  if(!up&&o.inGame){o.selfBan=true;$('bt').textContent='YOU\u2019RE OFFLINE';$('bs').textContent='Reconnecting… your game is saved and picks up where it left off.';$('banner').dataset.tone='';$('banner').hidden=false}
+  else if(up&&o.selfBan){o.selfBan=false;hideBanner();if(o.inGame)banner('RECONNECTED','Back in the game.')}
+  lobbyRender()});
  nr.onPeers(ch=>{const them=ch.peers.filter(p=>!p.sameTab&&p.presence&&p.presence.v===1&&p.presence.role!==o.role);const prev=o.opp;o.opp=them.length?them[0].presence:null;
+  if(o.resume&&o.opp&&!o.inGame){const R0=o.resume;o.resume=null;
+   if(o.opp.ing===R0.gid){// they're still in the game: put it back together from whichever snapshot is newer
+    startOnline(R0.start);const z=o.opp.sz&&o.opp.sz.gid===R0.gid&&o.opp.sz.t>R0.t?o.opp.sz.z:R0.z;applySnap(z);o.n=1000+(Date.now()%9000);setPhase('ready');S.pt=0;updateHUD();banner('RECONNECTED','Back in the game.')}
+   else{resumeClear();o.gid=null}}
   if(o.opp&&role==='guest'&&o.opp.start&&o.opp.start.gid!==o.gid&&!o.inGame)startOnline(o.opp.start);
   if(o.inGame&&prev&&!o.opp&&!o.lostAt){o.lostAt=Date.now();o.lostBan=true;$('bt').textContent='CONNECTION LOST';$('bs').textContent='Waiting for your opponent to come back…';$('banner').dataset.tone='';$('banner').hidden=false;
    clearTimeout(o.lostT);o.lostT=setTimeout(()=>{if(S.online!==o||o.opp||!o.inGame)return;banner('OPPONENT LEFT','They did not come back. Back to the room.');o.inGame=false;setTimeout(()=>{if(S.online!==o||o.inGame)return;toTitle();openOnline()},2500)},45000)}
   if(o.inGame&&o.opp){if(o.opp.ing===o.gid)o.sawIng=true;else if(o.sawIng){o.sawIng=false;clearTimeout(o.lostT);o.lostAt=0;o.lostBan=false;banner('OPPONENT LEFT','They quit the game. Back to the room.');o.inGame=false;setTimeout(()=>{if(S.online!==o||o.inGame)return;toTitle();openOnline()},2500)}}
   if(o.inGame&&o.opp&&o.lostAt){o.lostAt=0;clearTimeout(o.lostT);if(o.lostBan){o.lostBan=false;hideBanner()}}
   lobbyRender()});
- netPresence({v:1,role,team:S.you,ros:rosterSpec(S.you)});lobbyRender()}
+ netPresence({v:1,role,team:S.you,ros:rosterSpec(S.you),...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
  S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:rosterSpec(t)});lobbyRender()});
@@ -126,5 +154,13 @@ function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o
  netPresence({start:st});startOnline(st)}
 $('olGo').addEventListener('click',()=>hostStart(false));
 $('olNext').addEventListener('click',()=>hostStart(true));
-$('olLeave').addEventListener('click',async()=>{const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;openOnline()});
+$('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;openOnline()});
 $('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
+
+// the connection pill: shown during an online game; green when live, amber while it reconnects (tap to retry now)
+function netPill(){const o=S.online,el=$('olNet');const on=!!(o&&o.nr&&o.inGame);el.hidden=!on;if(!on)return;
+ const down=!!o.selfDown,lost=!!o.lostAt;el.classList.toggle('down',down);el.classList.toggle('warn',!down&&lost);
+ el.querySelector('span').textContent=down?'RECONNECTING… TAP':lost?'OPPONENT OFFLINE':'ONLINE'}
+$('olNet').addEventListener('click',()=>{const o=S.online;if(o&&o.nr&&o.nr.reconnect)o.nr.reconnect()});
+setInterval(netPill,1000);
+$('olRejoin').addEventListener('click',()=>{const r=resumeGet();if(!r)return;S.you=r.team;syncPicker();applyCustom();joinRoom(r.code,r.role,r)});

@@ -708,3 +708,10 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .muOrd{flex:none;font-family:var(--f-hud);color:var(--amber);font-size:.95em;margin-right:-2px}
 .mu .v .muNm{flex:1 1 auto}
 @media (max-width:560px){.mu .v{gap:5px}.mu .v .muTag{display:none}.muPos{font-size:10px;padding:0 4px}}
+
+.olNet{position:absolute;left:50%;top:6px;transform:translateX(-50%);z-index:7;display:flex;align-items:center;gap:6px;font-family:var(--f-hud);font-size:11px;letter-spacing:.12em;color:var(--chalk);background:rgba(8,20,14,.86);border:2px solid var(--edge);padding:3px 9px;cursor:pointer}
+.olNet i{width:8px;height:8px;background:#3fdc6a;box-shadow:0 0 6px #3fdc6a}
+.olNet.warn i{background:#ffbf3c;box-shadow:0 0 6px #ffbf3c}
+.olNet.down{color:#ffbf3c}.olNet.down i{background:#ff5a4a;box-shadow:0 0 6px #ff5a4a;animation:olBlink 1s steps(2) infinite}
+@keyframes olBlink{50%{opacity:.25}}
+body.inMenu .olNet{display:none!important}

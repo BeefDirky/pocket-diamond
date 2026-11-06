@@ -49,7 +49,7 @@ function gameOver(win){const onl=onlineGame();
    $('olSeries').hidden=false;$('olSeries').textContent=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw} · ${me==='host'?`start game ${se.gn+1} when you're both ready.`:`waiting for the host to start game ${se.gn+1}…`}`;
    $('olNext').hidden=!(me==='host'&&!se.done);$('olNext').textContent=`START GAME ${se.gn+1}`}}
  awardPacks(win);
- $('toLobby').hidden=!onl;if(onl){$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
+ $('toLobby').hidden=!onl;if(onl){resumeClear();$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false}
  if(S.celebr){const ce=S.celebr;setTimeout(()=>{if(S.phase==='over'&&S.celebr===ce)$('over').hidden=false},3400)}else $('over').hidden=false;updateHUD();
 }
