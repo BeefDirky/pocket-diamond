@@ -1,5 +1,10 @@
 // the player line in the at-bat / pitching boxes: the club's logo, then the name
-function muSet(id,k,txt){const el=$(id);el.textContent='';if(LOGO_URL[k]){const im=document.createElement('img');im.className='muLogo';im.src=LOGO_URL[k];im.alt=TEAMS[k].name;el.appendChild(im)}el.appendChild(document.createTextNode(txt))}
+function muSet(id,k,txt,tags){const el=$(id);el.textContent='';const box=el.closest('.mu');if(box){box.style.setProperty('--tc',TEAMS[k].jersey);box.style.setProperty('--tc2',TEAMS[k].cap)}
+ if(LOGO_URL[k]){const lb=document.createElement('span');lb.className='muLogo';const im=document.createElement('img');im.src=LOGO_URL[k];im.alt=TEAMS[k].name;lb.appendChild(im);el.appendChild(lb)}
+ const nm=document.createElement('span');nm.className='muNm';nm.textContent=txt;el.appendChild(nm);
+ for(const t of tags||[])if(t){const sp=document.createElement('span');sp.className='muTag';sp.textContent=t;el.appendChild(sp)}}
+// a row of stat cells like a broadcast graphic: small label over a big value
+const muStats=L=>`<span class="muStats">${L.map(([k,v])=>`<span class="muSt"><i>${k}</i>${v}</span>`).join('')}</span>`;
 // ---------- HUD ----------
 function banner(t,s,tone){if(OPT.info===false&&['windup','pitch','play','call','result'].includes(S.phase))return;$('bt').textContent=t;$('bs').textContent=s||'';$('banner').dataset.tone=tone||'';$('banner').hidden=false}
 function hideBanner(){$('banner').hidden=true}
@@ -40,10 +45,10 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  for(const pb of document.querySelectorAll('#actsPitch .pbtn'))pb.disabled=S.phase!=='choose';
  {const bg=document.querySelector('.bug'),pb=document.querySelector('.pcBox');if(bg&&pb){pb.style.top=(bg.offsetTop+bg.offsetHeight)+'px';pb.style.width=bg.offsetWidth+'px';pb.style.boxSizing='border-box'}}
  $('pcV').textContent=(S.pcOf&&S.pcOf[fldKey()])||0;$('bugInn').textContent=S.phase==='title'?'':`${S.mode==='full'&&S.half==='top'?'▲':'▼'}${S.inning}`;
- muSet('abName',batKey(),`${((S.orderOf&&S.orderOf[batKey()])||0)+1}. #${b.no} ${b.name} · ${b.pos}`);
- $('abHand').innerHTML=(b.hand==='S'?`Switch (<b>${effHand(b)}</b>)`:`Bats <b>${b.hand}</b>`)+` · CON ${rb(b.con)} POW ${rb(b.pow)} SPD ${rb(b.spd)}`;
- muSet('pName',fldKey(),`#${p.no} ${p.name}`);
- if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing: <button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button><span class="bpStat">${S.bp.sw} swings · ${S.bp.hr} HR · longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=`Throws <b>${p.hand}</b>${p.slot==='side'?' (sidearm)':''}${p.type==='demon'?' · <b class="dmn">SPEED DEMON</b>':p.type==='knuckle'?' · <b class="knk">KNUCKLER</b>':''} · VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}`;
+ muSet('abName',batKey(),b.name,[b.pos,`#${b.no}`,`${ord(((S.orderOf&&S.orderOf[batKey()])||0)+1).toUpperCase()} UP`]);
+ $('abHand').innerHTML=muStats([[b.hand==='S'?'SWITCH':'BATS',`<b>${b.hand==='S'?effHand(b):b.hand}</b>`],['CON',rb(b.con)],['POW',rb(b.pow)],['SPD',rb(b.spd)]]);
+ muSet('pName',fldKey(),p.name,[`#${p.no}`,p.slot==='side'?'SIDEARM':'']);
+ if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing: <button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button><span class="bpStat">${S.bp.sw} swings <i class=muSep></i> ${S.bp.hr} HR <i class=muSep></i> longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=muStats([['THROWS',`<b>${p.hand}</b>`],['VEL',rb(p.vel)],['MOV',rb(p.mov)],['CTL',rb(p.ctl)]])+(p.type==='demon'?'<span class="muTag dmn">SPEED DEMON</span>':p.type==='knuckle'?'<span class="muTag knk">KNUCKLER</span>':'');
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});
 }

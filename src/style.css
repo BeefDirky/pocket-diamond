@@ -683,4 +683,23 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .autoBtn,.infoBtn{font-size:10px!important;padding:0 7px!important;height:26px;display:flex;align-items:center;gap:4px;box-sizing:border-box;line-height:1}
 .autoBtn{bottom:max(8px,env(safe-area-inset-bottom,0px))}
 
-.muLogo{width:1.6em;height:1.6em;vertical-align:-.45em;margin-right:.4em;image-rendering:pixelated}
+
+/* ---- at-bat / pitching boxes, broadcast style: a team-coloured strip, logo tile, big name, stat cells ---- */
+.mu{--tc:#2f6fd0;--tc2:#c8202a;position:relative;padding:0!important;overflow:hidden;border-left:6px solid var(--tc)!important}
+.mu .k{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--tc),rgba(0,0,0,.25));color:#fff;font-family:var(--f-hud);font-size:12px;letter-spacing:.14em;padding:4px 10px;text-shadow:1px 1px 0 rgba(0,0,0,.45)}
+.mu .v{display:flex;align-items:center;gap:8px;margin:0;padding:7px 10px 4px;font-size:19px;letter-spacing:.02em;color:var(--chalk)}
+.mu .v .muNm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.muLogo{flex:none;width:34px;height:34px;display:grid;place-items:center;background:rgba(0,0,0,.35);border:2px solid var(--tc)}
+.muLogo img{width:28px;height:28px;image-rendering:pixelated}
+.muTag{flex:none;font-family:var(--f-hud);font-size:12px;letter-spacing:.06em;padding:2px 6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:var(--chalk)}
+.muTag.dmn{color:#ff8a4a;border-color:#ff8a4a}.muTag.knk{color:#c9a6ff;border-color:#c9a6ff}
+.mu .h{margin:0;padding:0 10px 8px;font-size:13px;line-height:1.3;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.muStats{display:flex;gap:0;border:1px solid rgba(255,255,255,.12)}
+.muSt{display:flex;flex-direction:column;align-items:center;min-width:46px;padding:2px 8px;border-left:1px solid rgba(255,255,255,.12)}
+.muSt:first-child{border-left:0}
+.muSt i{font-style:normal;font-size:9px;letter-spacing:.14em;color:var(--dim)}
+.muSt b{font-family:var(--f-hud);font-size:17px;line-height:1.1}
+.muSep{display:inline-block;width:1px;height:10px;background:rgba(255,255,255,.3);margin:0 4px;vertical-align:middle}
+.muBat::after,.muPit.canPen::after{top:5px;color:#fff;opacity:.85;font-size:10px}
+.app.deskApp>.matchup{width:400px}
+@media (max-width:560px){.mu .v{font-size:15px;padding:5px 8px 3px}.muLogo{width:26px;height:26px}.muLogo img{width:20px;height:20px}.muSt{min-width:34px;padding:1px 5px}.muSt b{font-size:13px}.mu .k{font-size:10px;padding:3px 8px}.mu .h{padding:0 8px 6px}}

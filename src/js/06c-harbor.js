@@ -245,7 +245,17 @@ function drawHarbor(g,k,night,CW,CH,cx,cy,OL,e){const P=(xf,yf)=>({x:cx(HX+xf/FT
   for(let a=.15;a<Math.PI-.1;a+=.22){const x=gx+Math.cos(a)*(R-6),y=gy+Math.sin(a)*(R-6);g.fillStyle='#2b3038';g.fillRect(x,y-6,1,7);g.fillStyle=(a*10|0)&1?'#2f6fd0':'#f4f1e8';g.fillRect(x+1,y-6,4,3)}
   for(let a=.08;a<Math.PI;a+=.16){const x=gx+Math.cos(a)*(R+8),y=gy+Math.sin(a)*(R+8);hBlossom(g,x,y,5,night)}}}
 
-function hBlossom(g,x,y,r,night){g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.arc(x+2,y+2,r,0,7);g.fill();g.fillStyle=night?'#5a3a4a':'#f2a7c3';g.beginPath();g.arc(x,y,r,0,7);g.fill();g.fillStyle=night?'#6a4a5a':'#f9cde0';g.beginPath();g.arc(x-r*.35,y-r*.35,r*.5,0,7);g.fill()}
+// a tree from above: a darker shadowed base, three or four overlapping leaf clumps, a lit crown and a few highlight
+// flecks (pink blossom or green leaf). Seeded by position so the same tree always looks the same.
+function hTreeTop(g,x,y,r,cols){const h=vHash(Math.round(x*3),Math.round(y*3)),[dk,md,lt,hi]=cols;
+ g.fillStyle='rgba(0,0,0,.24)';g.beginPath();g.arc(x+r*.45,y+r*.45,r,0,7);g.fill();
+ g.fillStyle=dk;g.beginPath();g.arc(x,y,r,0,7);g.fill();
+ const n=3+(h&1);for(let k=0;k<n;k++){const a=(h>>>3)%628/100+k*6.283/n,d=r*.38;g.fillStyle=md;g.beginPath();g.arc(x+Math.cos(a)*d-r*.08,y+Math.sin(a)*d-r*.08,r*.56,0,7);g.fill()}
+ g.fillStyle=lt;g.beginPath();g.arc(x-r*.3,y-r*.3,r*.42,0,7);g.fill();
+ g.fillStyle=hi;for(let k=0;k<3;k++){const a=((h>>>(9+k*4))&15)/16*6.283,d=r*(.2+((h>>>(20+k))&1)*.3);g.fillRect(Math.round(x-r*.25+Math.cos(a)*d),Math.round(y-r*.25+Math.sin(a)*d),1,1)}}
+const H_TCOL={pink:['#d98aa8','#f2a7c3','#f9cde0','#ffffff'],pinkN:['#4a2e3c','#5a3a4a','#6a4a5a','#8a6a7a'],green:['#2f6b2c','#3f8a3c','#58a64c','#8fd070'],greenN:['#122618','#183020','#1e3a26','#2a4a32']};
+function hBlossom(g,x,y,r,night){hTreeTop(g,x,y,r,H_TCOL[night?'pinkN':'pink'])}
+function hGreenTree(g,x,y,r,night){hTreeTop(g,x,y,r,H_TCOL[night?'greenN':'green'])}
 
 // night: the lighthouse, the gate, warm light spilling from the facade, port masts, and the stadium's light on the water
 function drawHarborGlow(g,cx,cy,OL){const P=(xf,yf)=>({x:cx(HX+xf/FT),y:cy(HY-yf/FT)});g.save();g.globalCompositeOperation='lighter';
@@ -280,26 +290,26 @@ function hSpots(){const key=DIMS.join(',');if(H_SPOTS&&H_SPOTS_K===key)return H_
    const p=hW(th,Rm);out.push({x:p.x,y:p.y,ang:-th*RAD,kind:k%4===2?'cafe':'para',col:k%3})}}
  // round the cove: in the middle of the promenade, outside the stadium and clear of the right-field deck
  {let acc=0,k=0;for(let a=-180;a<180;a+=.25){const ar=a*RAD,Rm=hCoveR(H_COVE_C.x+Math.sin(ar),H_COVE_C.y+Math.cos(ar))+9.4,x=H_COVE_C.x+Math.sin(ar)*Rm,y=H_COVE_C.y+Math.cos(ar)*Rm;acc+=Rm*.25*RAD;
-   if(!hEastLand(x,y)||hOwnDeck(x,y)||insidePoly(hOutline(),HX+x/FT,HY-y/FT)){acc=14;continue}if(acc<24)continue;acc=0;k++;const p={x:HX+x/FT,y:HY-y/FT};out.push({x:p.x,y:p.y,ang:-ar+Math.PI,kind:k%5===3?'cafe':'para',col:k%3})}}
+   if(!hEastLand(x,y)||hOwnDeck(x,y)||insidePoly(hOutline(),HX+x/FT,HY-y/FT)){acc=10;continue}if(acc<17)continue;acc=0;k++;const p={x:HX+x/FT,y:HY-y/FT};out.push({x:p.x,y:p.y,ang:-ar+Math.PI,kind:k%5===3?'cafe':'para',col:k%3,sc:.55})}}
  return H_SPOTS=out}
 // is this point on (or right by) the right-field deck?
 function hOwnDeck(x,y){const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;if(y<=0||th<=8||th>45)return false;return r<fenceDist(th)+hPenOff(th)+H_WALLW+hDeckW(th)+10}
 const H_PCOL=[['#2f6fd0','#f4f6fa'],['#14325a','#f4f6fa'],['#5aa0e6','#f4f6fa']];
-function hParasol(g,x,y,col){const r=11,[c1,c2]=H_PCOL[col];
- g.fillStyle='rgba(16,24,32,.28)';g.beginPath();g.arc(x+5,y+4,r,0,7);g.fill();// its shadow on the boards
- g.fillStyle='#6b4a2e';g.fillRect(Math.round(x-r-3),Math.round(y-1),3,3);g.fillRect(Math.round(x+r),Math.round(y-1),3,3);// two chairs peeking out
+function hParasol(g,x,y,col,sc){sc=sc||1;const r=11*sc,[c1,c2]=H_PCOL[col];
+ g.fillStyle='rgba(16,24,32,.28)';g.beginPath();g.arc(x+5*sc,y+4*sc,r,0,7);g.fill();// its shadow on the boards
+ g.fillStyle='#6b4a2e';const ch=Math.max(2,Math.round(3*sc));g.fillRect(Math.round(x-r-ch),Math.round(y-1),ch,ch);g.fillRect(Math.round(x+r),Math.round(y-1),ch,ch);// two chairs peeking out
  for(let k=0;k<8;k++){const a0=k*Math.PI/4-Math.PI/8,a1=a0+Math.PI/4,lit=Math.cos(a0+Math.PI/8+Math.PI*.75)>.2;
   g.fillStyle=k&1?(lit?'#ffffff':c2):(lit?shade(c1,.18):c1);g.beginPath();g.moveTo(x,y);g.arc(x,y,r,a0,a1);g.closePath();g.fill()}
  g.strokeStyle='rgba(10,20,40,.45)';g.lineWidth=1;g.beginPath();g.arc(x,y,r-.5,0,7);g.stroke();
  g.fillStyle='#2b3038';g.fillRect(Math.round(x-1),Math.round(y-1),2,2)}
-function hCafe(g,x,y,ang){g.save();g.translate(x,y);g.rotate(ang);const w=32,h=20;
+function hCafe(g,x,y,ang,sc){g.save();g.translate(x,y);g.rotate(ang);if(sc)g.scale(sc,sc);const w=32,h=20;
  g.fillStyle='rgba(16,24,32,.3)';g.fillRect(-w/2+5,-h/2+4,w,h);
  g.fillStyle='#14325a';g.fillRect(-w/2,-h/2,w,h-7);g.fillStyle='#21457a';g.fillRect(-w/2+1,-h/2+1,w-2,h-10);g.fillStyle='#e8eef5';g.fillRect(-w/2,-h/2,w,1);
  g.fillStyle='#8a939b';g.fillRect(-w/2+4,-h/2+3,5,4);g.fillStyle='#4f86c6';g.fillRect(w/2-9,-h/2+3,5,4);// rooftop unit and tank
  for(let k=0;k<w;k+=4){g.fillStyle=(k/4)&1?'#f4f6fa':'#2f6fd0';g.fillRect(-w/2+k,h/2-7,4,6)}g.fillStyle='rgba(0,0,0,.18)';g.fillRect(-w/2,h/2-1,w,1);// the striped awning over the counter
  g.restore()}
 function hDecor(g){
- for(const p of hSpots()){if(p.kind==='cafe')hCafe(g,p.x,p.y,p.ang);else hParasol(g,p.x,p.y,p.col)}
+ for(const p of hSpots()){if(p.kind==='cafe')hCafe(g,p.x,p.y,p.ang,p.sc);else hParasol(g,p.x,p.y,p.col,p.sc)}
  // the wall: club and sponsor boards painted on the pads, distances at the poles, the gaps and dead centre
  const wallAt=th=>fenceDist(th)-4.6;// the middle of the padded face, just inside the fence
  g.save();g.textAlign='center';g.textBaseline='middle';
@@ -327,11 +337,11 @@ function drawHarborLights(c,vx0,vy0,scale,now){if(!ST||!ST.harbor||!S.night||S.p
  // the lighthouse lamp turning: a soft cone sweeping slowly round the breakwater (one turn every 9 seconds)
  {const[lx,ly]=H_JETTY[H_JETTY.length-1],L={x:HX+lx/FT,y:HY-ly/FT},a=now/9000*Math.PI*2,R=520,sp=.2;
   if(!H_BEAM){H_BEAM=document.createElement('canvas');H_BEAM.width=H_BEAM.height=256;const q=H_BEAM.getContext('2d'),gr=q.createRadialGradient(128,128,4,128,128,128);
-   gr.addColorStop(0,'rgba(255,246,210,.55)');gr.addColorStop(.35,'rgba(255,240,200,.2)');gr.addColorStop(1,'rgba(255,240,200,0)');q.fillStyle=gr;q.fillRect(0,0,256,256)}
+   gr.addColorStop(0,'rgba(255,246,210,.3)');gr.addColorStop(.35,'rgba(255,240,200,.1)');gr.addColorStop(1,'rgba(255,240,200,0)');q.fillStyle=gr;q.fillRect(0,0,256,256)}
   c.save();c.translate(L.x,L.y);c.rotate(a);c.beginPath();c.moveTo(0,0);c.arc(0,0,R,-sp,sp);c.closePath();c.clip();c.drawImage(H_BEAM,-R,-R,R*2,R*2);c.restore();
   // the beam's back side, fainter, and the lamp itself flaring as the beam faces the camera
   c.save();c.translate(L.x,L.y);c.rotate(a+Math.PI);c.beginPath();c.moveTo(0,0);c.arc(0,0,R*.35,-sp*.8,sp*.8);c.closePath();c.clip();c.globalAlpha=.5;c.drawImage(H_BEAM,-R*.35,-R*.35,R*.7,R*.7);c.restore();
-  const fl=.55+.45*Math.max(0,Math.cos(a-Math.PI/2)),gr=c.createRadialGradient(L.x,L.y,0,L.x,L.y,26);gr.addColorStop(0,`rgba(255,250,220,${.9*fl})`);gr.addColorStop(1,'rgba(255,250,220,0)');c.fillStyle=gr;c.fillRect(L.x-26,L.y-26,52,52)}
+  const fl=.55+.45*Math.max(0,Math.cos(a-Math.PI/2)),gr=c.createRadialGradient(L.x,L.y,0,L.x,L.y,26);gr.addColorStop(0,`rgba(255,250,220,${.55*fl})`);gr.addColorStop(1,'rgba(255,250,220,0)');c.fillStyle=gr;c.fillRect(L.x-26,L.y-26,52,52)}
  c.restore()}
 let H_BEAM=null;
 // ---- the Ulsan city: each block is laid out as one designed piece (an apartment complex, a commercial building, a
@@ -360,7 +370,7 @@ function hCityBlock(g,x0,y0,x1,y1,night,rr){const w=x1-x0,h=y1-y0,R=(x,y,ww,hh,c
   R(x0+12,y0+h-yh*.62-4,yw-12,1,night?'#4a3a30':'#e8e4dc');bld(x0+6,y0+5,w-12,h*.28,'#e8d8b8',8,{lit:.2,tank:true});return}
  if(v<.68&&w>36&&h>30){// a pocket park: lawn, a looping path, trees, a pavilion
   C.park++;R(x0,y0,w,h,night?'#1d2a1d':'#7cb85c');g.strokeStyle=night?'#3a3a36':'#e0d6bc';g.lineWidth=3;g.beginPath();g.ellipse(x0+w/2,y0+h/2,w*.32,h*.3,0,0,7);g.stroke();
-  for(let k=0;k<Math.max(4,(w*h)/260|0);k++){const tx=x0+4+rr()*(w-8),ty=y0+4+rr()*(h-8);if(rr()<.45)hBlossom(g,tx,ty,4,night);else{g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.arc(tx+2,ty+2,4.5,0,7);g.fill();g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(tx,ty,4.5,0,7);g.fill();g.fillStyle=night?'#1e3a26':'#58a64c';g.beginPath();g.arc(tx-1.5,ty-1.5,2,0,7);g.fill()}}
+  for(let k=0;k<Math.max(4,(w*h)/260|0);k++){const tx=x0+4+rr()*(w-8),ty=y0+4+rr()*(h-8);if(rr()<.45)hBlossom(g,tx,ty,4,night);else hGreenTree(g,tx,ty,4.5,night)}
   return}
  // otherwise a street of shop houses: a row of buildings of varied widths and heights round the edge, a lane through the middle
  const roofs=night?['#2b3038','#323840','#2a2e34','#363b42']:['#d9d5ca','#b9b6ae','#c9c4b8','#e4e1d8','#8fa3b5','#a8b39a','#b5654a','#cfc6b0','#9aa3ab','#6f8fa8'];

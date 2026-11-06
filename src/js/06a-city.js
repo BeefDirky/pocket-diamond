@@ -66,7 +66,7 @@ H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  g.setLineDash([4,5]);g.strokeStyle=col.lane;g.lineWidth=1;g.stroke();g.restore();
  // plaza trees + lamp posts
  for(let i=0;i<OL.length;i+=2){const q=OL[i],dx=q.x-cx(HX),dy=q.y-cy(HY),l=Math.hypot(dx,dy)||1,o=20+rr()*8,x=q.x+dx/l*o,y=q.y+dy/l*o;
-  if(rr()<.7){g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.arc(x+2,y+2,4,0,7);g.fill();if(STADIUMS[k].harbor&&rr()<.6)hBlossom(g,x,y,4,night);else{g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x,y,4,0,7);g.fill();g.fillStyle=night?'#22402a':'#5aa64c';g.beginPath();g.arc(x-1,y-1,2,0,7);g.fill()}}
+  if(rr()<.7){if(STADIUMS[k].harbor&&rr()<.6)hBlossom(g,x,y,4,night);else{hGreenTree(g,x,y,4,night)}}
   else if(night){const gr=g.createRadialGradient(x,y,0,x,y,10);gr.addColorStop(0,'rgba(255,225,150,.5)');gr.addColorStop(1,'rgba(255,225,150,0)');g.fillStyle=gr;g.fillRect(x-10,y-10,20,20)}}
  // avenues: a grid around the park
  const roadsV=[],roadsH=[];for(let x=18;x<CW;x+=90+Math.floor(rr()*40))roadsV.push(x);for(let y=16;y<CH;y+=80+Math.floor(rr()*36))roadsH.push(y);
@@ -87,8 +87,8 @@ H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  for(const x of roadsV)for(let y=0;y<CH;y+=2)if(!near(x+3,y,40)&&!inWater(y,2)){R(x,y,6,2,col.road);if(y%8===0)R(x+2.5,y,1,1,col.lane);if(night&&y%14===0){R(x-1,y,1,1,'#ffe0a0');R(x+6,y,1,1,'#ffe0a0')}}
  for(const y of roadsH)for(let x=0;x<CW;x+=2)if(!near(x,y+3,40)&&!inWater(y,6)){R(x,y,2,6,col.road);if(x%8===0)R(x,y+2.5,1,1,col.lane)}
  // the harbor city's avenues are lined with cherry trees, and city buses run them
- if(STADIUMS[k].harbor){for(const x of roadsV)for(let y=6;y<CH;y+=15)for(const sd of[-3,9])if(!near(x+sd,y,44)){const pink=((x*7+y*13)>>2)%5<3;if(pink)hBlossom(g,x+sd,y,3,night);else{g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x+sd,y,3,0,7);g.fill()}}
-  for(const y of roadsH)for(let x=10;x<CW;x+=15)for(const sd of[-3,9])if(!near(x,y+sd,44)){const pink=((x*11+y*5)>>2)%5<3;if(pink)hBlossom(g,x,y+sd,3,night);else{g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x,y+sd,3,0,7);g.fill()}}
+ if(STADIUMS[k].harbor){for(const x of roadsV)for(let y=6;y<CH;y+=15)for(const sd of[-3,9])if(!near(x+sd,y,44)){const pink=((x*7+y*13)>>2)%5<3;if(pink)hBlossom(g,x+sd,y,3,night);else hGreenTree(g,x+sd,y,3,night)}
+  for(const y of roadsH)for(let x=10;x<CW;x+=15)for(const sd of[-3,9])if(!near(x,y+sd,44)){const pink=((x*11+y*5)>>2)%5<3;if(pink)hBlossom(g,x,y+sd,3,night);else hGreenTree(g,x,y+sd,3,night)}
   for(let i=0;i<26;i++){const vert=rr()<.5,x=vert?roadsV[Math.floor(rr()*roadsV.length)]+1:rr()*CW,y=vert?rr()*CH:roadsH[Math.floor(rr()*roadsH.length)]+1;if(near(x,y,44))continue;
    g.fillStyle='rgba(0,0,0,.3)';g.fillRect(x+1,y+1,vert?4:11,vert?11:4);g.fillStyle='#2f6fd0';g.fillRect(x,y,vert?4:11,vert?11:4);g.fillStyle=night?'#ffe0a0':'#bfe3ff';if(vert)for(let q=1;q<10;q+=2)g.fillRect(x+.5,y+q,3,1);else for(let q=1;q<10;q+=2)g.fillRect(x+q,y+.5,1,3)}}
  // traffic
