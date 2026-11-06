@@ -153,8 +153,8 @@ function buildField(){H_NIGHT=false;
      else{col=ST.bowl?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatMask[i]=1}}
    }
   }else{
-   const dOut=D[i]/3/K;const wallT=fairBig[i]?ST.wallFt*2:6;
    const fair=Math.abs(th)<=45&&y>=0;
+   const dOut=ST.bowl&&fair?(fenceDist(th)-r)/FT/K:D[i]/3/K;const wallT=fairBig[i]?ST.wallFt*2:6;// the bowl parks measure the wall straight from the fence line, so its top line runs clean
    if(dOut<wallT&&ST.bowl&&fair){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
     const sF=r*th*RAD,m=((sF%18)+18)%18,id=Math.floor(sF/18);
     col=dOut<1.4?HB.wallY:dOut<2.4?HB.wallCap:m<.9?HB.seam:dOut>wallT-2.5?hMul((id&1)?HB.pad2:HB.pad1,.72):(id&1)?HB.pad2:HB.pad1}

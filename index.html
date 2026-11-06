@@ -741,6 +741,21 @@ body.inMenu .olNet{display:none!important}
 .tsCenter{width:100%}
 .tsCenter #tsName,.tsCenter #tsSub{max-width:100%;text-align:center;overflow-wrap:anywhere}
 #scrTeams h1{font-size:clamp(20px,5vw,30px)}
+/* runner info tooltip */
+#runTip{position:fixed;z-index:60;pointer-events:none;background:rgba(8,14,20,.94);border:2px solid #ffbf3c;color:#f4f1e8;font:12px "Pixelify Sans",monospace;padding:6px 8px;min-width:120px;box-shadow:3px 3px 0 rgba(0,0,0,.4)}
+#runTip .rtN{font-weight:700;letter-spacing:.5px;margin-bottom:4px;white-space:nowrap}
+#runTip .rtS{display:flex;align-items:center;gap:6px}#runTip .rtS span{color:#9aa6b0;font-size:10px}#runTip .rtS b{font-size:15px;color:#7fd8ff;min-width:20px}
+#runTip .rtS i{flex:1;height:5px;background:#24303a;display:block}#runTip .rtS em{display:block;height:100%;background:#7fd8ff}
+#runTip .rtT{color:#ffbf3c;font-size:10px;margin-top:4px}
+/* desktop: the pitcher's box sits on the right, above AUTO / INFO; the batter's stays bottom-left */
+.app.deskApp>.matchup>.muPit{position:fixed;left:auto;right:14px;bottom:142px;width:400px;z-index:6}
+.app.deskApp .skipBtn{bottom:290px}
+@media (max-width:999px){
+ .app.deskApp>.matchup{transform:none;width:auto;bottom:50px}
+ .app.deskApp>.matchup>.muBat{width:340px;transform:scale(.64);transform-origin:bottom left}
+ .app.deskApp>.matchup>.muPit{width:340px;bottom:116px;transform:scale(.64);transform-origin:bottom right}
+ .app.deskApp .skipBtn{bottom:206px}
+}
 </style>
 
 <div class="app">
@@ -2376,7 +2391,7 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
 // the colour of harbor ground at a world pixel, or null where the plain city carries on
 function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const x=(wx-HX)*FT,y=(HY-wy)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th);
  const n=vHash(Math.floor(wx/3),Math.floor(wy/3)),fair=y>0&&ath<=45,q=fair?r-fenceDist(th):-1,s=r*th*RAD;
- if(fair&&q>=0){const q0=ath>=29&&ath<=41?18:0;if(q<q0)return HB.wallCap;if(q<q0+H_WALLW)return hWall(q-q0,s,n)}
+ if(fair&&q>=0){const q0=hPenOff(th);if(q0>.5&&q<q0)return HB.wallCap;if(q<q0+H_WALLW){const w=hWall(q-q0,s,n);return q0>.5&&w===HB.wallY?HB.wallCap:w}}// behind a bullpen the wall carries no home-run line
  const phi=hPhi(x,y),D=hD(phi),Ro=hRout(phi),rc=Math.hypot(x-H_CC.x,y-H_CC.y),d=rc<Ro+4?hFieldD(x,y):1e4;
  if(d<=0&&PARK_C)return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2;// the last of the foul ground, past the park buffer's edge
  if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
@@ -3365,8 +3380,8 @@ function buildField(){H_NIGHT=false;
      else{col=ST.bowl?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatMask[i]=1}}
    }
   }else{
-   const dOut=D[i]/3/K;const wallT=fairBig[i]?ST.wallFt*2:6;
    const fair=Math.abs(th)<=45&&y>=0;
+   const dOut=ST.bowl&&fair?(fenceDist(th)-r)/FT/K:D[i]/3/K;const wallT=fairBig[i]?ST.wallFt*2:6;// the bowl parks measure the wall straight from the fence line, so its top line runs clean
    if(dOut<wallT&&ST.bowl&&fair){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
     const sF=r*th*RAD,m=((sF%18)+18)%18,id=Math.floor(sF/18);
     col=dOut<1.4?HB.wallY:dOut<2.4?HB.wallCap:m<.9?HB.seam:dOut>wallT-2.5?hMul((id&1)?HB.pad2:HB.pad1,.72):(id&1)?HB.pad2:HB.pad1}
@@ -4142,7 +4157,7 @@ function finalize(play,runners,res){
   let tThr=null;for(const sg of play.segs)if(sg.thr&&dist(sg.to,BASES[b%4])<5)tThr=sg.t1;
   // every runner going into second or third slides in feet first; stealers (and close plays at home) may dive head first
   const into23=(b===2||b===3)&&!r.steal;
-  if(into23||r.steal||(r.out&&r.outAt!=null)||(tThr!=null&&Math.abs(tThr-tArr)<.7)){const tA=r.out?Math.min(tArr,r.outAt):tArr;r.slide={t0:tA-.32,t1:tA,head:into23?false:(r.steal||Math.random()<.4),b}}}
+  if(into23||r.steal||(r.out&&r.outAt!=null)||(tThr!=null&&Math.abs(tThr-tArr)<.7)){const tA=r.out?Math.min(tArr,r.outAt):tArr;r.slide={t0:tA-.5,t1:tA,head:into23?false:(r.steal||Math.random()<.4),b}}}
  {let tE=0;for(const sg of play.segs)tE=Math.max(tE,sg.t1);
   for(let i=0;i<9;i++){if(play.dive&&play.dive.i===i)continue;const f=POS[i],ks=play.fk[i],lastT=ks?ks[ks.length-1].t:0,t0=Math.max(tE+.2,lastT),a=fpos(play,i,t0),d=dist(a,f);if(d<4)continue;
    if(!play.fk[i])play.fk[i]=[{t:0,x:f.x,y:f.y}];
@@ -5512,7 +5527,7 @@ const wb=document.createElement('canvas');wb.width=W;wb.height=H;const wg=wb.get
 let TOWERS=[];
 let FIELD=null,DECOR=null,SIGNS=null,CROWD_A=null,CROWD_B=null,FANS=[],CONC=[],AISLES=[],RAIL=[],FLAGFANS=[];
 function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,3);cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
-new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
+new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},gbPlay:(s,EV,b1)=>{S.bases=[b1?curBatter():null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());S.play=pl;S.phase='play';const th=pl.segs.filter(g=>g.thr).map(g=>[g.t0.toFixed(2),g.from.x|0,g.from.y|0]);return{end:pl.end,th,sl:pl.runners.filter(r=>r.slide).map(r=>({t0:r.slide.t0,t1:r.slide.t1,b:r.slide.b,head:r.slide.head,out:!!r.out}))}},setT:t=>{S.play.t=t},splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 // Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
 // Suwon's board is built into the fortress: a stone bastion around it, a purple frame, a tiled pavilion roof above
@@ -6067,13 +6082,16 @@ function render(now){
   if(!moving&&live){legs='ready';arms='ready'}
   if(!moving&&!live&&!inPlay&&Math.sin(now/700+i*1.7)>.85)legs='ready';
   if(!moving&&inPlay&&ph!=='result'){const bb=Math.sin(now/170+i*1.9);legs=bb>-.2?'ready':'stand';arms='ready'}
+  let thr=null,lean=0;
   if(inPlay&&ph!=='result')for(const sg of play.segs){
-   if(sg.thr&&t>=sg.t0&&t<sg.t0+.28&&dist(sg.from,p)<6){arms='throw';break}
+   if(sg.thr&&t>=sg.t0-.2&&t<sg.t0+.2&&dist(sg.from,p)<7){// a real throw: arm back, step toward the target, whip through and follow
+    const u=t<sg.t0?.72*clamp((t-(sg.t0-.2))/.2,0,1)*.6+.72*.4*clamp((t-(sg.t0-.2))/.2,0,1):.72+.28*clamp((t-sg.t0)/.2,0,1),fa=toPx(sg.from.x,sg.from.y),ta=toPx(sg.to.x,sg.to.y);
+    arms='proc';legs=u<.36?'ready':u<.8?'stride':'follow';thr={arm:armPath(u,false),gloveAt:gloveAt(u),ball:u<.72,flip:ta.x>fa.x};lean=u>.6&&u<.95?1:0;break}
    if(sg.air&&!sg.thr&&!play.foul&&t>sg.t1-.4&&t<=sg.t1+.15&&dist(sg.to,p)<9){arms='catch'}
    else if(sg.hold===i&&t>=sg.t0&&t<=sg.t1&&arms!=='catch')arms='ready';
   }
   const skin=S.fpl?skinOf(S.fpl[i].name):SKINS[hash(S.opp+i)%2];
-  let flip=true,armO=null,lean=0,pT=null;
+  let flip=true,armO=null,pT=null;if(thr){armO={arm:thr.arm,gloveAt:thr.gloveAt,ball:thr.ball};flip=thr.flip}
   if(i===0&&!inPlay&&ph!=='reset'){
    flip=pitcher().hand==='R';
    const side=pitcher().slot==='side';
@@ -6095,7 +6113,8 @@ function render(now){
  if(inPlay&&!play.foul){
   for(const r of play.runners){
    if(r.batter&&t<.6)continue;
-   if(r.out&&t>r.outAt+.3){const o=runnerPos(r,r.outAt+.3),sd=batKey()===S.you?1:-1,D={x:sd*84,y:14},dd=dist(o,D),k=Math.min(1,(t-r.outAt-.3)*6.5/Math.max(1,dd));
+   const tw=ph==='result'?play.end+Math.max(0,(now-(S.postAt||now))/1000):t;// a retired runner keeps jogging off after the play is over
+   if(r.out&&tw>r.outAt+.3){const o=runnerPos(r,r.outAt+.3),sd=batKey()===S.you?1:-1,D={x:sd*84,y:14},dd=dist(o,D),k=Math.min(1,(tw-r.outAt-.3)*6.5/Math.max(1,dd));
     if(k>=1)continue;const w={x:lerp(o.x,D.x,k),y:lerp(o.y,D.y,k)},q=toPx(w.x,w.y);
     add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:'run',arms:'down',frame:Math.floor(now/190)+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants,flip:D.x<w.x}));continue}
    const p=runnerPos(r,t);const q=toPx(p.x,p.y);
@@ -6110,12 +6129,12 @@ function render(now){
     // a rooster tail of dirt kicked up along the slide, and a puff at the bag when he gets there
     if(t<r.slide.t1){for(let n=0;n<2;n++)if(Math.random()<.85)DUST.push({x:sq.x+rand(-4,4),y:sq.y+rand(-1,1),vx:rand(-26,26)-dir*12,vy:rand(-30,-8),life:rand(.3,.6),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
     else if(!r.slide.puff){r.slide.puff=true;const bq2=toPx(bb.x,bb.y);for(let n=0;n<14;n++)DUST.push({x:bq2.x+rand(-5,5),y:bq2.y+rand(-2,2),vx:rand(-40,40),vy:rand(-34,-6),life:rand(.4,.8),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
-    const back=dir*9*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// keep the leading hand (or spikes) on the bag, then get up onto it
+    const back=dir*(r.slide.head?14:16)*K/1.333*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// the lead hand or spikes reach exactly the bag// keep the leading hand (or spikes) on the bag, then get up onto it
     add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));
   }
  }else if(ph!=='title'){
-  S.stealHit=[];
+  S.stealHit=[];S.runHit=[];
   S.bases.forEach((b,k)=>{if(!b)return;const bb=BASES[k+1],nb=BASES[(k+2)%4],going=S.steal&&S.steal[k+1]&&ph==='pitch'&&S.pitch&&S.pitch.releaseAt;
    let Lf=leadNow(k+1,ph,now)/LEG;if(going){const sp=stealProg(k+1,now);Lf=Math.min(.97,sp.L+sp.run)}
    const q=toPx(lerp(bb.x,nb.x,Lf),lerp(bb.y,nb.y,Lf));
@@ -6125,6 +6144,7 @@ function render(now){
      wg.beginPath();wg.moveTo(7,0);wg.lineTo(-1,-5);wg.lineTo(-1,-2);wg.lineTo(-6,-2);wg.lineTo(-6,2);wg.lineTo(-1,2);wg.lineTo(-1,5);wg.closePath();wg.fill();
      wg.strokeStyle='rgba(8,20,14,.8)';wg.lineWidth=1;wg.stroke();wg.restore();wg.globalAlpha=1})}
    if(going){add(q.y,()=>drawPlayer(wg,q.x,q.y,bat,{legs:'run',arms:'run',frame:Math.floor(now/70)+k,skin:runSkin(b),helmet:true,pants:batPants,flip:nb.x<bb.x}));return}
+   S.runHit.push({x:q.x,y:q.y-9,who:b,k:k+1});
    const off=Lf>0?0:7,back=ph==='call'&&Lf>0;add(q.y,()=>drawPlayer(wg,q.x+off,q.y,bat,{legs:back?'run':(live||Lf>0)?'ready':'stand',arms:back?'run':'down',frame:Math.floor(now/110)+k,skin:runSkin(b),helmet:true,pants:batPants,flip:back}))});
  }
  // batter
@@ -6443,7 +6463,17 @@ function frame(now){const dt=Math.min(50,now-last);last=now;update(dt,now);if(!(
 
 // ---------- input ----------
 const overlayOpen=()=>!$('title').hidden||!$('over').hidden;
+// runner info: hover a runner (mouse) or tap one (touch) to see his speed
+const RUNTIP=(()=>{const d=document.createElement('div');d.id='runTip';d.hidden=true;document.body.appendChild(d);return d})();let runTipT=0;
+function cvWorld(e){const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*cv.width/r.width,py=(e.clientY-r.top)*cv.height/r.height;return{x:S.view.sx+(px-S.view.ox)/S.view.scale,y:S.view.sy+(py-(S.view.oy||0))/S.view.scale}}
+function runnerAt(e){if(!S.view||!S.runHit||!S.runHit.length||S.phase==='title')return null;const w=cvWorld(e);let best=null,bd=14;for(const h of S.runHit){const d=Math.hypot(h.x-w.x,h.y-w.y);if(d<bd){bd=d;best=h}}return best}
+function showRunTip(h,e){const w=h.who,sp=w.spd||60,tag=sp>=85?'BURNER':sp>=72?'QUICK':sp>=55?'AVERAGE':'SLOW',fill=Math.round(clamp((sp-20)/79,0,1)*100);
+ RUNTIP.innerHTML=`<div class="rtN">${['','1B','2B','3B'][h.k]} · ${w.name}</div><div class="rtS"><span>SPD</span><b>${sp}</b><i><em style="width:${fill}%"></em></i></div><div class="rtT">${tag}${canSteal(h.k)?' · steal arrow ready':''}</div>`;
+ RUNTIP.hidden=false;const W2=RUNTIP.offsetWidth,H2=RUNTIP.offsetHeight;RUNTIP.style.left=Math.min(innerWidth-W2-6,Math.max(6,e.clientX-W2/2))+'px';RUNTIP.style.top=Math.max(6,e.clientY-H2-18)+'px'}
+cv.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const h=runnerAt(e);if(h){showRunTip(h,e);cv.style.cursor='help'}else if(Date.now()>runTipT){RUNTIP.hidden=true;cv.style.cursor=''}});
+cv.addEventListener('pointerleave',()=>{if(Date.now()>runTipT)RUNTIP.hidden=true});
 cv.addEventListener('pointerdown',e=>{if(overlayOpen())return;e.preventDefault();if(S.phase==='play'&&S.play&&S.play.hrFired){skipTrot();return}
+ if(e.pointerType!=='mouse'){const h=runnerAt(e);if(h&&!(S.stealHit||[]).some(s2=>{const w=cvWorld(e);return Math.hypot(s2.x-w.x,s2.y-w.y)<16})){showRunTip(h,e);runTipT=Date.now()+2200;setTimeout(()=>{if(Date.now()>=runTipT)RUNTIP.hidden=true},2300);return}}
  if(S.view&&S.stealHit&&S.stealHit.length){const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*cv.width/r.width,py=(e.clientY-r.top)*cv.height/r.height,wx=S.view.sx+(px-S.view.ox)/S.view.scale,wy=S.view.sy+(py-(S.view.oy||0))/S.view.scale;
   for(const h of S.stealHit)if(Math.hypot(h.x-wx,h.y-wy)<16){toggleSteal(h.k);return}}
  swing()});

@@ -1,6 +1,16 @@
 // ---------- input ----------
 const overlayOpen=()=>!$('title').hidden||!$('over').hidden;
+// runner info: hover a runner (mouse) or tap one (touch) to see his speed
+const RUNTIP=(()=>{const d=document.createElement('div');d.id='runTip';d.hidden=true;document.body.appendChild(d);return d})();let runTipT=0;
+function cvWorld(e){const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*cv.width/r.width,py=(e.clientY-r.top)*cv.height/r.height;return{x:S.view.sx+(px-S.view.ox)/S.view.scale,y:S.view.sy+(py-(S.view.oy||0))/S.view.scale}}
+function runnerAt(e){if(!S.view||!S.runHit||!S.runHit.length||S.phase==='title')return null;const w=cvWorld(e);let best=null,bd=14;for(const h of S.runHit){const d=Math.hypot(h.x-w.x,h.y-w.y);if(d<bd){bd=d;best=h}}return best}
+function showRunTip(h,e){const w=h.who,sp=w.spd||60,tag=sp>=85?'BURNER':sp>=72?'QUICK':sp>=55?'AVERAGE':'SLOW',fill=Math.round(clamp((sp-20)/79,0,1)*100);
+ RUNTIP.innerHTML=`<div class="rtN">${['','1B','2B','3B'][h.k]} · ${w.name}</div><div class="rtS"><span>SPD</span><b>${sp}</b><i><em style="width:${fill}%"></em></i></div><div class="rtT">${tag}${canSteal(h.k)?' · steal arrow ready':''}</div>`;
+ RUNTIP.hidden=false;const W2=RUNTIP.offsetWidth,H2=RUNTIP.offsetHeight;RUNTIP.style.left=Math.min(innerWidth-W2-6,Math.max(6,e.clientX-W2/2))+'px';RUNTIP.style.top=Math.max(6,e.clientY-H2-18)+'px'}
+cv.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const h=runnerAt(e);if(h){showRunTip(h,e);cv.style.cursor='help'}else if(Date.now()>runTipT){RUNTIP.hidden=true;cv.style.cursor=''}});
+cv.addEventListener('pointerleave',()=>{if(Date.now()>runTipT)RUNTIP.hidden=true});
 cv.addEventListener('pointerdown',e=>{if(overlayOpen())return;e.preventDefault();if(S.phase==='play'&&S.play&&S.play.hrFired){skipTrot();return}
+ if(e.pointerType!=='mouse'){const h=runnerAt(e);if(h&&!(S.stealHit||[]).some(s2=>{const w=cvWorld(e);return Math.hypot(s2.x-w.x,s2.y-w.y)<16})){showRunTip(h,e);runTipT=Date.now()+2200;setTimeout(()=>{if(Date.now()>=runTipT)RUNTIP.hidden=true},2300);return}}
  if(S.view&&S.stealHit&&S.stealHit.length){const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*cv.width/r.width,py=(e.clientY-r.top)*cv.height/r.height,wx=S.view.sx+(px-S.view.ox)/S.view.scale,wy=S.view.sy+(py-(S.view.oy||0))/S.view.scale;
   for(const h of S.stealHit)if(Math.hypot(h.x-wx,h.y-wy)<16){toggleSteal(h.k);return}}
  swing()});

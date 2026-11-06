@@ -180,13 +180,16 @@ function render(now){
   if(!moving&&live){legs='ready';arms='ready'}
   if(!moving&&!live&&!inPlay&&Math.sin(now/700+i*1.7)>.85)legs='ready';
   if(!moving&&inPlay&&ph!=='result'){const bb=Math.sin(now/170+i*1.9);legs=bb>-.2?'ready':'stand';arms='ready'}
+  let thr=null,lean=0;
   if(inPlay&&ph!=='result')for(const sg of play.segs){
-   if(sg.thr&&t>=sg.t0&&t<sg.t0+.28&&dist(sg.from,p)<6){arms='throw';break}
+   if(sg.thr&&t>=sg.t0-.2&&t<sg.t0+.2&&dist(sg.from,p)<7){// a real throw: arm back, step toward the target, whip through and follow
+    const u=t<sg.t0?.72*clamp((t-(sg.t0-.2))/.2,0,1)*.6+.72*.4*clamp((t-(sg.t0-.2))/.2,0,1):.72+.28*clamp((t-sg.t0)/.2,0,1),fa=toPx(sg.from.x,sg.from.y),ta=toPx(sg.to.x,sg.to.y);
+    arms='proc';legs=u<.36?'ready':u<.8?'stride':'follow';thr={arm:armPath(u,false),gloveAt:gloveAt(u),ball:u<.72,flip:ta.x>fa.x};lean=u>.6&&u<.95?1:0;break}
    if(sg.air&&!sg.thr&&!play.foul&&t>sg.t1-.4&&t<=sg.t1+.15&&dist(sg.to,p)<9){arms='catch'}
    else if(sg.hold===i&&t>=sg.t0&&t<=sg.t1&&arms!=='catch')arms='ready';
   }
   const skin=S.fpl?skinOf(S.fpl[i].name):SKINS[hash(S.opp+i)%2];
-  let flip=true,armO=null,lean=0,pT=null;
+  let flip=true,armO=null,pT=null;if(thr){armO={arm:thr.arm,gloveAt:thr.gloveAt,ball:thr.ball};flip=thr.flip}
   if(i===0&&!inPlay&&ph!=='reset'){
    flip=pitcher().hand==='R';
    const side=pitcher().slot==='side';
@@ -208,7 +211,8 @@ function render(now){
  if(inPlay&&!play.foul){
   for(const r of play.runners){
    if(r.batter&&t<.6)continue;
-   if(r.out&&t>r.outAt+.3){const o=runnerPos(r,r.outAt+.3),sd=batKey()===S.you?1:-1,D={x:sd*84,y:14},dd=dist(o,D),k=Math.min(1,(t-r.outAt-.3)*6.5/Math.max(1,dd));
+   const tw=ph==='result'?play.end+Math.max(0,(now-(S.postAt||now))/1000):t;// a retired runner keeps jogging off after the play is over
+   if(r.out&&tw>r.outAt+.3){const o=runnerPos(r,r.outAt+.3),sd=batKey()===S.you?1:-1,D={x:sd*84,y:14},dd=dist(o,D),k=Math.min(1,(tw-r.outAt-.3)*6.5/Math.max(1,dd));
     if(k>=1)continue;const w={x:lerp(o.x,D.x,k),y:lerp(o.y,D.y,k)},q=toPx(w.x,w.y);
     add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:'run',arms:'down',frame:Math.floor(now/190)+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants,flip:D.x<w.x}));continue}
    const p=runnerPos(r,t);const q=toPx(p.x,p.y);
@@ -223,12 +227,12 @@ function render(now){
     // a rooster tail of dirt kicked up along the slide, and a puff at the bag when he gets there
     if(t<r.slide.t1){for(let n=0;n<2;n++)if(Math.random()<.85)DUST.push({x:sq.x+rand(-4,4),y:sq.y+rand(-1,1),vx:rand(-26,26)-dir*12,vy:rand(-30,-8),life:rand(.3,.6),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
     else if(!r.slide.puff){r.slide.puff=true;const bq2=toPx(bb.x,bb.y);for(let n=0;n<14;n++)DUST.push({x:bq2.x+rand(-5,5),y:bq2.y+rand(-2,2),vx:rand(-40,40),vy:rand(-34,-6),life:rand(.4,.8),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
-    const back=dir*9*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// keep the leading hand (or spikes) on the bag, then get up onto it
+    const back=dir*(r.slide.head?14:16)*K/1.333*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// the lead hand or spikes reach exactly the bag// keep the leading hand (or spikes) on the bag, then get up onto it
     add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));
   }
  }else if(ph!=='title'){
-  S.stealHit=[];
+  S.stealHit=[];S.runHit=[];
   S.bases.forEach((b,k)=>{if(!b)return;const bb=BASES[k+1],nb=BASES[(k+2)%4],going=S.steal&&S.steal[k+1]&&ph==='pitch'&&S.pitch&&S.pitch.releaseAt;
    let Lf=leadNow(k+1,ph,now)/LEG;if(going){const sp=stealProg(k+1,now);Lf=Math.min(.97,sp.L+sp.run)}
    const q=toPx(lerp(bb.x,nb.x,Lf),lerp(bb.y,nb.y,Lf));
@@ -238,6 +242,7 @@ function render(now){
      wg.beginPath();wg.moveTo(7,0);wg.lineTo(-1,-5);wg.lineTo(-1,-2);wg.lineTo(-6,-2);wg.lineTo(-6,2);wg.lineTo(-1,2);wg.lineTo(-1,5);wg.closePath();wg.fill();
      wg.strokeStyle='rgba(8,20,14,.8)';wg.lineWidth=1;wg.stroke();wg.restore();wg.globalAlpha=1})}
    if(going){add(q.y,()=>drawPlayer(wg,q.x,q.y,bat,{legs:'run',arms:'run',frame:Math.floor(now/70)+k,skin:runSkin(b),helmet:true,pants:batPants,flip:nb.x<bb.x}));return}
+   S.runHit.push({x:q.x,y:q.y-9,who:b,k:k+1});
    const off=Lf>0?0:7,back=ph==='call'&&Lf>0;add(q.y,()=>drawPlayer(wg,q.x+off,q.y,bat,{legs:back?'run':(live||Lf>0)?'ready':'stand',arms:back?'run':'down',frame:Math.floor(now/110)+k,skin:runSkin(b),helmet:true,pants:batPants,flip:back}))});
  }
  // batter
