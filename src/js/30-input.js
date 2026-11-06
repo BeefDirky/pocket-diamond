@@ -24,9 +24,9 @@ const toTitle=()=>{if(S.online&&S.online.inGame)resumeClear();$('clkS').hidden=t
 let pendingMode=null;
 const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTING PRACTICE',playoffs:'PLAYOFFS',watch:'WATCH A GAME'};
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}
-function updateOppLine(){const o=TEAMS[S.opp];$('oppLine').innerHTML=pendingMode==='online'?'Your friend picks their own club when they join.':pendingMode==='playoffs'?'Seven other clubs are drawn into the bracket with you.':parkFromBP?'Pick a club: you hit in their park, with their hitters.':pendingMode==='bp'?'Batting practice: just you, the machine and an empty park.':`Opponent (drawn at random): <b>${o.city} ${o.name}</b>`}
+function updateOppLine(){const o=TEAMS[S.opp];$('oppLine').innerHTML=pendingMode==='online'?'Your friend picks their own club when they join.':pendingMode==='playoffs'?'Seven other clubs are drawn into the bracket with you.':parkFromBP?'Pick a club: you hit in their park, with their hitters.':pendingMode==='bp'?'Batting practice: just you, the machine and an empty park.':`Opponent (random): <b>${o.city} ${o.name}</b>`}
 function chooseMode(m){ensureAudio();if(S.online&&!S.online.inGame){const o=S.online;if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null}pendingMode=m;if(S.opp===S.you||m!=='bp')drawOpp();updateOppLine();$('playGo').hidden=false;$('playGo').textContent=m==='online'?'TO THE LOBBY':m==='bp'?'START PRACTICE':m==='playoffs'?'TO THE BRACKET':m==='watch'?'WATCH':'PLAY BALL';
- document.querySelector('#scrTeams h1').innerHTML=`${MODE_NAME[m]} · <span>PICK YOUR CLUB</span>`;showScreen('scrTeams')}
+ document.querySelector('#scrTeams h1').innerHTML=`${MODE_NAME[m]}<small>PICK YOUR CLUB</small>`;showScreen('scrTeams')}
 $('go').addEventListener('click',()=>chooseMode('arcade'));
 $('goFull').addEventListener('click',()=>chooseMode('full'));
 $('goBP').addEventListener('click',()=>chooseMode('bp'));

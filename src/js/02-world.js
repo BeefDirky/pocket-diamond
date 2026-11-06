@@ -76,3 +76,5 @@ const rcol=v=>{v=clamp(v,30,100);let k=0;while(k<RC_STOPS.length-2&&v>RC_STOPS[k
 const rb=v=>`<b style="color:${rcol(v)}">${v}</b>`;
 const ABBR={seoul:'SEL',busan:'BSN',incheon:'ICN',gwangju:'GWJ',daegu:'DGU',daejeon:'DJN',suwon:'SWN',changwon:'CWN',ulsan:'USN',jeju:'JJU'};
 const ORDER=['seoul','busan','incheon','gwangju','daegu','daejeon','suwon','changwon','ulsan','jeju'];
+// the order the club-select screen walks through (and the picker chips use)
+const TS_ORDER=['busan','incheon','gwangju','daegu','seoul','daejeon','suwon','changwon','ulsan','jeju'];
