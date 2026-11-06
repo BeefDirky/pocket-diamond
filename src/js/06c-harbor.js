@@ -7,15 +7,45 @@ const HC=(()=>{const h=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),p
  wallTop:h('#8a939b'),riser:h('#26323b'),aisle:h('#4d5761'),conc:h('#b8bec4'),conc2:h('#aeb4ba'),edge:h('#e2e6ea'),edgeD:h('#4a545e'),pole:h('#2b3038'),
  deck:h('#c9a77a'),deck2:h('#b8956a'),rail:h('#f1f1ee'),tetra:h('#9aa3ad'),tetra2:h('#7d8790'),tetraD:h('#5b646d'),
  yard:h('#9aa1a8'),yard2:h('#90979e'),yline:h('#e8d27a'),quay:h('#c9ced3')}})();
-let H_SEAT=false;// set by harborCol when the pixel is a seat (so the crowd can fill it)
+let H_SEAT=false;
+// ---- the park's footprint: which ground past the playing field belongs to the waterfront (in feet) ----
+// The wall opens from left-centre round to the right-field pole; past the right-field line the grandstand is cut back
+// more and more toward the pole, so the water reaches in along first base. Left field keeps its full grandstand.
+const H_OL=-22,H_OR=45;
+function hRDepth(al){return al<185?1e9:al<330?Math.max(40,114-(al-185)*.5):Math.max(-40,41.5-(al-330)*2.2)}// past the pole the stands run out altogether
+// past the trimmed right-field stands (feet beyond their back wall), or -1
+function hRCut(x,y){if(x<=0||y<-60)return -1;const al=(x+y)/Math.SQRT2;if(al<185)return -1;return (x-y)/Math.SQRT2-40-hRDepth(al)}
+// the right half of the bowl's outer wall, following the cut (world px, for the outline)
+function hRightHalf(){const Pt=(al,pe)=>{const x=(al+pe)/Math.SQRT2,y=(al-pe)/Math.SQRT2;return[x/FT,HY-y/FT]},out=[[0,HY+580],Pt(185,154)];
+ for(let al=205;al<=405;al+=25)out.push(Pt(al,40+hRDepth(al)+26));out.push([1000,HY-820],[430,-150],[172,-200]);return out}
+function hOwn(x,y,th,r,fd){if(y>0&&th>H_OL&&th<H_OR&&r>=fd+4)return 1;
+ if(th>=H_OR){const d=hRCut(x,y);if(d>0&&d<26)return 2}return 0}
+// how deep the centre-field bleachers run: deepest left of centre, gone by right-centre
+function hCfDepth(th){return th<-4?34:th<12?34*(12-th)/16:0}
+// seats by section: navy, royal and sky blue blocks, a cheering block on each side of the infield, white seats
+// tracing a wave through some sections
+const H_SEATS=[['#1f3f7a','#1b3870'],['#2f6fd0','#2a63bb'],['#5aa0e6','#5193d6']].map(p=>p.map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)])),
+ H_SEATU=[[27,47,94],[24,42,84]],H_WHITE=[232,238,245],H_CHEER=[[255,210,63],[240,196,50]];
+function hSeat(ang,row,upper){const sec=Math.floor((ang+400)/10),h=vHash(sec,77);
+ if(upper)return H_SEATU[row&1];
+ if((ang>14&&ang<34)||(ang<-14&&ang>-34)){if(ang>0)return H_SEATS[2][row&1]}// the home cheering block on the first-base side
+ const p=H_SEATS[h%3];return p[row&1]}
+// the boardwalk: warm planks, blue-and-white parasols over tables, a cafe kiosk every so often
+const H_PARA=[[47,111,208],[244,246,250]];
+function hBoard(wx,wy,s2,d,w){const n=vHash(Math.floor(wx/3),Math.floor(wy/3));
+ const cs=((s2%72)+72)%72;if(cs<12&&d>w-10&&d<w-1){if(d<w-8||cs<1||cs>11)return [30,50,90];return Math.floor(cs/3)&1?[47,111,208]:[244,246,250]}// cafe roof, awning striped
+ const ps=((s2%18)+18)%18-9,pd=d-w*.45,pr=ps*ps+pd*pd;if(cs>=14&&pr<16){if(pr<1.2)return [40,44,50];return H_PARA[((ps>0)^(pd>0))?1:0]}
+ if(cs>=14&&pr<22)return [120,90,60];// the parasol's shadow ring
+ const p=vPerson(wx,wy,7);if(p)return p;
+ return Math.floor(d/2.2)&1?HC.deck:HC.deck2}// set by harborCol when the pixel is a seat (so the crowd can fill it)
 // the shoreline (feet): the sea comes in above the stadium, lower down on the right; the shipyard holds the left shore
-function hSea(x,y){if(x<-360)return false;if(x<-300&&y<540+(-300-x)*9)return false;return y>Math.max(540-Math.max(0,x-150)*1.25,120)}
+function hSea(x,y){if(x>0&&y>-40+26*Math.sin(x*.021)&&hRCut(x,y)>=26)return true;if(x<-360)return false;if(x<-300&&y<540+(-300-x)*9)return false;return y>Math.max(540-Math.max(0,x-150)*1.25,-300)}
 function hYard(x,y){return x<-330&&y>430}
 // the pier: a curved boardwalk out from the right-field corner, hooking round to a breakwater with a lighthouse
 const H_PIER=(()=>{const P=[];const b=(t,a,c,d,e)=>{const u=1-t;return u*u*u*a+3*u*u*t*c+3*u*t*t*d+t*t*t*e};// cubic, in feet
- for(let k=0;k<=48;k++){const t=k/48;P.push([b(t,300,390,500,450),b(t,345,440,520,585)])}return P})();
+ for(let k=0;k<=48;k++){const t=k/48;P.push([b(t,204,250,370,430),b(t,326,430,520,582)])}return P})();
 const H_BREAK={x:445,y:615,r:38};
-function hPierD(x,y){if(x<260||y<350)return 1e9;let m=1e9;for(let k=0;k<H_PIER.length-1;k++){const[ax,ay]=H_PIER[k],[bx,by]=H_PIER[k+1],vx=bx-ax,vy=by-ay,t=clamp(((x-ax)*vx+(y-ay)*vy)/(vx*vx+vy*vy),0,1),d=Math.hypot(x-ax-vx*t,y-ay-vy*t);if(d<m)m=d}return m}
+function hPierD(x,y){if(x<180||y<300)return 1e9;let m=1e9;for(let k=0;k<H_PIER.length-1;k++){const[ax,ay]=H_PIER[k],[bx,by]=H_PIER[k+1],vx=bx-ax,vy=by-ay,t=clamp(((x-ax)*vx+(y-ay)*vy)/(vx*vx+vy*vy),0,1),d=Math.hypot(x-ax-vx*t,y-ay-vy*t);if(d<m)m=d}return m}
 // which side of the pier a point is on (>0: the stadium side), and how far from it
 function hPierSide(x,y){let m=1e9,sd=0;for(let k=0;k<H_PIER.length-1;k++){const[ax,ay]=H_PIER[k],[bx,by]=H_PIER[k+1],vx=bx-ax,vy=by-ay,t=clamp(((x-ax)*vx+(y-ay)*vy)/(vx*vx+vy*vy),0,1),d=Math.hypot(x-ax-vx*t,y-ay-vy*t);if(d<m){m=d;sd=vx*(y-ay)-vy*(x-ax)}}return sd}
 const H_SEA=['#174f78','#1b5f8a','#1f6d98','#2a7fae'].map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)]),
@@ -26,7 +56,7 @@ const H_DITH=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
 // is shallower and turquoise, fading out through the mouth to the open sea
 function hSeaCol(x,y,wx,wy){const X=Math.floor(wx),Y=Math.floor(wy),dith=H_DITH[(Y&3)*4+(X&3)]/16;
  const db=Math.hypot(x-H_BREAK.x,y-H_BREAK.y)-H_BREAK.r;if(db<6&&db>=0)return ((X>>1)+(Y>>1))%3===0?HC.foam:H_COVE[3];
- let cove=0;{const dc=Math.hypot(x-350,y-470);if(dc<190&&x>120){cove=clamp((190-dc)/110,0,1);if(cove>0&&x>280&&hPierSide(x,y)<0)cove=0}}
+ let cove=0;{const dc=Math.hypot(x-330,y-440);if(dc<210&&x>110){cove=clamp((190-dc)/110,0,1);if(cove>0&&hPierSide(x,y)<0)cove=0}}
  const sw=Math.sin(x*.045+Math.sin(y*.03)*1.6)+.6*Math.sin(y*.07-x*.02)+.35*Math.sin((x+y)*.11);// -2..2
  const lv=clamp(Math.floor((sw+2)/4*4+dith-.5),0,3);
  const v=y*.8+3.2*Math.sin(x*.06)+2*Math.sin(x*.021+y*.04),crest=((v%14)+14)%14<.7&&Math.sin(x*.13+y*.05)>.93&&Math.sin(x*.031-y*.017)>.2;
@@ -37,14 +67,28 @@ function harborCol(wx,wy){H_SEAT=false;const x=(wx-HX)*FT,y=(HY-wy)*FT,r=Math.hy
  // the breakwater and its tetrapods, and the pier deck
  {const db=Math.hypot(x-H_BREAK.x,y-H_BREAK.y);if(db<H_BREAK.r){const t=vHash(Math.floor(wx/7),Math.floor(wy/7));if(db<H_BREAK.r-30)return (n&3)===0?HC.conc2:HC.conc;return (t&3)===0?HC.tetraD:(t&3)===1?HC.tetra2:HC.tetra}}
  const pd=hPierD(x,y);if(pd<12){if(pd>10.5)return HC.rail;const p=vPerson(wx,wy,9);if(p)return p;return (Math.floor(wy/4)+Math.floor(wx/9))&1?HC.deck:HC.deck2}
- // the outfield ring: bleachers behind the wall, a concourse with flags, the sea wall, then water
- if(y>0&&ath<ST.openTop){const fd=fenceDist(th),q=r-fd;if(q>=4){const pv=vPav(),d=Math.hypot(x,y-pv.cy)-pv.R+22,s=Math.atan2(x,y-pv.cy)*pv.R;
-   if(q<10)return HC.wallTop;
-   if(d<0){if(((s%44)+44)%44<3.2)return HC.aisle;const rq=(q-10)%3.2;if(rq<.7)return HC.riser;H_SEAT=true;return Math.floor((q-10)/3.2)&1?vRGB(ST.seat[0]):vRGB(ST.seat[1])}
-   if(d<8+Math.max(0,ath-22)*4.5){const m=((s%26)+26)%26;if(d>4&&d<5.2&&m<1.2)return HC.pole;if(d>1.2&&d<4&&m>=1.2&&m<4.6)return Math.floor(s/26)&1?vRGB('#2f6fd0'):HC.edge;// flags
-    const p=vPerson(wx,wy,8);if(p)return p;return (Math.floor(s/3)+Math.floor(d/3))&1?HC.conc:HC.conc2}
-   if(d<10)return d<9?HC.edge:HC.edgeD;
-   if(!hYard(x,y))return hSeaCol(x,y,wx,wy)}}
+ // the harbor's own ground: the open arc past the outfield wall, and the waterfront past the trimmed right-field stands
+ const fd=y>0?fenceDist(th):0,own=hOwn(x,y,th,r,fd);
+ if(own===1){const q=r-fd,s2=r*th*RAD;
+  if(r*(th-H_OL)*RAD<3.5)return HC.edgeD;// end wall of the left-field grandstand
+  if(q<8)return HC.wallTop;
+  const dep=hCfDepth(th);
+  if(dep>0&&q<8+dep){// the compact centre-field bleachers
+   if(((s2%40)+40)%40<3)return HC.aisle;const rq=(q-8)%3.2;if(rq<.7)return HC.riser;H_SEAT=true;return hSeat(th*4,Math.floor((q-8)/3.2),false)}
+  if(dep>0&&q<8+dep+9){const d=q-8-dep,m=((s2%26)+26)%26;// terrace behind the bleachers, flags along its back rail
+   if(d>6&&d<7.2&&m<1.2)return HC.pole;if(d>3.6&&d<6.2&&m>=1.2&&m<4.6)return Math.floor(s2/26)&1?vRGB('#2f6fd0'):HC.edge;
+   const p=vPerson(wx,wy,8);if(p)return p;return (Math.floor(s2/3)+Math.floor(d/3))&1?HC.conc:HC.conc2}
+  if(dep>0&&q<8+dep+11)return q<8+dep+10?HC.edge:HC.edgeD;// sea wall
+  if(dep<=0){// right field: the boardwalk right behind the wall, then the water (the splash zone)
+   const qa=(th>26&&th<44)?19:8;if(q<qa)return HC.wallTop;const d=q-qa;
+   if(d<20)return hBoard(wx,wy,s2,d,20);
+   if(d<21.6)return HC.rail}
+  if(hYard(x,y))return HC.yard;return hSeaCol(x,y,wx,wy)}
+ if(own===2){const al=(x+y)/Math.SQRT2,d=hRCut(x,y);
+  if(d<3)return HC.edgeD;// the trimmed grandstand's back wall
+  if(d<24)return hBoard(wx,wy,al,d-3,21);
+  if(d<25.6)return HC.rail;
+  return hSeaCol(x,y,wx,wy)}
  if(hYard(x,y)){// the shipyard apron: concrete with yellow lane lines, the quay edge along the water
   if(x>-336)return HC.quay;if(((Math.floor(wy)%60)+60)%60<1.2)return HC.yline;return (n&7)===0?HC.yard2:HC.yard}
  if(hSea(x,y))return hSea(x-3,y-3)&&hSea(x+3,y-3)&&hSea(x-3,y+3)?hSeaCol(x,y,wx,wy):HC.edge;// a pale sea wall along the shore

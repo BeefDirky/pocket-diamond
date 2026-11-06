@@ -3,19 +3,19 @@
 // at half resolution. Neighborhood pixel (cx,cy) is world pixel (cx*2-mx, cy*2-my).
 let PARK_OUTLINE=null,OUT_CV=null,OUT_KEY='';
 // the original single-deck footprint; the infield grandstand now juts out one more deck past it (Dodger Stadium style)
-function outlineFrom(half){let pts=[...half,...half.slice(1).reverse().map(([x,y])=>[-x,y])];
+function outlineFrom(half,right){let pts=[...(right||half),...half.slice(1).reverse().map(([x,y])=>[-x,y])];
  const chaikin=P=>{const out=[];for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];
    out.push([a[0]*.85+b[0]*.15,a[1]*.85+b[1]*.15],[a[0]*.15+b[0]*.85,a[1]*.15+b[1]*.85])}return out};
  pts=chaikin(pts);pts=chaikin(pts);return pts.map(([x,y])=>({x:HX+x,y}))}
 function parkOutlineInner(){return outlineFrom([[0,HY+400],[1000,HY-600],[1000,HY-800],[430,-150],[172,-200]])}
 // the ballpark's outer wall: a wide V with a pointed tip behind home. The home-plate grandstand is one deck deeper
 // than the rest, so the wall steps back in to the outfield pavilions out by the corners.
-function parkOutlineClosed(){return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
+function parkOutlineClosed(){if(ST&&ST.harbor)return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]],hRightHalf());return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
 // Some parks leave the outfield open: the bowl stops in the corners and the country runs right up to the fence.
 // The outline keeps its shape (it still decides where the park buffer shows), but the stretch across the outfield is
 // flagged open: no outer wall, plaza or roof lights there. Both layers paint the same countryside, so it reads as one.
 function parkOutline(){const B=parkOutlineClosed(),cut=ST&&ST.openTop;if(!cut)return B;
- const ang=q=>Math.atan2(q.x-HX,HY-q.y)/RAD,isOpen=q=>q.y<HY&&Math.abs(ang(q))<cut;
+ const ang=q=>Math.atan2(q.x-HX,HY-q.y)/RAD,isOpen=ST.harbor?q=>{const x=(q.x-HX)*FT,y=(HY-q.y)*FT,th=Math.atan2(x,y)/RAD;return hOwn(x,y,th,Math.hypot(x,y),y>0?fenceDist(th):0)>0}:q=>q.y<HY&&Math.abs(ang(q))<cut;
  const out=[];for(let i=0;i<B.length;i++){const a=B[i],b=B[(i+1)%B.length];a.open=isOpen(a);out.push(a);
   if(isOpen(a)!==isOpen(b)){let lo=0,hi=1;for(let k=0;k<30;k++){const m=(lo+hi)/2,q={x:a.x+(b.x-a.x)*m,y:a.y+(b.y-a.y)*m};if(isOpen(q)===isOpen(a))lo=m;else hi=m}
    out.push({x:a.x+(b.x-a.x)*lo,y:a.y+(b.y-a.y)*lo,open:false})}}
@@ -157,20 +157,19 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   const put=(i,c)=>{const j=i*4;d[j]=c[0];d[j+1]=c[1];d[j+2]=c[2];d[j+3]=255};
   for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const i=py*CW+px;if(md[i*4+3]<128)continue;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;
    const wx=wX(px),x=(wx-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fdh=fenceDist(th);let col=null,feat=null;
-   if(y>0){if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='sea';
+   if(ST.harbor&&hOwn(x,y,th,r,y>0?fdh:0))feat='harbor';else if(y>0){if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='sea';
     else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
-    else if(ST.feature==='whale'&&ST.harbor&&ath<ST.openTop&&r>fdh+4)feat='harbor';
-    else if(ST.feature==='whale'&&ath<36&&r>fdh+14)feat='sea';
+    else if(ST.feature==='whale'&&!ST.harbor&&ath<36&&r>fdh+14)feat='sea';
     else if(ST.feature==='orchard'&&ath<36&&r>fdh+11)feat=ST.openTop&&ath<ST.openTop?'country':'orchard'}
    const j4=i*4,onRing=imd[j4]>200&&imd[j4+3]>128,inOld=imd[j4+3]>128&&!onRing;
    if(!feat&&onRing&&A[i]&&md[j4+3]>128){put(i,C.conc);continue}
    if(!feat&&!inOld&&!onRing&&A[i]){// the new top deck: same rows and aisles, a darker shade of the lower bowl's color
     const dO=A[i]/3*2/K,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
-    if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;if(rr2>=4.6)col=C.riserU;else{col=(row&1)?C3a:C3b;seatM[i]=1}}
+    if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;if(rr2>=4.6)col=C.riserU;else{col=ST.harbor?hSeat(ang,row,true):(row&1)?C3a:C3b;seatM[i]=1}}
     put(i,col);continue}
    if(feat==='sea'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
    else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
-   else if(feat==='harbor'){col=r*(ST.openTop-ath)*RAD<3.5?C.conc:(harborCol(wx,wy)||C.sea);if(H_SEAT&&!empty)seatM[i]=1}
+   else if(feat==='harbor'){col=harborCol(wx,wy)||C.sea;if(H_SEAT&&!empty)seatM[i]=1}
    else if(feat==='country'){col=r*(ST.openTop-ath)*RAD<3.5?C.conc:villageCol(wx,wy)}
    else if(feat==='orchard'){const q=Math.round(wy),p2=Math.round(wx),cy2=Math.floor(q/22),cx2=Math.floor((p2+(cy2&1)*11)/22),lx=(p2+(cy2&1)*11)-cx2*22-11,ly=q-cy2*22-11,d2=lx*lx+ly*ly;
     if(d2<64){col=d2<20&&lx<0&&ly<0?C.orT2:C.orT;if(((lx*7+ly*13+cx2*5+cy2*3)&15)===0)col=C.orF}else col=(q>>1)&1?C.orG:C.orG2}
@@ -182,7 +181,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
     else{const upper=dO>=124,rp=(Math.hypot(wx-HX,wy-HY)/K)||1,ang=Math.atan2(wx-HX,HY-wy)/RAD,m=((ang%10)+10)%10;
      if(Math.abs(m-5)<(2.2/rp)/RAD)col=C.aisle;
      else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;
-      if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
+      if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=ST.harbor?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
    put(i,col)}}
   // the crowd: same grid and density as the park, same club colors, drawn at this layer's half scale
   const home=TEAMS[k],away=TEAMS[S.opp]||home,misc=['#e8d7c3','#f1ecdc','#6c7a86','#a8c6d8','#2b2b30','#c9a0dc','#7fbf6a','#d98c8c','#f4d58d'].map(hexRGB);
