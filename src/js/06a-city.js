@@ -82,6 +82,11 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
  // draw the avenues over the lots (they stop at the plaza and the water)
  for(const x of roadsV)for(let y=0;y<CH;y+=2)if(!near(x+3,y,40)&&!inWater(y,2)){R(x,y,6,2,col.road);if(y%8===0)R(x+2.5,y,1,1,col.lane);if(night&&y%14===0){R(x-1,y,1,1,'#ffe0a0');R(x+6,y,1,1,'#ffe0a0')}}
  for(const y of roadsH)for(let x=0;x<CW;x+=2)if(!near(x,y+3,40)&&!inWater(y,6)){R(x,y,2,6,col.road);if(x%8===0)R(x,y+2.5,1,1,col.lane)}
+ // the harbor city's avenues are lined with cherry trees, and city buses run them
+ if(STADIUMS[k].harbor){for(const x of roadsV)for(let y=6;y<CH;y+=15)for(const sd of[-3,9])if(!near(x+sd,y,44)){const pink=((x*7+y*13)>>2)%5<3;if(pink)hBlossom(g,x+sd,y,3,night);else{g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x+sd,y,3,0,7);g.fill()}}
+  for(const y of roadsH)for(let x=10;x<CW;x+=15)for(const sd of[-3,9])if(!near(x,y+sd,44)){const pink=((x*11+y*5)>>2)%5<3;if(pink)hBlossom(g,x,y+sd,3,night);else{g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x,y+sd,3,0,7);g.fill()}}
+  for(let i=0;i<26;i++){const vert=rr()<.5,x=vert?roadsV[Math.floor(rr()*roadsV.length)]+1:rr()*CW,y=vert?rr()*CH:roadsH[Math.floor(rr()*roadsH.length)]+1;if(near(x,y,44))continue;
+   g.fillStyle='rgba(0,0,0,.3)';g.fillRect(x+1,y+1,vert?4:11,vert?11:4);g.fillStyle='#2f6fd0';g.fillRect(x,y,vert?4:11,vert?11:4);g.fillStyle=night?'#ffe0a0':'#bfe3ff';if(vert)for(let q=1;q<10;q+=2)g.fillRect(x+.5,y+q,3,1);else for(let q=1;q<10;q+=2)g.fillRect(x+q,y+.5,1,3)}}
  // traffic
  for(let i=0;i<160;i++){const vert=rr()<.5,x=vert?roadsV[Math.floor(rr()*roadsV.length)]+1+(rr()<.5?0:3):rr()*CW,y=vert?rr()*CH:roadsH[Math.floor(rr()*roadsH.length)]+1+(rr()<.5?0:3);
   if(near(x,y,40)||inWater(y,1))continue;if(night)R(x,y,vert?1:3,vert?3:1,rr()<.5?'#fff3c8':'#ff4a3a');else R(x,y,vert?2:4,vert?4:2,['#c94a3a','#e8e4dc','#2a3a5a','#9aa3ad','#1b1f24'][Math.floor(rr()*5)])}

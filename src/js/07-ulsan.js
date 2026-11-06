@@ -10,8 +10,27 @@ function drawUlsan(g,now){
   g.fillStyle='#3b4f62';g.beginPath();g.moveTo(w.x+L*.92,w.y+bob);g.lineTo(w.x+L*1.35,w.y-Wd*1.1+bob);g.lineTo(w.x+L*1.2,w.y+bob);g.lineTo(w.x+L*1.35,w.y+Wd*1.1+bob);g.closePath();g.fill();
   g.fillStyle='rgba(232,246,255,.5)';for(let k=0;k<8;k++){const a=k/8*6.28+sec;g.fillRect(Math.round(w.x+Math.cos(a)*(L+6)),Math.round(w.y+Math.sin(a)*(Wd+5)),3,1)}}
  {const ph=sec%5.5;if(ph<1.4)spout(g,toPx(WHALE.x-22,WHALE.y+3),ph/1.4)}
- // shipyard on the right: dry dock, a hull being built, and a goliath gantry crane that slides along its rails
- {const d=hb?toPx(-560,650):toPx(-226,412);const x0=Math.round(d.x),y0=Math.round(d.y);
+ // the harbor park's shipyard: a long dry dock with a ship taking shape, under a yellow goliath crane
+ if(hb){const d=toPx(-600,690),x0=Math.round(d.x),y0=Math.round(d.y),DW=300,DH=140;
+  g.fillStyle='#6b747d';g.fillRect(x0-8,y0-8,DW+16,DH+16);g.fillStyle='#4a545e';g.fillRect(x0-3,y0-3,DW+6,DH+6);g.fillStyle='#235f86';g.fillRect(x0,y0,DW,DH);
+  g.fillStyle='#2d6f98';for(let k=6;k<DH;k+=12)g.fillRect(x0,y0+k,DW,2);
+  // the hull: dark topsides, red underbody showing at the bow, a grey deck with hatches, white bridge at the stern
+  const hx=x0+22,hy=y0+30,HW=240,HH=80;g.fillStyle='rgba(0,0,0,.3)';g.fillRect(hx+5,hy+6,HW,HH);
+  g.fillStyle='#8f2a24';g.beginPath();g.moveTo(hx,hy);g.lineTo(hx+HW-40,hy);g.quadraticCurveTo(hx+HW+8,hy+HH/2,hx+HW-40,hy+HH);g.lineTo(hx,hy+HH);g.closePath();g.fill();
+  g.fillStyle='#1d2a36';g.beginPath();g.moveTo(hx+3,hy+4);g.lineTo(hx+HW-42,hy+4);g.quadraticCurveTo(hx+HW,hy+HH/2,hx+HW-42,hy+HH-4);g.lineTo(hx+3,hy+HH-4);g.closePath();g.fill();
+  g.fillStyle='#8a949c';g.fillRect(hx+8,hy+10,HW-70,HH-20);g.fillStyle='#6f7a83';for(let k=0;k<8;k++)g.fillRect(hx+46+k*20,hy+16,15,HH-32);
+  g.fillStyle='#e8e4dc';g.fillRect(hx+8,hy+12,30,HH-24);g.fillStyle='#2a3a5a';g.fillRect(hx+12,hy+18,22,4);g.fillStyle='#c94a3a';g.fillRect(hx+40,hy+HH/2-5,8,10);
+  // the crane's rails along both sides of the dock
+  g.fillStyle='#2b2f36';g.fillRect(x0-6,y0-6,DW+12,3);g.fillRect(x0-6,y0+DH+3,DW+12,3);
+  const cx=Math.round(x0+40+((Math.sin(sec*.05)+1)/2)*(DW-90)),GW=24,top=y0-18,bot=y0+DH+18;
+  g.fillStyle='rgba(6,18,30,.3)';g.fillRect(cx+34,top+22,GW,bot-top);// its shadow on the dock
+  g.fillStyle='#c99a00';g.fillRect(cx-4,top-4,GW+8,8);g.fillRect(cx-4,bot-4,GW+8,8);// legs and bogies
+  g.fillStyle='#f5c518';g.fillRect(cx,top,GW,bot-top);g.fillStyle='#c99a00';g.fillRect(cx+GW-4,top,4,bot-top);
+  g.fillStyle='#d9ab08';for(let y=top+6;y<bot-6;y+=10){g.fillRect(cx+4,y,GW-10,1);g.fillRect(cx+4,y,1,10);g.fillRect(cx+GW-7,y,1,10)}
+  g.fillStyle='#14325a';g.fillRect(cx+2,top+16,GW-6,10);g.fillStyle='#f4f1e8';g.fillRect(cx+5,top+19,GW-12,4);// the yard's name board
+  const ty=Math.round(y0+20+((Math.sin(sec*.23)+1)/2)*(DH-40));g.fillStyle='#e0473d';g.fillRect(cx-3,ty,GW+6,12);g.fillStyle='#1b1f24';g.fillRect(cx+GW/2-1,ty+12,2,8);g.fillStyle='#ffbf3c';g.fillRect(cx+GW/2-4,ty+20,8,5)}
+ else{// (the old park's shipyard on the right: dry dock, a hull being built, and a gantry crane sliding along its rails)
+ {const d=toPx(-226,412);const x0=Math.round(d.x),y0=Math.round(d.y);
   g.fillStyle='#5d6873';g.fillRect(x0-6,y0-40,150,84);g.fillStyle='#4a545e';g.fillRect(x0-2,y0-36,142,76);
   g.fillStyle='#2a6e9a';g.fillRect(x0+2,y0-32,134,68);
   // hull under construction (top-down): red bottom paint, grey deck, blocks being set
@@ -25,6 +44,7 @@ function drawUlsan(g,now){
   g.fillStyle='#d23a2e';g.fillRect(cx,y0-42,14,86);g.fillStyle='#f4f1e8';for(let k=0;k<86;k+=12)g.fillRect(cx,y0-42+k,14,5);
   g.fillStyle='#1b1f24';g.fillRect(cx-3,y0-44,20,5);g.fillRect(cx-3,y0+38,20,5);
   const ty=Math.round(y0-6+Math.sin(sec*.37)*18);g.fillStyle='#ffbf3c';g.fillRect(cx+2,ty,10,8);g.fillStyle='#1b1f24';g.fillRect(cx+6,ty+8,2,6)}
+ }
  // a container ship crosses the bay
  {const u=((sec/150)%1),x=hb?-300+u*630:-250+u*500,q=toPx(x,hb?610:441);const qx=Math.round(q.x),qy=Math.round(q.y);
   g.fillStyle='rgba(255,255,255,.35)';for(let k=1;k<6;k++)g.fillRect(qx-30-k*7,qy-2+(k&1),5,1);

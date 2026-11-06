@@ -1640,6 +1640,11 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
  // draw the avenues over the lots (they stop at the plaza and the water)
  for(const x of roadsV)for(let y=0;y<CH;y+=2)if(!near(x+3,y,40)&&!inWater(y,2)){R(x,y,6,2,col.road);if(y%8===0)R(x+2.5,y,1,1,col.lane);if(night&&y%14===0){R(x-1,y,1,1,'#ffe0a0');R(x+6,y,1,1,'#ffe0a0')}}
  for(const y of roadsH)for(let x=0;x<CW;x+=2)if(!near(x,y+3,40)&&!inWater(y,6)){R(x,y,2,6,col.road);if(x%8===0)R(x,y+2.5,1,1,col.lane)}
+ // the harbor city's avenues are lined with cherry trees, and city buses run them
+ if(STADIUMS[k].harbor){for(const x of roadsV)for(let y=6;y<CH;y+=15)for(const sd of[-3,9])if(!near(x+sd,y,44)){const pink=((x*7+y*13)>>2)%5<3;if(pink)hBlossom(g,x+sd,y,3,night);else{g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x+sd,y,3,0,7);g.fill()}}
+  for(const y of roadsH)for(let x=10;x<CW;x+=15)for(const sd of[-3,9])if(!near(x,y+sd,44)){const pink=((x*11+y*5)>>2)%5<3;if(pink)hBlossom(g,x,y+sd,3,night);else{g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x,y+sd,3,0,7);g.fill()}}
+  for(let i=0;i<26;i++){const vert=rr()<.5,x=vert?roadsV[Math.floor(rr()*roadsV.length)]+1:rr()*CW,y=vert?rr()*CH:roadsH[Math.floor(rr()*roadsH.length)]+1;if(near(x,y,44))continue;
+   g.fillStyle='rgba(0,0,0,.3)';g.fillRect(x+1,y+1,vert?4:11,vert?11:4);g.fillStyle='#2f6fd0';g.fillRect(x,y,vert?4:11,vert?11:4);g.fillStyle=night?'#ffe0a0':'#bfe3ff';if(vert)for(let q=1;q<10;q+=2)g.fillRect(x+.5,y+q,3,1);else for(let q=1;q<10;q+=2)g.fillRect(x+q,y+.5,1,3)}}
  // traffic
  for(let i=0;i<160;i++){const vert=rr()<.5,x=vert?roadsV[Math.floor(rr()*roadsV.length)]+1+(rr()<.5?0:3):rr()*CW,y=vert?rr()*CH:roadsH[Math.floor(rr()*roadsH.length)]+1+(rr()<.5?0:3);
   if(near(x,y,40)||inWater(y,1))continue;if(night)R(x,y,vert?1:3,vert?3:1,rr()<.5?'#fff3c8':'#ff4a3a');else R(x,y,vert?2:4,vert?4:2,['#c94a3a','#e8e4dc','#2a3a5a','#9aa3ad','#1b1f24'][Math.floor(rr()*5)])}
@@ -2131,9 +2136,21 @@ const H_PIER=(()=>{const P=[];const b=(t,a,c,d,e)=>{const u=1-t;return u*u*u*a+3
  for(let k=0;k<=48;k++){const t=k/48;P.push([b(t,300,390,500,450),b(t,345,440,520,585)])}return P})();
 const H_BREAK={x:445,y:615,r:38};
 function hPierD(x,y){if(x<260||y<350)return 1e9;let m=1e9;for(let k=0;k<H_PIER.length-1;k++){const[ax,ay]=H_PIER[k],[bx,by]=H_PIER[k+1],vx=bx-ax,vy=by-ay,t=clamp(((x-ax)*vx+(y-ay)*vy)/(vx*vx+vy*vy),0,1),d=Math.hypot(x-ax-vx*t,y-ay-vy*t);if(d<m)m=d}return m}
-function hSeaCol(x,y,wx,wy){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);
- const db=Math.hypot(x-H_BREAK.x,y-H_BREAK.y)-H_BREAK.r;if(db<8&&db>=0)return ((Math.floor(wx/3)+Math.floor(wy/3))&3)===0?HC.foam:HC.shal;
- return w>1.35?HC.wave:w<-1.1?HC.sea2:HC.sea}
+// which side of the pier a point is on (>0: the stadium side), and how far from it
+function hPierSide(x,y){let m=1e9,sd=0;for(let k=0;k<H_PIER.length-1;k++){const[ax,ay]=H_PIER[k],[bx,by]=H_PIER[k+1],vx=bx-ax,vy=by-ay,t=clamp(((x-ax)*vx+(y-ay)*vy)/(vx*vx+vy*vy),0,1),d=Math.hypot(x-ax-vx*t,y-ay-vy*t);if(d<m){m=d;sd=vx*(y-ay)-vy*(x-ax)}}return sd}
+const H_SEA=['#174f78','#1b5f8a','#1f6d98','#2a7fae'].map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)]),
+ H_COVE=['#2592a8','#2aa3b6','#36b3c2','#48c3cc'].map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)]),
+ H_HI=[143,208,234],H_HIC=[200,240,242];
+const H_DITH=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+// calm water: broad swells in four tones, and short glints of light along the wave crests; the cove inside the pier
+// is shallower and turquoise, fading out through the mouth to the open sea
+function hSeaCol(x,y,wx,wy){const X=Math.floor(wx),Y=Math.floor(wy),dith=H_DITH[(Y&3)*4+(X&3)]/16;
+ const db=Math.hypot(x-H_BREAK.x,y-H_BREAK.y)-H_BREAK.r;if(db<6&&db>=0)return ((X>>1)+(Y>>1))%3===0?HC.foam:H_COVE[3];
+ let cove=0;{const dc=Math.hypot(x-350,y-470);if(dc<190&&x>120){cove=clamp((190-dc)/110,0,1);if(cove>0&&x>280&&hPierSide(x,y)<0)cove=0}}
+ const sw=Math.sin(x*.045+Math.sin(y*.03)*1.6)+.6*Math.sin(y*.07-x*.02)+.35*Math.sin((x+y)*.11);// -2..2
+ const lv=clamp(Math.floor((sw+2)/4*4+dith-.5),0,3);
+ const v=y*.8+3.2*Math.sin(x*.06)+2*Math.sin(x*.021+y*.04),crest=((v%14)+14)%14<.7&&Math.sin(x*.13+y*.05)>.93&&Math.sin(x*.031-y*.017)>.2;
+ const useC=cove>dith;if(crest)return useC?H_HIC:H_HI;return useC?H_COVE[lv]:H_SEA[lv]}
 // returns a colour for harbor ground, or null where the city carries on
 function harborCol(wx,wy){H_SEAT=false;const x=(wx-HX)*FT,y=(HY-wy)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th);
  const n=vHash(Math.floor(wx/3),Math.floor(wy/3));
@@ -2147,7 +2164,7 @@ function harborCol(wx,wy){H_SEAT=false;const x=(wx-HX)*FT,y=(HY-wy)*FT,r=Math.hy
    if(d<8+Math.max(0,ath-22)*4.5){const m=((s%26)+26)%26;if(d>4&&d<5.2&&m<1.2)return HC.pole;if(d>1.2&&d<4&&m>=1.2&&m<4.6)return Math.floor(s/26)&1?vRGB('#2f6fd0'):HC.edge;// flags
     const p=vPerson(wx,wy,8);if(p)return p;return (Math.floor(s/3)+Math.floor(d/3))&1?HC.conc:HC.conc2}
    if(d<10)return d<9?HC.edge:HC.edgeD;
-   return hSeaCol(x,y,wx,wy)}}
+   if(!hYard(x,y))return hSeaCol(x,y,wx,wy)}}
  if(hYard(x,y)){// the shipyard apron: concrete with yellow lane lines, the quay edge along the water
   if(x>-336)return HC.quay;if(((Math.floor(wy)%60)+60)%60<1.2)return HC.yline;return (n&7)===0?HC.yard2:HC.yard}
  if(hSea(x,y))return hSea(x-3,y-3)&&hSea(x+3,y-3)&&hSea(x-3,y+3)?hSeaCol(x,y,wx,wy):HC.edge;// a pale sea wall along the shore
@@ -2158,12 +2175,20 @@ function drawHarbor(g,k,night,CW,CH,cx,cy,OL,e){const P=(xf,yf)=>({x:cx(HX+xf/FT
  // ---- shipyard sheds and container stacks ----
  {const sheds=[[-600,520,110,60],[-600,620,90,52],[-470,690,120,48]];for(const[x,y,w,h]of sheds){const a=P(x,y),b=P(x+w,y-h);const X=a.x,Y=a.y,Wd=b.x-a.x,Hd=b.y-a.y;
    g.fillStyle='rgba(0,0,0,.25)';g.fillRect(X+4,Y+3,Wd,Hd);g.fillStyle='#2f5f96';g.fillRect(X,Y,Wd,Hd);g.fillStyle='#3a72ae';for(let q=2;q<Wd-2;q+=4)g.fillRect(X+q,Y+2,2,Hd-4);g.fillStyle='#e8ecef';g.fillRect(X,Y,Wd,1.5)}
-  const cc=['#d23a2e','#3f82e6','#f5c935','#3faa5b','#ef6a1f','#9aa5ae'];for(let i=0;i<7;i++)for(let j=0;j<3;j++){const a=P(-470+i*15,600-j*16);g.fillStyle=cc[(i*3+j*5)%6];g.fillRect(a.x,a.y,6,5);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(a.x,a.y+4,6,1)}}
+  const cc=['#d23a2e','#3f82e6','#f5c935','#3faa5b','#ef6a1f','#9aa5ae'];for(let i=0;i<12;i++)for(let j=0;j<6;j++){const a=P(-470+i*8,600-j*6);g.fillStyle=cc[vHash(i,j+9)%6];g.fillRect(a.x,a.y,5,3);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(a.x,a.y+2,5,1)}}
  {const sh=[[-760,700,140,70],[-760,600,120,50],[-640,470,80,40]];for(const[x,y,w,h]of sh){const a=P(x,y),b=P(x+w,y-h);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(a.x+4,a.y+3,b.x-a.x,b.y-a.y);g.fillStyle='#4a6f96';g.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);g.fillStyle='#5a82ad';for(let q=2;q<b.x-a.x-2;q+=4)g.fillRect(a.x+q,a.y+2,2,b.y-a.y-4)}
-  const cc=['#d23a2e','#3f82e6','#f5c935','#3faa5b','#ef6a1f','#9aa5ae'];for(let i=0;i<10;i++)for(let j=0;j<4;j++){const a=P(-610+i*14,760-j*14);g.fillStyle=cc[(i*7+j*3)%6];g.fillRect(a.x,a.y,6,5);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(a.x,a.y+4,6,1)}
+  const cc=['#d23a2e','#3f82e6','#f5c935','#3faa5b','#ef6a1f','#9aa5ae'];for(const[bx,by]of[[-640,790],[-500,790]])for(let i=0;i<14;i++)for(let j=0;j<7;j++){const a=P(bx+i*8,by-j*6);g.fillStyle=cc[vHash(i+bx,j)%6];g.fillRect(a.x,a.y,5,3);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(a.x,a.y+2,5,1)}
   // a car carrier moored along the quay
   {const a=P(-318,690),b=P(-262,470),X=a.x,Y=a.y,Wd=b.x-a.x,Hd=b.y-a.y;g.fillStyle='rgba(0,0,0,.3)';g.fillRect(X+3,Y+4,Wd,Hd);g.fillStyle='#8f2a24';g.beginPath();g.moveTo(X,Y+10);g.lineTo(X+Wd/2,Y);g.lineTo(X+Wd,Y+10);g.lineTo(X+Wd,Y+Hd);g.lineTo(X,Y+Hd);g.closePath();g.fill();
    g.fillStyle='#e8e4dc';g.fillRect(X+2,Y+10,Wd-4,Hd-14);g.fillStyle='#c9c4b8';for(let q=Y+14;q<Y+Hd-6;q+=6)g.fillRect(X+3,q,Wd-6,1);g.fillStyle='#2a3a5a';g.fillRect(X+3,Y+Hd-14,Wd-6,9);g.fillStyle='#ffd98a';g.fillRect(X+5,Y+Hd-12,Wd-10,1)}}
+ // ---- the pier's lamps and flags, and boats: moored in the cove, a few out at sea ----
+ for(let k=2;k<H_PIER.length-1;k+=3){const[ax,ay]=H_PIER[k],[bx,by]=H_PIER[k+1],l=Math.hypot(bx-ax,by-ay),nx=-(by-ay)/l,ny=(bx-ax)/l;
+  for(const sd of[-1,1]){const p=P(ax+nx*sd*10,ay+ny*sd*10);g.fillStyle='#2b3038';g.fillRect(p.x-.5,p.y-.5,1.5,1.5);if(k%6===2){g.fillStyle=sd>0?'#2f6fd0':'#f4f1e8';g.fillRect(p.x+1,p.y-3,3,2)}}}
+ const boat=(xf,yf,ang,len,col)=>{const p=P(xf,yf),L=len/FT/4.2;g.save();g.translate(p.x,p.y);g.rotate(ang);g.fillStyle='rgba(10,40,60,.3)';g.beginPath();g.ellipse(2,2,L,L*.32,0,0,7);g.fill();
+  g.fillStyle='#f4f1e8';g.beginPath();g.moveTo(-L,-L*.28);g.lineTo(L*.6,-L*.3);g.lineTo(L,0);g.lineTo(L*.6,L*.3);g.lineTo(-L,L*.28);g.closePath();g.fill();g.fillStyle=col;g.fillRect(-L*.4,-L*.18,L*.7,L*.36);g.fillStyle='#bcd8ea';g.fillRect(-L*.1,-L*.12,L*.3,L*.24);g.restore()};
+ [[360,520,.6,34,'#2f6fd0'],[395,548,.8,28,'#e0473d'],[330,470,.3,30,'#3f86c4'],[300,560,-.4,26,'#f5c935'],[372,590,1.1,24,'#2f6fd0'],[150,690,-.2,40,'#14325a'],[620,520,1.4,46,'#8f2a24'],[40,760,.1,30,'#2f6fd0']].forEach(b=>boat(...b));
+ // a wake behind the boat heading out
+ {const p=P(150,690);g.fillStyle='rgba(255,255,255,.5)';for(let k=1;k<7;k++)g.fillRect(p.x-12-k*5,p.y+(k&1?-1:1)*k*.6,3,1)}
  // ---- the lighthouse on the breakwater ----
  {const a=P(H_BREAK.x+10,H_BREAK.y+8);g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(a.x+7,a.y+4,7,3,0,0,7);g.fill();g.fillStyle='#d0312d';g.beginPath();g.arc(a.x,a.y,5,0,7);g.fill();g.fillStyle='#f4f1e8';g.fillRect(a.x-5,a.y-1,10,2);g.fillStyle='#2b3038';g.beginPath();g.arc(a.x,a.y,2.2,0,7);g.fill();g.fillStyle=night?'#fff4c0':'#e8e2d0';g.fillRect(a.x-1,a.y-1,2,2);
   if(night){const gr=g.createRadialGradient(a.x,a.y,0,a.x,a.y,26);gr.addColorStop(0,'rgba(255,240,180,.5)');gr.addColorStop(1,'rgba(255,240,180,0)');g.save();g.globalCompositeOperation='lighter';g.fillStyle=gr;g.fillRect(a.x-26,a.y-26,52,52);g.restore()}}
@@ -2176,7 +2201,10 @@ function drawHarbor(g,k,night,CW,CH,cx,cy,OL,e){const P=(xf,yf)=>({x:cx(HX+xf/FT
   g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(gx+4,gy+10,44,10,0,0,7);g.fill();
   g.strokeStyle='#14325a';g.lineWidth=9;g.beginPath();g.ellipse(gx,gy+4,40,14,0,Math.PI,0);g.stroke();g.strokeStyle='#2f6fd0';g.lineWidth=2;g.beginPath();g.ellipse(gx,gy+1,40,14,0,Math.PI,0);g.stroke();
   g.fillStyle='#14325a';g.fillRect(gx-42,gy+2,8,8);g.fillRect(gx+34,gy+2,8,8);
-  if(LOGO[k]){g.imageSmoothingEnabled=false;g.drawImage(LOGO[k],gx-11,gy-20,22,22)}
+  // the glass front of the concourse either side of the gate
+  {const C=closedRun(OL).filter(q=>q.y>tip.y-70);g.strokeStyle='#9fd0e8';g.lineWidth=5;g.beginPath();C.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y+3));g.stroke();g.strokeStyle='#5a8fb0';g.lineWidth=1;g.setLineDash([1,4]);g.stroke();g.setLineDash([])}
+  if(LOGO[k]){g.imageSmoothingEnabled=false;g.drawImage(LOGO[k],gx-11,gy-22,22,22)}
+  g.fillStyle='#14325a';g.fillRect(gx-30,gy+8,60,9);g.fillStyle='#f4f1e8';g.font='bold 6px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('ULSAN WHALES',gx,gy+12.5);g.fillStyle='#9fd8f6';g.fillRect(gx-28,gy+15,56,1)
   if(night){const gr=g.createRadialGradient(gx,gy+10,0,gx,gy+10,60);gr.addColorStop(0,'rgba(255,220,160,.35)');gr.addColorStop(1,'rgba(255,220,160,0)');g.save();g.globalCompositeOperation='lighter';g.fillStyle=gr;g.fillRect(gx-60,gy-50,120,120);g.restore()}
   // the whale-tail sculpture on the right of the plaza
   {const sx=gx+70,sy=gy+40;g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(sx+5,sy+4,9,3,0,0,7);g.fill();g.fillStyle='#3f86c4';g.beginPath();g.moveTo(sx,sy);g.quadraticCurveTo(sx-2,sy-8,sx-10,sy-12);g.quadraticCurveTo(sx-3,sy-10,sx,sy-6);g.quadraticCurveTo(sx+3,sy-10,sx+10,sy-12);g.quadraticCurveTo(sx+2,sy-8,sx,sy);g.fill();g.fillStyle='#9fd8f6';g.fillRect(sx-7,sy-11,3,1);g.fillRect(sx+4,sy-11,3,1)}
@@ -2188,14 +2216,14 @@ function hBlossom(g,x,y,r,night){g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.a
 function drawHarborRoof(g,night,OL){const C=closedRun(OL),cx0=OL.reduce((s,q)=>s+q.x,0)/OL.length,cy0=OL.reduce((s,q)=>s+q.y,0)/OL.length;
  const inw=(q,o)=>{const dx=cx0-q.x,dy=cy0-q.y,l=Math.hypot(dx,dy)||1;return{x:q.x+dx/l*o,y:q.y+dy/l*o}};
  const band=(o0,o1)=>{g.beginPath();C.forEach((q,i)=>{const p=inw(q,o0);g[i?'lineTo':'moveTo'](p.x,p.y)});for(let i=C.length-1;i>=0;i--){const p=inw(C[i],o1);g.lineTo(p.x,p.y)}g.closePath()};
- band(26,32);g.fillStyle='rgba(0,0,0,.22)';g.fill();// the roof's shadow on the seats
- band(0,26);g.fillStyle=night?'#3a4048':'#d3d9df';g.fill();
+ band(40,48);g.fillStyle='rgba(0,0,0,.24)';g.fill();// the roof's shadow on the seats
+ band(0,40);g.fillStyle=night?'#3e444c':'#e6eaee';g.fill();band(0,6);g.fillStyle=night?'#2e343b':'#c3cad1';g.fill();
  g.strokeStyle=night?'#2e343b':'#b3bbc4';g.lineWidth=1;g.beginPath();let acc=0;
- for(let i=0;i<C.length-1;i++){const a=C[i],b=C[i+1],L=Math.hypot(b.x-a.x,b.y-a.y);for(let t=(8-acc)/L;t<1;t+=8/L){const q={x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t},p=inw(q,26);g.moveTo(q.x,q.y);g.lineTo(p.x,p.y)}acc=(acc+L)%8}g.stroke();
- g.strokeStyle=night?'#4a525c':'#eef1f4';g.lineWidth=2;g.beginPath();C.forEach((q,i)=>{const p=inw(q,25);g[i?'lineTo':'moveTo'](p.x,p.y)});g.stroke();
+ for(let i=0;i<C.length-1;i++){const a=C[i],b=C[i+1],L=Math.hypot(b.x-a.x,b.y-a.y);for(let t=(10-acc)/L;t<1;t+=10/L){const q={x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t},p=inw(q,40);g.moveTo(q.x,q.y);g.lineTo(p.x,p.y)}acc=(acc+L)%10}g.stroke();
+ g.strokeStyle=night?'#4a525c':'#eef1f4';g.lineWidth=2;g.beginPath();C.forEach((q,i)=>{const p=inw(q,39);g[i?'lineTo':'moveTo'](p.x,p.y)});g.stroke();
  // banners on the facade, just outside the wall
- acc=0;for(let i=0;i<C.length-1;i++){const a=C[i],b=C[i+1],L=Math.hypot(b.x-a.x,b.y-a.y),ang=Math.atan2(b.y-a.y,b.x-a.x);for(let t=(26-acc)/L;t<1;t+=26/L){const q={x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t},p=inw(q,-5);
-   g.save();g.translate(p.x,p.y);g.rotate(ang);g.fillStyle='#14325a';g.fillRect(-6,-3,12,6);g.fillStyle='#2f6fd0';g.fillRect(-5,-2,10,4);g.fillStyle='#e8f2ff';g.fillRect(-4,0,3,1);g.fillRect(-1,-1,3,1);g.fillRect(2,0,2,1);g.restore()}acc=(acc+L)%26}}
+ acc=0;for(let i=0;i<C.length-1;i++){const a=C[i],b=C[i+1],L=Math.hypot(b.x-a.x,b.y-a.y),ang=Math.atan2(b.y-a.y,b.x-a.x);for(let t=(30-acc)/L;t<1;t+=30/L){const q={x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t},p=inw(q,-7);
+   g.save();g.translate(p.x,p.y);g.rotate(ang);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(-7,-3,15,9);g.fillStyle='#14325a';g.fillRect(-8,-5,16,9);g.fillStyle='#2f6fd0';g.fillRect(-7,-4,14,7);g.fillStyle='#e8f2ff';g.fillRect(-6,0,4,1);g.fillRect(-2,-1,4,1);g.fillRect(2,0,4,1);g.fillStyle='#9fd8f6';g.fillRect(-6,1,12,1);g.restore()}acc=(acc+L)%30}}
 // night lights on the shore: the lighthouse lamp and the glow under the main gate's arch
 function drawHarborGlow(g,cx,cy,OL){const P=(xf,yf)=>({x:cx(HX+xf/FT),y:cy(HY-yf/FT)});g.save();g.globalCompositeOperation='lighter';
  {const a=P(H_BREAK.x+10,H_BREAK.y+8),gr=g.createRadialGradient(a.x,a.y,0,a.x,a.y,26);gr.addColorStop(0,'rgba(255,240,180,.55)');gr.addColorStop(1,'rgba(255,240,180,0)');g.fillStyle=gr;g.fillRect(a.x-26,a.y-26,52,52);g.fillStyle='#fff4c0';g.fillRect(a.x-1,a.y-1,2,2)}
@@ -2213,8 +2241,27 @@ function drawUlsan(g,now){
   g.fillStyle='#3b4f62';g.beginPath();g.moveTo(w.x+L*.92,w.y+bob);g.lineTo(w.x+L*1.35,w.y-Wd*1.1+bob);g.lineTo(w.x+L*1.2,w.y+bob);g.lineTo(w.x+L*1.35,w.y+Wd*1.1+bob);g.closePath();g.fill();
   g.fillStyle='rgba(232,246,255,.5)';for(let k=0;k<8;k++){const a=k/8*6.28+sec;g.fillRect(Math.round(w.x+Math.cos(a)*(L+6)),Math.round(w.y+Math.sin(a)*(Wd+5)),3,1)}}
  {const ph=sec%5.5;if(ph<1.4)spout(g,toPx(WHALE.x-22,WHALE.y+3),ph/1.4)}
- // shipyard on the right: dry dock, a hull being built, and a goliath gantry crane that slides along its rails
- {const d=hb?toPx(-560,650):toPx(-226,412);const x0=Math.round(d.x),y0=Math.round(d.y);
+ // the harbor park's shipyard: a long dry dock with a ship taking shape, under a yellow goliath crane
+ if(hb){const d=toPx(-600,690),x0=Math.round(d.x),y0=Math.round(d.y),DW=300,DH=140;
+  g.fillStyle='#6b747d';g.fillRect(x0-8,y0-8,DW+16,DH+16);g.fillStyle='#4a545e';g.fillRect(x0-3,y0-3,DW+6,DH+6);g.fillStyle='#235f86';g.fillRect(x0,y0,DW,DH);
+  g.fillStyle='#2d6f98';for(let k=6;k<DH;k+=12)g.fillRect(x0,y0+k,DW,2);
+  // the hull: dark topsides, red underbody showing at the bow, a grey deck with hatches, white bridge at the stern
+  const hx=x0+22,hy=y0+30,HW=240,HH=80;g.fillStyle='rgba(0,0,0,.3)';g.fillRect(hx+5,hy+6,HW,HH);
+  g.fillStyle='#8f2a24';g.beginPath();g.moveTo(hx,hy);g.lineTo(hx+HW-40,hy);g.quadraticCurveTo(hx+HW+8,hy+HH/2,hx+HW-40,hy+HH);g.lineTo(hx,hy+HH);g.closePath();g.fill();
+  g.fillStyle='#1d2a36';g.beginPath();g.moveTo(hx+3,hy+4);g.lineTo(hx+HW-42,hy+4);g.quadraticCurveTo(hx+HW,hy+HH/2,hx+HW-42,hy+HH-4);g.lineTo(hx+3,hy+HH-4);g.closePath();g.fill();
+  g.fillStyle='#8a949c';g.fillRect(hx+8,hy+10,HW-70,HH-20);g.fillStyle='#6f7a83';for(let k=0;k<8;k++)g.fillRect(hx+46+k*20,hy+16,15,HH-32);
+  g.fillStyle='#e8e4dc';g.fillRect(hx+8,hy+12,30,HH-24);g.fillStyle='#2a3a5a';g.fillRect(hx+12,hy+18,22,4);g.fillStyle='#c94a3a';g.fillRect(hx+40,hy+HH/2-5,8,10);
+  // the crane's rails along both sides of the dock
+  g.fillStyle='#2b2f36';g.fillRect(x0-6,y0-6,DW+12,3);g.fillRect(x0-6,y0+DH+3,DW+12,3);
+  const cx=Math.round(x0+40+((Math.sin(sec*.05)+1)/2)*(DW-90)),GW=24,top=y0-18,bot=y0+DH+18;
+  g.fillStyle='rgba(6,18,30,.3)';g.fillRect(cx+34,top+22,GW,bot-top);// its shadow on the dock
+  g.fillStyle='#c99a00';g.fillRect(cx-4,top-4,GW+8,8);g.fillRect(cx-4,bot-4,GW+8,8);// legs and bogies
+  g.fillStyle='#f5c518';g.fillRect(cx,top,GW,bot-top);g.fillStyle='#c99a00';g.fillRect(cx+GW-4,top,4,bot-top);
+  g.fillStyle='#d9ab08';for(let y=top+6;y<bot-6;y+=10){g.fillRect(cx+4,y,GW-10,1);g.fillRect(cx+4,y,1,10);g.fillRect(cx+GW-7,y,1,10)}
+  g.fillStyle='#14325a';g.fillRect(cx+2,top+16,GW-6,10);g.fillStyle='#f4f1e8';g.fillRect(cx+5,top+19,GW-12,4);// the yard's name board
+  const ty=Math.round(y0+20+((Math.sin(sec*.23)+1)/2)*(DH-40));g.fillStyle='#e0473d';g.fillRect(cx-3,ty,GW+6,12);g.fillStyle='#1b1f24';g.fillRect(cx+GW/2-1,ty+12,2,8);g.fillStyle='#ffbf3c';g.fillRect(cx+GW/2-4,ty+20,8,5)}
+ else{// (the old park's shipyard on the right: dry dock, a hull being built, and a gantry crane sliding along its rails)
+ {const d=toPx(-226,412);const x0=Math.round(d.x),y0=Math.round(d.y);
   g.fillStyle='#5d6873';g.fillRect(x0-6,y0-40,150,84);g.fillStyle='#4a545e';g.fillRect(x0-2,y0-36,142,76);
   g.fillStyle='#2a6e9a';g.fillRect(x0+2,y0-32,134,68);
   // hull under construction (top-down): red bottom paint, grey deck, blocks being set
@@ -2228,6 +2275,7 @@ function drawUlsan(g,now){
   g.fillStyle='#d23a2e';g.fillRect(cx,y0-42,14,86);g.fillStyle='#f4f1e8';for(let k=0;k<86;k+=12)g.fillRect(cx,y0-42+k,14,5);
   g.fillStyle='#1b1f24';g.fillRect(cx-3,y0-44,20,5);g.fillRect(cx-3,y0+38,20,5);
   const ty=Math.round(y0-6+Math.sin(sec*.37)*18);g.fillStyle='#ffbf3c';g.fillRect(cx+2,ty,10,8);g.fillStyle='#1b1f24';g.fillRect(cx+6,ty+8,2,6)}
+ }
  // a container ship crosses the bay
  {const u=((sec/150)%1),x=hb?-300+u*630:-250+u*500,q=toPx(x,hb?610:441);const qx=Math.round(q.x),qy=Math.round(q.y);
   g.fillStyle='rgba(255,255,255,.35)';for(let k=1;k<6;k++)g.fillRect(qx-30-k*7,qy-2+(k&1),5,1);
@@ -2428,7 +2476,7 @@ function buildSigns(){
  // light towers, drawn with height: the overhead camera sees each mast lean away from the field,
  // so the lamp bank sits outward of the base, with lit and shaded faces and a cast shadow
  TOWERS=[];const CX=HX/K,CY=H/K*.53,LEAN=.12,night=!!S.night;
- [[44,222],[916,222],[104,872],[856,872]].forEach(([tx,ty])=>{
+ (ST.harbor?[[CX-175,70],[CX+175,70],[104,872],[856,872]]:[[44,222],[916,222],[104,872],[856,872]]).forEach(([tx,ty])=>{
   const bx=CX+(tx-CX)/(1+LEAN),by=CY+(ty-CY)/(1+LEAN);      // ground footprint
   const ox=tx-bx,oy=ty-by,ol=Math.hypot(ox,oy),ux=ox/ol,uy=oy/ol,nx=-uy,ny=ux;
   // cast shadow (sun from the upper left by day, faint spill by night)
