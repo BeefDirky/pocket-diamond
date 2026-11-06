@@ -224,7 +224,7 @@ function render(now){
     if(t<r.slide.t1){for(let n=0;n<2;n++)if(Math.random()<.85)DUST.push({x:sq.x+rand(-4,4),y:sq.y+rand(-1,1),vx:rand(-26,26)-dir*12,vy:rand(-30,-8),life:rand(.3,.6),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
     else if(!r.slide.puff){r.slide.puff=true;const bq2=toPx(bb.x,bb.y);for(let n=0;n<14;n++)DUST.push({x:bq2.x+rand(-5,5),y:bq2.y+rand(-2,2),vx:rand(-40,40),vy:rand(-34,-6),life:rand(.4,.8),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
     const back=dir*9*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// keep the leading hand (or spikes) on the bag, then get up onto it
-    add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},r.slide.head?dir:-dir,u<1?(1-u)*3:0));continue}
+    add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));
   }
  }else if(ph!=='title'){
@@ -349,7 +349,7 @@ function render(now){
    if(tt>=pl.fullEnd-.5){if(!pl.res.hr){let last=null;for(const sg of pl.segs)if(!last||sg.t1>=last.t1)last=sg;if(last){const q=last.fn(last.t1);(S.bpBalls=S.bpBalls||[]).push({x:q.x,y:q.y})}}return false}
    if(pl.clang&&!pl.clang.done&&tt>=pl.clang.t){pl.clang.done=true;if(!muted)playSample('clang',.85,1)}
    if(pl.fenceAt!=null&&!pl.fenceDone&&tt>=pl.fenceAt){pl.fenceDone=true;sfx('fence',.55)}
-   if(pl.ballGone!=null&&tt>=pl.ballGone)return true;
+   if(pl.ballGone!=null&&tt>=pl.ballGone){if(!f.splashed){f.splashed=true;splashCheck(pl)}return true}
    let seg=null;for(const sg of pl.segs)if(tt>=sg.t0&&tt<=sg.t1){seg=sg;break}if(!seg){for(const sg of pl.segs)if(sg.t1<=tt&&(!seg||sg.t1>=seg.t1))seg=sg}
     if(seg){const p=seg.fn(Math.min(tt,seg.t1)),q=toPx(p.x,p.y);dustAt(pl,p.x,p.y,p.h);
     if(OPT.info!==false&&pl.res.code){const tr=f.trail||(f.trail=[]);const lift=p.h/FT;tr.push({x:q.x-lift*.2,y:q.y-lift*.5});if(tr.length>26)tr.shift();
@@ -390,6 +390,7 @@ function render(now){
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
  drawHarborLights(ctx,vx0,vy0,scale,now);
+ drawSplashes(ctx,vx0,vy0,scale,now);
  if(ST.harbor&&S.phase!=='title'){ctx.save();ctx.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);drawUlsan(ctx,now);ctx.restore()}// the harbor's whales and ships, out past the park
  drawNeon(ctx,vx0,vy0,scale,now);
  if(S.phase!=='title'){ctx.save();ctx.setTransform(scale*K,0,0,scale*K,-vx0*scale,-vy0*scale);ctx.imageSmoothingEnabled=false;drawJumbo(ctx,now);ctx.restore()}// the board stands above everything on its legs

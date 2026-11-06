@@ -45,7 +45,7 @@ function buildFeather(src){const e=EXT_M,c=document.createElement('canvas');c.wi
  g.globalCompositeOperation='destination-in';g.beginPath();PARK_OUTLINE.forEach((q,i)=>g[i?'lineTo':'moveTo']((q.x+e.mx)/2,(q.y+e.my)/2));g.closePath();g.fill();
  return c}
 function buildOutside(k,night,empty){// empty: batting practice, nobody in the seats
-const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start');H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
+H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  const e=EXT_M,CW=Math.round((W+2*e.mx)/2),CH=Math.round((H+2*e.my)/2),c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
  const rr=mulberry32(hash(k+'-outside')),R=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))};
  const cx=x=>(x+e.mx)/2,cy=y=>(y+e.my)/2,T=TEAMS[k];
@@ -123,7 +123,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
   {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
  if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}}
- BT('city');if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
+if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
   const mc=document.createElement('canvas');mc.width=CW;mc.height=CH;const mg=mc.getContext('2d');mg.beginPath();OL.forEach((q,i)=>mg[i?'lineTo':'moveTo'](q.x,q.y));mg.closePath();mg.fill();const md=mg.getImageData(0,0,CW,CH).data;
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea],img=g.getImageData(0,0,CW,CH),d=img.data;
   // most of the canvas is plain city: sample each 8px tile on a 3x3 grid and skip it whole when nothing harbor-ish is there
@@ -132,7 +132,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
   for(let ty=0;ty*TS<CH;ty++)for(let tx=0;tx<TW;tx++){let any=false,sea=0;for(let a2=0;a2<=2;a2++)for(let b2=0;b2<=2;b2++){const v=lat[Math.min(LH-1,ty*2+b2)*LW+Math.min(LW-1,tx*2+a2)];if(v===2)any=true;else if(v===1)sea++}if(!any)skip[ty*TW+tx]=sea===9?2:sea?0:1;if(!any&&sea&&sea<9)skip[ty*TW+tx]=0}
   for(let py=0;py<CH;py++){const wy=(py+.5)*2-e.my,trow=((py/TS)|0)*TW;for(let px=0;px<CW;px++){const sk=skip[trow+((px/TS)|0)];if(sk===1)continue;const j=(py*CW+px)*4;if(md[j+3]>200)continue;const wx=(px+.5)*2-e.mx;let c;if(sk===2){c=hSeaCol((wx-HX)*FT,(HY-wy)*FT,wx,wy);H_EMIS=false;H_SHADE=false}else c=harborCol(wx,wy);if(!c){if(H_SHADE){d[j]*=.7;d[j+1]*=.7;d[j+2]*=.74}continue}const em=H_EMIS&&night;d[j]=em?c[0]:c[0]*lt[0]/255;d[j+1]=em?c[1]:c[1]*lt[1]/255;d[j+2]=em?c[2]:c[2]*lt[2]/255;d[j+3]=255}}
   g.putImageData(img,0,0)}// the city dims at night; the stadium stays lit (the village is lit like the park)
- BT('sea');
+
  // ---- the stands keep going past the park buffer, out to the outer wall ----
  // Painted with the same rules the park buffer uses (rows that follow the wall, risers, aisles toward home, the upper
  // deck colors, the outfield features) and the same crowd on the same 8px grid, so the two halves read as one bowl.
@@ -160,7 +160,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
    if(px>0)v=Math.min(v,DI[i-1]+3);if(py>0){v=Math.min(v,DI[i-CW]+3);if(px>0)v=Math.min(v,DI[i-CW-1]+4);if(px<CW-1)v=Math.min(v,DI[i-CW+1]+4)}DI[i]=v}
   if(!HB0)for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
    if(px<CW-1)v=Math.min(v,DI[i+1]+3);if(py<CH-1){v=Math.min(v,DI[i+CW]+3);if(px<CW-1)v=Math.min(v,DI[i+CW+1]+4);if(px>0)v=Math.min(v,DI[i+CW-1]+4)}DI[i]=v}
-  BT('chamfer');const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.harbor)H_NIGHT=night;
+ const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.harbor)H_NIGHT=night;
   // only the stretch outside the buffer (plus the strip the feather fades across) needs painting
   const bx0=cx(0)+16,by0=cy(0)+16,bx1=cx(W)-16,by1=cy(H)-16;
   const put=(i,c)=>{const j=i*4;d[j]=c[0];d[j+1]=c[1];d[j+2]=c[2];d[j+3]=255};
@@ -193,7 +193,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
      else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;
       if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=ST.harbor?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
    put(i,col)}}
-  BT('stands');
+ 
   // the crowd: same grid and density as the park, same club colors, drawn at this layer's half scale
   const home=TEAMS[k],away=TEAMS[S.opp]||home,misc=['#e8d7c3','#f1ecdc','#6c7a86','#a8c6d8','#2b2b30','#c9a0dc','#7fbf6a','#d98c8c','#f4d58d'].map(hexRGB);
   const hj=hexRGB(home.jersey),hc=hexRGB(home.cap),aj=hexRGB(away.jersey),ac=hexRGB(away.cap),sks=SKINS.map(hexRGB),hairs=['#2a1d14','#4a3020','#7a5230','#1a1a1a','#8a8a8a'].map(hexRGB),shadeC=c=>c.map(v=>v*.78|0);
@@ -208,7 +208,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
   // light: the same multiply the park gets, so day and night match across the seam
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea];
   for(let i=0;i<N;i++){if(md[i*4+3]<128||(night&&EMIS[i]))continue;const py=(i/CW)|0,px=i-py*CW;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;const j=i*4;d[j]=d[j]*lt[0]/255;d[j+1]=d[j+1]*lt[1]/255;d[j+2]=d[j+2]*lt[2]/255}
-  g.putImageData(img,0,0);BT('crowd+light');
+  g.putImageData(img,0,0);
   // a soft shadow where the roof overhangs the top rows
   g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
   g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';if(ST.openTop)outlinePath(OL,x=>x,y=>y,g);else{g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath()}g.stroke();g.restore()}
@@ -225,4 +225,4 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
    if(night){g.save();g.globalCompositeOperation='lighter';for(const[wx,wy]of glows){const x=(wx+e.mx)/2,y=(wy+e.my)/2;const gr=g.createRadialGradient(x,y,0,x,y,7);gr.addColorStop(0,'rgba(255,214,150,.45)');gr.addColorStop(1,'rgba(255,214,150,0)');g.fillStyle=gr;g.fillRect(x-7,y-7,14,14);g.fillStyle='rgba(255,230,170,.9)';g.fillRect(Math.round(x)-1,Math.round(y),2,1)}
     // streetlights along the town roads
     g.restore()}}
- BT('end');return c}
+return c}

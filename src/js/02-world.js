@@ -29,7 +29,7 @@ function dugoutFrame(sd){const along=82.5,perp=48.5;return toPx3(sd*(along+perp)
 function penSpot(sd,th){const r=fenceDist(sd*th)+9;return{x:sd*r*Math.sin(th*RAD),y:r*Math.cos(th*RAD)}}
 
 const TEAMS={
- seoul:{city:'SEOUL',kcity:'서울',name:'RATS',kname:'래츠',script:'Rats',emblem:'rat',logo:'shield',
+ seoul:{city:'SEOUL',kcity:'서울',name:'STEEDS',kname:'스티즈',script:'Steeds',emblem:'rat',logo:'shield',
   jersey:'#4a5060',cap:'#c8202a',brim:'#7a1018',mascot:'Chuchu',mdesc:'A subway rat in a conductor\'s cap. Knows every shortcut on Line 2 and squeaks the seventh-inning song.',
   pitcher:{name:'AHN W.K.',hand:'R',slot:'side'},pen:[{name:'WALSH',hand:'R',slot:'over'},{name:'NOH S.H.',hand:'L',slot:'over'}],
   lineup:[['PARK J.H.','L'],['KIM D.W.','R'],['RAMIREZ','S'],['LEE S.M.','R'],['CHOI W.S.','L'],['JUNG H.S.','R'],['KANG M.G.','R'],['OH J.Y.','L'],['YANG E.S.','R']]},
@@ -50,7 +50,7 @@ const TEAMS={
   pitcher:{name:'WON S.J.',hand:'R',slot:'over'},pen:[{name:'OH D.K.',hand:'R',slot:'side'},{name:'KWAK B.S.',hand:'L',slot:'over'}],
   lineup:[['KOO J.M.','L'],['BAEK S.H.','R'],['PARK H.J.','R'],['GARCIA','R'],['LEE J.H.','L'],['KIM Y.W.','S'],['CHO S.M.','R'],['YUN T.K.','L'],['KANG H.B.','R']]},
  daejeon:{city:'DAEJEON',kcity:'대전',name:'BEARS',kname:'베어스',script:'Bears',emblem:'bear',logo:'pennant',
-  jersey:'#7a4a2a',cap:'#ef8a24',brim:'#a85a12',mascot:'Gomi',mdesc:'A big bear who naps in the bullpen between innings and shares bread from the famous bakery with the ball kids.',
+  jersey:'#1c2b5a',cap:'#c8202a',brim:'#7a1018',mascot:'Gomi',mdesc:'A big bear who naps in the bullpen between innings and shares bread from the famous bakery with the ball kids.',
   pitcher:{name:'RYU M.S.',hand:'L',slot:'over'},pen:[{name:'KIM S.U.',hand:'R',slot:'side'},{name:'MUN D.W.',hand:'R',slot:'over'}],
   lineup:[['JEONG E.H.','L'],['NOH S.M.','R'],['CHAE E.J.','R'],['WILSON','L'],['HA J.W.','R'],['KIM I.H.','S'],['YOO R.G.','R'],['SIM W.J.','L'],['PARK S.K.','R']]},
  suwon:{city:'SUWON',kcity:'수원',name:'WIZARDS',kname:'위저즈',script:'Wizards',emblem:'wizard',logo:'fortress',

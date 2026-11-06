@@ -22,7 +22,7 @@ const hMul=(c,f)=>[c[0]*f|0,c[1]*f|0,c[2]*f|0];
 // round arcs behind home and in the corners; the depth changes gently with the angle: a deep front behind home, a big
 // left-field grandstand curling to left-centre, a shorter right side that ends at the right-field corner, the outfield open.
 const H_CC={x:0,y:180};// the bowl's centre, for its angle (feet)
-const H_DK={R:[[68,0],[92,52],[118,112],[148,150],[180,168]],L:[[34,0],[52,64],[78,122],[112,148],[180,168]]};
+const H_DK={R:[[68,0],[80,44],[96,82],[118,114],[148,150],[180,168]],L:[[34,0],[52,64],[78,122],[112,148],[180,168]]};
 function hD(phi){const a=Math.abs(phi),K=phi>=0?H_DK.R:H_DK.L;if(a<=K[0][0])return 0;
  for(let i=0;i<K.length-1;i++)if(a<=K[i+1][0]){const u=(a-K[i][0])/(K[i+1][0]-K[i][0]),t=(1-Math.cos(u*Math.PI))/2;return K[i][1]+(K[i+1][1]-K[i][1])*t}return K[K.length-1][1]}
 const hPhi=(x,y)=>Math.atan2(x,y-H_CC.y)/RAD;
@@ -31,8 +31,17 @@ function hFieldD(x,y){const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
  const st=sd=>{const al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;return Math.hypot(Math.max(-5-al,0,al-328),Math.max(-pe,0,pe-40))};
  const dA=st(1),dB=st(-1),dC=Math.max(0,r-34),m=Math.min(dS,dA,dB,dC);if(m<=0)return 0;
  const k=30,sm=-k*Math.log(Math.exp(-dS/k)+Math.exp(-dA/k)+Math.exp(-dB/k)+Math.exp(-dC/k)),w=clamp((m-12)/55,0,1);return m-(m-Math.max(0,sm))*w}
+// position along the row for a point in the stands (feet), and which part of the bowl it belongs to: the run along each
+// foul line, the curve behind home, or the arc beyond the outfield wall. Each piece's rows are straight or concentric, so
+// a stair at a fixed position along it stays square to the rows.
+function hAlong(x,y){const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
+ const dS=(y>0&&Math.abs(th)<=45)?Math.max(0,r-fenceDist(th)):1e4;
+ const st=sd=>{const al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;return{d:Math.hypot(Math.max(-5-al,0,al-328),Math.max(-pe,0,pe-40)),al}};
+ const A=st(1),B=st(-1),dC=Math.max(0,r-34),m=Math.min(dS,A.d,B.d,dC);
+ if(m===A.d&&A.al>-5)return{s:A.al,piece:1};if(m===B.d&&B.al>-5)return{s:-B.al,piece:2};
+ if(m===dS)return{s:th*RAD*fenceDist(th),piece:3};return{s:Math.atan2(x,y)*60,piece:4}}
 // is the roof over this angle, and how far in it reaches as a share of the depth? left and right differ on purpose
-function hRoofIn(phi){const L=phi<0,a=Math.abs(phi),lo=L?62:112,hi=166;if(a<lo||a>hi)return 9;const e=Math.min(a-lo,hi-a),t=clamp(e/9,0,1),sm=t*t*(3-2*t);return .70+(1-sm)*.32}
+function hRoofIn(phi){const L=phi<0,a=Math.abs(phi),lo=L?62:84,hi=166;if(a<lo||a>hi)return 9;const e=Math.min(a-lo,hi-a),t=clamp(e/9,0,1),sm=t*t*(3-2*t);return .70+(1-sm)*.32}
 const H_GATES=[180,-146,146,-112,114];
 // the cove: a compact round bay cut into the shore past right field, a breakwater sheltering its mouth
 const H_COVE_C={x:250,y:430,r:122};
@@ -51,9 +60,13 @@ function hRS(){const key=DIMS.join(',');if(H_RS&&H_RS_K===key)return H_RS;H_RS_K
   for(let t=10;t<1600;t+=10){if(hFieldD(H_CC.x+dx*t,H_CC.y+dy*t)>=De){t1=t;break}t0=t}
   for(let k=0;k<18;k++){const m=(t0+t1)/2;if(hFieldD(H_CC.x+dx*m,H_CC.y+dy*m)>=De)t1=m;else t0=m}raw[i]=t1;open[i]=D<10?1:0}
  // smooth only the closed part: a few passes of a wide circular average, the open ends pinned
- let R=Float32Array.from(raw);for(let p=0;p<6;p++){const o=new Float32Array(360);for(let i=0;i<360;i++){if(open[i]){o[i]=raw[i];continue}let s=0,w=0;for(let k=-10;k<=10;k++){const j=(i+k+360)%360;if(open[j])continue;const ww=11-Math.abs(k);s+=R[j]*ww;w+=ww}o[i]=s/w}R=o}
+ let R=Float32Array.from(raw);for(let p=0;p<14;p++){const o=new Float32Array(360);for(let i=0;i<360;i++){if(open[i]){o[i]=raw[i];continue}let s=0,w=0;for(let k=-10;k<=10;k++){const j=(i+k+360)%360;if(open[j])continue;const ww=11-Math.abs(k);s+=R[j]*ww;w+=ww}o[i]=s/w}R=o}
+ // fill any dents (the corner where the foul-line stand meets the outfield bends the raw edge inward): the outer wall
+ // of a stadium runs convex, so lift each point up to the chord between its neighbours
+ for(let it=0;it<30;it++)for(let i=0;i<360;i++){if(open[i])continue;for(let k=2;k<=14;k+=2){const a=(i-k+360)%360,b=(i+k)%360;if(open[a]||open[b])continue;const ch=(R[a]+R[b])/2*Math.cos(k*RAD);if(ch>R[i])R[i]=ch}}
+ {const o=new Float32Array(360);for(let i=0;i<360;i++){if(open[i]){o[i]=R[i];continue}let s2=0,w=0;for(let k=-3;k<=3;k++){const j=(i+k+360)%360;if(open[j])continue;s2+=R[j];w++}o[i]=s2/w}R=o}
  // never pull the edge in past where the seats need to be
- for(let i=0;i<360;i++)if(!open[i])R[i]=Math.max(R[i],raw[i]-14);
+ for(let i=0;i<360;i++)if(!open[i])R[i]=Math.max(R[i],raw[i]-48);
  return H_RS={R,open}}
 const hRout=phi=>{const T=hRS(),f=phi+180,i=Math.floor(f),u=f-i;return T.R[(i+360)%360]*(1-u)+T.R[(i+361)%360]*u};
 // the outline of the bowl (world px), traced where the stands end; open across the outfield
@@ -62,7 +75,7 @@ function hOutline(){const T=hRS(),out=[];for(let i=0;i<360;i+=1){const phi=i-180
 // tracing a wave through some sections
 const H_SEATS=[['#1f3f7a','#1b3870'],['#2f6fd0','#2a63bb'],['#5aa0e6','#5193d6']].map(p=>p.map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)])),
  H_SEATU=[[27,47,94],[24,42,84]],H_WHITE=[232,238,245],H_CHEER=[[255,210,63],[240,196,50]];
-function hSeat(ang,row,upper){const sec=Math.floor((ang+400)/10),h=vHash(sec,77);
+function hSeat(ang,row,upper,secId){const sec=secId!=null?secId+1000:Math.floor((ang+400)/10),h=vHash(sec,77);
  if(upper)return H_SEATU[row&1];
  if((ang>14&&ang<34)||(ang<-14&&ang>-34)){if(ang>0)return H_SEATS[2][row&1]}// the home cheering block on the first-base side
  const p=H_SEATS[h%3];return p[row&1]}
@@ -103,12 +116,16 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
    return H_NIGHT?((vHash(Math.floor(sF/4),band)&7)===0?hMul(HB.glassN,.45):band&1?HB.glassN2:HB.glassN):(band&1?HB.glass2:HB.glass)}
   return HB.fEdge}
  if(d<lo){return d<lo-1.2?HB.rail:HB.railD}
- const L1=D>70?D*.44:fac,C1=L1+7,U0=C1+1.6,RI=Math.min(fac,D*hRoofIn(phi));
- const seat=(d0,upper)=>{const t=(d-d0)/2.4,row=Math.floor(t),fr=t-row,step=9,off=upper?4.5:0,m=(((ha+off)%step)+step)%step;
-  if(Math.abs(m-step/2)*RAD*rh<1.15)return upper?hMul(HB.rail,.82):HB.rail;// stairs
-  if(Math.abs(m-step/2)*RAD*rh<1.6)return upper?[20,26,34]:[30,38,48];// their edges
-  if(fr>.76)return upper?[22,28,36]:[34,42,52];H_SEAT=true;return hSeat(ha,row,upper)};
+ // the upper deck and its concourse thin out smoothly toward the end of a stand, so the layers never jump
+ const RI=Math.min(fac,D*hRoofIn(phi)),up=clamp((D-40)/40,0,1),L1=lerp(RI,Math.min(RI,D*.44),up),C1=L1+7*up,U0=C1+1.6*up;
+ // stairs run straight up the bowl, square to the rows: spaced along the row direction (not fanned out from home plate)
+ const AL=hAlong(x,y),step=27,sStep=upper=>(((AL.s+(upper?step/2:0))%step)+step)%step;
+ const seat=(d0,upper)=>{const t=(d-d0)/2.4,row=Math.floor(t),fr=t-row,m=sStep(upper),dm=Math.abs(m-step/2);
+  if(dm<1.3)return upper?hMul(HB.rail,.82):HB.rail;// stairs
+  if(dm<1.9)return upper?[20,26,34]:[30,38,48];// their edges
+  if(fr>.76)return upper?[22,28,36]:[34,42,52];H_SEAT=true;return hSeat(ha,row,upper,AL.piece*100+Math.floor((AL.s+(upper?step/2:0))/(step*3)))};
  let c;
+ const roofPx=k=>{if(k<.8)return HB.gutter;if(k<1.8)return HB.roofEdge;if(d>fac-1.4)return HB.gutter;const m=((sF%10)+10)%10;if(m<1)return HB.rib;return (Math.floor(sF/10)&1)?HB.roof:HB.roof2};
  if(d<L1){c=seat(lo,false);if(D>70&&d>L1-9)c=hMul(c,.5+.3*clamp((L1-d)/9,0,1))}// the upper deck's overhang shades the back rows
  else if(d<C1){const p=vPerson(wx,wy,12);if(p)return hMul(p,.6);if(H_NIGHT&&((Math.floor(sF/9)+Math.floor(d))&7)===0){H_EMIS=true;return HB.concLit}return (n&3)?HB.conc:hMul(HB.conc,.85)}
  else if(d<U0){const m=((sF%6)+6)%6;H_EMIS=H_NIGHT;if(d<C1+.4||d>U0-.3)return HB.ledD;return m<2?HB.led1:m<4?HB.led2:HB.led3}
@@ -121,7 +138,8 @@ function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const
  if(fair&&q>=0){const pen=ath>=29&&ath<=41,q0=pen?18:0;if(q<q0)return HB.wallCap;if(q<q0+H_WALLW)return hWall(q-q0,s,n)}
  const phi=hPhi(x,y),D=hD(phi),Ro=hRout(phi),rc=Math.hypot(x-H_CC.x,y-H_CC.y),d=rc<Ro+4?hFieldD(x,y):1e4;
  if(d<=0&&PARK_C)return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2;// the last of the foul ground, past the park buffer's edge
- if(D>8){if(rc<Ro&&d>0){const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
+ if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
+ const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
  // past the open outfield wall: a terrace behind centre, a boardwalk behind right field, then the sea wall
  if(fair&&q<26){if(th>8)return hTerr(wx,wy,s,q-H_WALLW,26-H_WALLW,th);const m=((s%26)+26)%26;
    if(q>21&&q<22.2&&m<1.2)return HB.par;if(q>18.6&&q<21.2&&m>=1.2&&m<4.6)return Math.floor(s/26)&1?HB.pad2:HB.pad3;// flags along the back rail

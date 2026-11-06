@@ -1,3 +1,5 @@
+// the player line in the at-bat / pitching boxes: the club's logo, then the name
+function muSet(id,k,txt){const el=$(id);el.textContent='';if(LOGO_URL[k]){const im=document.createElement('img');im.className='muLogo';im.src=LOGO_URL[k];im.alt=TEAMS[k].name;el.appendChild(im)}el.appendChild(document.createTextNode(txt))}
 // ---------- HUD ----------
 function banner(t,s,tone){if(OPT.info===false&&['windup','pitch','play','call','result'].includes(S.phase))return;$('bt').textContent=t;$('bs').textContent=s||'';$('banner').dataset.tone=tone||'';$('banner').hidden=false}
 function hideBanner(){$('banner').hidden=true}
@@ -32,15 +34,15 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  const hrTrot=S.phase==='play'&&S.play&&S.play.hrFired;
  for(let k=1;k<=3;k++)if(!S.baseChase)$('d'+k).classList.toggle('on',!hrTrot&&!!S.bases[k-1]);
  const b=curBatter(),p=pitcher();
- $('abTeam').textContent=`${TEAMS[batKey()].name} · AT BAT`;$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE':`${TEAMS[fldKey()].name} · PITCHING${pitching()?' (YOU)':''}`;
+ $('abTeam').textContent='AT BAT';$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE':`PITCHING${pitching()?' (YOU)':''}`;
  const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;if(pit){const A=arsOf(pitcher());for(const pb of document.querySelectorAll('#actsPitch .pbtn[data-k]')){const i=A.indexOf(pb.dataset.k);pb.hidden=i<0;if(i>=0)pb.querySelector('small').textContent=i+1}
   $('actsPitch').style.gridTemplateColumns=isWide()?'':`repeat(${A.length},1fr)`}$('muPit').classList.toggle('canPen',canPen());document.querySelector('.meter').hidden=pit;
  for(const pb of document.querySelectorAll('#actsPitch .pbtn'))pb.disabled=S.phase!=='choose';
  {const bg=document.querySelector('.bug'),pb=document.querySelector('.pcBox');if(bg&&pb){pb.style.top=(bg.offsetTop+bg.offsetHeight)+'px';pb.style.width=bg.offsetWidth+'px';pb.style.boxSizing='border-box'}}
  $('pcV').textContent=(S.pcOf&&S.pcOf[fldKey()])||0;$('bugInn').textContent=S.phase==='title'?'':`${S.mode==='full'&&S.half==='top'?'▲':'▼'}${S.inning}`;
- $('abName').textContent=`${((S.orderOf&&S.orderOf[batKey()])||0)+1}. #${b.no} ${b.name} · ${b.pos}`;
+ muSet('abName',batKey(),`${((S.orderOf&&S.orderOf[batKey()])||0)+1}. #${b.no} ${b.name} · ${b.pos}`);
  $('abHand').innerHTML=(b.hand==='S'?`Switch (<b>${effHand(b)}</b>)`:`Bats <b>${b.hand}</b>`)+` · CON ${rb(b.con)} POW ${rb(b.pow)} SPD ${rb(b.spd)}`;
- $('pName').textContent=`#${p.no} ${p.name}`;
+ muSet('pName',fldKey(),`#${p.no} ${p.name}`);
  if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing: <button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button><span class="bpStat">${S.bp.sw} swings · ${S.bp.hr} HR · longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=`Throws <b>${p.hand}</b>${p.slot==='side'?' (sidearm)':''}${p.type==='demon'?' · <b class="dmn">SPEED DEMON</b>':p.type==='knuckle'?' · <b class="knk">KNUCKLER</b>':''} · VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}`;
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});

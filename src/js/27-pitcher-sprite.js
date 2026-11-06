@@ -118,7 +118,12 @@ function drawSlider(g,X,Y,T,o,dir,lift){
  const sc=v=>Math.round(v*1.2);const R=(c,dx,dy,w,h)=>{g.fillStyle=c;const x0=sc(dx),x1=sc(dx+w),y0=sc(dy),y1=sc(dy+h);g.fillRect(dir>0?x+x0:x-x1+1,yy+y0,Math.max(1,x1-x0),Math.max(1,y1-y0))};
  g.fillStyle='rgba(6,18,10,.3)';g.fillRect(x-9,y,19,2);
  if(o.head){R(SHOE,-11,-5,2,2);R(pa,-9,-5,5,3);R(BELT,-4,-5,1,3);R(T.jersey,-3,-6,8,4);R(T.cap,5,-8,4,4);R(T.brim,9,-6,1,2);R(sk,6,-5,2,2);R(sk,9,-4,3,1);R(sk,9,-7,2,1)}
- else{R(T.cap,-10,-9,4,4);R(T.brim,-11,-7,1,2);R(sk,-9,-6,2,2);R(T.jersey,-7,-7,6,4);R(BELT,-1,-6,1,3);R(pa,0,-6,6,3);R(pa,5,-4,4,2);R(SHOE,9,-5,2,2);R(SHOE,8,-3,2,1);R(sk,-6,-9,1,2)}
+ else{// feet first: leaning back on one hand, lead leg out straight at the bag with the spikes up, the other tucked under
+  R(sk,-11,-3,2,2);// trailing hand on the dirt
+  R(T.cap,-10,-11,4,4);R(T.brim,-11,-9,1,2);R(sk,-9,-8,2,2);// helmet and face, looking at the bag
+  R(T.jersey,-8,-9,6,5);R(T.jersey,-10,-6,3,2);R(BELT,-2,-7,1,4);
+  R(pa,-1,-7,6,3);R(pa,5,-6,5,2);R('#f1ecdc',10,-6,2,2);R(SHOE,12,-7,2,3);// lead leg: pants, sock, spikes up
+  R(pa,0,-4,4,2);R(pa,3,-3,2,2);R('#f1ecdc',4,-2,2,1);R(SHOE,5,-2,2,1)}// the bent leg tucked under
 }
 function drawCatcher(g,X,Y,T,o){
  const x=Math.round(X),y=Math.round(Y),sk=o.skin,pa=o.pants;

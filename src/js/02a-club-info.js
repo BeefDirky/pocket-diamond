@@ -3,10 +3,10 @@
 const CLUB_INFO={
  seoul:{est:1982,nick:'The capital club',
   city:'Korea\'s capital, split down the middle by the Han River and watched over by the tower on Namsan.',
-  facts:['The rat leads the zodiac: it won the great race by riding the ox and hopping off first. The club says that\'s just good baserunning.',
+  facts:['Seoul Forest was once Salgoji, the Joseon court\'s royal horse pasture, and later the Ttukseom racecourse. The Steeds are named for the horses that ran there.',
    'Hangang Park sits so close to the river that home runs to right have been fished out by rowers.',
    'Night games end with the whole park lit up on phone flashlights while the cheer squad leads one last song.'],
-  slogans:['한강의 쥐들!','찍찍 화이팅','오늘도 래츠!'],landmark:null},
+  slogans:['달려라 스티즈!','한강의 준마','오늘도 스티즈!'],landmark:null},
  busan:{est:1982,nick:'Baseball city',
   city:'Korea\'s second city and its biggest port: Haeundae beach, the Gwangan Bridge and a seagull for a city bird.',
   facts:['Fans tie orange plastic bags on their heads in the late innings, then use them for trash on the way out.',

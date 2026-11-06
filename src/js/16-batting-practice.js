@@ -1,14 +1,20 @@
 // ---------- batting practice: the ball just flies, lands and rolls; nobody fields it ----------
+// a ball rolling into the wall comes back off it (instead of stopping dead against the pad): past `room` it rebounds
+// at a third of the speed it arrived with
+const wallD=(d,room)=>d<=room?d:Math.max(room-(d-room)*.35,room-30);
+// the middle infielder for a cutoff: whichever of the shortstop and second baseman is nearer the spot (and not busy)
+function nearMid(p,play){const free=i=>!play||!play.fk[i];const d5=dist(POS[5],p),d3=dist(POS[3],p);if(free(5)&&(!free(3)||d5<=d3))return 5;return free(3)?3:(d5<=d3?5:3)}
 function buildBP(P,dir,b){const C={x:0,y:2},play=newPlay(),fair=Math.abs(P.s)<=45,fd=fenceDist(clamp(P.s,-45,45));let D=0,T=0,code,desc;
  if(P.L<10){const vf=.72*(1-Math.max(0,-P.L)/75),v0=P.EV*1.467*vf,A=15,ts=v0/A,dmax=fair?fd-10:150;
-  const gpos=t=>{const tt=Math.min(t,ts);const d=Math.min(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
+  const gpos=t=>{const tt=Math.min(t,ts);const d=wallD(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
   const tE=Math.min(ts,4.2);play.segs.push(fnSeg(0,tE,gpos));const g=gpos(tE);D=Math.hypot(g.x,g.y);code=fair?'GB':'FOUL';
   if(fair&&v0*ts-.5*A*ts*ts>=dmax){const tw=(v0-Math.sqrt(Math.max(0,v0*v0-2*A*dmax)))/A;play.fenceAt=Math.min(tw,tE)}
  }else{const Lr=P.L*RAD;D=Math.max(30,Math.min(475,(P.EV-40)*5.9*(.82+b.pow*.0035)*Math.pow(Math.sin(2*Lr),P.L>45?1:.6)));
   const need=b.pow>=85?.62:b.pow>=72?.7:.78;if(fair&&(b.pow<60||P.q<need)&&D>fd-8)D=fd-8-rand(0,22);
+  if(fair&&D<=fd&&D>fd-10)D=fd-10;// off the wall
   const vy=P.EV*1.467*Math.sin(Lr);T=Math.max(.7,vy/16*.82);const Hh=Math.max(8,vy*vy/64*.55),land={x:dir.x*D,y:dir.y*D};
   if(fair&&D>fd){play.segs.push(airSeg(0,T,C,land,Hh));play.ballGone=T;code='HR';play.clang=clangFor(D,fd,P.s,T,true)}
-  else{const Tr=1.3,room=fair?Math.max(0,fd-8-D):30,vr=Math.min(42,P.EV*.28),rp=t=>{const tau=clamp(t-T,0,Tr);const d=Math.min(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
+  else{const Tr=1.3,room=fair?Math.max(0,fd-8-D):30,vr=Math.min(42,P.EV*.28),rp=t=>{const tau=clamp(t-T,0,Tr);const d=wallD(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
    play.segs.push(airSeg(0,T,C,land,Hh),fnSeg(T,T+Tr,rp));if(fair)play.clang=clangFor(D,fd,P.s,T,false);if(fair&&vr*Tr*.5>=room&&room<30&&!play.clang)play.fenceAt=T+Math.min(Tr,room/Math.max(1,vr*.6));code=!fair?'FOUL':P.L>50?'POP':P.L<22?'LD':'FB'}}
  const nm={HR:'HOME RUN!',FOUL:'FOUL BALL',GB:'GROUND BALL',LD:'LINE DRIVE',FB:'FLY BALL',POP:'POP-UP'}[code];
  let e=0;for(const sg of play.segs)e=Math.max(e,sg.t1);play.end=Math.min(e,5.5)+.5;play.runners=[];play.bp=true;
@@ -70,7 +76,7 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  let tArr;
  if(it.i>=6&&Math.hypot(it.p.x,it.p.y)>200){
   // deep hit: the outfielder hits the cutoff man, who turns and relays to the base
-  const cut=it.p.x<0?5:3,Cc={x:lerp(tb.x,it.p.x,.45),y:lerp(tb.y,it.p.y,.45)},o=fromF(play,it.i,t0),t1=t0+dist(o,Cc)/THROW;
+  const Cc={x:lerp(tb.x,it.p.x,.45),y:lerp(tb.y,it.p.y,.45)},cut=nearMid(Cc,play),o=fromF(play,it.i,t0),t1=t0+dist(o,Cc)/THROW;
   play.fk[cut]=cover(cut,Cc,t1);
   play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,Cc),holdSeg(play,t1,t1+.32,cut),throwSeg(t1+.32,Cc,tb));
   tArr=t1+.32+dist(Cc,tb)/THROW;
@@ -93,7 +99,7 @@ function buildGrounder(P,dir,b){
  const C={x:0,y:2};
  const vf=.72*(1-Math.max(0,-P.L)/75);
  const v0=P.EV*1.467*vf,A=P.bunt?9:15,ts=v0/A,dmax=fenceDist(P.s)-10;
- const gpos=t=>{const tt=Math.min(t,ts);const d=Math.min(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
+ const gpos=t=>{const tt=Math.min(t,ts);const d=wallD(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
  // a scorcher right down the line gets past the corner infielder most of the time and rattles into the corner
  const lineShot=!P.bunt&&Math.abs(P.s)>=40.5&&P.EV>=86&&Math.random()<.7;
  const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8].filter(i=>!(lineShot&&i===(P.s>0?2:4))),P.bunt?.35:0);
@@ -193,8 +199,8 @@ function buildAir(P,dir,b){
  const vy=P.EV*1.467*Math.sin(Lr);
  const T=Math.max(.7,vy/16*.82);
  const Hh=Math.max(8,vy*vy/64*.55);
+ const fd=fenceDist(P.s);if(D<=fd&&D>fd-10)D=fd-10;// a drive that reaches the wall in the air hits the pad and drops
  const land={x:C.x+dir.x*D,y:C.y+dir.y*D};
- const fd=fenceDist(P.s);
  const play=newPlay();const runners=runnerList(b);const outsBefore=S.outs;
  play.deep=D>fd-30;
  if(D>fd){
@@ -236,7 +242,7 @@ function buildAir(P,dir,b){
    if(cand&&Math.random()<.35){const bb=BASES[cand.from],tt=T+.35+dist(land,bb)/THROW;play.segs.push(holdSeg(play,T,T+.35,best),throwSeg(T+.35,fromF(play,best,T+.35),bb));
     cand.out=true;cand.outAt=tt;cand.dblOff=true;dbl=cand;const cv=cand.from===1?(best===2?0:2):(best===5?3:5);if(cv!==best&&!play.fk[cv])play.fk[cv]=cover(cv,bb,tt)}}
   const empty=!S.bases.some(Boolean);
-  if(best>=6){const mi=land.x<0?5:3,tgt=tag?BASES[0]:empty?{x:lerp(POS[mi].x,land.x,.12),y:lerp(POS[mi].y,land.y,.12)}:BASES[2];if(empty&&!tag&&!play.fk[mi])play.fk[mi]=cover(mi,tgt,T+XF+dist(land,tgt)/THROW);play.segs.push(holdSeg(play,T,T+XF,best),throwSeg(T+XF,fromF(play,best,T+XF),tgt));
+  if(best>=6){const tg0=tag?BASES[0]:empty?land:BASES[2],mi=empty?(land.x<0?5:3):nearMid({x:lerp(tg0.x,land.x,.45),y:lerp(tg0.y,land.y,.45)},play),tgt=tag?BASES[0]:empty?{x:lerp(POS[mi].x,land.x,.12),y:lerp(POS[mi].y,land.y,.12)}:BASES[2];if(empty&&!tag&&!play.fk[mi])play.fk[mi]=cover(mi,tgt,T+XF+dist(land,tgt)/THROW);play.segs.push(holdSeg(play,T,T+XF,best),throwSeg(T+XF,fromF(play,best,T+XF),tgt));
    const cov=tag?1:(land.x<0?3:5);if(!play.fk[cov]&&!tag)play.fk[cov]=cover(cov,tgt,T+XF+dist(land,tgt)/THROW)}
   const kind=(P.L>=45||(best<=5&&P.L>=30))?'P':P.L<22?'L':'F';
   const diving=bn>T-.12&&kind!=='P';
@@ -250,7 +256,7 @@ function buildAir(P,dir,b){
  }
  const vr=drop?14:P.L<22?44:30,Rr=drop?7:(P.L<22?.2:.09)*D,Tr=Math.max(.3,2*Rr/vr),room=Math.max(0,fd-10-D);
  const rollPos=t=>{if(t<T){const u=t/T;return{x:lerp(C.x,land.x,u),y:lerp(C.y,land.y,u),h:4*Hh*u*(1-u)}}
-  const tau=clamp(t-T,0,Tr);const d=Math.min(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
+  const tau=clamp(t-T,0,Tr);const d=wallD(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
  const it=intercept(rollPos,T,T+Tr+12,[2,3,4,5,6,7,8]);
  {const rs=fnSeg(T,it.t,rollPos);rs.snd=true;play.segs.push(airSeg(0,T,C,land,Hh),rs)}
  if(!drop)play.clang=clangFor(D,fd,P.s,T,false);

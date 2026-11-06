@@ -43,7 +43,7 @@ function update(dt,now){
    if(pl.jump&&!pl.jumpSnd&&pl.t>=pl.jump.t-.05&&fldKey()===S.opp&&batKey()===S.you){pl.jumpSnd=true;crowdSad()}
    if(pl.runners)for(const r of pl.runners)if(r.slide&&!r.slide.sd&&pl.t>=r.slide.t0){r.slide.sd=true;if(!muted)playSample('slide',.85,1)}
    if(pl.clang&&!pl.clang.done&&pl.t>=pl.clang.t){pl.clang.done=true;if(!muted)playSample('clang',pl.clang.k==='board'?.75:.9,pl.clang.k==='pole'?1.08:1)}
-   if(r.hr&&!r.bp&&!S.play.hrFired&&S.play.t>=S.play.ballGone){S.play.hrFired=true;hrMoment(r)}
+   if(r.hr&&!r.bp&&!S.play.hrFired&&S.play.t>=S.play.ballGone){S.play.hrFired=true;hrMoment(r);splashCheck(S.play)}
    if(S.play.t>=S.play.end){S.play.t=S.play.end;finishPlay()}break}
   case'result':if(S.pt>(S.mode==='bp'?420:1450)){hideBanner();setPhase('reset');setCam('pitch')}break;
   case'reset':if(S.pt>(S.mode==='bp'?200:540)){S.play=null;afterPA()}break;

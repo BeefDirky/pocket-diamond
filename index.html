@@ -11,6 +11,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Yellowtail&family=Pixelify+Sans:wght@400;600;700&family=Jua&display=swap">
 <style>
+/* Pixelify Sans's 5 has a rounded top; this face replaces just that one glyph with a square-cornered pixel 5 */
+@font-face{font-family:'Pixelify Sans';font-weight:400;font-style:normal;unicode-range:U+0035;src:url(data:font/ttf;base64,AAEAAAAKAIAAAwAgT1MvMkXdRBgAAAEoAAAAYGNtYXAADACIAAABkAAAADRnbHlmiw/VDQAAAcwAAABYaGVhZC+Go0kAAACsAAAANmhoZWEF4wFyAAAA5AAAACRobXR4BD4APAAAAYgAAAAIbG9jYQAsAAAAAAHEAAAABm1heHAACQAaAAABCAAAACBuYW1l/e2LcgAAAiQAAABgcG9zdAAcAAAAAAKEAAAAJgABAAAAAQAAk9oHwV8PPPUAAwPoAAAAAOcTL/8AAAAA5xMv/wA8//QCDQJ3AAAAAwACAAAAAAAAAAEAAAOY/ugAAAJKADwAPQINAAEAAAAAAAAAAAAAAAAAAAACAAEAAAACABgABgAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAwIfAZAABQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAPz8/PwAAADUANQOY/ugAAAOYARgAAAAAAAAAAAAAAAAAAAAgAAAB9AAAAkoAPAAAAAIAAAADAAAAFAADAAEAAAAUAAQAIAAAAAQABAABAAAANf//AAAANf///8wAAQAAAAAAAAAAACwAAAAGADz/9AINAncAAwAHAAsADwATABcAABM1IRUFNTMVBzUhFRERMxEFNSEVJTUzFTwB0f4vW1sBdVz+igEa/otbAhxbW2RkZFpaWv7wARD+8FpaWlplZQAAAAAEADYAAQAAAAAAAQAHAAAAAQAAAAAAAgAHAAcAAwABBAkAAQAOAA4AAwABBAkAAgAOABxQRCBGaXZlUmVndWxhcgBQAEQAIABGAGkAdgBlAFIAZQBnAHUAbABhAHIAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAGAAA) format('truetype')}
+@font-face{font-family:'Pixelify Sans';font-weight:500;font-style:normal;unicode-range:U+0035;src:url(data:font/ttf;base64,AAEAAAAKAIAAAwAgT1MvMkXdRBgAAAEoAAAAYGNtYXAADACIAAABkAAAADRnbHlmiw/VDQAAAcwAAABYaGVhZC+Go0kAAACsAAAANmhoZWEF4wFyAAAA5AAAACRobXR4BD4APAAAAYgAAAAIbG9jYQAsAAAAAAHEAAAABm1heHAACQAaAAABCAAAACBuYW1l/e2LcgAAAiQAAABgcG9zdAAcAAAAAAKEAAAAJgABAAAAAQAAk9oHwV8PPPUAAwPoAAAAAOcTL/8AAAAA5xMv/wA8//QCDQJ3AAAAAwACAAAAAAAAAAEAAAOY/ugAAAJKADwAPQINAAEAAAAAAAAAAAAAAAAAAAACAAEAAAACABgABgAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAwIfAZAABQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAPz8/PwAAADUANQOY/ugAAAOYARgAAAAAAAAAAAAAAAAAAAAgAAAB9AAAAkoAPAAAAAIAAAADAAAAFAADAAEAAAAUAAQAIAAAAAQABAABAAAANf//AAAANf///8wAAQAAAAAAAAAAACwAAAAGADz/9AINAncAAwAHAAsADwATABcAABM1IRUFNTMVBzUhFRERMxEFNSEVJTUzFTwB0f4vW1sBdVz+igEa/otbAhxbW2RkZFpaWv7wARD+8FpaWlplZQAAAAAEADYAAQAAAAAAAQAHAAAAAQAAAAAAAgAHAAcAAwABBAkAAQAOAA4AAwABBAkAAgAOABxQRCBGaXZlUmVndWxhcgBQAEQAIABGAGkAdgBlAFIAZQBnAHUAbABhAHIAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAGAAA) format('truetype')}
+@font-face{font-family:'Pixelify Sans';font-weight:600;font-style:normal;unicode-range:U+0035;src:url(data:font/ttf;base64,AAEAAAAKAIAAAwAgT1MvMkcJRCEAAAEoAAAAYGNtYXAADACIAAABkAAAADRnbHlmwg7kHgAAAcwAAABgaGVhZC+Wo1EAAACsAAAANmhoZWEF8wGEAAAA5AAAACRobXR4BE8APAAAAYgAAAAIbG9jYQAwAAAAAAHEAAAABm1heHAACgAeAAABCAAAACBuYW1l/e2LcgAAAiwAAABgcG9zdAAcAAAAAAKMAAAAJgABAAAAAQAAIxfpOV8PPPUAAQPoAAAAAOcTL/8AAAAA5xMv/wA9//UCHgJ+AAAAAwACAAAAAAAAAAEAAAOY/ugAAAJbADwAPgIdAAEAAAAAAAAAAAAAAAAAAAACAAEAAAACABwABwAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAwIoArwABQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAPz8/PwAAADUANQOY/ugAAAOYARgAAAAAAAAAAAAAAAAAAAAgAAAB9AAAAlsAPAAAAAIAAAADAAAAFAADAAEAAAAUAAQAIAAAAAQABAABAAAANf//AAAANf///8wAAQAAAAAAAAAAADAAAAAHAD3/9QIeAn4AAwAHAAsADwATABcAGwAAEzUhFQU1MxUHNSEVBzUzFQU1IRUlNTMVITUzFT0B4f4ff38BiCeA/ncBMP734v6ffwH1iYl4eHiHh4esrKxVVVVVMzOJiQAAAAQANgABAAAAAAABAAcAAAABAAAAAAACAAcABwADAAEECQABAA4ADgADAAEECQACAA4AHFBEIEZpdmVSZWd1bGFyAFAARAAgAEYAaQB2AGUAUgBlAGcAdQBsAGEAcgACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAYAAA=) format('truetype')}
+@font-face{font-family:'Pixelify Sans';font-weight:700;font-style:normal;unicode-range:U+0035;src:url(data:font/ttf;base64,AAEAAAAKAIAAAwAgT1MvMkcJRCEAAAEoAAAAYGNtYXAADACIAAABkAAAADRnbHlmwg7kHgAAAcwAAABgaGVhZC+Wo1EAAACsAAAANmhoZWEF8wGEAAAA5AAAACRobXR4BE8APAAAAYgAAAAIbG9jYQAwAAAAAAHEAAAABm1heHAACgAeAAABCAAAACBuYW1l/e2LcgAAAiwAAABgcG9zdAAcAAAAAAKMAAAAJgABAAAAAQAAIxfpOV8PPPUAAQPoAAAAAOcTL/8AAAAA5xMv/wA9//UCHgJ+AAAAAwACAAAAAAAAAAEAAAOY/ugAAAJbADwAPgIdAAEAAAAAAAAAAAAAAAAAAAACAAEAAAACABwABwAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAwIoArwABQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAPz8/PwAAADUANQOY/ugAAAOYARgAAAAAAAAAAAAAAAAAAAAgAAAB9AAAAlsAPAAAAAIAAAADAAAAFAADAAEAAAAUAAQAIAAAAAQABAABAAAANf//AAAANf///8wAAQAAAAAAAAAAADAAAAAHAD3/9QIeAn4AAwAHAAsADwATABcAGwAAEzUhFQU1MxUHNSEVBzUzFQU1IRUlNTMVITUzFT0B4f4ff38BiCeA/ncBMP734v6ffwH1iYl4eHiHh4esrKxVVVVVMzOJiQAAAAQANgABAAAAAAABAAcAAAABAAAAAAACAAcABwADAAEECQABAA4ADgADAAEECQACAA4AHFBEIEZpdmVSZWd1bGFyAFAARAAgAEYAaQB2AGUAUgBlAGcAdQBsAGEAcgACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAYAAA=) format('truetype')}
 [hidden]{display:none!important}
 /* layout: one centered column — manual-scoreboard header, pixel ballpark, at-bat controls, scorebook */
 :root{
@@ -453,6 +458,17 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 .pcBox{align-items:center}
 .pcBox span{display:inline-flex;align-items:center;gap:5px;line-height:1}
 .pcBox b{display:inline-block;line-height:1;transform:translateY(-.5px)}
+/* on a computer screen there's room: the score bug and pitch count go back up to a comfortable size */
+@media (min-width:900px) and (hover:hover) and (pointer:fine){
+ .bug{gap:15px;padding:10px 14px;right:12px;top:12px}
+ .bugDia{width:70px;height:70px}.bugDia i{width:20px;height:20px;border-width:2px}
+ .bugDia .b2{left:23px;top:4px}.bugDia .b1{left:44px;top:25px}.bugDia .b3{left:2px;top:25px}
+ .bugSc{gap:8px;font-size:20px;padding-right:14px}.bugSc div{gap:8px}.bugSc i{width:6px;height:20px}.bugSc span{min-width:44px}.bugSc b{font-size:23px;min-width:26px}
+ .bugCnt{gap:6px;font-size:17px}.bugCnt div{gap:9px}
+ .bug .bulbs{gap:6px}.bug .bulb{width:16px;height:16px}
+ .pcBox{right:12px;gap:14px;padding:6px 14px;font-size:15px}
+ .pcBox b,.pcBox span:first-child{font-size:14px}
+}
 
 /* bullpen */
 .pbtn.pen{background:var(--chalk)}
@@ -679,6 +695,8 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 /* AUTO and INFO: same size and baseline, side by side */
 .autoBtn,.infoBtn{font-size:10px!important;padding:0 7px!important;height:26px;display:flex;align-items:center;gap:4px;box-sizing:border-box;line-height:1}
 .autoBtn{bottom:max(8px,env(safe-area-inset-bottom,0px))}
+
+.muLogo{width:1.6em;height:1.6em;vertical-align:-.45em;margin-right:.4em;image-rendering:pixelated}
 </style>
 
 <div class="app">
@@ -934,13 +952,13 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
         <h1 id="overT">FINAL</h1>
         <p id="overS"></p>
         <div class="stats" id="overStats"></div>
-        <button class="big" id="again" type="button">RUN IT BACK</button>
+        <button class="big" id="again" type="button">PLAY AGAIN</button>
         <button class="big" id="toBracket" type="button" hidden>BACK TO THE BRACKET</button>
         <p class="olSeries" id="olSeries" hidden></p>
         <button class="big" id="olNext" type="button" hidden>NEXT GAME</button>
         <button class="big" id="toLobby" type="button" hidden>BACK TO THE ROOM</button>
+        <button class="big alt" id="change" type="button">MAIN MENU</button>
         <p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Open card packs</button>
-        <button class="ghost" id="change" type="button">Change clubs</button>
       </div>
     </div>
   </div>
@@ -1015,7 +1033,7 @@ function dugoutFrame(sd){const along=82.5,perp=48.5;return toPx3(sd*(along+perp)
 function penSpot(sd,th){const r=fenceDist(sd*th)+9;return{x:sd*r*Math.sin(th*RAD),y:r*Math.cos(th*RAD)}}
 
 const TEAMS={
- seoul:{city:'SEOUL',kcity:'서울',name:'RATS',kname:'래츠',script:'Rats',emblem:'rat',logo:'shield',
+ seoul:{city:'SEOUL',kcity:'서울',name:'STEEDS',kname:'스티즈',script:'Steeds',emblem:'rat',logo:'shield',
   jersey:'#4a5060',cap:'#c8202a',brim:'#7a1018',mascot:'Chuchu',mdesc:'A subway rat in a conductor\'s cap. Knows every shortcut on Line 2 and squeaks the seventh-inning song.',
   pitcher:{name:'AHN W.K.',hand:'R',slot:'side'},pen:[{name:'WALSH',hand:'R',slot:'over'},{name:'NOH S.H.',hand:'L',slot:'over'}],
   lineup:[['PARK J.H.','L'],['KIM D.W.','R'],['RAMIREZ','S'],['LEE S.M.','R'],['CHOI W.S.','L'],['JUNG H.S.','R'],['KANG M.G.','R'],['OH J.Y.','L'],['YANG E.S.','R']]},
@@ -1036,7 +1054,7 @@ const TEAMS={
   pitcher:{name:'WON S.J.',hand:'R',slot:'over'},pen:[{name:'OH D.K.',hand:'R',slot:'side'},{name:'KWAK B.S.',hand:'L',slot:'over'}],
   lineup:[['KOO J.M.','L'],['BAEK S.H.','R'],['PARK H.J.','R'],['GARCIA','R'],['LEE J.H.','L'],['KIM Y.W.','S'],['CHO S.M.','R'],['YUN T.K.','L'],['KANG H.B.','R']]},
  daejeon:{city:'DAEJEON',kcity:'대전',name:'BEARS',kname:'베어스',script:'Bears',emblem:'bear',logo:'pennant',
-  jersey:'#7a4a2a',cap:'#ef8a24',brim:'#a85a12',mascot:'Gomi',mdesc:'A big bear who naps in the bullpen between innings and shares bread from the famous bakery with the ball kids.',
+  jersey:'#1c2b5a',cap:'#c8202a',brim:'#7a1018',mascot:'Gomi',mdesc:'A big bear who naps in the bullpen between innings and shares bread from the famous bakery with the ball kids.',
   pitcher:{name:'RYU M.S.',hand:'L',slot:'over'},pen:[{name:'KIM S.U.',hand:'R',slot:'side'},{name:'MUN D.W.',hand:'R',slot:'over'}],
   lineup:[['JEONG E.H.','L'],['NOH S.M.','R'],['CHAE E.J.','R'],['WILSON','L'],['HA J.W.','R'],['KIM I.H.','S'],['YOO R.G.','R'],['SIM W.J.','L'],['PARK S.K.','R']]},
  suwon:{city:'SUWON',kcity:'수원',name:'WIZARDS',kname:'위저즈',script:'Wizards',emblem:'wizard',logo:'fortress',
@@ -1067,10 +1085,10 @@ const ORDER=['seoul','busan','incheon','gwangju','daegu','daejeon','suwon','chan
 const CLUB_INFO={
  seoul:{est:1982,nick:'The capital club',
   city:'Korea\'s capital, split down the middle by the Han River and watched over by the tower on Namsan.',
-  facts:['The rat leads the zodiac: it won the great race by riding the ox and hopping off first. The club says that\'s just good baserunning.',
+  facts:['Seoul Forest was once Salgoji, the Joseon court\'s royal horse pasture, and later the Ttukseom racecourse. The Steeds are named for the horses that ran there.',
    'Hangang Park sits so close to the river that home runs to right have been fished out by rowers.',
    'Night games end with the whole park lit up on phone flashlights while the cheer squad leads one last song.'],
-  slogans:['한강의 쥐들!','찍찍 화이팅','오늘도 래츠!'],landmark:null},
+  slogans:['달려라 스티즈!','한강의 준마','오늘도 스티즈!'],landmark:null},
  busan:{est:1982,nick:'Baseball city',
   city:'Korea\'s second city and its biggest port: Haeundae beach, the Gwangan Bridge and a seagull for a city bird.',
   facts:['Fans tie orange plastic bags on their heads in the late innings, then use them for trash on the way out.',
@@ -1139,7 +1157,7 @@ const STADIUMS={
  daegu:{name:'CROWN PARK',kname:'크라운파크',dims:[325,372,400,372,325],grass:['#3a9c39','#46ad45','#50b64e'],mow:'check',
   seat:['#1f57c3','#1b4dad'],seatU:['#e8b730','#d4a62a'],pad:'#1b1b1f',pad2:'#111114',wallFt:8,feature:'honey',net:true},
  daejeon:{name:'BREAD BOWL PARK',kname:'빵그릇파크',dims:[325,360,400,355,315],grass:['#3fa23c','#4cb447','#56bd50'],mow:'stripe',
-  seat:['#7a4a2a','#6b4024'],seatU:['#ef8a24','#d97c20'],pad:'#0d4f57',pad2:'#083339',wallFt:8,feature:'pool',net:true},
+  seat:['#24396e','#1f3262'],seatU:['#c8202a','#b01c26'],pad:'#14244e',pad2:'#0c1834',wallFt:8,feature:'pool',net:true},
  suwon:{name:'FORTRESS FIELD',kname:'화성필드',dims:[330,380,400,380,330],grass:['#389a3a','#44ab44','#4fb54d'],mow:'diag',
   seat:['#4b2a8a','#42257a'],seatU:['#1b1b22','#16161c'],pad:'#2a2a30',pad2:'#1d1d22',wallFt:8,feature:'fortress',net:true},
  changwon:{name:'FOSSIL YARD',kname:'화석야드',dims:[324,370,400,370,324],grass:['#3c9f37','#48b142','#52ba4b'],mow:'arc',
@@ -1211,18 +1229,18 @@ const CREAM='#f4f1e8',INK='#1b1f24';
 
 // ---------- club emblems: hand-finished pixel art, 40x40, one character per pixel ('.' = clear) ----------
 // Redrawn on a true pixel grid from Imugi Labs' logo art (the originals imitated pixels at uneven sizes), then
-// touched up by hand: the cat's and rex's eyes, the rat's eye, the Kings' and Cosmos' baseballs, Jeju's eyebrows, the Daejeon bear's eye.
+// touched up by hand: the cat's and rex's eyes, the rat's eye, the Kings' and Cosmos' baseballs, Jeju's eyebrows, the Daejeon bear's eye; Seoul's steed is a placeholder.
 const PIXEL_LOGOS={
  incheon:{pal:["#031950", "#614f6c", "#fbf2d8", "#d79baa", "#f71866", "#e6065a", "#facc02", "#c20b52", "#ff6fa3"],px:'......................................../.................555555................./..............555555555555............../............5555222222225555............/...........555222200002222555.........../.........5522220000000000222255........./........552200000000000000002255......../.......55220000000000000000002255......./......5522000000000000200006602255....../.....552200000000000002000066002255...../.....522000000000000000006666660225...../....55200020000000000000006660000255..../...5520000220000000000000006600000255.../...5220000000000000000000002220000225.../...5220000000000888844442222222200225.../..552000000000088884444422000002000255../..552000000000822844444227000002000255../.55200000000008824444442470000220000255./.55200000000088822444422447002200000255./.55200000000288442444424447222200000255./.55200000002284442444424442220000000255./.55200000222244442444424222200000000255./.55200000220044422444422222000000000255./..552000220000442444222227000000000255../..552020200000422222222227000000000255../..552200200000222222277770000022002255../...5220022222222224477770000000000225.../...5520000222000000000000000000000255.../...5552000000000000000000000200002555.../....55220000000000000000000220002255..../.....552200000000000000000000002255...../......55220000000000000000000002555...../......5552200000000000000000022555....../.......5552200000000000000002255......../.........5522200000000000022255........./..........55522222000022222555........../............5555222222225555............/..............555555555555............../.................555555................./........................................'},
  ulsan:{pal:["#012762", "#02173b", "#3977b9", "#faf7f2", "#009ef1", "#78d4f7"],px:'......................................../............1111......................../...........144441......................./..........14433441....................../..........14444441..111................./..........11444441.14441................/...........1111441144441................/........1111..1141444441................/.......144441..11144441....111111......./......14433441..114411....113333311...../......144444441..141.....13300003331..../......1444444441.11....13300000003311.../.......111111141....111330000022220311../..............11...1330000000220000001../...............1..130000000000003333331./.........11111...1130000000333331111331./....1111133331..11300000033311111111111./..113333300001.13300000031311111333311../.133000000000.130000000331111333333311../.13002220000.1300000003111333333333311../..100000000.1300000000011333313331331.../..11000000013000003030013313313331311.../...1100000000000003330033313133313311.../....11110000000000000033313313331311..../.......10000000000000033313133313311..../......13000000000000033313313331331...../......10000011111100333313133313311...../.....13001111444411333333313331311111.../....130111444444444111133333111111111.../....1111444333344444411113331111.1511.../....111444433444444444441111115555411.../.....1444444411114444444444443444411..../....144441111...111144444433344441....../....14411....1111..11144444444411......./...1111....11555511...1114444411......../...111...1155555555111..111111........../........155511115555551111............../........11111..1115555511.............../.................111111................./........................................'},
- daejeon:{pal:["#2f0d11", "#ad5b28", "#fbeada", "#fbc103", "#6b3724", "#542b10"],px:'......................................../..........00000........................./.........0033300......00000............./.......00333333300..000333000.........../.......03330003330003333333300........../......003000110030033300003330..00....../......033001111003330000000033003300..../.....00300111111033000111100333333300.../.....03301100001000000111120003000330.../.....033011000001111110011220000000330../.....033011000111111111111222222220033../.....003001101111111102112222200444033../......03301111111111100112222200000033../......00330011111111100112222220000330../.....000000011111111111122222222202330../....0330000111111111111222222200002330../....3330011111111111111220022000000330../...03300011111111111111222000222220033../...33000111111111111111222222222220033../..033001111111111111111122222220200033../..030001111111101111111111222000200330../..030001110111101111111111100000000330../..033301100111001110111111100000003300../..0030000011110011001111110000003300..../...03000001110001100011100000003300...../...3300000110000010001110000003300....../..030000000100000000011000003300......../..03000000010000000000100003330........./..03333000000000000000000033000........./..000033300000000000000003300.........../.....00003330000000000003300............/........0003330000000003300............./..........0003330000003300............../............0033300003300.............../..............0033003330................/...............00330330................./................0033300................./.................00300................../..................000.................../........................................'},
+ daejeon:{pal:["#121a3c", "#3b5cae", "#fbeada", "#d0202e", "#24397a", "#1b2b62"],px:'......................................../..........00000........................./.........0033300......00000............./.......00333333300..000333000.........../.......03330003330003333333300........../......003000110030033300003330..00....../......033001111003330000000033003300..../.....00300111111033000111100333333300.../.....03301100001000000111120003000330.../.....033011000001111110011220000000330../.....033011000111111111111222222220033../.....003001101111111102112222200444033../......03301111111111100112222200000033../......00330011111111100112222220000330../.....000000011111111111122222222202330../....0330000111111111111222222200002330../....3330011111111111111220022000000330../...03300011111111111111222000222220033../...33000111111111111111222222222220033../..033001111111111111111122222220200033../..030001111111101111111111222000200330../..030001110111101111111111100000000330../..033301100111001110111111100000003300../..0030000011110011001111110000003300..../...03000001110001100011100000003300...../...3300000110000010001110000003300....../..030000000100000000011000003300......../..03000000010000000000100003330........./..03333000000000000000000033000........./..000033300000000000000003300.........../.....00003330000000000003300............/........0003330000000003300............./..........0003330000003300............../............0033300003300.............../..............0033003330................/...............00330330................./................0033300................./.................00300................../..................000.................../........................................'},
  suwon:{pal:["#341054", "#0f0123", "#21024a", "#2b133b", "#fbf0cb", "#723b94"],px:'......................................../..........................3333333......./.......................33335555333....../.......................33335555333....../.....................33355555555533...../....................3355555533355533..../..................333555555333333533..../.................335555555533..33533..../.................335555555333..33333..../...............3335553355533.....33...../..............33555534335533............/.............335553344443333............/............33355533444433333.........../...........333555555343355533.........../........3333333555555435555333........../.....3333444444333355335555533........../.....33334444444333555555555333........./...3334444444444444333335555333...3333../..334444333333334444444433333333333443../..344433333333333334444444444444444443../..344433333333333333333444444444443333../..34333334444444433333333333333333333.../..33334444444444444443333333333333433.../...3334440000044334444444444333334433.../....33344000004434400044334400000433..../.....3344000004434000044344000004433..../......34400000444400004434400004433...../......3440000044400000444400004443....../......3440000044000000444000004433....../......344000004400000044000004443......./......344000000004400040000004433......./......344000000044400000000044333......./......3440000000444000000000443........./......3440000004444000000044433........./......344000000433400000004433........../......344000044433400000044433........../......34444444433344444444433.........../......3444444433334444444433............/......333333333..33333333333............/........................................'},
  jeju:{pal:["#0d1321", "#126e2f", "#d64901", "#fc6a01", "#fcfbfb", "#fab060", "#703416", "#61bc3b"],px:'......................................../..........................00000........./..........00000.........00000000......../........0000000000.....000777700......../........0077777000....0077777700......../........00777777770..07777711100......../........00111447777007777441100........./.........0011444411001144441100........./.........0011114411001144411100........./...........001111111114411110.........../...........00011117771111100............/.............000000770000000............/...........000000007700000000.........../..........000333330770333330000........./.........0033355330770333333300........./.......00003335533000033333330000......./.......00443353333333333333334400......./......0004433500333333330044344000....../......0033343333033333303334433300....../.....00033343330033333000333433300....../....00333444443003333300034444433300..../....00333444443003333300034444433300..../....00333334333333333333333343333300..../....00333344443333333333333344333300..../....00334444443300333300334444443300..../....00333344333330000000333344333300..../....00333344333333000003333344333300..../....00334444433333333333333444443300..../.....003444443333333333333344444300...../.....003334333333333333333333433300...../.....003334443333333333333334433300...../......0004444333333333333334444000....../.......00442233333333333333224000......./........00022222333333332222200........./.........0022222222222222222200........./..........00022222222222222000........../..........00000022222222000000........../.............00000000000000............./................00000000................/........................................'},
  gwangju:{pal:["#d60827", "#07102a", "#a6221a", "#871914", "#fbf2e0", "#76767d", "#fb7103", "#ffd23a", "#f28a9a"],px:'......................................../......................................../......................1111111111......../....................111000000001111...../.................1111000000000000111..../.........111...1110000000000000000011.../.........1111..1000000000000000000011.../........1166111100000000000000000011..../........1466611000000011111110000011..../.......1146661110001111....111100111..../.......1446636111011......111111011...../.......14466336611......11166111011...../......114466336611......111661.111....../.....1114666333661111111166641........../....11014663333661111111666441........../...110014633366666336336666441........../..111001446666666663663366641.........../..110001446666644663363366611.........../..110011146611444466663666611.........../.1110014446666116666666666611111111111../.10001444666666111116661111611000000011./.10001443336661771716661717111000000001./.10001113666661771716661717111000000011./.1000111444444611111888111161111000001../.10001444444444466644111166611.1000011../.11001441111111114444111446111.100011.../.111011111664444111444144114411100011.../..11001166444444444444144444411100111.../..1100011444111144444111444111100011..../...110011111114444411444444411000011..../...111001111666444444444411110000111..../....1100011116666444444111110000011...../.....110001111166644441111000000111...../......110001111111111110000000001......./.......111001.1000000000000000011......./........11111.111000000000001111......../................1110000001111.........../..................11111111............../......................................../........................................'},
  daegu:{pal:["#011842", "#bcc2cf", "#fcb501", "#fcfbfb", "#46443e", "#fbd474", "#6e7892", "#a7841a", "#d22b3a"],px:'......................................../......................................../......................................../......................................../......................................../...................00.................../...................00.................../..................0000................../.................003300................./................003333000.............../................022222200.............../........000.....002222000....000......../.......00000.....002200.....00000......./.......000000....00000.....000000......./......0002200...00033000...0022000....../.00...00222200.0003333000.00222200...00./.0000.00222200.0033223300.00222200.0000./.00000000222000003322330000022200000000./..033000022000003322223330000220000330../..003300002200033222222330002200003300../..000330002200332222222233002200033000../...0023330222332200000022332220033200.../...0022333222322000000002232223332200.../...0002233222220033333300222223322000.../....00222222220038333383002222222200..../....00022222220033833833002222222000..../......02222222003833338300222222200...../......02222222003383383300222222200...../......0022000000383333830000002200....../......0000000000333333330000000000....../......0022222220033333300222222200....../......0022222222000000002222222200....../.......00220000000000000000002200......./.......00000000000000000000000000......./.......00000................0000......../......................................../......................................../......................................../......................................../........................................'},
  changwon:{pal:["#b40811", "#021b1e", "#8a8480", "#010a0d", "#335749", "#9ace89", "#faf4eb", "#2f8c5a", "#133a2e", "#f2c230"],px:'......................................../......................................../................6666..................../..............6661166.................../.............6111111166...6611166......./............611155551166.6111111166...../...........6115577755111611777771116..../..........611557777775111177777771116.../.........61155337777777777777117777116../........611577733337777777777111777716../......66115577736693311777777771177716../.....6611557777369337177777777777777166./.....6115577777733377777777777777777716./.....6115777777711117777777771111111116./.....1155777777777777777771111166661116./....6111177771117777711111166666616116../...61117777771111111166166166616616166../...1117777711111111116616111611611116.../..6117771777157111111611111111111116..../..117771177555771111111111600666116...../.61177117775557771111111166006660116..../.61771117775557777111111666006600616..../.61711177717755777116611660066660611..../.61111177717755777166611666066006611..../.66661777711777777716661100666600611..../....11777711177777771161606666006616..../....11777771111777777166611166006116..../...61177777711111177771661166600116...../...61777777111111117771111661111166...../...6177771111111111177711166166166....../..6117771111666..661117771116661......../..6177711166......66111777711111......../..617711166.........611177777116......../..6171166............6111111116........./..611166..............66111116........../..61166.................66666.........../..616.................................../..66..................................../......................................../........................................'},
  busan:{pal:["#010d28", "#fabd05", "#b2c4dd", "#03a8f7", "#012867", "#fefefe", "#dcdde1", "#636778"],px:'......................................../......................................../....................55555555............/..............555500000000000.........../............5550000444444400055........./.........55500004444444444440055......../......500000000000000444444440055......./....50000000005555555000444444005......./...500005555555555555550044444405......./...000000055555555555555044444405......./....55000000005555555555004444405......./......550004400000055555504444455......./........550004440555555550444405......../.........5550444055555555044000005....../..........5004444000555500400555005...../..........50444445555555000055555005..../.........5004444000055500055550055005.../.........504444400555500055555555111005./........5004444005555555555555551111105./........5044444055500555555552220000005./.......500444440000555555555220055....../.......5044444000555555555222005......../......500444005555555555222200005......./......5044400555555552222220044005....../......00440555522222220000044444005...../.....5044055555222000004444444444005..../.....0040555000000000000000444444005..../....50405500000555550000055044444405..../....00405000555000000000050044444405..../...504400000003333333005500444444055..../...00000000033333330000000444444005...../...00000003333330005550444444444055...../...555003333330005550004444440005......./...55033333330055500044444400055......../..55033333300000004444440000555........./.5503330000000044000000005............../.500000055555000005555................../.55555......555555....................../......................................../........................................'},
- seoul:{pal:["#5a5e71", "#fb7881", "#a3a8bf", "#cf041e", "#07132f", "#fbefdb", "#720a25", "#c4394f"],px:'......................................../......................................../......................................../......................44444............./....................44444444............/.................444433333344.........../...............444333355553444........../......44444...4433333555553334........../....444555444.43333335533333344........./...4445555554443333335555533344........./...4455555554433333333335533344........./..44555444555543333355555333344444444.../.445554111445544333355553444443333344.../.4455411111145543333334444433333333344../.45541111111145433344433333344444443344./.45541111114442444443333333444444444344./.45541111111442444444444444444444444344./.4554111111444222244444444444444444444../.445571111142222222244222244444443344.../..4555711144442222222222222224433444..../...45557774222222222222222222444444...../...44555544222222222224442224444......../....44444422222222222454442222444......./......4442222244444224444422222444....../.......422222222222422444225555554....../......4422222222222224445555554444.44.../......422222224444444255555554422444..../.....44222222222225555445555554444....../.....42222222222255544555555555554444.../.....42242222222555554455555555544..4.../.....4444222222555555544444444444......./......44422244455555555444545544......../.......422444444455555554455554........./.......4244...44444555544455554........./.......444.......4445544.44444........../...................4444................./....................44................../......................................../......................................../........................................'}
+ seoul:{pal:["#5a5e71", "#a3a8bf", "#cf041e", "#07132f", "#fbefdb", "#720a25", "#d9dce6", "#2b2f45"],px:'...................3313................./..................311113................/..................311513................/..................3115113.3............./...................311111323............/...................31111115233........../...................311211152223........./..................311221115222233......./................332112221152522523....../...............31122222211522222223...../..............31161222111152222223....../.............31166121111111522223......./............31166113111111155225233...../............316633311111111522222223..../...........31166377111111115222222223.../..........31166677711111111152222223..../.........31116661711111111115225223...../.........311666111111111111152222223..../........31166661111111111110522222223.../.......3111666111111111111100522222223../.......31166661111111111111005252252253./......31116661111111111111000522222233../......311666111111111111110005222223..../.....31000661110001111111000052222223.../.....300000011011101111110000055225223../....3000000000111111111110000052222223../....30033000011133311111000000522222223./.....30000000133...311110000005222222223/.....300033033.....31111000000552252333./......333303........311000000005222223../..........3.........311000000005222223../....................3110000000052222223./....................3100000000052252253./....................31000000000522222223/....................3100000000052223333./...................31000000000005223..../...................310000000000052523.../...................310000000000052223.../....................3333333333333333..../........................................'}
 };
 // ---------- logos (vector badges) ----------
 function circ(g,x,y,r){g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill()}
@@ -1547,7 +1565,7 @@ MASCOTS.busan={c:{w:CREAM,k:INK,y:'#ffc83a',b:'#9aa3ad',n:'#123a6b',o:'#e8642a'}
 MASCOTS.incheon={c:{w:CREAM,v:'#c9d4de',b:'#3a6ab0',k:INK,p:'#e94e77',n:'#1d2a5e'},m:['...wwwww...','..wvvvvvw..','.wvbbbbbvw.','.wvbkbbkvw.','.wvbbbbbvw.','..wvvvvvw..','...wwwww...','..nwwpwwn..','.wwwwpwwww.','w.wwwwwww.w','w.wwnnnww.w','..wwwwwww..','..ww...ww..','..ww...ww..','.nnn...nnn.']};
 MASCOTS.gwangju={c:{r:'#d0312d',d:'#8e1f1c',w:CREAM,k:INK,g:'#9fe06a',p:'#f2a5b4'},m:['.r.......r.','.rr.....rr.','.rprrrrrpr.','.rrdrdrdrr.','rrgkrrrkgrr','rrrrrprrrrr','.rwwwwwwwr.','..wwkwkww..','...rrrrr...','..rrwwwrr..','.rdrwwwrdr.','r.rrwwwrr.r','..rdrrrdr..','...rr.rr..d','...rr.rr.dd','..kkk.kkk..']};
 MASCOTS.daegu={c:{y:'#ffc83a',d:'#d89a1c',r:'#e0473d',b:'#1f57c3',s:'#f1c7a1',k:INK,w:CREAM,p:'#c8202a'},m:['.y.y.y.y.y.','.yyyyyyyyy.','.yrydybyry.','.yyyyyyyyy.','..sssssss..','..skssskss.','..sssssss..','..ss.k.ss..','...sssss...','..ppppppp..','.ppbbbbbpp.','pp.bbybb.pp','s..bbbbb..s','...bbbbb...','...bb.bb...','..kkk.kkk..']};
-MASCOTS.daejeon={c:{b:'#8a5632',d:'#7a4a2a',m:'#e3c49a',k:INK,w:CREAM,o:'#ef8a24',p:'#f2a5b4'},m:['.bb.....bb.','bmbbbbbbbmb','.bbbbbbbbb.','bbkbbbbbkbb','bbbbmmmbbbb','.bbmkkkmbb.','.pbmmmmmbp.','..bbbbbbb..','.ooooooooo.','oobwwwwwboo','b.owwwwwo.b','..ooooooo..','..bbbbbbb..','..bbb.bbb..','..bbb.bbb..','.kkkk.kkkk.']};MASCOTS.suwon={c:{h:'#4b2a8a',d:'#2e1a58',y:'#ffe36b',s:'#f1c7a1',k:INK,w:CREAM,r:'#1b1b22',b:'#d9b07a'},m:['.....h.....','....hhh....','...hhyhh...','...hhhhh...','..hyhhhhh..','.hhhhhhhhh.','ddddddddddd','..sssssss..','..sksssks..','..sssssss..','...sswss...','..rrrrrrr.b','.rrryrrrrb.','r.rrrrrrbr.','..rrrrrrr..','...rr.rr...','..kkk.kkk..']};
+MASCOTS.daejeon={c:{b:'#8a5632',d:'#1c2b5a',m:'#e3c49a',k:INK,w:CREAM,o:'#c8202a',p:'#f2a5b4'},m:['.bb.....bb.','bmbbbbbbbmb','.bbbbbbbbb.','bbkbbbbbkbb','bbbbmmmbbbb','.bbmkkkmbb.','.pbmmmmmbp.','..bbbbbbb..','.ooooooooo.','oobwwwwwboo','b.owwwwwo.b','..ooooooo..','..bbbbbbb..','..bbb.bbb..','..bbb.bbb..','.kkkk.kkkk.']};MASCOTS.suwon={c:{h:'#4b2a8a',d:'#2e1a58',y:'#ffe36b',s:'#f1c7a1',k:INK,w:CREAM,r:'#1b1b22',b:'#d9b07a'},m:['.....h.....','....hhh....','...hhyhh...','...hhhhh...','..hyhhhhh..','.hhhhhhhhh.','ddddddddddd','..sssssss..','..sksssks..','..sssssss..','...sswss...','..rrrrrrr.b','.rrryrrrrb.','r.rrrrrrbr.','..rrrrrrr..','...rr.rr...','..kkk.kkk..']};
 MASCOTS.changwon={c:{g:'#1e8a6e',d:'#123a32',w:CREAM,k:INK,y:'#ffc83a',l:'#7fd8b8'},m:['....yyyyy..','...yyyyyyy.','...gggggggg','..ggkggggggg'.slice(0,11),'..ggggggggg','..gggwwwwww','..ggg.w.w.w','..gggg.....','.gggggg....','gglllgg.g..','gglllgggg..','.glllgg....','..ggggg....','..gg.gg..gg','..gg.gggggd','.kkk.kkk...']};
 MASCOTS.ulsan={c:{...MASCOTS.blue.c,b:'#4f9fd8'},m:MASCOTS.blue.m};MASCOTS.jeju={c:{o:'#ff9a1f',w:CREAM,k:INK},m:MASCOTS.orange.m};
 function blit(g,map,cols,x0,y0){
@@ -1603,7 +1621,7 @@ function buildFeather(src){const e=EXT_M,c=document.createElement('canvas');c.wi
  g.globalCompositeOperation='destination-in';g.beginPath();PARK_OUTLINE.forEach((q,i)=>g[i?'lineTo':'moveTo']((q.x+e.mx)/2,(q.y+e.my)/2));g.closePath();g.fill();
  return c}
 function buildOutside(k,night,empty){// empty: batting practice, nobody in the seats
-const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start');H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
+H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  const e=EXT_M,CW=Math.round((W+2*e.mx)/2),CH=Math.round((H+2*e.my)/2),c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
  const rr=mulberry32(hash(k+'-outside')),R=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))};
  const cx=x=>(x+e.mx)/2,cy=y=>(y+e.my)/2,T=TEAMS[k];
@@ -1681,7 +1699,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
   {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
  if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}}
- BT('city');if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
+if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
   const mc=document.createElement('canvas');mc.width=CW;mc.height=CH;const mg=mc.getContext('2d');mg.beginPath();OL.forEach((q,i)=>mg[i?'lineTo':'moveTo'](q.x,q.y));mg.closePath();mg.fill();const md=mg.getImageData(0,0,CW,CH).data;
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea],img=g.getImageData(0,0,CW,CH),d=img.data;
   // most of the canvas is plain city: sample each 8px tile on a 3x3 grid and skip it whole when nothing harbor-ish is there
@@ -1690,7 +1708,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
   for(let ty=0;ty*TS<CH;ty++)for(let tx=0;tx<TW;tx++){let any=false,sea=0;for(let a2=0;a2<=2;a2++)for(let b2=0;b2<=2;b2++){const v=lat[Math.min(LH-1,ty*2+b2)*LW+Math.min(LW-1,tx*2+a2)];if(v===2)any=true;else if(v===1)sea++}if(!any)skip[ty*TW+tx]=sea===9?2:sea?0:1;if(!any&&sea&&sea<9)skip[ty*TW+tx]=0}
   for(let py=0;py<CH;py++){const wy=(py+.5)*2-e.my,trow=((py/TS)|0)*TW;for(let px=0;px<CW;px++){const sk=skip[trow+((px/TS)|0)];if(sk===1)continue;const j=(py*CW+px)*4;if(md[j+3]>200)continue;const wx=(px+.5)*2-e.mx;let c;if(sk===2){c=hSeaCol((wx-HX)*FT,(HY-wy)*FT,wx,wy);H_EMIS=false;H_SHADE=false}else c=harborCol(wx,wy);if(!c){if(H_SHADE){d[j]*=.7;d[j+1]*=.7;d[j+2]*=.74}continue}const em=H_EMIS&&night;d[j]=em?c[0]:c[0]*lt[0]/255;d[j+1]=em?c[1]:c[1]*lt[1]/255;d[j+2]=em?c[2]:c[2]*lt[2]/255;d[j+3]=255}}
   g.putImageData(img,0,0)}// the city dims at night; the stadium stays lit (the village is lit like the park)
- BT('sea');
+
  // ---- the stands keep going past the park buffer, out to the outer wall ----
  // Painted with the same rules the park buffer uses (rows that follow the wall, risers, aisles toward home, the upper
  // deck colors, the outfield features) and the same crowd on the same 8px grid, so the two halves read as one bowl.
@@ -1718,7 +1736,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
    if(px>0)v=Math.min(v,DI[i-1]+3);if(py>0){v=Math.min(v,DI[i-CW]+3);if(px>0)v=Math.min(v,DI[i-CW-1]+4);if(px<CW-1)v=Math.min(v,DI[i-CW+1]+4)}DI[i]=v}
   if(!HB0)for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
    if(px<CW-1)v=Math.min(v,DI[i+1]+3);if(py<CH-1){v=Math.min(v,DI[i+CW]+3);if(px<CW-1)v=Math.min(v,DI[i+CW+1]+4);if(px>0)v=Math.min(v,DI[i+CW-1]+4)}DI[i]=v}
-  BT('chamfer');const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.harbor)H_NIGHT=night;
+ const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.harbor)H_NIGHT=night;
   // only the stretch outside the buffer (plus the strip the feather fades across) needs painting
   const bx0=cx(0)+16,by0=cy(0)+16,bx1=cx(W)-16,by1=cy(H)-16;
   const put=(i,c)=>{const j=i*4;d[j]=c[0];d[j+1]=c[1];d[j+2]=c[2];d[j+3]=255};
@@ -1751,7 +1769,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
      else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;
       if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=ST.harbor?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
    put(i,col)}}
-  BT('stands');
+ 
   // the crowd: same grid and density as the park, same club colors, drawn at this layer's half scale
   const home=TEAMS[k],away=TEAMS[S.opp]||home,misc=['#e8d7c3','#f1ecdc','#6c7a86','#a8c6d8','#2b2b30','#c9a0dc','#7fbf6a','#d98c8c','#f4d58d'].map(hexRGB);
   const hj=hexRGB(home.jersey),hc=hexRGB(home.cap),aj=hexRGB(away.jersey),ac=hexRGB(away.cap),sks=SKINS.map(hexRGB),hairs=['#2a1d14','#4a3020','#7a5230','#1a1a1a','#8a8a8a'].map(hexRGB),shadeC=c=>c.map(v=>v*.78|0);
@@ -1766,7 +1784,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
   // light: the same multiply the park gets, so day and night match across the seam
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea];
   for(let i=0;i<N;i++){if(md[i*4+3]<128||(night&&EMIS[i]))continue;const py=(i/CW)|0,px=i-py*CW;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;const j=i*4;d[j]=d[j]*lt[0]/255;d[j+1]=d[j+1]*lt[1]/255;d[j+2]=d[j+2]*lt[2]/255}
-  g.putImageData(img,0,0);BT('crowd+light');
+  g.putImageData(img,0,0);
   // a soft shadow where the roof overhangs the top rows
   g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
   g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';if(ST.openTop)outlinePath(OL,x=>x,y=>y,g);else{g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath()}g.stroke();g.restore()}
@@ -1783,7 +1801,7 @@ const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start
    if(night){g.save();g.globalCompositeOperation='lighter';for(const[wx,wy]of glows){const x=(wx+e.mx)/2,y=(wy+e.my)/2;const gr=g.createRadialGradient(x,y,0,x,y,7);gr.addColorStop(0,'rgba(255,214,150,.45)');gr.addColorStop(1,'rgba(255,214,150,0)');g.fillStyle=gr;g.fillRect(x-7,y-7,14,14);g.fillStyle='rgba(255,230,170,.9)';g.fillRect(Math.round(x)-1,Math.round(y),2,1)}
     // streetlights along the town roads
     g.restore()}}
- BT('end');return c}
+return c}
 // ---------- Jeju: an old island village and its tangerine orchards around an open-outfield park ----------
 // The country is one pure function of world position (villageCol), so the park buffer (the orchard past the outfield
 // wall) and the half-resolution neighborhood layer paint exactly the same pixels and meet without a seam.
@@ -2153,7 +2171,7 @@ const hMul=(c,f)=>[c[0]*f|0,c[1]*f|0,c[2]*f|0];
 // round arcs behind home and in the corners; the depth changes gently with the angle: a deep front behind home, a big
 // left-field grandstand curling to left-centre, a shorter right side that ends at the right-field corner, the outfield open.
 const H_CC={x:0,y:180};// the bowl's centre, for its angle (feet)
-const H_DK={R:[[68,0],[92,52],[118,112],[148,150],[180,168]],L:[[34,0],[52,64],[78,122],[112,148],[180,168]]};
+const H_DK={R:[[68,0],[80,44],[96,82],[118,114],[148,150],[180,168]],L:[[34,0],[52,64],[78,122],[112,148],[180,168]]};
 function hD(phi){const a=Math.abs(phi),K=phi>=0?H_DK.R:H_DK.L;if(a<=K[0][0])return 0;
  for(let i=0;i<K.length-1;i++)if(a<=K[i+1][0]){const u=(a-K[i][0])/(K[i+1][0]-K[i][0]),t=(1-Math.cos(u*Math.PI))/2;return K[i][1]+(K[i+1][1]-K[i][1])*t}return K[K.length-1][1]}
 const hPhi=(x,y)=>Math.atan2(x,y-H_CC.y)/RAD;
@@ -2162,8 +2180,17 @@ function hFieldD(x,y){const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
  const st=sd=>{const al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;return Math.hypot(Math.max(-5-al,0,al-328),Math.max(-pe,0,pe-40))};
  const dA=st(1),dB=st(-1),dC=Math.max(0,r-34),m=Math.min(dS,dA,dB,dC);if(m<=0)return 0;
  const k=30,sm=-k*Math.log(Math.exp(-dS/k)+Math.exp(-dA/k)+Math.exp(-dB/k)+Math.exp(-dC/k)),w=clamp((m-12)/55,0,1);return m-(m-Math.max(0,sm))*w}
+// position along the row for a point in the stands (feet), and which part of the bowl it belongs to: the run along each
+// foul line, the curve behind home, or the arc beyond the outfield wall. Each piece's rows are straight or concentric, so
+// a stair at a fixed position along it stays square to the rows.
+function hAlong(x,y){const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
+ const dS=(y>0&&Math.abs(th)<=45)?Math.max(0,r-fenceDist(th)):1e4;
+ const st=sd=>{const al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;return{d:Math.hypot(Math.max(-5-al,0,al-328),Math.max(-pe,0,pe-40)),al}};
+ const A=st(1),B=st(-1),dC=Math.max(0,r-34),m=Math.min(dS,A.d,B.d,dC);
+ if(m===A.d&&A.al>-5)return{s:A.al,piece:1};if(m===B.d&&B.al>-5)return{s:-B.al,piece:2};
+ if(m===dS)return{s:th*RAD*fenceDist(th),piece:3};return{s:Math.atan2(x,y)*60,piece:4}}
 // is the roof over this angle, and how far in it reaches as a share of the depth? left and right differ on purpose
-function hRoofIn(phi){const L=phi<0,a=Math.abs(phi),lo=L?62:112,hi=166;if(a<lo||a>hi)return 9;const e=Math.min(a-lo,hi-a),t=clamp(e/9,0,1),sm=t*t*(3-2*t);return .70+(1-sm)*.32}
+function hRoofIn(phi){const L=phi<0,a=Math.abs(phi),lo=L?62:84,hi=166;if(a<lo||a>hi)return 9;const e=Math.min(a-lo,hi-a),t=clamp(e/9,0,1),sm=t*t*(3-2*t);return .70+(1-sm)*.32}
 const H_GATES=[180,-146,146,-112,114];
 // the cove: a compact round bay cut into the shore past right field, a breakwater sheltering its mouth
 const H_COVE_C={x:250,y:430,r:122};
@@ -2182,9 +2209,13 @@ function hRS(){const key=DIMS.join(',');if(H_RS&&H_RS_K===key)return H_RS;H_RS_K
   for(let t=10;t<1600;t+=10){if(hFieldD(H_CC.x+dx*t,H_CC.y+dy*t)>=De){t1=t;break}t0=t}
   for(let k=0;k<18;k++){const m=(t0+t1)/2;if(hFieldD(H_CC.x+dx*m,H_CC.y+dy*m)>=De)t1=m;else t0=m}raw[i]=t1;open[i]=D<10?1:0}
  // smooth only the closed part: a few passes of a wide circular average, the open ends pinned
- let R=Float32Array.from(raw);for(let p=0;p<6;p++){const o=new Float32Array(360);for(let i=0;i<360;i++){if(open[i]){o[i]=raw[i];continue}let s=0,w=0;for(let k=-10;k<=10;k++){const j=(i+k+360)%360;if(open[j])continue;const ww=11-Math.abs(k);s+=R[j]*ww;w+=ww}o[i]=s/w}R=o}
+ let R=Float32Array.from(raw);for(let p=0;p<14;p++){const o=new Float32Array(360);for(let i=0;i<360;i++){if(open[i]){o[i]=raw[i];continue}let s=0,w=0;for(let k=-10;k<=10;k++){const j=(i+k+360)%360;if(open[j])continue;const ww=11-Math.abs(k);s+=R[j]*ww;w+=ww}o[i]=s/w}R=o}
+ // fill any dents (the corner where the foul-line stand meets the outfield bends the raw edge inward): the outer wall
+ // of a stadium runs convex, so lift each point up to the chord between its neighbours
+ for(let it=0;it<30;it++)for(let i=0;i<360;i++){if(open[i])continue;for(let k=2;k<=14;k+=2){const a=(i-k+360)%360,b=(i+k)%360;if(open[a]||open[b])continue;const ch=(R[a]+R[b])/2*Math.cos(k*RAD);if(ch>R[i])R[i]=ch}}
+ {const o=new Float32Array(360);for(let i=0;i<360;i++){if(open[i]){o[i]=R[i];continue}let s2=0,w=0;for(let k=-3;k<=3;k++){const j=(i+k+360)%360;if(open[j])continue;s2+=R[j];w++}o[i]=s2/w}R=o}
  // never pull the edge in past where the seats need to be
- for(let i=0;i<360;i++)if(!open[i])R[i]=Math.max(R[i],raw[i]-14);
+ for(let i=0;i<360;i++)if(!open[i])R[i]=Math.max(R[i],raw[i]-48);
  return H_RS={R,open}}
 const hRout=phi=>{const T=hRS(),f=phi+180,i=Math.floor(f),u=f-i;return T.R[(i+360)%360]*(1-u)+T.R[(i+361)%360]*u};
 // the outline of the bowl (world px), traced where the stands end; open across the outfield
@@ -2193,7 +2224,7 @@ function hOutline(){const T=hRS(),out=[];for(let i=0;i<360;i+=1){const phi=i-180
 // tracing a wave through some sections
 const H_SEATS=[['#1f3f7a','#1b3870'],['#2f6fd0','#2a63bb'],['#5aa0e6','#5193d6']].map(p=>p.map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)])),
  H_SEATU=[[27,47,94],[24,42,84]],H_WHITE=[232,238,245],H_CHEER=[[255,210,63],[240,196,50]];
-function hSeat(ang,row,upper){const sec=Math.floor((ang+400)/10),h=vHash(sec,77);
+function hSeat(ang,row,upper,secId){const sec=secId!=null?secId+1000:Math.floor((ang+400)/10),h=vHash(sec,77);
  if(upper)return H_SEATU[row&1];
  if((ang>14&&ang<34)||(ang<-14&&ang>-34)){if(ang>0)return H_SEATS[2][row&1]}// the home cheering block on the first-base side
  const p=H_SEATS[h%3];return p[row&1]}
@@ -2234,12 +2265,16 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
    return H_NIGHT?((vHash(Math.floor(sF/4),band)&7)===0?hMul(HB.glassN,.45):band&1?HB.glassN2:HB.glassN):(band&1?HB.glass2:HB.glass)}
   return HB.fEdge}
  if(d<lo){return d<lo-1.2?HB.rail:HB.railD}
- const L1=D>70?D*.44:fac,C1=L1+7,U0=C1+1.6,RI=Math.min(fac,D*hRoofIn(phi));
- const seat=(d0,upper)=>{const t=(d-d0)/2.4,row=Math.floor(t),fr=t-row,step=9,off=upper?4.5:0,m=(((ha+off)%step)+step)%step;
-  if(Math.abs(m-step/2)*RAD*rh<1.15)return upper?hMul(HB.rail,.82):HB.rail;// stairs
-  if(Math.abs(m-step/2)*RAD*rh<1.6)return upper?[20,26,34]:[30,38,48];// their edges
-  if(fr>.76)return upper?[22,28,36]:[34,42,52];H_SEAT=true;return hSeat(ha,row,upper)};
+ // the upper deck and its concourse thin out smoothly toward the end of a stand, so the layers never jump
+ const RI=Math.min(fac,D*hRoofIn(phi)),up=clamp((D-40)/40,0,1),L1=lerp(RI,Math.min(RI,D*.44),up),C1=L1+7*up,U0=C1+1.6*up;
+ // stairs run straight up the bowl, square to the rows: spaced along the row direction (not fanned out from home plate)
+ const AL=hAlong(x,y),step=27,sStep=upper=>(((AL.s+(upper?step/2:0))%step)+step)%step;
+ const seat=(d0,upper)=>{const t=(d-d0)/2.4,row=Math.floor(t),fr=t-row,m=sStep(upper),dm=Math.abs(m-step/2);
+  if(dm<1.3)return upper?hMul(HB.rail,.82):HB.rail;// stairs
+  if(dm<1.9)return upper?[20,26,34]:[30,38,48];// their edges
+  if(fr>.76)return upper?[22,28,36]:[34,42,52];H_SEAT=true;return hSeat(ha,row,upper,AL.piece*100+Math.floor((AL.s+(upper?step/2:0))/(step*3)))};
  let c;
+ const roofPx=k=>{if(k<.8)return HB.gutter;if(k<1.8)return HB.roofEdge;if(d>fac-1.4)return HB.gutter;const m=((sF%10)+10)%10;if(m<1)return HB.rib;return (Math.floor(sF/10)&1)?HB.roof:HB.roof2};
  if(d<L1){c=seat(lo,false);if(D>70&&d>L1-9)c=hMul(c,.5+.3*clamp((L1-d)/9,0,1))}// the upper deck's overhang shades the back rows
  else if(d<C1){const p=vPerson(wx,wy,12);if(p)return hMul(p,.6);if(H_NIGHT&&((Math.floor(sF/9)+Math.floor(d))&7)===0){H_EMIS=true;return HB.concLit}return (n&3)?HB.conc:hMul(HB.conc,.85)}
  else if(d<U0){const m=((sF%6)+6)%6;H_EMIS=H_NIGHT;if(d<C1+.4||d>U0-.3)return HB.ledD;return m<2?HB.led1:m<4?HB.led2:HB.led3}
@@ -2252,7 +2287,8 @@ function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const
  if(fair&&q>=0){const pen=ath>=29&&ath<=41,q0=pen?18:0;if(q<q0)return HB.wallCap;if(q<q0+H_WALLW)return hWall(q-q0,s,n)}
  const phi=hPhi(x,y),D=hD(phi),Ro=hRout(phi),rc=Math.hypot(x-H_CC.x,y-H_CC.y),d=rc<Ro+4?hFieldD(x,y):1e4;
  if(d<=0&&PARK_C)return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2;// the last of the foul ground, past the park buffer's edge
- if(D>8){if(rc<Ro&&d>0){const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
+ if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
+ const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
  // past the open outfield wall: a terrace behind centre, a boardwalk behind right field, then the sea wall
  if(fair&&q<26){if(th>8)return hTerr(wx,wy,s,q-H_WALLW,26-H_WALLW,th);const m=((s%26)+26)%26;
    if(q>21&&q<22.2&&m<1.2)return HB.par;if(q>18.6&&q<21.2&&m>=1.2&&m<4.6)return Math.floor(s/26)&1?HB.pad2:HB.pad3;// flags along the back rail
@@ -3344,8 +3380,8 @@ function ambient(play){
    for(const i of[2,3,4,5])go(i,{x:lerp(POS[i].x,bp.x,.06),y:lerp(POS[i].y,bp.y,.06)},.4);
    for(const i of[6,7,8])go(i,{x:lerp(POS[i].x,bp.x,.25),y:lerp(POS[i].y,bp.y,.25)},.7);return}
   go(2,B1);go(4,B3);
-  const left=bp.x<10,cut=left?5:3,cov=left?3:5;go(cov,B2);
-  const tgt=(S.bases[0]||S.bases[1])?B3:B2;go(cut,{x:lerp(tgt.x,bp.x,.42),y:lerp(tgt.y,bp.y,.42)},.95);
+  const tgt=(S.bases[0]||S.bases[1])?B3:B2,cp={x:lerp(tgt.x,bp.x,.42),y:lerp(tgt.y,bp.y,.42)},cut=nearMid(cp),cov=cut===5?3:5;go(cov,B2);
+  go(cut,cp,.95);
   go(0,on?{x:-12,y:-24}:{x:-42,y:34},.8);go(1,{x:0,y:-1},.5);
   for(const i of[6,7,8])go(i,{x:lerp(POS[i].x,bp.x,.3),y:lerp(POS[i].y,bp.y,.3)},.85);
  }else{
@@ -3410,16 +3446,22 @@ function simulateContact(err,hand,b){
 }
 
 // ---------- batting practice: the ball just flies, lands and rolls; nobody fields it ----------
+// a ball rolling into the wall comes back off it (instead of stopping dead against the pad): past `room` it rebounds
+// at a third of the speed it arrived with
+const wallD=(d,room)=>d<=room?d:Math.max(room-(d-room)*.35,room-30);
+// the middle infielder for a cutoff: whichever of the shortstop and second baseman is nearer the spot (and not busy)
+function nearMid(p,play){const free=i=>!play||!play.fk[i];const d5=dist(POS[5],p),d3=dist(POS[3],p);if(free(5)&&(!free(3)||d5<=d3))return 5;return free(3)?3:(d5<=d3?5:3)}
 function buildBP(P,dir,b){const C={x:0,y:2},play=newPlay(),fair=Math.abs(P.s)<=45,fd=fenceDist(clamp(P.s,-45,45));let D=0,T=0,code,desc;
  if(P.L<10){const vf=.72*(1-Math.max(0,-P.L)/75),v0=P.EV*1.467*vf,A=15,ts=v0/A,dmax=fair?fd-10:150;
-  const gpos=t=>{const tt=Math.min(t,ts);const d=Math.min(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
+  const gpos=t=>{const tt=Math.min(t,ts);const d=wallD(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
   const tE=Math.min(ts,4.2);play.segs.push(fnSeg(0,tE,gpos));const g=gpos(tE);D=Math.hypot(g.x,g.y);code=fair?'GB':'FOUL';
   if(fair&&v0*ts-.5*A*ts*ts>=dmax){const tw=(v0-Math.sqrt(Math.max(0,v0*v0-2*A*dmax)))/A;play.fenceAt=Math.min(tw,tE)}
  }else{const Lr=P.L*RAD;D=Math.max(30,Math.min(475,(P.EV-40)*5.9*(.82+b.pow*.0035)*Math.pow(Math.sin(2*Lr),P.L>45?1:.6)));
   const need=b.pow>=85?.62:b.pow>=72?.7:.78;if(fair&&(b.pow<60||P.q<need)&&D>fd-8)D=fd-8-rand(0,22);
+  if(fair&&D<=fd&&D>fd-10)D=fd-10;// off the wall
   const vy=P.EV*1.467*Math.sin(Lr);T=Math.max(.7,vy/16*.82);const Hh=Math.max(8,vy*vy/64*.55),land={x:dir.x*D,y:dir.y*D};
   if(fair&&D>fd){play.segs.push(airSeg(0,T,C,land,Hh));play.ballGone=T;code='HR';play.clang=clangFor(D,fd,P.s,T,true)}
-  else{const Tr=1.3,room=fair?Math.max(0,fd-8-D):30,vr=Math.min(42,P.EV*.28),rp=t=>{const tau=clamp(t-T,0,Tr);const d=Math.min(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
+  else{const Tr=1.3,room=fair?Math.max(0,fd-8-D):30,vr=Math.min(42,P.EV*.28),rp=t=>{const tau=clamp(t-T,0,Tr);const d=wallD(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
    play.segs.push(airSeg(0,T,C,land,Hh),fnSeg(T,T+Tr,rp));if(fair)play.clang=clangFor(D,fd,P.s,T,false);if(fair&&vr*Tr*.5>=room&&room<30&&!play.clang)play.fenceAt=T+Math.min(Tr,room/Math.max(1,vr*.6));code=!fair?'FOUL':P.L>50?'POP':P.L<22?'LD':'FB'}}
  const nm={HR:'HOME RUN!',FOUL:'FOUL BALL',GB:'GROUND BALL',LD:'LINE DRIVE',FB:'FLY BALL',POP:'POP-UP'}[code];
  let e=0;for(const sg of play.segs)e=Math.max(e,sg.t1);play.end=Math.min(e,5.5)+.5;play.runners=[];play.bp=true;
@@ -3481,7 +3523,7 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  let tArr;
  if(it.i>=6&&Math.hypot(it.p.x,it.p.y)>200){
   // deep hit: the outfielder hits the cutoff man, who turns and relays to the base
-  const cut=it.p.x<0?5:3,Cc={x:lerp(tb.x,it.p.x,.45),y:lerp(tb.y,it.p.y,.45)},o=fromF(play,it.i,t0),t1=t0+dist(o,Cc)/THROW;
+  const Cc={x:lerp(tb.x,it.p.x,.45),y:lerp(tb.y,it.p.y,.45)},cut=nearMid(Cc,play),o=fromF(play,it.i,t0),t1=t0+dist(o,Cc)/THROW;
   play.fk[cut]=cover(cut,Cc,t1);
   play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,Cc),holdSeg(play,t1,t1+.32,cut),throwSeg(t1+.32,Cc,tb));
   tArr=t1+.32+dist(Cc,tb)/THROW;
@@ -3504,7 +3546,7 @@ function buildGrounder(P,dir,b){
  const C={x:0,y:2};
  const vf=.72*(1-Math.max(0,-P.L)/75);
  const v0=P.EV*1.467*vf,A=P.bunt?9:15,ts=v0/A,dmax=fenceDist(P.s)-10;
- const gpos=t=>{const tt=Math.min(t,ts);const d=Math.min(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
+ const gpos=t=>{const tt=Math.min(t,ts);const d=wallD(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
  // a scorcher right down the line gets past the corner infielder most of the time and rattles into the corner
  const lineShot=!P.bunt&&Math.abs(P.s)>=40.5&&P.EV>=86&&Math.random()<.7;
  const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8].filter(i=>!(lineShot&&i===(P.s>0?2:4))),P.bunt?.35:0);
@@ -3604,8 +3646,8 @@ function buildAir(P,dir,b){
  const vy=P.EV*1.467*Math.sin(Lr);
  const T=Math.max(.7,vy/16*.82);
  const Hh=Math.max(8,vy*vy/64*.55);
+ const fd=fenceDist(P.s);if(D<=fd&&D>fd-10)D=fd-10;// a drive that reaches the wall in the air hits the pad and drops
  const land={x:C.x+dir.x*D,y:C.y+dir.y*D};
- const fd=fenceDist(P.s);
  const play=newPlay();const runners=runnerList(b);const outsBefore=S.outs;
  play.deep=D>fd-30;
  if(D>fd){
@@ -3647,7 +3689,7 @@ function buildAir(P,dir,b){
    if(cand&&Math.random()<.35){const bb=BASES[cand.from],tt=T+.35+dist(land,bb)/THROW;play.segs.push(holdSeg(play,T,T+.35,best),throwSeg(T+.35,fromF(play,best,T+.35),bb));
     cand.out=true;cand.outAt=tt;cand.dblOff=true;dbl=cand;const cv=cand.from===1?(best===2?0:2):(best===5?3:5);if(cv!==best&&!play.fk[cv])play.fk[cv]=cover(cv,bb,tt)}}
   const empty=!S.bases.some(Boolean);
-  if(best>=6){const mi=land.x<0?5:3,tgt=tag?BASES[0]:empty?{x:lerp(POS[mi].x,land.x,.12),y:lerp(POS[mi].y,land.y,.12)}:BASES[2];if(empty&&!tag&&!play.fk[mi])play.fk[mi]=cover(mi,tgt,T+XF+dist(land,tgt)/THROW);play.segs.push(holdSeg(play,T,T+XF,best),throwSeg(T+XF,fromF(play,best,T+XF),tgt));
+  if(best>=6){const tg0=tag?BASES[0]:empty?land:BASES[2],mi=empty?(land.x<0?5:3):nearMid({x:lerp(tg0.x,land.x,.45),y:lerp(tg0.y,land.y,.45)},play),tgt=tag?BASES[0]:empty?{x:lerp(POS[mi].x,land.x,.12),y:lerp(POS[mi].y,land.y,.12)}:BASES[2];if(empty&&!tag&&!play.fk[mi])play.fk[mi]=cover(mi,tgt,T+XF+dist(land,tgt)/THROW);play.segs.push(holdSeg(play,T,T+XF,best),throwSeg(T+XF,fromF(play,best,T+XF),tgt));
    const cov=tag?1:(land.x<0?3:5);if(!play.fk[cov]&&!tag)play.fk[cov]=cover(cov,tgt,T+XF+dist(land,tgt)/THROW)}
   const kind=(P.L>=45||(best<=5&&P.L>=30))?'P':P.L<22?'L':'F';
   const diving=bn>T-.12&&kind!=='P';
@@ -3661,7 +3703,7 @@ function buildAir(P,dir,b){
  }
  const vr=drop?14:P.L<22?44:30,Rr=drop?7:(P.L<22?.2:.09)*D,Tr=Math.max(.3,2*Rr/vr),room=Math.max(0,fd-10-D);
  const rollPos=t=>{if(t<T){const u=t/T;return{x:lerp(C.x,land.x,u),y:lerp(C.y,land.y,u),h:4*Hh*u*(1-u)}}
-  const tau=clamp(t-T,0,Tr);const d=Math.min(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
+  const tau=clamp(t-T,0,Tr);const d=wallD(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
  const it=intercept(rollPos,T,T+Tr+12,[2,3,4,5,6,7,8]);
  {const rs=fnSeg(T,it.t,rollPos);rs.snd=true;play.segs.push(airSeg(0,T,C,land,Hh),rs)}
  if(!drop)play.clang=clangFor(D,fd,P.s,T,false);
@@ -3878,6 +3920,8 @@ function gameOver(win){const onl=onlineGame();
  if(S.celebr){const ce=S.celebr;setTimeout(()=>{if(S.phase==='over'&&S.celebr===ce)$('over').hidden=false},3400)}else $('over').hidden=false;updateHUD();
 }
 
+// the player line in the at-bat / pitching boxes: the club's logo, then the name
+function muSet(id,k,txt){const el=$(id);el.textContent='';if(LOGO_URL[k]){const im=document.createElement('img');im.className='muLogo';im.src=LOGO_URL[k];im.alt=TEAMS[k].name;el.appendChild(im)}el.appendChild(document.createTextNode(txt))}
 // ---------- HUD ----------
 function banner(t,s,tone){if(OPT.info===false&&['windup','pitch','play','call','result'].includes(S.phase))return;$('bt').textContent=t;$('bs').textContent=s||'';$('banner').dataset.tone=tone||'';$('banner').hidden=false}
 function hideBanner(){$('banner').hidden=true}
@@ -3912,15 +3956,15 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  const hrTrot=S.phase==='play'&&S.play&&S.play.hrFired;
  for(let k=1;k<=3;k++)if(!S.baseChase)$('d'+k).classList.toggle('on',!hrTrot&&!!S.bases[k-1]);
  const b=curBatter(),p=pitcher();
- $('abTeam').textContent=`${TEAMS[batKey()].name} · AT BAT`;$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE':`${TEAMS[fldKey()].name} · PITCHING${pitching()?' (YOU)':''}`;
+ $('abTeam').textContent='AT BAT';$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE':`PITCHING${pitching()?' (YOU)':''}`;
  const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;if(pit){const A=arsOf(pitcher());for(const pb of document.querySelectorAll('#actsPitch .pbtn[data-k]')){const i=A.indexOf(pb.dataset.k);pb.hidden=i<0;if(i>=0)pb.querySelector('small').textContent=i+1}
   $('actsPitch').style.gridTemplateColumns=isWide()?'':`repeat(${A.length},1fr)`}$('muPit').classList.toggle('canPen',canPen());document.querySelector('.meter').hidden=pit;
  for(const pb of document.querySelectorAll('#actsPitch .pbtn'))pb.disabled=S.phase!=='choose';
  {const bg=document.querySelector('.bug'),pb=document.querySelector('.pcBox');if(bg&&pb){pb.style.top=(bg.offsetTop+bg.offsetHeight)+'px';pb.style.width=bg.offsetWidth+'px';pb.style.boxSizing='border-box'}}
  $('pcV').textContent=(S.pcOf&&S.pcOf[fldKey()])||0;$('bugInn').textContent=S.phase==='title'?'':`${S.mode==='full'&&S.half==='top'?'▲':'▼'}${S.inning}`;
- $('abName').textContent=`${((S.orderOf&&S.orderOf[batKey()])||0)+1}. #${b.no} ${b.name} · ${b.pos}`;
+ muSet('abName',batKey(),`${((S.orderOf&&S.orderOf[batKey()])||0)+1}. #${b.no} ${b.name} · ${b.pos}`);
  $('abHand').innerHTML=(b.hand==='S'?`Switch (<b>${effHand(b)}</b>)`:`Bats <b>${b.hand}</b>`)+` · CON ${rb(b.con)} POW ${rb(b.pow)} SPD ${rb(b.spd)}`;
- $('pName').textContent=`#${p.no} ${p.name}`;
+ muSet('pName',fldKey(),`#${p.no} ${p.name}`);
  if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing: <button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button><span class="bpStat">${S.bp.sw} swings · ${S.bp.hr} HR · longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=`Throws <b>${p.hand}</b>${p.slot==='side'?' (sidearm)':''}${p.type==='demon'?' · <b class="dmn">SPEED DEMON</b>':p.type==='knuckle'?' · <b class="knk">KNUCKLER</b>':''} · VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}`;
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});
@@ -4690,7 +4734,7 @@ const wb=document.createElement('canvas');wb.width=W;wb.height=H;const wg=wb.get
 let TOWERS=[];
 let FIELD=null,DECOR=null,SIGNS=null,CROWD_A=null,CROWD_B=null,FANS=[],CONC=[],AISLES=[],RAIL=[],FLAGFANS=[];
 function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,3);cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
-new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,ev:s=>eval(s),ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
+new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 // Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
 function drawJumbo(g,now){if(S.you!=='ulsan')return drawJumbo0(g,now);
@@ -4743,6 +4787,8 @@ function drawJumbo0(g,now){
   g.fillText(started?String(S.target):'-',x0+w-8,y0+17);g.fillText(started?String(S.runs):'-',x0+w-8,y0+33);
   g.fillStyle='#94b4a1';g.textAlign='left';g.font='12px "Pixelify Sans", monospace';
   g.fillText(started?`${S.half==='top'?'TOP':'BOT'} ${ord(S.inning).toUpperCase()} · ${Math.min(S.outs,2)} OUT · ${S.balls}-${S.strikes}`:(S.night?'TONIGHT AT THE PARK':'TODAY AT THE PARK'),x0+64,y0+50,w-70);
+  // strikeout cards along the bottom edge of the screen, one per K
+  for(let k=0;k<Math.min(S.ks,18);k++){const x=x0+64+k*7,y=y0+h-9;g.fillStyle='#f4f1e8';g.fillRect(x,y,6,7);g.fillStyle='#c7262e';KMAP.forEach((row,ry)=>{for(let rx=0;rx<4;rx++)if(row[rx]==='1')g.fillRect(x+1+rx,y+1+ry,1,1)})}
  }
  g.fillStyle='rgba(0,0,0,.28)';for(let yy=y0;yy<y0+h;yy+=2)g.fillRect(x0,yy,w,1);
 }
@@ -4834,7 +4880,7 @@ function drawCrowdLife(g,now){
  for(let k=0;k<CONC.length;k+=5){const c=CONC[k];const o=Math.round(Math.sin(now/300+k*.4));
   g.fillStyle=cols[(k/5|0)%3];for(let r=0;r<6;r++){const w=Math.max(1,5-r);g.fillRect(Math.round(c.x)-2+((5-w)>>1)+(r>2?o:0),Math.round(c.y)+r,w,1)}}
  // visitor fans post a K card for every strikeout
- for(let k=0;k<Math.min(S.ks,12);k++){const th=-41+k*2.3;const r=fenceDist(th)+5;const p=toPx(r*Math.sin(th*RAD),r*Math.cos(th*RAD));
+ if(0)for(let k=0;k<Math.min(S.ks,12);k++){const th=-41+k*2.3;// (the K cards moved to the scoreboard)const r=fenceDist(th)+5;const p=toPx(r*Math.sin(th*RAD),r*Math.cos(th*RAD));
   const x=Math.round(p.x)-3,y=Math.round(p.y)-5;g.fillStyle='#f4f1e8';g.fillRect(x,y,7,9);g.fillStyle='#c7262e';
   KMAP.forEach((row,ry)=>{for(let rx=0;rx<4;rx++)if(row[rx]==='1')g.fillRect(x+2+rx,y+2+ry,1,1)})}
  // vendors climbing the aisles
@@ -5010,7 +5056,12 @@ function drawSlider(g,X,Y,T,o,dir,lift){
  const sc=v=>Math.round(v*1.2);const R=(c,dx,dy,w,h)=>{g.fillStyle=c;const x0=sc(dx),x1=sc(dx+w),y0=sc(dy),y1=sc(dy+h);g.fillRect(dir>0?x+x0:x-x1+1,yy+y0,Math.max(1,x1-x0),Math.max(1,y1-y0))};
  g.fillStyle='rgba(6,18,10,.3)';g.fillRect(x-9,y,19,2);
  if(o.head){R(SHOE,-11,-5,2,2);R(pa,-9,-5,5,3);R(BELT,-4,-5,1,3);R(T.jersey,-3,-6,8,4);R(T.cap,5,-8,4,4);R(T.brim,9,-6,1,2);R(sk,6,-5,2,2);R(sk,9,-4,3,1);R(sk,9,-7,2,1)}
- else{R(T.cap,-10,-9,4,4);R(T.brim,-11,-7,1,2);R(sk,-9,-6,2,2);R(T.jersey,-7,-7,6,4);R(BELT,-1,-6,1,3);R(pa,0,-6,6,3);R(pa,5,-4,4,2);R(SHOE,9,-5,2,2);R(SHOE,8,-3,2,1);R(sk,-6,-9,1,2)}
+ else{// feet first: leaning back on one hand, lead leg out straight at the bag with the spikes up, the other tucked under
+  R(sk,-11,-3,2,2);// trailing hand on the dirt
+  R(T.cap,-10,-11,4,4);R(T.brim,-11,-9,1,2);R(sk,-9,-8,2,2);// helmet and face, looking at the bag
+  R(T.jersey,-8,-9,6,5);R(T.jersey,-10,-6,3,2);R(BELT,-2,-7,1,4);
+  R(pa,-1,-7,6,3);R(pa,5,-6,5,2);R('#f1ecdc',10,-6,2,2);R(SHOE,12,-7,2,3);// lead leg: pants, sock, spikes up
+  R(pa,0,-4,4,2);R(pa,3,-3,2,2);R('#f1ecdc',4,-2,2,1);R(SHOE,5,-2,2,1)}// the bent leg tucked under
 }
 function drawCatcher(g,X,Y,T,o){
  const x=Math.round(X),y=Math.round(Y),sk=o.skin,pa=o.pants;
@@ -5264,7 +5315,7 @@ function render(now){
     if(t<r.slide.t1){for(let n=0;n<2;n++)if(Math.random()<.85)DUST.push({x:sq.x+rand(-4,4),y:sq.y+rand(-1,1),vx:rand(-26,26)-dir*12,vy:rand(-30,-8),life:rand(.3,.6),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
     else if(!r.slide.puff){r.slide.puff=true;const bq2=toPx(bb.x,bb.y);for(let n=0;n<14;n++)DUST.push({x:bq2.x+rand(-5,5),y:bq2.y+rand(-2,2),vx:rand(-40,40),vy:rand(-34,-6),life:rand(.4,.8),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
     const back=dir*9*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// keep the leading hand (or spikes) on the bag, then get up onto it
-    add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},r.slide.head?dir:-dir,u<1?(1-u)*3:0));continue}
+    add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));
   }
  }else if(ph!=='title'){
@@ -5389,7 +5440,7 @@ function render(now){
    if(tt>=pl.fullEnd-.5){if(!pl.res.hr){let last=null;for(const sg of pl.segs)if(!last||sg.t1>=last.t1)last=sg;if(last){const q=last.fn(last.t1);(S.bpBalls=S.bpBalls||[]).push({x:q.x,y:q.y})}}return false}
    if(pl.clang&&!pl.clang.done&&tt>=pl.clang.t){pl.clang.done=true;if(!muted)playSample('clang',.85,1)}
    if(pl.fenceAt!=null&&!pl.fenceDone&&tt>=pl.fenceAt){pl.fenceDone=true;sfx('fence',.55)}
-   if(pl.ballGone!=null&&tt>=pl.ballGone)return true;
+   if(pl.ballGone!=null&&tt>=pl.ballGone){if(!f.splashed){f.splashed=true;splashCheck(pl)}return true}
    let seg=null;for(const sg of pl.segs)if(tt>=sg.t0&&tt<=sg.t1){seg=sg;break}if(!seg){for(const sg of pl.segs)if(sg.t1<=tt&&(!seg||sg.t1>=seg.t1))seg=sg}
     if(seg){const p=seg.fn(Math.min(tt,seg.t1)),q=toPx(p.x,p.y);dustAt(pl,p.x,p.y,p.h);
     if(OPT.info!==false&&pl.res.code){const tr=f.trail||(f.trail=[]);const lift=p.h/FT;tr.push({x:q.x-lift*.2,y:q.y-lift*.5});if(tr.length>26)tr.shift();
@@ -5430,6 +5481,7 @@ function render(now){
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
  drawHarborLights(ctx,vx0,vy0,scale,now);
+ drawSplashes(ctx,vx0,vy0,scale,now);
  if(ST.harbor&&S.phase!=='title'){ctx.save();ctx.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);drawUlsan(ctx,now);ctx.restore()}// the harbor's whales and ships, out past the park
  drawNeon(ctx,vx0,vy0,scale,now);
  if(S.phase!=='title'){ctx.save();ctx.setTransform(scale*K,0,0,scale*K,-vx0*scale,-vy0*scale);ctx.imageSmoothingEnabled=false;drawJumbo(ctx,now);ctx.restore()}// the board stands above everything on its legs
@@ -5501,6 +5553,34 @@ function drawBallCam(now){const box=$('ballCam'),cam=S.bpCam;
  const r=pl.res||{},live=Math.round(Math.hypot(p.x,p.y-2));
  $('ballCamTxt').textContent=done?`${r.hr?'HOME RUN · ':r.code==='FOUL'?'FOUL · ':''}${r.dist||live} FT`:`${live} FT`;
  box.classList.toggle('hr',!!(done&&r.hr))}
+// ---------- splash: a home run that comes down in water (Ulsan's sea and cove, Busan's harbor, the Daejeon pool) ----------
+let SPLASH=[];
+function waterAt(x,y){if(!ST)return false;const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fd=y>0?fenceDist(Math.max(-45,Math.min(45,th))):0;
+ if(ST.harbor){harborCol(HX+x/FT,HY-y/FT);return H_KIND===1||(hInCove(x,y)&&hCoveR(x,y)-Math.hypot(x-H_COVE_C.x,y-H_COVE_C.y)>8)}
+ if(y<=0)return false;
+ if(ST.feature==='ocean')return ath<33&&r>fd+26;
+ if(ST.feature==='pool')return th>8&&th<30&&r>fd+9&&r<fd+49;
+ if(ST.feature==='whale')return ath<36&&r>fd+14;
+ return false}
+// where a homer comes down: the end of the flight that leaves the park
+function hrLand(play){let sg=null;for(const s of play.segs)if(s.air&&(!sg||s.t1>sg.t1))sg=s;if(!sg)for(const s of play.segs)if(!sg||s.t1>sg.t1)sg=s;return sg?sg.fn(sg.t1):null}
+function splashCheck(play){const p=hrLand(play);if(!p||!waterAt(p.x,p.y))return false;const q=toPx(p.x,p.y);
+ SPLASH.push({x:q.x,y:q.y,t0:performance.now(),drops:Array.from({length:40},()=>({a:rand(0,6.283),v:rand(25,110),up:rand(90,210),s:rand(2,4)}))});
+ if(!muted)playSample('drop',.9,.6);return true}
+// drawn over the finished frame in world pixels: a white crown of spray thrown up and falling back, rings spreading out
+function drawSplashes(c,vx0,vy0,scale,now){if(!SPLASH.length)return;SPLASH=SPLASH.filter(s=>now-s.t0<2600);
+ c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);
+ for(const s of SPLASH){const t=(now-s.t0)/1000;
+  // rings
+  for(let k=0;k<3;k++){const tt=t-k*.28;if(tt<0)continue;const R=12+tt*60,a=Math.max(0,.75-tt*.42);if(a<=0)continue;c.strokeStyle=`rgba(232,246,255,${a})`;c.lineWidth=Math.max(1,3-tt);c.beginPath();c.ellipse(s.x,s.y,R,R*.55,0,0,7);c.stroke()}
+  // foam patch
+  if(t<1.4){const a=1-t/1.4;c.fillStyle=`rgba(255,255,255,${.55*a})`;c.beginPath();c.ellipse(s.x,s.y,10+t*10,(10+t*10)*.55,0,0,7);c.fill()}
+  // the column and droplets: thrown up, falling back under gravity (height drawn as an upward offset)
+  for(const d of s.drops){const h=d.up*t-220*t*t;if(h<-2)continue;const dx=Math.cos(d.a)*d.v*t,dy=Math.sin(d.a)*d.v*t*.55,a=Math.min(1,1.6-t);if(a<=0)continue;
+   c.fillStyle=`rgba(240,250,255,${a})`;c.fillRect(Math.round(s.x+dx),Math.round(s.y+dy-Math.max(0,h)),Math.ceil(d.s),Math.ceil(d.s));
+   if(h>0){c.fillStyle=`rgba(20,60,90,${.18*a})`;c.fillRect(Math.round(s.x+dx),Math.round(s.y+dy),Math.ceil(d.s),1)}}
+  if(t<.6){const a=1-t/.6,H=95*Math.sin(Math.min(1,t/.22)*Math.PI/2);c.fillStyle=`rgba(255,255,255,${.9*a})`;c.fillRect(Math.round(s.x-5),Math.round(s.y-H),10,Math.round(H));c.fillStyle=`rgba(220,240,255,${.8*a})`;c.fillRect(Math.round(s.x-11),Math.round(s.y-H*.55),22,Math.round(H*.3));c.fillRect(Math.round(s.x-16),Math.round(s.y-H*.2),32,Math.round(H*.2))}}
+ c.restore()}
 // ---------- loop ----------
 function update(dt,now){
  if(S.paused)return;
@@ -5546,7 +5626,7 @@ function update(dt,now){
    if(pl.jump&&!pl.jumpSnd&&pl.t>=pl.jump.t-.05&&fldKey()===S.opp&&batKey()===S.you){pl.jumpSnd=true;crowdSad()}
    if(pl.runners)for(const r of pl.runners)if(r.slide&&!r.slide.sd&&pl.t>=r.slide.t0){r.slide.sd=true;if(!muted)playSample('slide',.85,1)}
    if(pl.clang&&!pl.clang.done&&pl.t>=pl.clang.t){pl.clang.done=true;if(!muted)playSample('clang',pl.clang.k==='board'?.75:.9,pl.clang.k==='pole'?1.08:1)}
-   if(r.hr&&!r.bp&&!S.play.hrFired&&S.play.t>=S.play.ballGone){S.play.hrFired=true;hrMoment(r)}
+   if(r.hr&&!r.bp&&!S.play.hrFired&&S.play.t>=S.play.ballGone){S.play.hrFired=true;hrMoment(r);splashCheck(S.play)}
    if(S.play.t>=S.play.end){S.play.t=S.play.end;finishPlay()}break}
   case'result':if(S.pt>(S.mode==='bp'?420:1450)){hideBanner();setPhase('reset');setCam('pitch')}break;
   case'reset':if(S.pt>(S.mode==='bp'?200:540)){S.play=null;afterPA()}break;
