@@ -97,7 +97,7 @@ function brickCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
  if(a>80){const c=bCoastCol(x,y,wx,wy);if(c)return c;return !bInOL(x,y)?null:th>-24?fTrees(wx,wy):BC.ring}
  // ---- right field: the footbridge ----
  if(th>B_BR.t0-1.5&&th<B_BR.t1+1.5){const b=a-bBridgeA(th),ends=Math.min((th-B_BR.t0)*RAD*r,(B_BR.t1-th)*RAD*r);
-  if(b<2.5)return (Math.floor(s/9)&1)?BC.conc:BC.conc2;// the walk behind the wall
+  if(b<4.5){if(b<.8)return HB.wallY;const id=Math.floor(s/18);if(((s%18)+18)%18<.9)return HB.seam;return b>3.8?hMul(HB.pad1,1.25):(id&1)?HB.pad2:HB.pad1}// the right-field wall stands taller: an upper padded band with its own yellow line
   const pier=B_BR.piers.some(tp=>Math.abs((th-tp)*RAD*r)<5);
   if(ends>-6&&b<34){if(ends<0){if(b>6&&b<24){const st=Math.floor(-ends/1.6);return st&1?BC.conc2:BC.concJ}return BC.conc}// stairs down at each end
    if(b<9){if(pier)return bBrick(s,b,false);const p=vPerson(wx,wy,10);if(p)return hMul(p,.55);if((vHash(Math.floor(s/7),1)&3)===0&&b<4.4){H_EMIS=H_NIGHT;return BC.shop}if(((s%9)+9)%9<1&&b>4.4)return BC.navyD;return (n&7)?BC.under:BC.under2}// the shade under the walkway, shop lights in it
@@ -165,15 +165,25 @@ function drawBrick(g,k,night,CW,CH,cx,cy,OL,e){
   for(let x=x0+2;x<x0+w-1;x+=3)R(x,y0+1,1,h-2,night?'#262a30':'#454a52');if(beams)for(let x=x0+4;x<x0+w-2;x+=beams){R(x,y0+1,2,h-2,night?'#3e444c':'#6e757e');R(x+2,y0+1,1,h-2,'rgba(0,0,0,.25)')}};
  const glass=(x0,y0,w,h,step)=>{R(x0,y0,w,h,night?'#ffc46a':'#2f4458');if(night){for(let y=y0+1;y<y0+h;y+=4)R(x0,y,w,1,'#ffb04a')}else R(x0,y0,w,Math.max(1,h>>2),'#3e5a74');
   for(let x=x0;x<=x0+w;x+=step)R(x,y0,1,h,'#1c222a');R(x0,y0,w,1,'#14181e');R(x0,y0,1,h,'#14181e')};
- const WW=124,FY=gy+6,RH=14,FH=22;// wing half-width, front line, roof depth, front face height
- // shadows first
- R(gx-WW+8,FY-RH-FH+8,WW*2,RH+FH+4,'rgba(10,8,12,.32)');
- for(const sd of[-1,1]){const x0=sd<0?gx-WW:gx+38,w=WW-38;
-  roof(x0,FY-FH-RH,w,RH,9);brick(x0,FY-FH,w,FH,false);
-  for(let bx=x0+5;bx<x0+w-14;bx+=17){glass(bx,FY-FH+4,12,FH-8,4);R(bx-1,FY-FH+3,14,1,'#22262c');R(bx,FY-FH+FH/2|0,12,1,'#22262c')}// glass bays with a steel floor band
-  R(x0,FY-FH,w,2,'#2a2e34');R(x0,FY-2,w,2,'#5e5a54');// steel lintel, stone base
-  const ex=sd<0?x0:x0+w-5;brick(ex,FY-FH,5,FH,true);// the end return, in shade
-  R(sd<0?x0+w-6:x0+1,FY-FH-RH-2,5,RH+FH+2,night?'#3a3633':'#cbbfae')}// stone pier where each wing meets the centre
+ const WW=124,FY=gy+6,RH=14,FH=22;// (front line, roof depth and face height shared with the centre block)
+ // the front curves round with the bowl: brick bays laid along the outline either side of the centre, each turned to face
+ // outward, with a roof strip, a brick face with a glass bay and a steel band, a stone pier between bays and a shadow
+ {const ctr={x:gx,y:cy(HY)};const pts=OL.filter(q=>q.y>ctr.y+20&&Math.abs(q.x-gx)>40);
+  const bays=[];for(const sd of[-1,1]){const side=pts.filter(q=>(q.x-gx)*sd>0).sort((a2,b2)=>Math.abs(a2.x-gx)-Math.abs(b2.x-gx));let acc=0,last=null;
+   for(const q of side){if(last){acc+=Math.hypot(q.x-last.x,q.y-last.y)}last=q;if(acc>=24||bays.filter(b2=>b2.sd===sd).length===0&&Math.abs(q.x-gx)>44){if(acc>230)break;bays.push({q,sd});acc=0}}}
+  const PIE=night?'#4a3e38':'#cbbfae';
+  for(const pass of[0,1])for(const{q,sd}of bays){const dx=q.x-ctr.x,dy=q.y-ctr.y,l=Math.hypot(dx,dy),nx=dx/l,ny=dy/l,ang=Math.atan2(ny,nx)-Math.PI/2;
+   g.save();g.translate(Math.round(q.x+nx*2),Math.round(q.y+ny*2));g.rotate(ang);
+   if(pass===0){R(-12+5,-RH+4,25,RH+FH+2,'rgba(10,8,12,.3)');g.restore();continue}
+   // roof strip (toward the stadium), then the brick face
+   R(-13,-RH,26,RH,night?'#2b2f36':'#4e535b');R(-13,-RH,26,1,night?'#4a5058':'#8e959e');for(let x=-12;x<13;x+=3)R(x,-RH+1,1,RH-2,night?'#262a30':'#454a52');
+   for(let y=0;y<FH;y+=2)for(let x=-13;x<13;x+=2){const row=y>>1,c=((((x+13)>>1)+(row&1))%3===0)?'#8c3c2a':'#9a4430';R(x,y,2,2,night?shade(c,-.38):c)}
+   R(-13,0,26,2,'#2a2e34');R(-13,FH-2,26,2,'#5e5a54');
+   R(-8,4,16,FH-8,night?'#ffc46a':'#2f4458');if(night)for(let y=5;y<FH-4;y+=4)R(-8,y,16,1,'#ffb04a');else R(-8,4,16,3,'#3e5a74');
+   for(let x=-8;x<=8;x+=4)R(x,4,1,FH-8,'#1c222a');R(-8,(FH/2)|0,16,1,'#22262c');
+   R(-14,-RH-1,3,RH+FH+1,PIE);R(11,-RH-1,3,RH+FH+1,PIE);
+   if(vHash(Math.round(q.x),Math.round(q.y))%3===0){R(-3,1,6,12,'#13254a');R(-3,1,6,1,'#e8642a');R(-1,5,2,3,'#e8eef5')}// a club banner on some piers
+   g.restore()}}
  // the centre: a taller block, its roof set back, a deep arched portal with a steel canopy, the logo on the parapet
  const CW2=38,CT=FY-FH-RH-16;
  roof(gx-CW2,CT,CW2*2,RH+2,0);R(gx-CW2,CT+RH+2,CW2*2,3,'#2a2e34');
