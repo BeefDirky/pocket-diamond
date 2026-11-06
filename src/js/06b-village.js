@@ -63,45 +63,78 @@ function vPerson(wx,wy,pct){const ci=Math.floor(wx/9),cj=Math.floor(wy/9),h=vHas
  if(dx>=1&&dx<=3&&dy>=3&&dy<=5){const c=V_SHIRTS[(h>>>14)%V_SHIRTS.length];return dy===5?c.map(v=>v*.78|0):c}
  if(dx===2&&dy===2)return (h>>>18)&1?V_SKIN[(h>>>19)&1]:[42,30,22];return null}
 const V_BOOTH=['#e0473d','#3f82e6','#ef6a1f','#3faa5b','#f5c935','#c9a0dc'].map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)]);
-// the open outfield, in feet past the fence: the stone wall, a picnic lawn, the promenade, a row of food stands,
-// and the steel-truss pavilion over the back concourse with its neon fascia, then the plaza out to the town
-function vOutfield(wx,wy,q,th,r){const s=r*th*RAD,n=vHash(Math.floor(wx/3),Math.floor(wy/3));
+// The outfield pavilion follows one smooth circle (not the fence, which kinks at the gaps), so its lawn, promenade,
+// food stands and steel roof keep true proportions all the way along. In feet, centred on the y axis behind home.
+let V_PAV=null,V_PAV_K='';
+function vPav(){const key=DIMS.join(',');if(V_PAV&&V_PAV_K===key)return V_PAV;V_PAV_K=key;
+ const r33=fenceDist(33)+30,px=r33*Math.sin(33*RAD),py=r33*Math.cos(33*RAD),top=452,cy=(top*top-px*px-py*py)/(2*(top-py)),R=top-cy;
+ // how far round the circle the roof runs: until it reaches 27 degrees off centre as seen from the plate
+ const homeAng=f=>Math.atan2(Math.sin(f)*(R+20),cy+Math.cos(f)*(R+20))/RAD;let lo=0,hi=1.5;for(let k=0;k<40;k++){const m=(lo+hi)/2;if(homeAng(m)<27)lo=m;else hi=m}
+ return V_PAV={cy,R,fm:lo}}
+// the open outfield: the stone wall behind the fence, a picnic lawn, then the promenade along the pavilion
+function vOutfield(wx,wy,q,th,r,fx,fy,d){const n=vHash(Math.floor(wx/3),Math.floor(wy/3));
  if(q<11)return (n&15)<3?VC.wall2:VC.wall;
- if(q<28){const ci=Math.floor(s/11),cj=Math.floor((q-11)/8),h=vHash(ci+977,cj+31);
-  if(h%5===0){const ls=s-ci*11,lq=q-11-cj*8;if(ls>2&&ls<8&&lq>1.5&&lq<6){const c=V_BLANKET[(h>>>4)%V_BLANKET.length];return (Math.floor(ls)+Math.floor(lq))&1?c:c.map(v=>v*.86|0)}}
-  return Math.floor(q/4)&1?VC.lawnA:VC.lawnB}
- const ss=((s%96)+96)%96;
- if(q<42){const ps=ss%32;if(q>31.5&&q<38.5&&ps>11&&ps<19){const dx=ps-15,dq=q-35,d=dx*dx+dq*dq;if(d<9){return (n&7)===0?VC.orF:d<3&&dx<0?VC.orT2:VC.orT}if(d<12.5)return VC.planter}
-  if(Math.abs(q-29.5)<.8&&ss%16<1.2)return VC.lamp;
-  const p=vPerson(wx,wy,9);if(p)return p;
-  return (Math.floor(s/2.5)+Math.floor(q/2.5))&1?VC.pave:VC.pave2}
- if(q<54){// food stands: a counter facing the promenade, a striped awning, the kiosk roof behind
-  const m=ss%20,bi=Math.floor(((s%1e5)+1e5)/20),c=V_BOOTH[vHash(bi,77)%V_BOOTH.length];
-  if(m>=17){const p=vPerson(wx,wy,14);return p||VC.pave2}
-  if(q<43.5)return n&1?vRGB('#e8e1cf'):vRGB('#ddd5c1');
-  if(q<48)return (Math.floor(s/2)&1)?vRGB('#f4f1e8'):c;
-  if(q<48.8)return vDark(c,.6);
-  return (n&3)===0?vDark(c,.66):vDark(c,.78)}
- if(q<74){// the pavilion: an open steel truss roof over the concourse (you see through the bars to the crowd below)
-  const tq=q-54,tri=1-Math.abs(((ss/9)%2)-1),diag=Math.abs(tq-tri*20)<.9||Math.abs(tq-(1-tri)*20)<.9,chord=tq<1.3||tq>18.6,vert=ss%18<1.1,col=ss%36<3&&(tq<3||tq>17);
-  if(col)return vRGB('#2a2f36');
-  if(chord||diag||vert)return (tq<1.3||((ss+tq)|0)%3===0)?vRGB('#6a7480'):vRGB('#4a525c');
-  const p=vPerson(wx,wy,16);if(p)return vDark(p,.82);
-  return (Math.floor(s/3)+Math.floor(q/3))&1?vRGB('#7a7468'):vRGB('#706a5f')}
- if(q<76){if(q>74.6&&q<75.4)return vRGB('#ffd2a0');return vRGB('#2b3038')}// the fascia and its neon tube
- const p=vPerson(wx,wy,4);if(p)return p;
- return (Math.floor(s/4)+Math.floor(q/4))&1?VC.pave:VC.pave2}
-// the neon along the pavilion's fascia, drawn live over the park at night (and chasing through colours on a home run)
-let V_NEON=null,V_NEON_K='';
-function drawNeon(c,vx0,vy0,scale,now){if(!ST||!ST.openTop||!S.night||S.phase==='title')return;const key=S.you+DIMS.join(',');
- if(V_NEON_K!==key){V_NEON_K=key;V_NEON=[];const cut=ST.openTop-.6;for(let th=-cut;th<cut;th+=2.4){const seg=new Path2D();for(let t=th;t<=Math.min(cut,th+2.4)+.01;t+=.6){const R=(fenceDist(t)+75)/FT,x=HX+Math.sin(t*RAD)*R,y=HY-Math.cos(t*RAD)*R;t===th?seg.moveTo(x,y):seg.lineTo(x,y)}V_NEON.push(seg)}
-  const arc=ex=>{const p=new Path2D();for(let t=-cut;t<=cut+.01;t+=.6){const R=(fenceDist(t)+ex)/FT,x=HX+Math.sin(t*RAD)*R,y=HY-Math.cos(t*RAD)*R;t===-cut?p.moveTo(x,y):p.lineTo(x,y)}return p};V_NEON.glow=[arc(36),arc(49),arc(64)]}
- const show=S.lightShow&&now-S.lightShow<6000;
- c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);c.globalCompositeOperation='lighter';c.lineCap='round';
- // the concourse is lit: warm light along the promenade, the food stands and under the pavilion roof
- const G=V_NEON.glow;c.strokeStyle='rgba(255,214,160,.10)';c.lineWidth=40;c.stroke(G[0]);c.strokeStyle='rgba(255,196,120,.16)';c.lineWidth=30;c.stroke(G[1]);c.strokeStyle='rgba(255,220,170,.11)';c.lineWidth=52;c.stroke(G[2]);
- V_NEON.forEach((seg,i)=>{let col='255,138,40';if(show){const k=Math.floor((now-S.lightShow)/120+i)%4;col=['255,138,40','255,70,170','80,220,255','255,230,90'][k]}
-  c.strokeStyle=`rgba(${col},.16)`;c.lineWidth=14;c.stroke(seg);c.strokeStyle=`rgba(${col},.4)`;c.lineWidth=5;c.stroke(seg);c.strokeStyle='rgba(255,240,220,.9)';c.lineWidth=1.4;c.stroke(seg)});
+ const pv=vPav(),f=Math.atan2(fx,fy-pv.cy),s=f*(pv.R-6);// feet along the promenade
+ if(d<-13){const ci=Math.floor(s/11),cj=Math.floor(d/8),h=vHash(ci+977,cj+31);
+  if(h%5===0){const ls=s-ci*11,lq=d-cj*8;if(ls>2&&ls<8&&lq>1.5&&lq<6){const c=V_BLANKET[(h>>>4)%V_BLANKET.length];return (Math.floor(ls)+Math.floor(lq))&1?c:c.map(v=>v*.86|0)}}
+  return Math.floor(d/4)&1?VC.lawnA:VC.lawnB}
+ if(d<0){const ss=((s%32)+32)%32;
+  if(d>-10&&d<-3&&ss>12&&ss<20){const dx=ss-16,dq=d+6.5,dd=dx*dx+dq*dq;if(dd<9)return (n&7)===0?VC.orF:dd<3&&dx<0?VC.orT2:VC.orT;if(dd<12.5)return VC.planter}
+  if(d<-12)return VC.edgeL;
+  if(Math.abs(d+11)<.8&&((s%16)+16)%16<1.2)return VC.lamp;
+  const p=vPerson(wx,wy,10);if(p)return p;
+  return (Math.floor(s/2.5)+Math.floor(d/2.5))&1?VC.pave:VC.pave2}
+ const p=vPerson(wx,wy,5);if(p)return p;
+ return (Math.floor(s/4)+Math.floor(d/4))&1?VC.pave:VC.pave2}
+// the pavilion itself, pre-drawn at full resolution (day, and a lit night version) and laid over the park each frame
+let V_PAVC=null,V_PAVC_K='';
+function vPavCanvas(night){const key=S.you+DIMS.join(',')+(night?'n':'d');if(V_PAVC&&V_PAVC_K===key)return V_PAVC;V_PAVC_K=key;
+ const pv=vPav(),pt=(f,d)=>({x:HX+Math.sin(f)*(pv.R+d)/FT,y:HY-(pv.cy+Math.cos(f)*(pv.R+d))/FT});
+ const fm=pv.fm,sm=t=>t*t*(3-2*t),w=f=>{const a=Math.abs(f)/fm,t=clamp((1-a)/.3,0,1),gx=Math.abs(Math.sin(f)*pv.R/FT),gt=clamp((gx-118)/60,0,1);return sm(t)*sm(gt)};// tapers to nothing at the ends, and opens around the scoreboard's legs
+ const A=pt(-fm,0),B=pt(fm,0),T=pt(0,40);const x0=Math.floor(Math.min(A.x,B.x)-30),x1=Math.ceil(Math.max(A.x,B.x)+40),y0=Math.floor(T.y-30),y1=Math.ceil(Math.max(A.y,B.y)+40);
+ const c=document.createElement('canvas');c.width=x1-x0;c.height=y1-y0;const g=c.getContext('2d');g.translate(-x0,-y0);
+ const rr=mulberry32(4242),N=180,F=k=>-fm+2*fm*k/N;
+ const dOut=f=>12+24*w(f);
+ const band=(din,dout,ox,oy)=>{g.beginPath();for(let k=0;k<=N;k++){const q=pt(F(k),din(F(k)));g[k?'lineTo':'moveTo'](q.x+ox,q.y+oy)}for(let k=N;k>=0;k--){const q=pt(F(k),dout(F(k)));g.lineTo(q.x+ox,q.y+oy)}g.closePath()};
+ // the roof's shadow on the plaza, then the concourse floor under it
+ band(f=>12*w(f),dOut,10,7);g.fillStyle='rgba(0,0,0,.2)';g.fill();
+ band(f=>12+(1-w(f))*.5,dOut,0,0);g.fillStyle='#736c60';g.fill();
+ g.save();band(f=>12,dOut,0,0);g.clip();g.fillStyle='#6a6458';for(let k=0;k<N;k+=2){const a=pt(F(k),0),b=pt(F(k),60);g.fillRect(a.x,a.y,1,1)}
+ // fans on the concourse
+ for(let k=0;k<420;k++){const f=-fm+rr()*2*fm,d=13+rr()*(dOut(f)-14),q=pt(f,d);const sh=V_SHIRTS[(rr()*V_SHIRTS.length)|0];g.fillStyle=`rgb(${sh})`;g.fillRect(Math.round(q.x)-1,Math.round(q.y),3,3);g.fillStyle=rr()<.5?'#2a1e16':'#d9a878';g.fillRect(Math.round(q.x),Math.round(q.y)-1,1,1)}
+ g.restore();
+ // the steel: two chords, a zig-zag of diagonals, radial ribs, and columns at the panel points
+ const steel=(pts,wd,col)=>{g.strokeStyle=col;g.lineWidth=wd;g.beginPath();pts.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.stroke()};
+ const P=9/(pv.R+12),K2=Math.floor(fm/P);g.lineCap='round';g.lineJoin='round';
+ const inner=[],outer=[];for(let k=0;k<=N;k++){const f=F(k);inner.push(pt(f,12));outer.push(pt(f,dOut(f)))}
+ g.strokeStyle='#4a525c';g.lineWidth=1.6;g.beginPath();
+ for(let k=-K2;k<K2;k++){const f0=k*P,f1=(k+1)*P,a=pt(f0,k&1?dOut(f0):12),b=pt(f1,k&1?12:dOut(f1));if(w(f0)<.05&&w(f1)<.05)continue;g.moveTo(a.x,a.y);g.lineTo(b.x,b.y)}g.stroke();
+ g.strokeStyle='#59626c';g.lineWidth=1.2;g.beginPath();for(let k=-K2;k<=K2;k+=2){const f=k*P;if(w(f)<.05)continue;const a=pt(f,12),b=pt(f,dOut(f));g.moveTo(a.x,a.y);g.lineTo(b.x,b.y)}g.stroke();
+ steel(inner,3.4,'#3e454e');steel(inner,1.2,'#7a848f');
+ steel(outer,5,'#2b3038');steel(outer,1.6,night?'#ffe2b8':'#ffcf9a');// fascia with its neon tube
+ g.fillStyle='#262b31';for(let k=-K2;k<=K2;k+=4){const f=k*P;if(w(f)<.2)continue;for(const d of[12,dOut(f)]){const q=pt(f,d);g.fillRect(Math.round(q.x)-2,Math.round(q.y)-2,4,4)}}
+ // the food stands along the front, facing the promenade and the field
+ const BL=20/(pv.R+5);for(let k=-Math.floor(fm/BL);k<Math.floor(fm/BL);k++){const f=(k+.5)*BL;if(w(f)<.55)continue;const col=V_BOOTH[vHash(k+40,77)%V_BOOTH.length],cs=`rgb(${col})`,dk=`rgb(${col.map(v=>v*.7|0)})`;
+  const q=pt(f,6);g.save();g.translate(q.x,q.y);g.rotate(f);const bw=16/FT,bd=11/FT;
+  g.fillStyle='rgba(0,0,0,.22)';g.fillRect(-bw/2+3,-bd/2+2,bw,bd);
+  g.fillStyle=dk;g.fillRect(-bw/2,-bd/2,bw,bd*.55);g.fillStyle=`rgb(${col.map(v=>v*.82|0)})`;g.fillRect(-bw/2+2,-bd/2+2,bw-4,bd*.55-4);// kiosk roof
+  for(let x=0;x<bw;x+=5){g.fillStyle=(x/5)&1?'#f4f1e8':cs;g.fillRect(-bw/2+x,-bd/2+bd*.55,Math.min(5,bw-x),bd*.33)}// striped awning
+  g.fillStyle='#e8e1cf';g.fillRect(-bw/2,bd/2-bd*.12,bw,bd*.12);g.fillStyle='#ff9a1f';for(let x=4;x<bw-4;x+=7)g.fillRect(-bw/2+x,bd/2-bd*.1,3,2);
+  g.restore()}
+ if(night){// lit the way the park is lit, then the concourse's own light
+  const m=document.createElement('canvas');m.width=c.width;m.height=c.height;m.getContext('2d').drawImage(c,0,0);
+  g.save();g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='multiply';g.fillStyle='#6a73a0';g.fillRect(0,0,c.width,c.height);g.globalCompositeOperation='destination-in';g.drawImage(m,0,0);g.restore();
+  g.save();g.globalCompositeOperation='lighter';
+  for(let k=0;k<=N;k+=3){const f=F(k);if(w(f)<.1)continue;const q=pt(f,12+dOut(f)/2-6),rad=16+dOut(f)*1.4;const gr=g.createRadialGradient(q.x,q.y,0,q.x,q.y,rad);gr.addColorStop(0,'rgba(255,205,140,.13)');gr.addColorStop(1,'rgba(255,205,140,0)');g.fillStyle=gr;g.fillRect(q.x-rad,q.y-rad,rad*2,rad*2)}
+  for(let k=-Math.floor(fm/BL);k<Math.floor(fm/BL);k++){const f=(k+.5)*BL;if(w(f)<.55)continue;const q=pt(f,1);const gr=g.createRadialGradient(q.x,q.y,0,q.x,q.y,30);gr.addColorStop(0,'rgba(255,190,110,.35)');gr.addColorStop(1,'rgba(255,190,110,0)');g.fillStyle=gr;g.fillRect(q.x-30,q.y-30,60,60)}
+  g.restore()}
+ V_PAVC={c,x0,y0,outer,ow:Array.from({length:N+1},(_,k)=>w(F(k)))};return V_PAVC}
+function drawNeon(c,vx0,vy0,scale,now){if(!ST||!ST.openTop||S.phase==='title')return;const night=!!S.night,P=vPavCanvas(night);
+ c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);c.imageSmoothingEnabled=scale<1.6;c.drawImage(P.c,P.x0,P.y0);
+ if(night){c.globalCompositeOperation='lighter';c.lineCap='round';c.lineJoin='round';const show=S.lightShow&&now-S.lightShow<6000,O=P.outer,n=O.length,seg=12;
+  for(let i=0;i<n-1;i+=seg){let col='255,138,40';if(show){const k=Math.floor((now-S.lightShow)/120+i/seg)%4;col=['255,138,40','255,70,170','80,220,255','255,230,90'][k]}
+   const t=Math.min(P.ow[i],P.ow[Math.min(n-1,i+seg)]);if(t<=.05)continue;const p=new Path2D();for(let j=i;j<=Math.min(n-1,i+seg);j++)j===i?p.moveTo(O[j].x,O[j].y):p.lineTo(O[j].x,O[j].y);
+   c.strokeStyle=`rgba(${col},${.16*t})`;c.lineWidth=14;c.stroke(p);c.strokeStyle=`rgba(${col},${.42*t})`;c.lineWidth=5;c.stroke(p);c.strokeStyle=`rgba(255,240,220,${.9*t})`;c.lineWidth=1.4;c.stroke(p)}}
  c.restore()}
 // what a town plot holds, and its look, pixel by pixel in the plot's own rotated frame
 function vKind(P){if(P.kind)return P.kind;const fx=(P.x-HX)*FT,fy=(HY-P.y)*FT,wedge=fy>0&&Math.abs(Math.atan2(fx,fy)/RAD)<(ST.openTop||0)+8,k=(P.h>>>6)%100;
@@ -136,7 +169,7 @@ function vTownCol(P,wx,wy,e){const K=vKind(P),A=(P.h>>>13)&1?Math.PI/2:0,c=Math.
  if(K==='park'){const d=Math.hypot((ls-600)/1.25,lt-600);if(Math.abs(d-30)<2.6)return VC.pave;return (n&7)===0?VC.lawnB:VC.lawnA}
  return (Math.floor(ls/6)+Math.floor(lt/6))&1?VC.pave:VC.pave2}// the market square
 function villageCol(wx,wy){
- if(ST&&ST.openTop){const fx=(wx-HX)*FT,fy=(HY-wy)*FT;if(fy>0){const th=Math.atan2(fx,fy)/RAD;if(Math.abs(th)<ST.openTop){const r=Math.hypot(fx,fy),q=r-fenceDist(th);if(q<88)return vOutfield(wx,wy,q,th,r)}}}
+ if(ST&&ST.openTop){const fx=(wx-HX)*FT,fy=(HY-wy)*FT;if(fy>0){const th=Math.atan2(fx,fy)/RAD;if(Math.abs(th)<ST.openTop){const r=Math.hypot(fx,fy),q=r-fenceDist(th);const pv=vPav(),dd=Math.hypot(fx,fy-pv.cy)-pv.R;if(q<88||dd<50)return vOutfield(wx,wy,q,th,r,fx,fy,dd)}}}
  const x=wx+2.2*Math.sin(wy*.21)+1.6*Math.sin(wy*.07+wx*.05),y=wy+2.2*Math.sin(wx*.19)+1.4*Math.sin(wx*.06-wy*.04);// rough-laid stone
  let n0=vNear(x,y),a=n0.a,b=n0.b,e=n0.e;
  if(a.t==='town'||b.t==='town'){n0=vNear(wx,wy);a=n0.a;b=n0.b;e=n0.e}// town streets are laid straight
@@ -274,7 +307,7 @@ function vTownPlots(){const out=[],i0=Math.floor(-EXT_M.mx/VS)-1,i1=Math.ceil((W
  for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const P=vSeedG(i,j);if(P.t==='town')out.push(P)}return out}
 // spots well inside a plot (clear of its streets and of the outfield road), for the things that sit on it
 function vSpots(P,n,minE,rr){const out=[];for(let k=0;k<n*6&&out.length<n;k++){const x=P.x+(rr()-.5)*VS*.9,y=P.y+(rr()-.5)*VS*.9,q=vNear(x,y);if(q.a!==P||q.e<minE)continue;
-  if(ST.openTop){const fx=(x-HX)*FT,fy=(HY-y)*FT,th=Math.atan2(fx,fy)/RAD;if(fy>0&&Math.abs(th)<ST.openTop&&Math.hypot(fx,fy)-fenceDist(th)<96)continue}
+  if(ST.openTop){const fx=(x-HX)*FT,fy=(HY-y)*FT,th=Math.atan2(fx,fy)/RAD;if(fy>0&&Math.abs(th)<ST.openTop&&(Math.hypot(fx,fy)-fenceDist(th)<96||Math.hypot(fx,fy-vPav().cy)-vPav().R<58))continue}
   out.push([x,y,q.e])}return out}
 function vBuilding(g,x,y,w,h,col,ht,rr,glows){// a flat-roofed low-rise: parapet, water tank, AC units, stair hut
  x=Math.round(x);y=Math.round(y);w=Math.round(w);h=Math.round(h);

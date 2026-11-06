@@ -138,7 +138,7 @@ function render(now){
  if(CROWD_A&&!bpv)drawCrowdLife(wg,now);
  if(SIGNS)wg.drawImage(SIGNS,0,0);
  if(DECOR)wg.drawImage(DECOR,0,0);
- if(!bpv)drawDugoutCrew(wg,now);wg.save();wg.scale(K,K);if(!bpv)drawCheer(wg,now);drawFlags(wg,now);drawJumbo(wg,now);wg.restore();
+ if(!bpv)drawDugoutCrew(wg,now);wg.save();wg.scale(K,K);if(!bpv)drawCheer(wg,now);drawFlags(wg,now);wg.restore();
  const ph=S.phase,play=S.play;
  const inPlay=!!play&&(ph==='play'||ph==='result');
  const t=play?(ph==='result'?play.end:play.t):0;
@@ -383,6 +383,7 @@ function render(now){
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
  drawNeon(ctx,vx0,vy0,scale,now);
+ if(S.phase!=='title'){ctx.save();ctx.setTransform(scale*K,0,0,scale*K,-vx0*scale,-vy0*scale);ctx.imageSmoothingEnabled=false;drawJumbo(ctx,now);ctx.restore()}// the board stands above everything on its legs
  drawBallCam(now);
 }
 

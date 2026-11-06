@@ -7,8 +7,23 @@ function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.d
 new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 function drawJumbo(g,now){
- const cx=HX/K,x0=cx-95,y0=10,w=190,h=66;
- g.fillStyle='#14181c';g.fillRect(x0-4,y0-4,w+8,h+8);g.fillStyle='#05080a';g.fillRect(x0,y0,w,h);
+ const cx=HX/K,x0=cx-95,y0=-18,w=190,h=66;
+ // the board stands on steel: lattice legs down to concrete footings just behind the wall, braced across the middle
+ {const fy=(HY-fenceDist(0)/FT)/K,yb=fy-8,yt=y0+h+2,night=!!S.night,legs=[x0+26,cx,x0+w-26];
+  g.fillStyle='rgba(0,0,0,.24)';g.beginPath();g.moveTo(x0+8,yb+1);g.lineTo(x0+w-8,yb+1);g.lineTo(x0+w+30,yb+12);g.lineTo(x0+46,yb+12);g.closePath();g.fill();
+  for(const lx of legs){g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.moveTo(lx-2,yb);g.lineTo(lx+2,yb);g.lineTo(lx+24,yb+13);g.lineTo(lx+20,yb+14);g.closePath();g.fill()}
+  // the horizontal brace between the legs
+  const by1=yt+(yb-yt)*.35,by2=yt+(yb-yt)*.6;g.strokeStyle=night?'#4a545e':'#6b7680';g.lineWidth=1.4;g.beginPath();g.moveTo(legs[0],by1);g.lineTo(legs[2],by1);g.moveTo(legs[0],by2);g.lineTo(legs[2],by2);
+  for(let x=legs[0],k=0;x<legs[2]-1;x+=10,k++){g.moveTo(x,k&1?by1:by2);g.lineTo(Math.min(legs[2],x+10),k&1?by2:by1)}g.stroke();
+  for(const lx of legs){g.fillStyle=night?'#6d7884':'#9aa6b0';g.fillRect(lx-3.5,yt,3.5,yb-yt);g.fillStyle=night?'#3c4650':'#56606a';g.fillRect(lx,yt,3.5,yb-yt);
+   g.strokeStyle='rgba(30,36,42,.7)';g.lineWidth=.6;g.beginPath();for(let y=yt;y<yb-1;y+=6){g.moveTo(lx-3.5,y);g.lineTo(lx+3.5,y+6);g.moveTo(lx+3.5,y);g.lineTo(lx-3.5,y+6)}g.stroke();
+   g.fillStyle='#4a525b';g.fillRect(lx-7,yb-2,14,5);g.fillStyle='#6b747d';g.fillRect(lx-7,yb-2,14,1.5)}}
+ // the board's depth: its top and back show past the frame, with a row of beacon lights along the crown
+ g.fillStyle='#0c0f12';g.fillRect(x0-6,y0-11,w+12,8);g.fillStyle='#2a3038';g.fillRect(x0-6,y0-11,w+12,2);
+ for(let k=0;k<12;k++){g.fillStyle=S.night?'#ffe9a8':'#c9ced3';g.fillRect(x0+4+k*(w-8)/11-1,y0-9,2,2)}
+ g.fillStyle='#3a424b';g.fillRect(x0-6,y0-5,w+12,h+12);g.fillStyle='#14181c';g.fillRect(x0-4,y0-4,w+8,h+8);g.fillStyle='#05080a';g.fillRect(x0,y0,w,h);
+ g.fillStyle='#59636d';for(let k=-4;k<=w+4;k+=8){g.fillRect(x0+k,y0+h+5,1,1);g.fillRect(x0+k,y0-5,1,1)}// bolts along the frame
+ g.fillStyle='#8b96a0';g.fillRect(x0-6,y0+h+7,w+12,1.5);g.fillStyle='#59636d';for(let k=-4;k<=w+6;k+=9)g.fillRect(x0+k,y0+h+7,1,3);// catwalk rail
  const msg=S.jumbo&&now<S.jumbo.until?S.jumbo:null;
  g.textBaseline='middle';
  if(msg){
