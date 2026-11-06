@@ -57,6 +57,9 @@ function bOpenR(phi,t0){const dx=Math.sin(phi*RAD),dy=Math.cos(phi*RAD);let lo=0
 let B_EXT=null,B_EXT_K='',B_OR=null,B_OR_K='';
 function bInOL(x,y){const k=DIMS.join(',');if(!B_OR||B_OR_K!==k){B_OR_K=k;const T=hRS();B_OR=new Float32Array(360);for(let i=0;i<360;i++)B_OR[i]=T.open[i]?bOpenR(i-180,T.R[i]):T.R[i]}
  const phi=Math.atan2(x-H_CC.x,y-H_CC.y)/RAD,f=phi+180,i=Math.floor(f)%360,j=(i+1)%360,R=B_OR[i]+(B_OR[j]-B_OR[i])*(f-Math.floor(f));return Math.hypot(x-H_CC.x,y-H_CC.y)<R+2}
+// beyond the outline, round the outfield half: a belt of trees hugging the park, its outer edge ragged like a real treeline
+function bBelt(x,y,wx,wy){if(y<60)return null;const phi=Math.atan2(x-H_CC.x,y-H_CC.y)/RAD,f=phi+180,i=Math.floor(f)%360,j=(i+1)%360,R=B_OR[i]+(B_OR[j]-B_OR[i])*(f-Math.floor(f)),d=Math.hypot(x-H_CC.x,y-H_CC.y)-R;
+ const lim=34+7*Math.sin(phi*.9)+4*Math.sin(phi*2.3+1)-clamp((140-y)/30,0,1)*34;if(d>lim)return d<lim+60&&y>120?fTrees(wx,wy):null;return fTrees(wx,wy)}
 function bExt(){const k=DIMS.join(',');if(B_EXT!=null&&B_EXT_K===k)return B_EXT;B_EXT_K=k;let m=0;for(let ph=-180;ph<180;ph+=1){const T=hRS(),i=((ph+180)%360+360)%360;let t=T.R[i];if(T.open[i])t=bOpenR(ph,t);
   const x=Math.sin(ph*RAD)*t,y=Math.cos(ph*RAD)*t;m=Math.max(m,-.8*x+.6*y)}return B_EXT=m}
 function bCoast(x,y){const u=.6*x+.8*(y-180),t=-.8*x+.6*(y-180)-(bExt()+34+16*Math.sin(u/150)+7*Math.sin(u/61));return{t,u}}
@@ -92,9 +95,9 @@ function bCoastCol(x,y,wx,wy){const{t,u}=bCoast(x,y);if(t<-78)return null;
 const B_BR={t0:11,t1:43,a0:2.5,piers:[21,35]};
 function bBridgeA(th){const f=(th-B_BR.t0)/(B_BR.t1-B_BR.t0);return 2.2*Math.sin(Math.PI*clamp(f,0,1))}// the walkway bows gently outward
 function brickCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
- if(!fair||q<0){const c=bCoastCol(x,y,wx,wy);if(c)return c;if(!bInOL(x,y))return null;if(y>0&&th<-40){const p=vPerson(wx,wy,6);if(p)return p;return bPave(r*th*RAD,r)}return BC.ring}
+ if(!fair||q<0){const c=bCoastCol(x,y,wx,wy);if(c)return c;if(!bInOL(x,y))return bBelt(x,y,wx,wy);if(y>0){const a2=r-fenceDist(Math.sign(th)*45)-H_WALLW;if(a2>56)return fTrees(wx,wy);const p=vPerson(wx,wy,6);if(p)return p;return bPave(r*th*RAD,r)}return BC.ring}
  const a=q-hPenOff(th)-H_WALLW;if(a<0)return null;
- if(a>80){const c=bCoastCol(x,y,wx,wy);if(c)return c;return !bInOL(x,y)?null:th>-24?fTrees(wx,wy):BC.ring}
+ if(a>80){const c=bCoastCol(x,y,wx,wy);if(c)return c;return !bInOL(x,y)?bBelt(x,y,wx,wy):fTrees(wx,wy)}
  // ---- right field: the footbridge ----
  if(th>B_BR.t0-1.5&&th<B_BR.t1+1.5){const b=a-bBridgeA(th),ends=Math.min((th-B_BR.t0)*RAD*r,(B_BR.t1-th)*RAD*r);
   if(b<4.5){if(b<.8)return HB.wallY;const id=Math.floor(s/18);if(((s%18)+18)%18<.9)return HB.seam;return b>3.8?hMul(HB.pad1,1.25):(id&1)?HB.pad2:HB.pad1}// the right-field wall stands taller: an upper padded band with its own yellow line
@@ -116,24 +119,24 @@ function brickCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
     if(v>.74&&((m%3)+3)%3<.8){H_EMIS=H_NIGHT;return BC.shop}return BC.under}
    if(b<33.5)return hMul(BC.conc2,.55);// the bridge's shadow on the ground
   }
-  if(a<56&&th>B_BR.t0+2){// ground-level kiosks in brick and metal beyond the bridge
+  if(a<55&&th>B_BR.t0+2){// ground-level kiosks in brick and metal beyond the bridge
    const k0=a-36,kw=24,km=((s%(kw+6))+(kw+6))%(kw+6);
    if(k0>0&&k0<18&&km<kw){if(k0<1.6){H_EMIS=H_NIGHT;return km%6<.6?BC.stD:BC.shop}// lit shopfronts facing the field
     if(k0>16.6)return hMul(BC.conc2,.6);if(Math.abs(k0-9)<.6)return BC.kRidge;if(km<.8||km>kw-.8)return bBrick(s,k0,false);return ((s%2)+2)%2<.3?BC.kRoof:k0<9?BC.kRoof2:BC.kRoof}
-   if(a>=58)return fTrees(wx,wy);const p=vPerson(wx,wy,8);if(p)return p;return bPave(s,a)}}
+   const p=vPerson(wx,wy,8);if(p)return p;return bPave(s,a)}
+  if(a>58)return fTrees(wx,wy);if(a>55)return a>57.2?hMul(BC.hedge,.8):BC.conc;{const p=vPerson(wx,wy,6);if(p)return p}return bPave(s,a)}
  // ---- centre: a planted batter's eye under the board ----
- if(ath<=B_BR.t0-1.5&&th>-9){if(a<34){const k=vHash(Math.floor(wx/4),Math.floor(wy/4));return k%5===0?BC.hedge2:BC.hedge}return fTrees(wx,wy)}
+ if(th>-11&&th<B_BR.t0-1.5&&a<9){const k=vHash(Math.floor(wx/4),Math.floor(wy/4));if(a>7.6)return BC.stD;return k%5===0?BC.hedge2:BC.hedge}
  // ---- left-centre and left: stepped food-and-drink terraces, then a brick-paved concourse ----
- if(th<=-9||th<B_BR.t0){
+ if(th<B_BR.t0+1.5||th>B_BR.t1){
   if(a<2.5)return BC.conc;
-  if(a<24&&th<-9&&th>-38){const rw=Math.floor((a-2.5)/5.5),f=(a-2.5)-rw*5.5;if(f<.6)return BC.terrJ;
+  {const e=(th+11)*RAD*r;if(a<25.4&&e>-1.2&&e<0&&th>-38)return BC.railW;if(a<25.4&&e>=0&&e<1.6)return hMul(BC.paver,.6)}// the terrace's end rail and its shadow
+  if(a<24&&th<-11&&th>-38){const rw=Math.floor((a-2.5)/5.5),f=(a-2.5)-rw*5.5;if(f<.6)return BC.terrJ;
    // tables under orange and navy umbrellas, in rows on each step
-   const um=((s+rw*7)%15+15)%15,cu=7.5,du=um-cu,dv=f-3;if(du*du+dv*dv<3.4){const o=vHash(Math.floor((s+rw*7)/15),rw)&1;return du+dv<0?(o?BC.umbO:BC.umbN):(o?BC.umbO2:BC.umbN2)}
    if(H_NIGHT&&f>4.8&&f<5.2&&((s%3)+3)%3<.6){H_EMIS=true;return BC.lamp}// string lights over each step
    const p=vPerson(wx,wy,22);if(p)return p;return (rw&1)?BC.terr:BC.terr2}
-  if(a<25.4&&th<-9&&th>-38)return BC.railW;
-  if(a>56){if(a>62)return th>-30?fTrees(wx,wy):BC.ring;return (Math.floor(s/7)&1)?BC.conc:BC.conc2}
-  {const tr=th<-30||a>40?bTree(s,a,48,22,4.6):null;if(tr)return tr}
+  if(a<25.4&&th<-11&&th>-38)return BC.railW;
+  if(a>58)return fTrees(wx,wy);if(a>55){if(a>57.2)return hMul(BC.hedge,.8);return (Math.floor(s/7)&1)?BC.conc:BC.conc2}// a low wall, then the trees
   const p=vPerson(wx,wy,8);if(p)return p;return bPave(s,a)}
  return null}
 // ---- shapes (world px, both layers): seagulls and waves on the wall pads, the bridge sign ----
@@ -142,6 +145,9 @@ function bXY(th,a){const r=fenceDist(Math.max(-45,Math.min(45,th)))+hPenOff(th)+
 function bDecor(g){
  const wv=(th,len)=>{for(let i=-len;i<=len;i++){const t=th+i*.22,p=bXY(t,4.6+Math.sin(i*.42)*1.4),q=bXY(t,3.4+Math.sin(i*.42)*1.4);g.fillStyle='#3a6ab0';g.fillRect(p.x,p.y,1,1);if((i&3)===0){g.fillStyle='#8fb6e8';g.fillRect(q.x,q.y,1,1)}}};
  for(const th of[-25,-19,-4,4,19,24])wv(th,10);
+ // umbrella tables on each terrace step, and shade trees along the concourse (round, drawn as shapes)
+ for(let rw=0;rw<4;rw++){const A=2.5+rw*5.5+3.2;for(let th=-36+(rw&1)*1.6;th<-12;th+=3.4){const p=bXY(th,A+H_WALLW);hParasol(g,p.x,p.y,(rw+Math.round(th))%3===0?0:1,.62)}}
+ for(let th=-43;th<=8;th+=4.2){const A=th<-11?40:46,p=bXY(th,A+H_WALLW+((Math.round(th*7)&3)-1.5));if(Math.abs(th)<5)continue;(Math.round(th*3)%5===0?hBlossom:hGreenTree)(g,p.x,p.y,13,false)}
  for(const th of[-33,-11.5,11.5]){const p=bXY(th,4.2);g.fillStyle='#e8eef5';B_GULL.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='X')g.fillRect(p.x-3+i,p.y-2+j,1,1)})}
  // the team's name on the bridge's outer face, mid-span
  {const p=bXY((B_BR.t0+B_BR.t1)/2,H_WALLW+27.5+bBridgeA((B_BR.t0+B_BR.t1)/2));g.save();g.translate(p.x,p.y);g.rotate(((B_BR.t0+B_BR.t1)/2)*RAD);
