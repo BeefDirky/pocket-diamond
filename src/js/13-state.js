@@ -1,6 +1,6 @@
 // ---------- state ----------
 const onlineGame=()=>!!(S.online&&S.online.inGame);
-const S={phase:'title',pt:0,you:'seoul',opp:'busan',mode:'arcade',half:'bot',bat:null,fld:null,orderOf:{},pIdxOf:{},pcOf:{},pRunsOf:{},pBFOf:{},myErrs:0,myK:0,wildUntil:0,inning:1,totalInn:INNINGS,outs:0,balls:0,strikes:0,runs:0,hits:0,hr:0,ks:0,
+const S={phase:'title',pt:0,you:(()=>{try{const k=localStorage.getItem('pd-club');if(k&&/^[a-z]+$/.test(k))return k}catch(e){}return 'busan'})(),opp:'seoul',mode:'arcade',half:'bot',bat:null,fld:null,orderOf:{},pIdxOf:{},pcOf:{},pRunsOf:{},pBFOf:{},myErrs:0,myK:0,wildUntil:0,inning:1,totalInn:INNINGS,outs:0,balls:0,strikes:0,runs:0,hits:0,hr:0,ks:0,
  target:0,oppLine:[],youLine:[],oppHits:0,bases:[null,null,null],order:0,pitch:null,swing:null,play:null,
  cam:{...CAM_FULL},zoom:1,camMode:'full',camV:{x:0,y:0,z:0},flame:0,umpPunch:0,camFrom:null,camTo:null,camT:0,camDur:1,cheerUntil:0,jumbo:null,presIdx:2,wave:null,fx:[],fwUntil:0,flashes:[],fidg:[],bb:null,gulls:[],nextGull:0,vendors:null};
 const setPhase=p=>{S.phase=p;S.pt=0;document.body.classList.toggle('inMenu',p==='title');const sb=document.getElementById('skipBtn');if(sb&&p!=='play')sb.hidden=true};
@@ -63,3 +63,6 @@ function updateCam(dt){
  let lz;[lz,V.z]=sdamp(Math.log(S.cam.z),Math.log(tg.z),V.z,.6,k);S.cam.z=Math.exp(lz);
 }
 
+
+// remember the player's club between visits (the club-select screen opens on it next time)
+function clubSave(){try{if(!(S.online&&S.online.inGame)&&TEAMS[S.you])localStorage.setItem('pd-club',S.you)}catch(e){}}

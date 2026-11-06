@@ -3130,7 +3130,7 @@ function sfx(k,q){
 
 // ---------- state ----------
 const onlineGame=()=>!!(S.online&&S.online.inGame);
-const S={phase:'title',pt:0,you:'seoul',opp:'busan',mode:'arcade',half:'bot',bat:null,fld:null,orderOf:{},pIdxOf:{},pcOf:{},pRunsOf:{},pBFOf:{},myErrs:0,myK:0,wildUntil:0,inning:1,totalInn:INNINGS,outs:0,balls:0,strikes:0,runs:0,hits:0,hr:0,ks:0,
+const S={phase:'title',pt:0,you:(()=>{try{const k=localStorage.getItem('pd-club');if(k&&/^[a-z]+$/.test(k))return k}catch(e){}return 'busan'})(),opp:'seoul',mode:'arcade',half:'bot',bat:null,fld:null,orderOf:{},pIdxOf:{},pcOf:{},pRunsOf:{},pBFOf:{},myErrs:0,myK:0,wildUntil:0,inning:1,totalInn:INNINGS,outs:0,balls:0,strikes:0,runs:0,hits:0,hr:0,ks:0,
  target:0,oppLine:[],youLine:[],oppHits:0,bases:[null,null,null],order:0,pitch:null,swing:null,play:null,
  cam:{...CAM_FULL},zoom:1,camMode:'full',camV:{x:0,y:0,z:0},flame:0,umpPunch:0,camFrom:null,camTo:null,camT:0,camDur:1,cheerUntil:0,jumbo:null,presIdx:2,wave:null,fx:[],fwUntil:0,flashes:[],fidg:[],bb:null,gulls:[],nextGull:0,vendors:null};
 const setPhase=p=>{S.phase=p;S.pt=0;document.body.classList.toggle('inMenu',p==='title');const sb=document.getElementById('skipBtn');if(sb&&p!=='play')sb.hidden=true};
@@ -3193,6 +3193,9 @@ function updateCam(dt){
  let lz;[lz,V.z]=sdamp(Math.log(S.cam.z),Math.log(tg.z),V.z,.6,k);S.cam.z=Math.exp(lz);
 }
 
+
+// remember the player's club between visits (the club-select screen opens on it next time)
+function clubSave(){try{if(!(S.online&&S.online.inGame)&&TEAMS[S.you])localStorage.setItem('pd-club',S.you)}catch(e){}}
 // ---------- pitching ----------
 function startWindup(kf){closePen();unduckMusic();
  const bpm=S.mode==='bp';if(bpm)kf=S.bpPitch==='RND'?pick(['FB','SL','CH','SP','CB','KN']):(S.bpPitch||'FB');
@@ -3965,7 +3968,7 @@ function fullInning(){
 const ord=n=>n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
 
 // ---------- game flow ----------
-function startGame(mode){tsFlush();unduckMusic();
+function startGame(mode){tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
  S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();
@@ -4263,7 +4266,7 @@ function tsRender(){if(!$('tsLogo'))return;const k=S.you,T=TEAMS[k],ST2=STADIUMS
  if(TS.cur!==k){if(TS.cur){TS.prev=TS.cur;TS.t0=performance.now();const im=$('tsLogo');im.classList.remove('pop');void im.offsetWidth;im.classList.add('pop')}TS.cur=k}
  $('tsLogo').src=LOGO_URL[k];$('tsLogo').alt=`${T.city} ${T.name}`;$('tsName').textContent=`${T.city} ${T.name}`;$('tsSub').textContent=`${T.kcity} ${T.kname} · ${ST2?ST2.name:''}`;
  $('tsDots').innerHTML=TS_ORDER.map(t=>`<i class="${t===k?'on':''}"></i>`).join('');tsStart()}
-function tsGo(d){const i=TS_ORDER.indexOf(S.you),k=TS_ORDER[(i+d+TS_ORDER.length)%TS_ORDER.length];if(k===S.opp)S.opp=S.you;S.you=k;
+function tsGo(d){const i=TS_ORDER.indexOf(S.you),k=TS_ORDER[(i+d+TS_ORDER.length)%TS_ORDER.length];if(k===S.opp)S.opp=S.you;S.you=k;clubSave();
  syncPicker();applyCustom();updateHUD();
  parkDirty()}
 // building a ballpark takes most of a second, so flipping through clubs only marks it; the new park is built once,
@@ -5845,7 +5848,7 @@ $('snd').addEventListener('click',()=>{muted=!muted;ensureAudio();applyVolumes()
 
 document.addEventListener('pointerdown',e=>{if(e.button>0||overlayOpen()||e.target===cv)return;if(e.target.closest('button,input,select,textarea,a,label,.book,.zoomCtl,.pauseBtn'))return;if(S.phase==='title'||S.phase==='over')return;swing()});
 addEventListener('pointerdown',ensureAudio,{once:true});addEventListener('keydown',ensureAudio,{once:true});
-document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();applySignings();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
+if(!TEAMS[S.you])S.you='busan';if(S.opp===S.you)S.opp=TS_ORDER.find(k=>k!==S.you);document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();applySignings();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
 const fontsReady=Promise.race([
  Promise.all([document.fonts.load('12px "Pixelify Sans"'),document.fonts.load('12px Jua'),document.fonts.load('bold 10px "Silkscreen"'),document.fonts.load('12px "Press Start 2P"'),document.fonts.load('40px "Yellowtail"')]),
  new Promise(r=>setTimeout(r,2500))]).catch(()=>{});
