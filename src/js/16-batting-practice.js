@@ -140,7 +140,9 @@ function groundOut(play,it,P,runners){
  }else{
   let t1;
   if(i===2&&dist(Pp,BASES[1])<25&&!(play.dive&&play.dive.i===2)){
-   t1=tf+dist(Pp,BASES[1])/POS[2].sp;pushKey(play,2,{t:t1,x:BASES[1].x,y:BASES[1].y});
+   // he runs to the bag from wherever his fielding momentum leaves him (not from the ball's spot), at running speed
+   const ks=play.fk[2],lk=ks&&ks.length?ks[ks.length-1]:{t:tf,x:Pp.x,y:Pp.y},t0=Math.max(tf,lk.t),from=lk.t>tf?lk:fromF(play,2,tf);
+   t1=t0+.08+dist(from,BASES[1])/(POS[2].sp*.95);pushKey(play,2,{t:t0,x:from.x,y:from.y});pushKey(play,2,{t:t1,x:BASES[1].x,y:BASES[1].y});
    play.segs.push(holdSeg(play,tf,t1,2));note='3U';
   }else{
    t1=tf+xf+dist(Pp,BASES[1])/THROW;
