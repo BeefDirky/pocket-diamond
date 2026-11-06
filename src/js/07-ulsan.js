@@ -4,12 +4,12 @@ function drawUlsan(g,now){
  const sec=now/1000;
  // resident whale breathes every few seconds
  const hb=!!ST.harbor;
- if(hb){// out in the open sea now, so the resident whale is drawn here rather than painted into the bay
+ if(false){// (the harbor park has no whale in its sea) so the resident whale is drawn here rather than painted into the bay
   const w=toPx(WHALE.x,WHALE.y),L=30/FT,Wd=9/FT,bob=Math.sin(sec*.6)*1.5;g.fillStyle='rgba(10,30,50,.35)';g.beginPath();g.ellipse(w.x+4,w.y+5,L,Wd,0,0,7);g.fill();
   g.fillStyle='#3b4f62';g.beginPath();g.ellipse(w.x,w.y+bob,L,Wd,0,0,7);g.fill();g.fillStyle='#4c6378';g.beginPath();g.ellipse(w.x-L*.15,w.y-Wd*.35+bob,L*.75,Wd*.45,0,0,7);g.fill();
   g.fillStyle='#3b4f62';g.beginPath();g.moveTo(w.x+L*.92,w.y+bob);g.lineTo(w.x+L*1.35,w.y-Wd*1.1+bob);g.lineTo(w.x+L*1.2,w.y+bob);g.lineTo(w.x+L*1.35,w.y+Wd*1.1+bob);g.closePath();g.fill();
   g.fillStyle='rgba(232,246,255,.5)';for(let k=0;k<8;k++){const a=k/8*6.28+sec;g.fillRect(Math.round(w.x+Math.cos(a)*(L+6)),Math.round(w.y+Math.sin(a)*(Wd+5)),3,1)}}
- {const ph=sec%5.5;if(ph<1.4)spout(g,toPx(WHALE.x-22,WHALE.y+3),ph/1.4)}
+ if(!hb){const ph=sec%5.5;if(ph<1.4)spout(g,toPx(WHALE.x-22,WHALE.y+3),ph/1.4)}
  // the harbor park's shipyard: a long dry dock with a ship taking shape, under a yellow goliath crane
  if(hb){const d=toPx(-600,690),x0=Math.round(d.x),y0=Math.round(d.y),DW=300,DH=140;
   g.fillStyle='#6b747d';g.fillRect(x0-8,y0-8,DW+16,DH+16);g.fillStyle='#4a545e';g.fillRect(x0-3,y0-3,DW+6,DH+6);g.fillStyle='#235f86';g.fillRect(x0,y0,DW,DH);
@@ -52,7 +52,7 @@ function drawUlsan(g,now){
   const cc=['#d23a2e','#3f82e6','#f5c935','#3faa5b','#ef6a1f','#9aa5ae'];for(let k=0;k<6;k++)for(let j=0;j<2;j++){g.fillStyle=cc[(k*3+j*5)%6];g.fillRect(qx-20+k*6,qy-5+j*5,5,4)}
   g.fillStyle='#f4f1e8';g.fillRect(qx-28,qy-5,6,10);g.fillStyle='#1b1f24';g.fillRect(qx-27,qy-2,4,2)}
  // a second whale breaches every so often in the left-center bay
- {const cyc=13,ph=sec%cyc;if(ph<2.6){const k=Math.floor(sec/cyc),th=-16+((k*53)%26),r=fenceDist(th)+30,wp=hb?toPx(-150+((k*53)%300),640+((k*31)%110)):toPx(Math.sin(th*RAD)*r,Math.cos(th*RAD)*r);
+ if(!hb){const cyc=13,ph=sec%cyc;if(ph<2.6){const k=Math.floor(sec/cyc),th=-16+((k*53)%26),r=fenceDist(th)+30,wp=hb?toPx(-150+((k*53)%300),640+((k*31)%110)):toPx(Math.sin(th*RAD)*r,Math.cos(th*RAD)*r);
    const a=ph/2.6,up=Math.sin(Math.min(1,a*1.6)*Math.PI);
    if(a<.62){const L=8+up*22,Wd=4+up*7;g.fillStyle='#3b4f62';g.beginPath();g.ellipse(wp.x,wp.y-up*6,L,Wd,-.5,0,Math.PI*2);g.fill();g.fillStyle='#c9d6df';g.beginPath();g.ellipse(wp.x+2,wp.y-up*6+1,L*.6,Wd*.45,-.5,0,Math.PI*2);g.fill()}
    if(a>.5){const s=(a-.5)/.5;g.strokeStyle=`rgba(232,246,255,${(1-s)*.9})`;g.lineWidth=3;g.beginPath();g.ellipse(wp.x,wp.y,10+s*34,5+s*16,0,0,Math.PI*2);g.stroke();

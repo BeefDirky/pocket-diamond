@@ -29,7 +29,7 @@ function dugoutFrame(sd){const along=82.5,perp=48.5;return toPx3(sd*(along+perp)
 function penSpot(sd,th){const r=fenceDist(sd*th)+9;return{x:sd*r*Math.sin(th*RAD),y:r*Math.cos(th*RAD)}}
 
 const TEAMS={
- seoul:{city:'SEOUL',kcity:'서울',name:'STEEDS',kname:'스티즈',script:'Steeds',emblem:'rat',logo:'shield',
+ seoul:{city:'SEOUL',kcity:'서울',name:'RATS',kname:'래츠',script:'Rats',emblem:'rat',logo:'shield',
   jersey:'#4a5060',cap:'#c8202a',brim:'#7a1018',mascot:'Chuchu',mdesc:'A subway rat in a conductor\'s cap. Knows every shortcut on Line 2 and squeaks the seventh-inning song.',
   pitcher:{name:'AHN W.K.',hand:'R',slot:'side'},pen:[{name:'WALSH',hand:'R',slot:'over'},{name:'NOH S.H.',hand:'L',slot:'over'}],
   lineup:[['PARK J.H.','L'],['KIM D.W.','R'],['RAMIREZ','S'],['LEE S.M.','R'],['CHOI W.S.','L'],['JUNG H.S.','R'],['KANG M.G.','R'],['OH J.Y.','L'],['YANG E.S.','R']]},

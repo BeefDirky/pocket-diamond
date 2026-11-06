@@ -81,20 +81,24 @@ function hSeat(ang,row,upper,secId){const sec=secId!=null?secId+1000:Math.floor(
  const p=H_SEATS[h%3];return p[row&1]}
 // the boardwalk: warm planks, blue-and-white parasols over tables, a cafe kiosk every so often
 const H_PARA=[[47,111,208],[244,246,250]];
-function hBoard(wx,wy,s2,d,w){const n=vHash(Math.floor(wx/3),Math.floor(wy/3));
- const cs=((s2%72)+72)%72;if(cs<12&&d>w-10&&d<w-1){if(d<w-8||cs<1||cs>11)return [30,50,90];return Math.floor(cs/3)&1?[47,111,208]:[244,246,250]}// cafe roof, awning striped
- const ps=((s2%18)+18)%18-9,pd=d-w*.45,pr=ps*ps+pd*pd;if(cs>=14&&pr<16){if(pr<1.2)return [40,44,50];return H_PARA[((ps>0)^(pd>0))?1:0]}
- if(cs>=14&&pr<22)return [120,90,60];// the parasol's shadow ring
- const p=vPerson(wx,wy,7);if(p)return p;
- return Math.floor(d/2.2)&1?HC.deck:HC.deck2}// set by harborCol when the pixel is a seat (so the crowd can fill it)
+function hBoard(wx,wy,s2,d,w){// warm planks laid along the walk, a darker joint every few boards and a butt joint every 12 ft
+ if(d<.8||d>w-.8)return HC.deck2;
+ const b=Math.floor(d/1.6),sj=((s2+b*5.3)%12+12)%12;if(sj<.35)return hMul(HC.deck2,.86);
+ const p=vPerson(wx,wy,6);if(p)return p;
+ return b%3===0?hMul(HC.deck,.95):(b&1)?HC.deck:HC.deck2}
 
 // the right-field terrace right behind the wall: three stepped tiers of standing rail and benches looking over the wall,
 // then the boardwalk with its umbrellas and cafes running on round to the cove
-function hTerr(wx,wy,s,d,w,th){const n=vHash(Math.floor(wx/3),Math.floor(wy/3));
- if(d<6){const t=d%2;if(t<.45)return HB.railD;if(t<.9)return HB.rail;// standing rails along each step
-  const p=vPerson(wx,wy,22);if(p)return p;return d<2?HB.terr2:d<4?HB.terr:hMul(HB.terr,1.04)}
- if(d<7)return HB.railD;
- return hBoard(wx,wy,s,d-7,w-7)}
+const hPenOff=th=>{const a=Math.abs(th),t=a<29?clamp((a-27)/2,0,1):a>41?clamp((43-a)/2,0,1):1;return 18*t};// the deck steps out round the bullpens
+const hDeckW=th=>lerp(16,21.5,clamp((th-8)/5,0,1));
+function hTerr(wx,wy,s,d,w,th){
+ if(d<5){const t=d%1.7;if(t<.4)return HB.railD;if(t<.8)return HB.rail;// standing rails along each step
+  const p=vPerson(wx,wy,24);if(p)return p;return d<1.7?HB.terr2:d<3.4?HB.terr:hMul(HB.terr,1.05)}
+ if(d<6)return d<5.4?HB.railD:HB.rail;
+ if(d<w-3.5)return hBoard(wx,wy,s,d-6,w-9.5);
+ if(d<w-2.6)return [196,226,238];// glass rail
+ if(d<w-2.1)return HB.railD;
+ return d<w-.6?HB.seaWall:HB.seaWallD}
 // the outfield wall: a yellow home-run line, padded panels in club colours with seams, a concrete cap
 const H_WALLW=10;// feet from the fence line to the back of the wall
 function hWall(q,s,n){if(q<.9)return HB.wallY;
@@ -135,13 +139,14 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
 // the colour of harbor ground at a world pixel, or null where the plain city carries on
 function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const x=(wx-HX)*FT,y=(HY-wy)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th);
  const n=vHash(Math.floor(wx/3),Math.floor(wy/3)),fair=y>0&&ath<=45,q=fair?r-fenceDist(th):-1,s=r*th*RAD;
- if(fair&&q>=0){const pen=ath>=29&&ath<=41,q0=pen?18:0;if(q<q0)return HB.wallCap;if(q<q0+H_WALLW)return hWall(q-q0,s,n)}
+ if(fair&&q>=0){const q0=ath>=29&&ath<=41?18:0;if(q<q0)return HB.wallCap;if(q<q0+H_WALLW)return hWall(q-q0,s,n)}
  const phi=hPhi(x,y),D=hD(phi),Ro=hRout(phi),rc=Math.hypot(x-H_CC.x,y-H_CC.y),d=rc<Ro+4?hFieldD(x,y):1e4;
  if(d<=0&&PARK_C)return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2;// the last of the foul ground, past the park buffer's edge
  if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
  const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
  // past the open outfield wall: a terrace behind centre, a boardwalk behind right field, then the sea wall
- if(fair&&q<26){if(th>8)return hTerr(wx,wy,s,q-H_WALLW,26-H_WALLW,th);const m=((s%26)+26)%26;
+ if(fair&&th>8){const q0=hPenOff(th)+H_WALLW,dw=hDeckW(th);if(q<q0)return HB.wallCap;if(q<q0+dw)return hTerr(wx,wy,s,q-q0,dw,th)}
+ if(fair&&q<26){const m=((s%26)+26)%26;
    if(q>21&&q<22.2&&m<1.2)return HB.par;if(q>18.6&&q<21.2&&m>=1.2&&m<4.6)return Math.floor(s/26)&1?HB.pad2:HB.pad3;// flags along the back rail
    const p=vPerson(wx,wy,8);if(p)return p;return (Math.floor(s/3)+Math.floor(q/3))&1?HB.terr:HB.terr2}
  if(fair&&q<27.6)return HB.seaWall;
@@ -263,11 +268,40 @@ function hLamps(){if(H_LAMPS)return H_LAMPS;const L=[];
  // the cove promenade: lamps on the rail, every few degrees round the bay where it meets the land
  for(let a=-180;a<180;a+=11){const ar=a*RAD,R=hCoveR(H_COVE_C.x+Math.sin(ar),H_COVE_C.y+Math.cos(ar))+3,x=H_COVE_C.x+Math.sin(ar)*R,y=H_COVE_C.y+Math.cos(ar)*R;if(!hEastLand(x,y))continue;L.push({x:HX+x/FT,y:HY-y/FT,k:'cove',a:ar})}
  // the right-field terrace, along its back rail
- for(let th=10;th<44;th+=4.5){const pen=th>=29&&th<=41,q=(pen?18:0)+H_WALLW+6.5;L.push({...hW(th,fenceDist(th)+q),k:'terr'})}
+ for(let th=10;th<44;th+=4.5){const q=hPenOff(th)+H_WALLW+5.7;L.push({...hW(th,fenceDist(th)+q),k:'terr'})}
+ for(let th=10;th<44;th+=4.5){const q=hPenOff(th)+H_WALLW+hDeckW(th)-3;L.push({...hW(th,fenceDist(th)+q),k:'terr'})}
  // the centre-field terrace
  for(let th=-20;th<=8;th+=5){L.push({...hW(th,fenceDist(th)+22),k:'terr'})}
  return H_LAMPS=L}
+// the furniture on the boardwalks, as real shapes in world pixels: parasol tables and cafe kiosks along the right-field
+// deck and round the cove (spaced by distance along each walk, so they keep their size and shape on the curves)
+let H_SPOTS=null,H_SPOTS_K='';
+function hSpots(){const key=DIMS.join(',');if(H_SPOTS&&H_SPOTS_K===key)return H_SPOTS;H_SPOTS_K=key;const out=[];
+ // right-field deck: walk the centre line of the boardwalk from right-centre to the pole
+ {let acc=8,k=0;for(let th=11.5;th<41.5;th+=.1){const R0=fenceDist(th)+hPenOff(th)+H_WALLW,dw=hDeckW(th),Rm=R0+6+(dw-9.5)/2,ds=Rm*.1*RAD;acc+=ds;if(acc<26)continue;acc=0;k++;
+   const p=hW(th,Rm);out.push({x:p.x,y:p.y,ang:-th*RAD,kind:k%4===2?'cafe':'para',col:k%3})}}
+ // round the cove: in the middle of the promenade, outside the stadium and clear of the right-field deck
+ {let acc=0,k=0;for(let a=-180;a<180;a+=.25){const ar=a*RAD,Rm=hCoveR(H_COVE_C.x+Math.sin(ar),H_COVE_C.y+Math.cos(ar))+9.4,x=H_COVE_C.x+Math.sin(ar)*Rm,y=H_COVE_C.y+Math.cos(ar)*Rm;acc+=Rm*.25*RAD;
+   if(!hEastLand(x,y)||hOwnDeck(x,y)||insidePoly(hOutline(),HX+x/FT,HY-y/FT)){acc=14;continue}if(acc<24)continue;acc=0;k++;const p={x:HX+x/FT,y:HY-y/FT};out.push({x:p.x,y:p.y,ang:-ar+Math.PI,kind:k%5===3?'cafe':'para',col:k%3})}}
+ return H_SPOTS=out}
+// is this point on (or right by) the right-field deck?
+function hOwnDeck(x,y){const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;if(y<=0||th<=8||th>45)return false;return r<fenceDist(th)+hPenOff(th)+H_WALLW+hDeckW(th)+10}
+const H_PCOL=[['#2f6fd0','#f4f6fa'],['#14325a','#f4f6fa'],['#5aa0e6','#f4f6fa']];
+function hParasol(g,x,y,col){const r=11,[c1,c2]=H_PCOL[col];
+ g.fillStyle='rgba(16,24,32,.28)';g.beginPath();g.arc(x+5,y+4,r,0,7);g.fill();// its shadow on the boards
+ g.fillStyle='#6b4a2e';g.fillRect(Math.round(x-r-3),Math.round(y-1),3,3);g.fillRect(Math.round(x+r),Math.round(y-1),3,3);// two chairs peeking out
+ for(let k=0;k<8;k++){const a0=k*Math.PI/4-Math.PI/8,a1=a0+Math.PI/4,lit=Math.cos(a0+Math.PI/8+Math.PI*.75)>.2;
+  g.fillStyle=k&1?(lit?'#ffffff':c2):(lit?shade(c1,.18):c1);g.beginPath();g.moveTo(x,y);g.arc(x,y,r,a0,a1);g.closePath();g.fill()}
+ g.strokeStyle='rgba(10,20,40,.45)';g.lineWidth=1;g.beginPath();g.arc(x,y,r-.5,0,7);g.stroke();
+ g.fillStyle='#2b3038';g.fillRect(Math.round(x-1),Math.round(y-1),2,2)}
+function hCafe(g,x,y,ang){g.save();g.translate(x,y);g.rotate(ang);const w=32,h=20;
+ g.fillStyle='rgba(16,24,32,.3)';g.fillRect(-w/2+5,-h/2+4,w,h);
+ g.fillStyle='#14325a';g.fillRect(-w/2,-h/2,w,h-7);g.fillStyle='#21457a';g.fillRect(-w/2+1,-h/2+1,w-2,h-10);g.fillStyle='#e8eef5';g.fillRect(-w/2,-h/2,w,1);
+ g.fillStyle='#8a939b';g.fillRect(-w/2+4,-h/2+3,5,4);g.fillStyle='#4f86c6';g.fillRect(w/2-9,-h/2+3,5,4);// rooftop unit and tank
+ for(let k=0;k<w;k+=4){g.fillStyle=(k/4)&1?'#f4f6fa':'#2f6fd0';g.fillRect(-w/2+k,h/2-7,4,6)}g.fillStyle='rgba(0,0,0,.18)';g.fillRect(-w/2,h/2-1,w,1);// the striped awning over the counter
+ g.restore()}
 function hDecor(g){
+ for(const p of hSpots()){if(p.kind==='cafe')hCafe(g,p.x,p.y,p.ang);else hParasol(g,p.x,p.y,p.col)}
  // the wall: club and sponsor boards painted on the pads, distances at the poles, the gaps and dead centre
  const wallAt=th=>fenceDist(th)-4.6;// the middle of the padded face, just inside the fence
  g.save();g.textAlign='center';g.textBaseline='middle';
@@ -289,7 +323,7 @@ function drawHarborLights(c,vx0,vy0,scale,now){if(!ST||!ST.harbor||!S.night||S.p
    if(L.k==='cove'){// its reflection: a broken column of light on the water toward the cove's centre
     const dx=-Math.sin(L.a),dy=Math.cos(L.a);for(let k=1;k<9;k++){const w=10-k;g.fillStyle=`rgba(255,214,150,${.32-k*.03})`;g.fillRect(L.x+dx*(14+k*9)-w/2+((k*5)%3-1)*2,L.y+dy*(14+k*9),w,2)}}}
   // cafe windows along the cove boardwalk
-  for(let a=-180;a<180;a+=24){const ar=a*RAD,R=hCoveR(H_COVE_C.x+Math.sin(ar),H_COVE_C.y+Math.cos(ar))+14,x=H_COVE_C.x+Math.sin(ar)*R,y=H_COVE_C.y+Math.cos(ar)*R;if(!hEastLand(x,y))continue;glow(HX+x/FT,HY-y/FT,40,'255,184,100',.3)}
+  for(const p of hSpots())if(p.kind==='cafe')glow(p.x,p.y,44,'255,184,100',.34);else glow(p.x,p.y,16,'255,214,150',.14)
   H_NL={cv,x0,y0,x1,y1}}
  const N=H_NL;c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);c.globalCompositeOperation='lighter';c.drawImage(N.cv,N.x0,N.y0,N.x1-N.x0,N.y1-N.y0);
  // a slow shimmer on the reflections
