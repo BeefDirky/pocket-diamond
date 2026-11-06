@@ -222,10 +222,8 @@ function drawHarbor(g,k,night,CW,CH,cx,cy,OL,e){const P=(xf,yf)=>({x:cx(HX+xf/FT
   // paving: pale slabs, two blue wave bands round the rim
   g.fillStyle='#cfccc4';for(let yy=gy;yy<gy+R;yy+=8)g.fillRect(gx-R,yy,2*R,1);for(let xx=gx-R;xx<gx+R;xx+=8)g.fillRect(xx,gy,1,R);
   for(const[rb,col]of[[R-7,'#3f78c8'],[R-12,'#9cc0e8']]){g.strokeStyle=col;g.lineWidth=2.5;g.beginPath();for(let a=0;a<=Math.PI+.01;a+=.03){const rr2=rb+2.5*Math.sin(a*14);const x=gx+Math.cos(a)*rr2,y=gy+Math.sin(a)*rr2;a===0?g.moveTo(x,y):g.lineTo(x,y)}g.stroke()}
-  // the centrepiece: a whale laid into the paving in blue and white stone, its spout a round fountain
-  {const wx=gx-6,wy=gy+52;g.fillStyle='#2f5f9a';g.beginPath();g.ellipse(wx,wy,34,12,0,0,7);g.fill();g.beginPath();g.moveTo(wx+30,wy);g.lineTo(wx+50,wy-11);g.lineTo(wx+44,wy);g.lineTo(wx+50,wy+11);g.closePath();g.fill();
-   g.fillStyle='#e8eef5';g.beginPath();g.ellipse(wx-4,wy+5,24,4.5,0,0,7);g.fill();g.fillStyle='#2f5f9a';for(let k=-3;k<=3;k++)g.fillRect(wx-4+k*6,wy+2,1,7);
-   g.fillStyle='#14325a';g.fillRect(wx-24,wy-3,2,2);g.fillStyle='#5a8fd0';g.beginPath();g.ellipse(wx-6,wy-5,18,3,0,0,7);g.fill();
+  // the centrepiece: a round fountain
+  {const wx=gx+16,wy=gy+78;
    g.fillStyle='#9aa3ad';g.beginPath();g.arc(wx-22,wy-26,10,0,7);g.fill();g.fillStyle='#6fb8e0';g.beginPath();g.arc(wx-22,wy-26,8,0,7);g.fill();g.fillStyle='#d8f0fa';for(let k=0;k<6;k++){const a=k*1.05;g.fillRect(wx-22+Math.cos(a)*4,wy-26+Math.sin(a)*4,1.5,1.5)}g.fillRect(wx-23,wy-27,2,2)}
   // planted beds with trees down both sides, benches in front of them
   for(const sd of[-1,1]){for(let k=0;k<4;k++){const a=Math.PI/2+sd*(.62+k*.2),bx=gx+Math.cos(a)*(R*.62),by=gy+Math.sin(a)*(R*.62);g.fillStyle='#8d877d';g.beginPath();g.arc(bx,by,8,0,7);g.fill();g.fillStyle='#6aa850';g.beginPath();g.arc(bx,by,6.5,0,7);g.fill();hBlossom(g,bx,by-1,5,false);
@@ -326,8 +324,16 @@ function drawHarborLights(c,vx0,vy0,scale,now){if(!ST||!ST.harbor||!S.night||S.p
   for(const p of hSpots())if(p.kind==='cafe')glow(p.x,p.y,44,'255,184,100',.34);else glow(p.x,p.y,16,'255,214,150',.14)
   H_NL={cv,x0,y0,x1,y1}}
  const N=H_NL;c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);c.globalCompositeOperation='lighter';c.drawImage(N.cv,N.x0,N.y0,N.x1-N.x0,N.y1-N.y0);
- // a slow shimmer on the reflections
+ // the lighthouse lamp turning: a soft cone sweeping slowly round the breakwater (one turn every 9 seconds)
+ {const[lx,ly]=H_JETTY[H_JETTY.length-1],L={x:HX+lx/FT,y:HY-ly/FT},a=now/9000*Math.PI*2,R=520,sp=.2;
+  if(!H_BEAM){H_BEAM=document.createElement('canvas');H_BEAM.width=H_BEAM.height=256;const q=H_BEAM.getContext('2d'),gr=q.createRadialGradient(128,128,4,128,128,128);
+   gr.addColorStop(0,'rgba(255,246,210,.55)');gr.addColorStop(.35,'rgba(255,240,200,.2)');gr.addColorStop(1,'rgba(255,240,200,0)');q.fillStyle=gr;q.fillRect(0,0,256,256)}
+  c.save();c.translate(L.x,L.y);c.rotate(a);c.beginPath();c.moveTo(0,0);c.arc(0,0,R,-sp,sp);c.closePath();c.clip();c.drawImage(H_BEAM,-R,-R,R*2,R*2);c.restore();
+  // the beam's back side, fainter, and the lamp itself flaring as the beam faces the camera
+  c.save();c.translate(L.x,L.y);c.rotate(a+Math.PI);c.beginPath();c.moveTo(0,0);c.arc(0,0,R*.35,-sp*.8,sp*.8);c.closePath();c.clip();c.globalAlpha=.5;c.drawImage(H_BEAM,-R*.35,-R*.35,R*.7,R*.7);c.restore();
+  const fl=.55+.45*Math.max(0,Math.cos(a-Math.PI/2)),gr=c.createRadialGradient(L.x,L.y,0,L.x,L.y,26);gr.addColorStop(0,`rgba(255,250,220,${.9*fl})`);gr.addColorStop(1,'rgba(255,250,220,0)');c.fillStyle=gr;c.fillRect(L.x-26,L.y-26,52,52)}
  c.restore()}
+let H_BEAM=null;
 // ---- the Ulsan city: each block is laid out as one designed piece (an apartment complex, a commercial building, a
 // school, a park, a market street, or a row of shop houses), with sidewalks, consistent shadows and rooftop plant ----
 const H_CITYN={apt:0,school:0,park:0,com:0};
