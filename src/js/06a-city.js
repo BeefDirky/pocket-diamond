@@ -57,7 +57,7 @@ H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  const near=(x,y,pad)=>{if(insidePoly(OL,x,y))return true;for(let a=0;a<6.28;a+=.8)if(insidePoly(OL,x+Math.cos(a)*pad,y+Math.sin(a)*pad))return true;return false};
  if(STADIUMS[k].village)drawVillage(g,k,night,CW,CH,cx,cy,OL,rr,e);else{
  // water band along the top: the Han River for Seoul, the sea for the coastal clubs
- const wTop=cy(-660),wBot=cy(-420),hasWater=(seoul||coast)&&!STADIUMS[k].harbor;
+ const wTop=cy(-660),wBot=cy(-420),hasWater=(seoul||coast)&&!STADIUMS[k].bowl;
  const inWater=(y,h)=>hasWater&&y+h>wTop-14&&y<wBot+14;
  // plaza ring: concrete apron with trees around the outer wall
  g.save();g.beginPath();OL.forEach((q,i)=>{const dx=q.x-cx(HX),dy=q.y-cy(HY),l=Math.hypot(dx,dy)||1,o=34;g[i?'lineTo':'moveTo'](q.x+dx/l*o,q.y+dy/l*o)});g.closePath();g.fillStyle=col.plaza;g.fill();g.restore();
@@ -215,7 +215,7 @@ if(STADIUMS[k].bowl){H_NIGHT=night;// the sea, the shipyard shore and the pier, 
   if(ST.bowl){{const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);hDecor(lg);
     if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}g.drawImage(L,0,0)}
    // the shore's buildings, ships and the gate, drawn by day and then lit like the rest of this layer
-   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');(ST.harbor?drawHarbor:ST.bowl==='steel'?drawSteel:drawFortress)(lg,k,false,CW,CH,cx,cy,OL,e);
+   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');(ST.harbor?drawHarbor:ST.bowl==='steel'?drawSteel:ST.bowl==='brick'?drawBrick:drawFortress)(lg,k,false,CW,CH,cx,cy,OL,e);
    if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}
    g.drawImage(L,0,0);if(night&&ST.harbor)drawHarborGlow(g,cx,cy,OL)}
   if(ST.village){// the town's buildings, lit like everything else on this layer

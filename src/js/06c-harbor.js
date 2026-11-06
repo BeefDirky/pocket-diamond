@@ -11,6 +11,11 @@ const HC=(()=>{const h=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),p
 const HB0={};let H_THEME='harbor';
 const H_THEMES={
  harbor:{},
+ brick:{dk:{L:[[74,0],[82,22],[98,70],[120,110],[148,148],[180,168]],R:[[60,0],[68,26],[86,74],[114,112],[148,150],[180,168]]},roof:[94,86,181],gates:[-140,140,-104,104],brick:true,roofIn:.62,facT:1.5,
+  seats:[['#e8642a','#d65a25'],['#1d3f78','#1a386c'],['#dc5e2c','#c95426']],seatU:[[26,54,108],[22,47,96]],cheer:0,
+  pal:{pad1:'#13254a',pad2:'#182c56',pad3:'#e8eef5',pad4:'#3a6ab0',seam:'#08142a',wallY:'#ffcc48',led1:'#ffb04a',led2:'#fff1d0',led3:'#e8642a',ledD:'#2a1608',
+   fTop:'#8e8a86',fTop2:'#837f7b',mull:'#1c222a',glass:'#33475c',glass2:'#2a3c50',glassN:'#ffc46a',glassN2:'#ffb04a',fEdge:'#1a1d22',par:'#2a2e34',gate:'#1a1d22',gateN:'#ffd08a',
+   roof:'#5c6169',roof2:'#555a62',rib:'#4a4f56',roofEdge:'#9aa0a8',gutter:'#25292e',conc:'#2e3238',rail:'#c9ced3',railD:'#4a525c',wallCap:'#a3a9b1',wallCap2:'#727880'}},
  steel:{dk:{L:[[33,0],[42,40],[56,72],[80,96],[110,116],[148,150],[180,170]],R:[[37,0],[46,36],[60,66],[84,92],[112,114],[148,150],[180,170]]},roof:[46,54,181],gates:[-138,138,-102,102],steel:true,roofIn:.56,facT:1.6,
   seats:[['#143c2b','#123626'],['#1f5a3e','#1b5037'],['#2c7550','#286a48']],seatU:[[20,56,40],[17,48,35]],cheer:2,
   pal:{pad1:'#123a2a',pad2:'#184832',pad3:'#e8f0e0',pad4:'#2f7a52',seam:'#071a10',led1:'#7fe0a8',led2:'#eafff2',led3:'#2fa86a',ledD:'#0a2418',wallY:'#e2b93a',
@@ -91,7 +96,8 @@ function hRS(){const key=(ST&&ST.bowl)+DIMS.join(',');if(H_RS&&H_RS_K===key)retu
 const hRout=phi=>{const T=hRS(),f=phi+180,i=Math.floor(f),u=f-i;return T.R[(i+360)%360]*(1-u)+T.R[(i+361)%360]*u};
 // the outline of the bowl (world px), traced where the stands end; open across the outfield
 function hOutline(){const T=hRS(),out=[];for(let i=0;i<360;i+=1){const phi=i-180,dx=Math.sin(phi*RAD),dy=Math.cos(phi*RAD);let t=T.R[i],op=!!T.open[i];
-  if(H_THEME==='steel'){const tr=sTrR(phi);if(tr>0&&(op||tr+16>t)){t=Math.max(t,tr+16);op=false}}// Fossil Yard closes over the outfield with its truss
+  if(H_THEME==='steel'){const tr=sTrR(phi);if(tr>0&&(op||tr+16>t)){t=Math.max(t,tr+16);op=false}}
+  if(H_THEME==='brick'&&op){t=bOpenR(phi,t);op=false}// Harbor Field's outfield buildings close the ring// Fossil Yard closes over the outfield with its truss
   out.push({x:HX+(H_CC.x+dx*t)/FT,y:HY-(H_CC.y+dy*t)/FT,open:op})}return out}
 // seats by section: navy, royal and sky blue blocks, a cheering block on each side of the infield, white seats
 // tracing a wave through some sections
@@ -137,7 +143,7 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
   if(D<=40)return k<1.4?HB.par:HB.fEdge;
   let gate=false;for(const gg of H_GATES){const dg=Math.abs(((phi-gg+540)%360)-180)*RAD*rC;if(dg<6){gate=true;break}}
   if(gate){if(k<1.5)return HB.par;H_EMIS=H_NIGHT;return H_NIGHT?(k>9?HB.gateN:hMul(HB.gateN,.75)):HB.gate}
-  if(k<1.6)return HB.par;if(TH.steel&&k<T-1.4)return sFacade(k,T,sF);if(k<5.6){if(((sF%22)+22)%22<3&&k>2.4&&k<4.6)return HB.wallCap2;return (Math.floor(sF/6)&1)?HB.fTop:HB.fTop2}// facade top, with rooftop plant
+  if(k<1.6)return HB.par;if(TH.steel&&k<T-1.4)return sFacade(k,T,sF);if(TH.brick&&k<T-1.4)return bFacade(k,T,sF);if(k<5.6){if(((sF%22)+22)%22<3&&k>2.4&&k<4.6)return HB.wallCap2;return (Math.floor(sF/6)&1)?HB.fTop:HB.fTop2}// facade top, with rooftop plant
   if(TH.stone&&k<T-1.4){// stone masonry with arched windows, a floor at a time; warm light in them at night
    const fl=((k-5.6)%5.2+5.2)%5.2,band=Math.floor((k-5.6)/5.2),m=((sF%12)+12)%12,wx2=m-6,inW=Math.abs(wx2)<2.8&&fl>1&&fl<4.6&&!(fl<2.2&&Math.abs(wx2)>1.6);
    if(inW){H_EMIS=H_NIGHT;return H_NIGHT?((vHash(Math.floor(sF/12),band)&7)===0?hMul(HB.glassN,.4):HB.glassN):(fl<2.2?HB.glass2:HB.glass)}
@@ -160,7 +166,7 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
  else if(d<C1){const p=vPerson(wx,wy,12);if(p)return hMul(p,.6);if(H_NIGHT&&((Math.floor(sF/9)+Math.floor(d))&7)===0){H_EMIS=true;return HB.concLit}return (n&3)?HB.conc:hMul(HB.conc,.85)}
  else if(d<U0){const m=((sF%6)+6)%6;H_EMIS=H_NIGHT;if(d<C1+.4||d>U0-.3)return HB.ledD;return m<2?HB.led1:m<4?HB.led2:HB.led3}
  else if(d<RI){c=seat(U0,true);if(RI<fac&&d>RI-13)c=hMul(c,.42+.36*clamp((RI-d)/13,0,1))}// the roof's shadow on the top rows
- else{const k=d-RI;if(TH.steel)return sRoof(k,fac-RI,phi,sF,()=>seat(U0,true));
+ else{const k=d-RI;if(TH.steel)return sRoof(k,fac-RI,phi,sF,()=>seat(U0,true));if(TH.brick)return bRoof(k,fac-RI,phi,sF);
   if(TH.tile&&Math.abs(phi)>TH.tile){// a Korean tiled roof: charcoal tile rows running down to a pale lifted eave, a light ridge on top
    const kk=fac-d;if(k<1)return [24,22,30];if(k<2.2)return [214,206,190];if(kk<1.4)return [178,172,160];
    const m=((sF%2.1)+2.1)%2.1,sh=.8+.3*clamp(k/Math.max(4,fac-RI),0,1),c0=m<.55?[26,26,34]:m<1.15?[70,70,84]:[50,50,62];// channels run ridge to eave; the cap tiles catch the light
@@ -175,7 +181,7 @@ function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const
  if(d<=0&&PARK_C)return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2;// the last of the foul ground, past the park buffer's edge
  if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
  const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
- if(H_THEME!=='harbor'){const c=(H_THEME==='steel'?steelCol:fortCol)(x,y,wx,wy,r,th,ath,q,s,n,fair);if(c)return c;if(D>8){const x2=x-6,y2=y+6,p2=hPhi(x2,y2);if(hD(p2)>8&&Math.hypot(x2-H_CC.x,y2-H_CC.y)<hRout(p2))H_SHADE=true}return null}
+ if(H_THEME!=='harbor'){const c=(H_THEME==='steel'?steelCol:H_THEME==='brick'?brickCol:fortCol)(x,y,wx,wy,r,th,ath,q,s,n,fair);if(c)return c;if(D>8){const x2=x-6,y2=y+6,p2=hPhi(x2,y2);if(hD(p2)>8&&Math.hypot(x2-H_CC.x,y2-H_CC.y)<hRout(p2))H_SHADE=true}return null}
  // past the open outfield wall: a terrace behind centre, a boardwalk behind right field, then the sea wall
  if(fair&&th>8){const q0=hPenOff(th)+H_WALLW,dw=hDeckW(th);if(q<q0)return HB.wallCap;if(q<q0+dw)return hTerr(wx,wy,s,q-q0,dw,th)}
  if(fair&&q<26){const m=((s%26)+26)%26;
@@ -346,10 +352,10 @@ function hDecor(g){
  const wallAt=th=>fenceDist(th)-4.6;// the middle of the padded face, just inside the fence
  g.save();g.textAlign='center';g.textBaseline='middle';
  const paint=(th,txt,col,font)=>{const p=hW(th,wallAt(th));g.save();g.translate(p.x,p.y);g.rotate(th*RAD);g.font=font;g.fillStyle='rgba(0,0,0,.35)';g.fillText(txt,1,1);g.fillStyle=col;g.fillText(txt,0,0);g.restore()};
- const ADS=H_THEME==='fortress'?F_ADS:H_THEME==='steel'?S_ADS:H_ADS;[-36,-30,-15,-8,8,15,30,36].forEach((th,i)=>{const[t,c]=ADS[i%ADS.length];paint(th,t,c,/[A-Z]/.test(t)?'bold 12px "Pixelify Sans", monospace':'14px Jua, sans-serif')});
- [[-42.5,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[42.5,DIMS[4]]].forEach(([th,v])=>paint(th,v+'',H_THEME==='fortress'?'#ffd23f':H_THEME==='steel'?'#e2b93a':'#ffffff','bold 15px "Pixelify Sans", monospace'));
+ const ADS=H_THEME==='fortress'?F_ADS:H_THEME==='steel'?S_ADS:H_THEME==='brick'?B_ADS:H_ADS;[-36,-30,-15,-8,8,15,30,36].forEach((th,i)=>{const[t,c]=ADS[i%ADS.length];paint(th,t,c,/[A-Z]/.test(t)?'bold 12px "Pixelify Sans", monospace':'14px Jua, sans-serif')});
+ [[-42.5,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[42.5,DIMS[4]]].forEach(([th,v])=>paint(th,v+'',H_THEME==='fortress'?'#ffd23f':H_THEME==='steel'?'#e2b93a':H_THEME==='brick'?'#ffcc48':'#ffffff','bold 15px "Pixelify Sans", monospace'));
  g.restore();
- if(H_THEME!=='harbor'){(H_THEME==='steel'?sDecor:fDecor)(g);return}
+ if(H_THEME!=='harbor'){(H_THEME==='steel'?sDecor:H_THEME==='brick'?bDecor:fDecor)(g);return}
  // benches facing the water round the cove, and lamp posts
  for(let a=-180;a<180;a+=5.5){const ar=a*RAD,R=hCoveR(H_COVE_C.x+Math.sin(ar),H_COVE_C.y+Math.cos(ar))+15.5,x=H_COVE_C.x+Math.sin(ar)*R,y=H_COVE_C.y+Math.cos(ar)*R;if(!hEastLand(x,y))continue;
   const p={x:HX+x/FT,y:HY-y/FT};g.save();g.translate(p.x,p.y);g.rotate(-ar+Math.PI/2);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(-6,1,13,4);g.fillStyle='#8a5a32';g.fillRect(-7,-2,14,3);g.fillStyle='#a8743f';g.fillRect(-7,-2,14,1);g.restore()}

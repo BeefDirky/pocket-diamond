@@ -3,7 +3,7 @@ const STADIUMS={
  seoul:{name:'HANGANG PARK',kname:'한강파크',dims:[325,375,400,375,325],grass:['#3c9f37','#48b142','#52ba4b'],mow:'check',
   seat:['#4a5060','#434958'],seatU:['#7a1018','#6b0e15'],pad:'#123c5c',pad2:'#0d2f49',wallFt:8,feature:'twin',net:true},
  busan:{name:'HARBOR FIELD',kname:'바다구장',dims:[318,352,392,352,318],grass:['#3a9a3c','#46ab46','#50b44f'],mow:'stripe',
-  seat:['#e8642a','#d65a25'],seatU:['#123a6b','#0f325e'],pad:'#1f6b3a',pad2:'#185a30',wallFt:12,feature:'ocean',bags:true},
+  seat:['#e8642a','#d65a25'],seatU:['#123a6b','#0f325e'],pad:'#13254a',pad2:'#182c56',wallFt:12,feature:'coast',bags:true,bowl:'brick'},
  incheon:{name:'ORBIT PARK',kname:'오빗파크',dims:[328,368,400,362,315],grass:['#3fa23c','#4cb447','#56bd50'],mow:'arc',
   seat:['#1d2a5e','#1a2552'],seatU:['#e94e77','#d6446b'],pad:'#3a1e22',pad2:'#2c1619',wallFt:8,feature:'lawn',net:true},
  gwangju:{name:'MUDEUNG FIELD',kname:'무등필드',dims:[335,382,405,378,330],grass:['#389a3a','#44ab44','#4fb54d'],mow:'diag',
