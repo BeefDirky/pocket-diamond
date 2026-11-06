@@ -19,7 +19,7 @@ const STADIUMS={
  ulsan:{name:'WHALE BAY PARK',kname:'고래만파크',dims:[322,365,400,365,322],grass:['#3a9a3c','#46ab46','#50b44f'],mow:'wave',
   seat:['#3f86c4','#3878b0'],seatU:['#1b2f5e','#172851'],pad:'#14325a',pad2:'#0d2442',wallFt:10,feature:'whale',net:true},
  jeju:{name:'HALLA FIELD',kname:'한라필드',dims:[330,375,402,375,330],grass:['#3fa23c','#4cb447','#56bd50'],mow:'check',
-  seat:['#e0781c','#c96b18'],seatU:['#2f7a3a','#296b33'],pad:'#2f2f33',pad2:'#202024',wallFt:8,feature:'orchard'},
+  seat:['#e0781c','#c96b18'],seatU:['#2f7a3a','#296b33'],pad:'#2f2f33',pad2:'#202024',wallFt:8,feature:'orchard',openTop:36,village:true},
 };
 // ---- player ratings: CON widens the timing window, POW adds exit velo and lift, SPD runs the bases, DEF powers the glove ----
 const POSCODE=['P','C','1B','2B','3B','SS','LF','CF','RF'];

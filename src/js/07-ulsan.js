@@ -98,6 +98,7 @@ function buildField(){
   else if(feat==='whale'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea;
    const wx=WHALE.x,wy=WHALE.y,dx=x-wx,dy=y-wy,e=(dx/30)**2+(dy/(9-Math.max(0,dx)*.12))**2;
    if(e<1)col=dy<-3&&e>.35?C.whB:C.wh1;else{const tx=x-(wx+30),ty=y-wy;if(tx>0&&tx<12&&Math.abs(ty)<tx*.85&&Math.abs(ty)>tx*.25)col=C.wh2}}
+  else if(feat==='orchard'&&ST.openTop&&r>=fdh+11&&ath<ST.openTop){col=r*(ST.openTop-ath)*RAD<3.5?C.conc:villageCol(px+.5,py+.5)}
   else if(feat==='orchard'){if(r<fdh+11){const rw=Math.floor(py/6),off=(rw&1)*5;col=(py%6===0||(px+off)%10===0)?C.bas2:C.bas}
    else{const cy=Math.floor(py/22),cx=Math.floor((px+(cy&1)*11)/22),lx=(px+(cy&1)*11)-cx*22-11,ly=py-cy*22-11,d2=lx*lx+ly*ly;
     if(d2<64){col=d2<20&&lx<0&&ly<0?C.orT2:C.orT;if(((lx*7+ly*13+cx*5+cy*3)&15)===0||((lx*3-ly*11+cx)&31)===1)col=C.orF}else col=(py>>1)&1?C.orG:C.orG2}}

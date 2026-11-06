@@ -5,7 +5,7 @@ function roofLights(){const key=S.you+(STADIUMS[S.you]?STADIUMS[S.you].dims.join
  const OL=PARK_OUTLINE||parkOutline(),cxp=HX,cyp=HY-420;
  // walk the rim at even spacing
  const L=[];let acc=0;const step=150;
- for(let i=0;i<OL.length;i++){const a=OL[i],b=OL[(i+1)%OL.length],d=Math.hypot(b.x-a.x,b.y-a.y);let t=(step-acc)/d;
+ for(let i=0;i<OL.length;i++){const a=OL[i],b=OL[(i+1)%OL.length],d=Math.hypot(b.x-a.x,b.y-a.y);if(a.open||b.open){acc=0;continue}let t=(step-acc)/d;
   while(t<=1){const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;L.push({x,y});t+=step/d}acc=(acc+d)%step}
  RL=L.map(p=>{const dx=cxp-p.x,dy=cyp-p.y,l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l;
   // pool: a good way down the seating bowl, longer than it is wide

@@ -10,7 +10,20 @@ function outlineFrom(half){let pts=[...half,...half.slice(1).reverse().map(([x,y
 function parkOutlineInner(){return outlineFrom([[0,HY+400],[1000,HY-600],[1000,HY-800],[430,-150],[172,-200]])}
 // the ballpark's outer wall: a wide V with a pointed tip behind home. The home-plate grandstand is one deck deeper
 // than the rest, so the wall steps back in to the outfield pavilions out by the corners.
-function parkOutline(){return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
+function parkOutlineClosed(){return outlineFrom([[0,HY+580],[1170,HY-590],[1170,HY-690],[1030,HY-760],[1000,HY-820],[430,-150],[172,-200]])}
+// Some parks leave the outfield open: the bowl stops in the corners and the country runs right up to the fence.
+// The outline keeps its shape (it still decides where the park buffer shows), but the stretch across the outfield is
+// flagged open: no outer wall, plaza or roof lights there. Both layers paint the same countryside, so it reads as one.
+function parkOutline(){const B=parkOutlineClosed(),cut=ST&&ST.openTop;if(!cut)return B;
+ const ang=q=>Math.atan2(q.x-HX,HY-q.y)/RAD,isOpen=q=>q.y<HY&&Math.abs(ang(q))<cut;
+ const out=[];for(let i=0;i<B.length;i++){const a=B[i],b=B[(i+1)%B.length];a.open=isOpen(a);out.push(a);
+  if(isOpen(a)!==isOpen(b)){let lo=0,hi=1;for(let k=0;k<30;k++){const m=(lo+hi)/2,q={x:a.x+(b.x-a.x)*m,y:a.y+(b.y-a.y)*m};if(isOpen(q)===isOpen(a))lo=m;else hi=m}
+   out.push({x:a.x+(b.x-a.x)*lo,y:a.y+(b.y-a.y)*lo,open:false})}}
+ return out}
+// the outline's closed stretch as one run of points, starting just past the open gap
+function closedRun(P){const n=P.length;let k=P.findIndex(q=>q.open);if(k<0)return P.slice();while(P[k%n].open)k++;const out=[];for(let i=0;i<n;i++){const q=P[(k+i)%n];if(q.open)break;out.push(q)}return out}
+// a path along the outline that leaves out the open stretches
+function outlinePath(P,tx,ty,c){c.beginPath();for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];if(a.open||b.open)continue;c.moveTo(tx(a.x),ty(a.y));c.lineTo(tx(b.x),ty(b.y))}}
 const hexRGB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c}
 // a canvas that was read back pixel by pixel (getImageData) gets parked in main memory by the browser, and then has to
@@ -37,8 +50,9 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
  const col=night?{ground:'#171c22',road:'#0d1015',lane:'#3a3420',block:'#1d232b',plaza:'#232830',park:'#13231a',water:'#0a1a33',bank:'#18291f',roofs:['#242a33','#2b313b','#1f242c','#30343c','#262b22']}
   :{ground:'#a3a9ad',road:'#5b6167',lane:'#ece6cc',block:'#bcc0c2',plaza:'#d6d2c8',park:'#62a04e',water:'#3d7fb8',bank:'#86b46a',roofs:['#c9c6bd','#a9b1b8','#d8d0c0','#8f98a2','#b7a48c','#cfd6dc','#9aa38a']};
  R(0,0,CW,CH,col.ground);
- const OL=PARK_OUTLINE.map(q=>({x:cx(q.x),y:cy(q.y)}));
+ const OL=PARK_OUTLINE.map(q=>({x:cx(q.x),y:cy(q.y),open:q.open}));
  const near=(x,y,pad)=>{if(insidePoly(OL,x,y))return true;for(let a=0;a<6.28;a+=.8)if(insidePoly(OL,x+Math.cos(a)*pad,y+Math.sin(a)*pad))return true;return false};
+ if(STADIUMS[k].village)drawVillage(g,k,night,CW,CH,cx,cy,OL,rr,e);else{
  // water band along the top: the Han River for Seoul, the sea for the coastal clubs
  const wTop=cy(-660),wBot=cy(-420),hasWater=seoul||coast;
  const inWater=(y,h)=>hasWater&&y+h>wTop-14&&y<wBot+14;
@@ -99,7 +113,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   // a subway entrance and a row of food stalls on the plaza behind home
   {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
- if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}// the city dims at night; the stadium stays lit
+ if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}}// the city dims at night; the stadium stays lit (the village is lit like the park)
  // ---- the stands keep going past the park buffer, out to the outer wall ----
  // Painted with the same rules the park buffer uses (rows that follow the wall, risers, aisles toward home, the upper
  // deck colors, the outfield features) and the same crowd on the same 8px grid, so the two halves read as one bowl.
@@ -136,7 +150,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
    if(y>0){if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='sea';
     else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
     else if(ST.feature==='whale'&&ath<36&&r>fdh+14)feat='sea';
-    else if(ST.feature==='orchard'&&ath<36&&r>fdh+11)feat='orchard'}
+    else if(ST.feature==='orchard'&&ath<36&&r>fdh+11)feat=ST.openTop&&ath<ST.openTop?'country':'orchard'}
    const j4=i*4,onRing=imd[j4]>200&&imd[j4+3]>128,inOld=imd[j4+3]>128&&!onRing;
    if(!feat&&onRing&&A[i]&&md[j4+3]>128){put(i,C.conc);continue}
    if(!feat&&!inOld&&!onRing&&A[i]){// the new top deck: same rows and aisles, a darker shade of the lower bowl's color
@@ -145,6 +159,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
     put(i,col);continue}
    if(feat==='sea'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
    else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
+   else if(feat==='country'){col=r*(ST.openTop-ath)*RAD<3.5?C.conc:villageCol(wx,wy)}
    else if(feat==='orchard'){const q=Math.round(wy),p2=Math.round(wx),cy2=Math.floor(q/22),cx2=Math.floor((p2+(cy2&1)*11)/22),lx=(p2+(cy2&1)*11)-cx2*22-11,ly=q-cy2*22-11,d2=lx*lx+ly*ly;
     if(d2<64){col=d2<20&&lx<0&&ly<0?C.orT2:C.orT;if(((lx*7+ly*13+cx2*5+cy2*3)&15)===0)col=C.orF}else col=(q>>1)&1?C.orG:C.orG2}
    else if(!A[i]){const dOut=DI[i]/3*2/K,fair=ath<=45&&y>=0,wallT=fair&&r>200?ST.wallFt*2:6;
@@ -174,5 +189,5 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   g.putImageData(img,0,0);
   // a soft shadow where the roof overhangs the top rows
   g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
-  g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.stroke();g.restore()}
+  g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';if(ST.openTop)outlinePath(OL,x=>x,y=>y,g);else{g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath()}g.stroke();g.restore()}
  return c}
