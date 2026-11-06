@@ -25,7 +25,7 @@ function drawJumboFort(g,now){const cx=HX/K,sc=1.18,y0=-18,h=66,w=190,x0=cx-95,y
  kRoof(g,cx,y0-26,170,30,0,S.night);kRoof(g,cx,y0-30,96,16,0,S.night);
  {const p=y0-14;g.fillStyle='#5a2a2a';for(const px of[cx-70,cx-40,cx+40,cx+70]){g.fillRect(px-2,p,4,6)}}// the pavilion's red posts
  g.restore()}
-function drawJumbo(g,now){if(S.you==='suwon')return drawJumboFort(g,now);if(S.you!=='ulsan')return drawJumbo0(g,now);
+function drawJumbo(g,now){if(S.you==='suwon')return drawJumboFort(g,now);if(S.you==='changwon')return drawJumboSteel(g,now);if(S.you!=='ulsan')return drawJumbo0(g,now);
  const cx=HX/K,fy=(HY-fenceDist(0)/FT)/K,sc=1.22,yb=fy-8;g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);
  {const y0=-18,h=66,night=!!S.night,yc=y0+h/2;// the deck it stands on, and the flippers
   g.fillStyle='rgba(0,0,0,.25)';g.fillRect(cx-118,yb-4,250,16);g.fillStyle=night?'#3a4048':'#9aa3ad';g.fillRect(cx-122,yb-8,244,12);g.fillStyle=night?'#4a525c':'#c3cad1';g.fillRect(cx-122,yb-8,244,3);

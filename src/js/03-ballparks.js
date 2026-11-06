@@ -15,7 +15,7 @@ const STADIUMS={
  suwon:{name:'FORTRESS FIELD',kname:'화성필드',dims:[330,395,400,375,318],grass:['#3d9e3c','#49af46','#54b950'],mow:'diag',
   seat:['#4b2a8a','#42257a'],seatU:['#1b1b22','#16161c'],pad:'#2a1650',pad2:'#1d0f3a',wallFt:8,feature:'fortress',net:true,bowl:'fortress'},
  changwon:{name:'FOSSIL YARD',kname:'화석야드',dims:[324,370,400,370,324],grass:['#3c9f37','#48b142','#52ba4b'],mow:'arc',
-  seat:['#1e8a6e','#1a7a62'],seatU:['#123a32','#0f322b'],pad:'#2c1d5c',pad2:'#1c1240',wallFt:8,feature:'trees'},
+  seat:['#1f5a3e','#1b5037'],seatU:['#123a2a','#0f3224'],pad:'#123a2a',pad2:'#0c2a1e',wallFt:8,feature:'rex',net:true,bowl:'steel'},
  ulsan:{name:'WHALE BAY PARK',kname:'고래만파크',dims:[322,365,400,365,322],grass:['#3a9a3c','#46ab46','#50b44f'],mow:'wave',
   seat:['#3f86c4','#3878b0'],seatU:['#1b2f5e','#172851'],pad:'#14325a',pad2:'#0d2442',wallFt:10,feature:'whale',net:true,openTop:36,harbor:true,bowl:'harbor'},
  jeju:{name:'HALLA FIELD',kname:'한라필드',dims:[330,375,402,375,330],grass:['#3fa23c','#4cb447','#56bd50'],mow:'check',

@@ -215,7 +215,7 @@ if(STADIUMS[k].bowl){H_NIGHT=night;// the sea, the shipyard shore and the pier, 
   if(ST.bowl){{const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);hDecor(lg);
     if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}g.drawImage(L,0,0)}
    // the shore's buildings, ships and the gate, drawn by day and then lit like the rest of this layer
-   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');(ST.harbor?drawHarbor:drawFortress)(lg,k,false,CW,CH,cx,cy,OL,e);
+   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');(ST.harbor?drawHarbor:ST.bowl==='steel'?drawSteel:drawFortress)(lg,k,false,CW,CH,cx,cy,OL,e);
    if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}
    g.drawImage(L,0,0);if(night&&ST.harbor)drawHarborGlow(g,cx,cy,OL)}
   if(ST.village){// the town's buildings, lit like everything else on this layer
