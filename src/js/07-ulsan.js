@@ -87,7 +87,7 @@ function buildField(){
    else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
    else if(ST.feature==='honey'&&ath<34&&r>fdh+3&&r<fdh+60)feat='honey';
    else if(ST.feature==='whale'&&ath<36&&r>fdh+14)feat='whale';
-   else if(ST.feature==='orchard'&&ath<36&&r>fdh+4)feat='orchard';
+   else if(ST.feature==='orchard'&&ath<36&&r>fdh+4&&!inPen)feat='orchard';
   }
   if(feat==='ocean'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
   else if(feat==='lawn'){col=(((px>>4)+(py>>4))&1)?C.lawn1:C.lawn2;seatMask[i]=2}
@@ -183,6 +183,7 @@ function buildField(){
  for(const sd of[1,-1]){const pm=penSpot(sd,32),pc=penSpot(sd,38.2);const m=P(pm.x,pm.y),k=P(pc.x,pc.y);
   g.fillStyle='#c48c56';g.beginPath();g.arc(m.x,m.y,15,0,Math.PI*2);g.fill();g.beginPath();g.arc(k.x,k.y,10,0,Math.PI*2);g.fill();
   g.fillStyle='#f3eee0';g.fillRect(Math.round(m.x)-3,Math.round(m.y),6,2);g.fillRect(Math.round(k.x)-2,Math.round(k.y)+3,5,3);}
+ if(ST.village)vTownDraw(g,null);// the buildings behind the open outfield
  return c;
 }
 

@@ -1748,6 +1748,13 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   // a soft shadow where the roof overhangs the top rows
   g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
   g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';if(ST.openTop)outlinePath(OL,x=>x,y=>y,g);else{g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath()}g.stroke();g.restore()}
+  if(ST.village){// the town's buildings, lit like everything else on this layer
+   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);const glows=[];vTownDraw(lg,night?glows:null);
+   const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);
+   lg.globalCompositeOperation='multiply';lg.fillStyle=night?'#5a6494':'#fff7ea';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0);g.drawImage(L,0,0);
+   if(night){g.save();g.globalCompositeOperation='lighter';for(const[wx,wy]of glows){const x=(wx+e.mx)/2,y=(wy+e.my)/2;const gr=g.createRadialGradient(x,y,0,x,y,7);gr.addColorStop(0,'rgba(255,214,150,.45)');gr.addColorStop(1,'rgba(255,214,150,0)');g.fillStyle=gr;g.fillRect(x-7,y-7,14,14);g.fillStyle='rgba(255,230,170,.9)';g.fillRect(Math.round(x)-1,Math.round(y),2,1)}
+    // streetlights along the town roads
+    g.restore()}}
  return c}
 // ---------- Jeju: an old island village and its tangerine orchards around an open-outfield park ----------
 // The country is one pure function of world position (villageCol), so the park buffer (the orchard past the outfield
@@ -1763,14 +1770,21 @@ const VC=(()=>{const h=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),p
  can1:h('#f4d23a'),can2:h('#e8c22c'),canG:h('#8db53e'),
  bar1:h('#a3c75c'),bar2:h('#93b952'),barG1:h('#d8c47a'),barG2:h('#cbb56a'),
  soil:h('#8b6b49'),soil2:h('#7d5f40'),crop:h('#5d9d45'),crop2:h('#78b553'),
- pas1:h('#7fb459'),lawn:h('#86ba5e'),pas2:h('#73a84f'),yard:h('#cdb893'),yard2:h('#c2ad88')}})();
+ pas1:h('#7fb459'),lawn:h('#86ba5e'),lawnA:h('#7cbd5a'),lawnB:h('#72b352'),pave:h('#d8cbb0'),pave2:h('#cdbfa3'),planter:h('#7a6a58'),lamp:h('#2b2f36'),
+ asph:h('#55585b'),asph2:h('#4e5154'),dash:h('#e8d27a'),edgeL:h('#e8e6dc'),side:h('#bdb8ac'),side2:h('#b3aea2'),lot:h('#b9b4a8'),lot2:h('#b1aca0'),curb:h('#8e8a82'),pas2:h('#73a84f'),yard:h('#cdb893'),yard2:h('#c2ad88')}})();
 const vHash=(i,j)=>{let h=(i*73856093)^(j*19349663)^0x5bd1e995;h=Math.imul(h^(h>>>15),0x2c1b3c6d);h=Math.imul(h^(h>>>12),0x297a2d39);return(h^(h>>>15))>>>0};
 // village cores (world px): the house plots gather around these; the orchards fill the country past the outfield
 const V_CORES=()=>[[HX,HY+800,720],[HX-1320,HY-180,640],[HX+1300,HY-120,640],[HX-1250,HY+820,520],[HX+1300,HY+860,520],[HX-980,-760,300],[HX+1060,-700,280]];
 const V_MARKS=()=>[[HX-150,HY+880],[HX+130,HY+940]];// the pond, the village tree and its pavilion
 const V_SEEDS=new Map();let V_OL=null;
-function vNearPark(x,y){if(!V_OL)V_OL=parkOutlineClosed();if(Math.abs(x-HX)<130&&y>HY+500)return true;// the main road
- const c=HX,cy=HY-420,dx=x-c,dy=y-cy,l=Math.hypot(dx,dy)||1;return insidePoly(V_OL,x-dx/l*185,y-dy/l*185)}
+function vNearPark(x,y,pad=185,road=true){if(!V_OL)V_OL=parkOutlineClosed();if(road&&Math.abs(x-HX)<130&&y>HY+500)return true;// the main road
+ const c=HX,cy=HY-420,dx=x-c,dy=y-cy,l=Math.hypot(dx,dy)||1;return insidePoly(V_OL,x-dx/l*pad,y-dy/l*pad)}
+// the town: a ring of shops, lots and markets right outside the stadium, and the service quarter behind the open outfield
+function vTownSeed(x,y,wedge,h){if(!V_OL)V_OL=parkOutlineClosed();
+ if(Math.abs(x-HX)<130&&y>HY+500)return false;
+ if(wedge)return vNearPark(x,y,250,false)||(vNearPark(x,y,400,false)&&(h>>>21)%3===0);
+ if(insidePoly(V_OL,x,y)||vNearPark(x,y,150,false))return false;
+ const reach=vNearPark(x,y,310,false),far=vNearPark(x,y,450,false);return reach||(far&&(h>>>21)%3===0)}
 function vSeed(i,j){const k=(i+512)*4096+(j+512);let p=V_SEEDS.get(k);if(p)return p;
  const h=vHash(i,j),sx=(i+.18+.64*((h&1023)/1023))*VS,sy=(j+.18+.64*(((h>>>10)&1023)/1023))*VS;
  const x=(sx-HX)*FT,y=(HY-sy)*FT,th=Math.abs(Math.atan2(x,y)/RAD);
@@ -1778,7 +1792,8 @@ function vSeed(i,j){const k=(i+512)*4096+(j+512);let p=V_SEEDS.get(k);if(p)retur
  const orch=y>0&&th<56+((h>>>20)%11)-5,inBuf=sx>-VS&&sx<W+VS&&sy>-VS&&sy<H+VS&&th<64&&y>-20,v=((h>>>4)%1000)/1000,w=((h>>>14)%1000)/1000;
  let t;
  const mark=V_MARKS().some(([mx,my])=>Math.hypot(sx-mx,sy-my)<170);
- if(mark)t='lawn';else if(v<core*.92&&!inBuf&&!vNearPark(sx,sy))t='house';
+ const wedge=ST&&ST.openTop&&y>0&&th<ST.openTop+4;
+ if(mark)t='lawn';else if(vTownSeed(sx,sy,wedge,h))t='town';else if(v<core*.92&&!inBuf&&!vNearPark(sx,sy))t='house';
  else if(orch)t=w<.07?'canola':'orchard';
  else t=w<.16?'canola':w<.34?'barley':w<.5?'veg':w<.72?'orchard':'pasture';
  p={x:sx,y:sy,t,h,wind:((h>>>8)%3)===0,gold:((h>>>11)&3)===0,ang:((h>>>3)%180)*RAD};V_SEEDS.set(k,p);return p}
@@ -1796,13 +1811,64 @@ const V_TREES=new Map();
 function vTreeOK(tcx,tcy,a){const k=Math.round(tcx)*8192+Math.round(tcy);let v=V_TREES.get(k);if(v===undefined){const n=vNear(tcx,tcy);v=n.a===a&&n.e>11&&!(a.wind&&vWindband(a,tcx,tcy)<22);V_TREES.set(k,v)}return v}
 // windbreak: a row of cedars along the plot's north side, as the island's orchards plant against the winter wind
 function vWindband(a,x,y){return y-(a.y-VS*.42)}
+const V_BLANKET=['#e0473d','#3f82e6','#f5c935','#f1ecdc','#ef6a1f','#7fbf6a','#c9a0dc'].map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)]);
+// the open outfield, measured in feet past the fence: the stone wall, a picnic lawn, the promenade, the service road
+function vOutfield(wx,wy,q,th,r){const s=r*th*RAD,n=vHash(Math.floor(wx/3),Math.floor(wy/3));
+ if(q<11)return (n&15)<3?VC.wall2:VC.wall;
+ if(q<36){const ci=Math.floor(s/11),cj=Math.floor((q-11)/8),h=vHash(ci+977,cj+31);
+  if(h%5===0){const ls=s-ci*11,lq=q-11-cj*8;if(ls>2&&ls<8&&lq>1.5&&lq<6){const c=V_BLANKET[(h>>>4)%V_BLANKET.length];return (Math.floor(ls)+Math.floor(lq))&1?c:c.map(v=>v*.86|0)}}
+  return Math.floor(q/4)&1?VC.lawnA:VC.lawnB}
+ if(q<50){const ps=((s%32)+32)%32;if(q>39.5&&q<46.5&&ps>11&&ps<19){const dx=ps-15,dq=q-43,d=dx*dx+dq*dq;if(d<9){return (n&7)===0?VC.orF:d<3&&dx<0?VC.orT2:VC.orT}if(d<12.5)return VC.planter}
+  if(Math.abs(q-37.5)<.8&&((s%16)+16)%16<1.2)return VC.lamp;
+  return (Math.floor(s/2.5)+Math.floor(q/2.5))&1?VC.pave:VC.pave2}
+ if(q<54)return (n&3)===0?VC.cedar2:VC.cedar;
+ if(q<80){if(Math.abs(q-67)<.5&&((s%14)+14)%14<7)return VC.dash;if(Math.abs(q-56)<.45||Math.abs(q-78)<.45)return VC.edgeL;return (n&15)===0?VC.asph2:VC.asph}
+ return (n&7)===0?VC.side2:VC.side}
+// what a town plot holds, and its look, pixel by pixel in the plot's own rotated frame
+function vKind(P){if(P.kind)return P.kind;const fx=(P.x-HX)*FT,fy=(HY-P.y)*FT,wedge=fy>0&&Math.abs(Math.atan2(fx,fy)/RAD)<(ST.openTop||0)+8,k=(P.h>>>6)%100;
+ if(P===vHall())return P.kind='hall';
+ return P.kind=wedge?(k<26?'green':k<46?'pack':k<62?'block':k<74?'lot':k<86?'market':'park'):(k<58?'block':k<72?'lot':k<82?'market':k<92?'park':'pack')}
+let V_HALL;function vHall(){if(V_HALL!==undefined)return V_HALL;V_HALL=null;let hd=1e9;const ci=Math.floor(HX/VS),cj=Math.floor(-280/VS);
+ for(let i=ci-2;i<=ci+2;i++)for(let j=cj-2;j<=cj+2;j++){const P=vSeedG(i,j);if(P.t!=='town')continue;const d=Math.hypot(P.x-HX,P.y+280);if(d<hd){hd=d;V_HALL=P}}return V_HALL}
+const V_RGB={};const vRGB=x=>V_RGB[x]||(V_RGB[x]=[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)]);
+const vDark=(c,f)=>[c[0]*f|0,c[1]*f|0,c[2]*f|0];
+// is (x,y) under a roof? (buildings only; used to cast their shadows down and to the right)
+function vRoofAt(x,y){const q=vNear(x,y),P=q.a;if(P.t!=='town'||q.e<12)return false;const K=vKind(P);if(K!=='block'&&K!=='pack'&&K!=='hall')return false;if(K!=='block')return true;
+ const A=(P.h>>>13)&1?Math.PI/2:0,c=Math.cos(A),sn=Math.sin(A),dx=x-P.x,dy=y-P.y,ls=dx*c+dy*sn+600,lt=-dx*sn+dy*c+600,span=34+(P.h>>>9)%28,id=Math.floor(ls/span),span2=26+(vHash(id,P.h%977)%30),lt2=lt+vHash(id+5,P.h%991)%40;if(ls%span<3||lt2%span2<3)return false;return vHash(id*131+Math.floor(lt2/span2),P.h%9973)%100>=16}
+const vShadowed=(x,y)=>vRoofAt(x-6,y-5)||vRoofAt(x-3,y-2.5);
+function vTownCol(P,wx,wy,e){const K=vKind(P),A=(P.h>>>13)&1?Math.PI/2:0,c=Math.cos(A),sn=Math.sin(A),dx=wx-P.x,dy=wy-P.y,ls=dx*c+dy*sn+600,lt=-dx*sn+dy*c+600,n=vHash(Math.floor(wx/2),Math.floor(wy/2))&15;
+ if(K==='block'||K==='pack'||K==='hall'){const span=K==='block'?34+(P.h>>>9)%28:999,m=ls%span,id=Math.floor(ls/span);
+  const span2=K==='block'?26+(vHash(id,P.h%977)%30):999,lt2=lt+(K==='block'?vHash(id+5,P.h%991)%40:0),m2=lt2%span2,id2=Math.floor(lt2/span2),th=vHash(id*131+id2,P.h%9973);
+  if(K==='block'&&m>=3&&m2>=3){const u=th%100;if(u<10){const cp=(ls|0)%9,lm=(lt2|0)%20,sh2=vHash(Math.floor(ls/9),Math.floor(lt2/20)+th%97);if(lm<1)return VC.edgeL;if(cp<1&&lm<13)return VC.edgeL;if(sh2%3&&cp>1&&cp<8&&lm>2&&lm<12)return lm>3&&lm<6?[40,52,64]:vRGB(['#c94a3a','#e8e4dc','#2a3a5a','#9aa3ad','#1b1f24','#d9b04a'][(sh2>>>4)%6]);return VC.asph}// a little car park
+   if(u<16){const tx=m-span/2,ty=m2-span2/2;return tx*tx+ty*ty<40?(tx<0&&ty<0?VC.orT2:VC.orT):VC.lawnA}}// a courtyard tree
+  if(K==='block'&&(m<3||m2<3))return vShadowed(wx,wy)?vDark(VC.side2,.72):VC.side2;// alleys between the buildings
+  const col=K==='hall'?vRGB('#e0781c'):K==='pack'?vRGB('#9aa3ab'):vRGB(V_ROOFS[th%V_ROOFS.length]);
+  if(e<12||(K==='block'&&(m<4||m>span-2||m2<4||m2>span2-2)))return vDark(col,.7);// parapet
+  if(K==='block'&&(m<5||m2<5))return vDark(col,.86);// the roof's shaded lip
+  if(e<13.5)return vDark(col,1.08>1?1:1);
+  if(K!=='block'&&lt%14<5&&e>18)return K==='hall'?vRGB('#f3a24a'):vRGB('#bfc8cf');// skylights
+  return n===0?vDark(col,.95):col}
+ if(K==='lot'){const rp=lt%46,cp=ls%11;if(rp>=18&&rp<28)return VC.asph;
+  if(cp<1)return VC.edgeL;const row=Math.floor(lt/46)*2+(rp<18?0:1),colI=Math.floor(ls/11),h=vHash(row+P.h%977,colI);
+  const inner=(rp<18?rp:rp-28),car=h%3!==0&&cp>2&&cp<9&&inner>2&&inner<16&&e>12;
+  if(car){const cc=vRGB(['#c94a3a','#e8e4dc','#2a3a5a','#9aa3ad','#1b1f24','#d9b04a','#3f7a5a'][(h>>>4)%7]);return (inner>5&&inner<8)?[40,52,64]:cc}
+  return n===0?VC.asph2:VC.asph}
+ if(K==='green'){const m=ls%18;if(m>=14||e<12)return n<3?VC.soil2:VC.soil;if(lt%6<1)return vRGB('#b8c6cc');if(m>=6&&m<8)return vRGB('#f4f8f8');return (n&3)===0?vRGB('#cfdcd2'):vRGB('#dde8e0')}
+ if(K==='park'){const d=Math.hypot((ls-600)/1.25,lt-600);if(Math.abs(d-30)<2.6)return VC.pave;return (n&7)===0?VC.lawnB:VC.lawnA}
+ return (Math.floor(ls/6)+Math.floor(lt/6))&1?VC.pave:VC.pave2}// the market square
 function villageCol(wx,wy){
+ if(ST&&ST.openTop){const fx=(wx-HX)*FT,fy=(HY-wy)*FT;if(fy>0){const th=Math.atan2(fx,fy)/RAD;if(Math.abs(th)<ST.openTop){const r=Math.hypot(fx,fy),q=r-fenceDist(th);if(q<88)return vOutfield(wx,wy,q,th,r)}}}
  const x=wx+2.2*Math.sin(wy*.21)+1.6*Math.sin(wy*.07+wx*.05),y=wy+2.2*Math.sin(wx*.19)+1.4*Math.sin(wx*.06-wy*.04);// rough-laid stone
- const n0=vNear(x,y),a=n0.a,b=n0.b,e=n0.e;
+ let n0=vNear(x,y),a=n0.a,b=n0.b,e=n0.e;
+ if(a.t==='town'||b.t==='town'){n0=vNear(wx,wy);a=n0.a;b=n0.b;e=n0.e}// town streets are laid straight
+ if(a.t==='town'||b.t==='town'){const n=vHash(Math.floor(wx/3),Math.floor(wy/3))&15;
+  if(a.t==='town'&&b.t==='town'){const c0=e<6?(n===0?VC.asph2:VC.asph):e<7?VC.curb:e<10?(n<2?VC.side2:VC.side):null;if(c0)return vShadowed(wx,wy)?vDark(c0,.72):c0}
+  else{if(e<4)return n<2?VC.side2:VC.side;if(e<7)return n<3?VC.wall2:VC.wall}}
  if(vLane(a,b)){if(e<5.5){const n=(Math.floor(wx/3)*7+Math.floor(wy/3)*13)&7;return n===0?VC.path2:VC.path}
   if(e<9){const n=vHash(Math.floor(wx/3),Math.floor(wy/3))&15;return n<3?VC.wall2:n===15?VC.wall3:VC.wall}}
  else if(e<3.4){const n=vHash(Math.floor(wx/3),Math.floor(wy/3))&15;return n<3?VC.wall2:n===15?VC.wall3:VC.wall}
  const P=a,s=wx*Math.cos(P.ang)+wy*Math.sin(P.ang),t=-wx*Math.sin(P.ang)+wy*Math.cos(P.ang);
+ if(P.t==='town')return vTownCol(P,wx,wy,e);
  if(P.t==='orchard'){
   if(P.wind){const wb=vWindband(P,wx,wy);if(wb>=-30&&wb<12&&e>9){if(wb<-28)return VC.cedar3;const n=Math.sin(wx*.9)+Math.sin(wx*.37+wy*.5);return n>.9?VC.cedar2:VC.cedar}}
   const q=Math.floor(wy),p2=Math.floor(wx),cy2=Math.floor(q/22),cx2=Math.floor((p2+(cy2&1)*11)/22),lx=(p2+(cy2&1)*11)-cx2*22-11,ly=q-cy2*22-11,d2=lx*lx+ly*ly;
@@ -1821,6 +1887,11 @@ function villageCol(wx,wy){
  if(P.t==='lawn'){const n=vHash(Math.floor(wx/3),Math.floor(wy/3))&7;return n===0?VC.pas2:VC.lawn}
  if(P.t==='veg'||P.t==='house'){const st=Math.floor(t/5);if(st&1){const n=(Math.floor(s/3)+st)&1;return n?VC.crop:VC.crop2}return (Math.floor(s/2)&1)?VC.soil:VC.soil2}
  const n=vHash(Math.floor(wx/3),Math.floor(wy/3))&7;return n===0?VC.pas2:VC.pas1}
+// a town plot's lot: the biggest centred rectangle whose corners stay clear of the streets around it
+const V_LOT=new Map();
+function vLot(P){let r=V_LOT.get(P);if(r)return r;const Y=vYard(P);let w=Y.R*2.6,h=Y.R*2.2;
+ for(let k=0;k<14;k++){const ok=[[-1,-1],[1,-1],[-1,1],[1,1],[0,-1],[0,1],[-1,0],[1,0]].every(([a,b])=>{const n=vNear(P.x+a*w/2,P.y+b*h/2);return n.a===P&&n.e>12});if(ok)break;w*=.92;h*=.92}
+ r={w,h,R:Y.R};V_LOT.set(P,r);return r}
 // a house plot's yard (world px, centred on its seed): it fits inside the plot's largest clear circle
 const V_YARD=new Map();
 function vYard(P){let r=V_YARD.get(P);if(r)return r;const i=Math.floor(P.x/VS),j=Math.floor(P.y/VS);let m=1e9;
@@ -1917,6 +1988,34 @@ function drawVillage(g,k,night,CW,CH,cx,cy,OL,rr,e){
    const x=(wx+e.mx)/2,y=(wy+e.my)/2;if(insidePoly(OL,x,y))continue;const gr=g.createRadialGradient(x,y,0,x,y,9);gr.addColorStop(0,'rgba(255,150,80,.45)');gr.addColorStop(1,'rgba(255,150,80,0)');g.fillStyle=gr;g.fillRect(x-9,y-9,18,18);g.fillStyle='#ff8a4a';g.fillRect(Math.round(x),Math.round(y),1,1)}
   g.restore()}
 }
+// ---- the town's buildings, drawn in world pixels: once into the park buffer (the ones behind the open outfield)
+// and once into the neighborhood layer, so a building that straddles the two lines up exactly ----
+const V_ROOFS=['#d9d5ca','#c9c4b8','#e4e1d8','#b9b6ae','#5f9a78','#6f8fa8','#a8b39a','#cfc6b0','#b5654a','#7a9a6a','#d4cbb8','#8fa3b5'];
+function vTownPlots(){const out=[],i0=Math.floor(-EXT_M.mx/VS)-1,i1=Math.ceil((W+EXT_M.mx)/VS)+1,j0=Math.floor(-EXT_M.my/VS)-1,j1=Math.ceil((H+EXT_M.my)/VS)+1;
+ for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const P=vSeedG(i,j);if(P.t==='town')out.push(P)}return out}
+// spots well inside a plot (clear of its streets and of the outfield road), for the things that sit on it
+function vSpots(P,n,minE,rr){const out=[];for(let k=0;k<n*6&&out.length<n;k++){const x=P.x+(rr()-.5)*VS*.9,y=P.y+(rr()-.5)*VS*.9,q=vNear(x,y);if(q.a!==P||q.e<minE)continue;
+  if(ST.openTop){const fx=(x-HX)*FT,fy=(HY-y)*FT,th=Math.atan2(fx,fy)/RAD;if(fy>0&&Math.abs(th)<ST.openTop&&Math.hypot(fx,fy)-fenceDist(th)<96)continue}
+  out.push([x,y,q.e])}return out}
+function vBuilding(g,x,y,w,h,col,ht,rr,glows){// a flat-roofed low-rise: parapet, water tank, AC units, stair hut
+ x=Math.round(x);y=Math.round(y);w=Math.round(w);h=Math.round(h);
+ g.fillStyle='rgba(0,0,0,.26)';g.beginPath();g.moveTo(x+w,y);g.lineTo(x+w+ht*.7,y+ht*.45);g.lineTo(x+w+ht*.7,y+h+ht*.45);g.lineTo(x+ht*.7,y+h+ht*.45);g.lineTo(x,y+h);g.closePath();g.fill();
+ g.fillStyle=shade(col,-.25);g.fillRect(x,y,w,h);g.fillStyle=col;g.fillRect(x+2,y+2,w-4,h-4);g.fillStyle=shade(col,.12);g.fillRect(x+2,y+2,w-4,2);
+ if(w>14&&h>12){const tx=x+4+Math.floor(rr()*(w-14)),ty=y+4+Math.floor(rr()*(h-12));g.fillStyle='#2d5f9a';g.beginPath();g.arc(tx+3,ty+3,3.2,0,7);g.fill();g.fillStyle='#4f86c6';g.beginPath();g.arc(tx+2.4,ty+2.4,1.6,0,7);g.fill()}
+ for(let k=0;k<1+((rr()*3)|0);k++){const ax=x+3+Math.floor(rr()*(w-8)),ay=y+3+Math.floor(rr()*(h-7));g.fillStyle='#8a9096';g.fillRect(ax,ay,4,3);g.fillStyle='#5f656b';g.fillRect(ax+1,ay+1,2,1)}
+ if(w>20&&rr()<.6){const sx=x+w-9,sy=y+3;g.fillStyle=shade(col,-.12);g.fillRect(sx,sy,6,6);g.fillStyle='rgba(0,0,0,.2)';g.fillRect(sx+6,sy+1,2,6)}
+ if(glows)for(let k=0;k<Math.max(1,w/14|0);k++)glows.push([x+4+rr()*(w-8),y+h+1])}
+function vTownDraw(g,glows){if(!V_OL)V_OL=parkOutlineClosed();
+ for(const P of vTownPlots()){const K=vKind(P),rr=mulberry32(P.h^0x9e37);
+  if(K==='block'){for(const[x,y]of vSpots(P,4,22,rr)){if(rr()<.5){g.fillStyle='#2d5f9a';g.beginPath();g.arc(x,y,3.2,0,7);g.fill();g.fillStyle='#4f86c6';g.beginPath();g.arc(x-.6,y-.6,1.6,0,7);g.fill()}
+    else{g.fillStyle='#8a9096';g.fillRect(Math.round(x),Math.round(y),4,3);g.fillStyle='#5f656b';g.fillRect(Math.round(x)+1,Math.round(y)+1,2,1)}}
+   if(glows)for(const[x,y]of vSpots(P,5,10,rr))glows.push([x,y])}
+  else if(K==='hall'){const[x,y]=[P.x,P.y];g.fillStyle='#2f7a3a';g.beginPath();g.arc(x,y,10,0,7);g.fill();g.fillStyle='#ff9a1f';g.beginPath();g.arc(x,y,8,0,7);g.fill();g.fillStyle='#ffc04a';g.fillRect(Math.round(x-5),Math.round(y-5),3,2);g.fillStyle='#3c8f44';g.fillRect(Math.round(x-1),Math.round(y-11),4,3);if(glows)for(const s2 of vSpots(P,6,10,rr))glows.push(s2)}
+  else if(K==='park'){for(const[x,y]of vSpots(P,6,16,rr)){g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.arc(x+3,y+3,6,0,7);g.fill();g.fillStyle='#2f6b2f';g.beginPath();g.arc(x,y,6,0,7);g.fill();g.fillStyle='#3f8040';g.beginPath();g.arc(x-2,y-2,3,0,7);g.fill()}}
+  else if(K==='market'){for(const[x,y]of vSpots(P,9,18,rr)){const sx=Math.round(x-6),sy=Math.round(y-5),c=['#e0473d','#3f82e6','#ef6a1f','#3faa5b'][(rr()*4)|0];
+    g.fillStyle='rgba(0,0,0,.2)';g.fillRect(sx+2,sy+2,13,11);for(let q=0;q<13;q+=2){g.fillStyle=q%4?'#f4f1e8':c;g.fillRect(sx+q,sy,2,11)}g.fillStyle='#ff9a1f';for(let q=0;q<3;q++)g.fillRect(sx+2+q*4,sy+12,3,2)}
+   if(glows)for(const s2 of vSpots(P,3,12,rr))glows.push(s2)}
+}}
 // ---------- Ulsan: whale bay, shipyard and the harbor traffic ----------
 function spout(g,q,ph,big){const a=ph;for(let k=0;k<(big?20:14);k++){const s=(k*37%11)/11,h=a*(big?44:34)*(.5+s*.6),dx=(k%2?1:-1)*s*a*(big?18:14);g.globalAlpha=Math.max(0,1-a)*.9;g.fillStyle=k%3?'#e8f6ff':'#9fd8f6';g.fillRect(Math.round(q.x+dx),Math.round(q.y-h),3,3)}g.globalAlpha=1}
 function drawUlsan(g,now){
@@ -2006,7 +2105,7 @@ function buildField(){
    else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
    else if(ST.feature==='honey'&&ath<34&&r>fdh+3&&r<fdh+60)feat='honey';
    else if(ST.feature==='whale'&&ath<36&&r>fdh+14)feat='whale';
-   else if(ST.feature==='orchard'&&ath<36&&r>fdh+4)feat='orchard';
+   else if(ST.feature==='orchard'&&ath<36&&r>fdh+4&&!inPen)feat='orchard';
   }
   if(feat==='ocean'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
   else if(feat==='lawn'){col=(((px>>4)+(py>>4))&1)?C.lawn1:C.lawn2;seatMask[i]=2}
@@ -2102,6 +2201,7 @@ function buildField(){
  for(const sd of[1,-1]){const pm=penSpot(sd,32),pc=penSpot(sd,38.2);const m=P(pm.x,pm.y),k=P(pc.x,pc.y);
   g.fillStyle='#c48c56';g.beginPath();g.arc(m.x,m.y,15,0,Math.PI*2);g.fill();g.beginPath();g.arc(k.x,k.y,10,0,Math.PI*2);g.fill();
   g.fillStyle='#f3eee0';g.fillRect(Math.round(m.x)-3,Math.round(m.y),6,2);g.fillRect(Math.round(k.x)-2,Math.round(k.y)+3,5,3);}
+ if(ST.village)vTownDraw(g,null);// the buildings behind the open outfield
  return c;
 }
 
