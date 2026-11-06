@@ -6,7 +6,17 @@ let FIELD=null,DECOR=null,SIGNS=null,CROWD_A=null,CROWD_B=null,FANS=[],CONC=[],A
 function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,3);cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
 new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,ev:s=>eval(s),ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
-function drawJumbo(g,now){
+// Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
+function drawJumbo(g,now){if(S.you!=='ulsan')return drawJumbo0(g,now);
+ const cx=HX/K,fy=(HY-fenceDist(0)/FT)/K,sc=1.22,yb=fy-8;g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);
+ {const y0=-18,h=66,night=!!S.night,yc=y0+h/2;// the deck it stands on, and the flippers
+  g.fillStyle='rgba(0,0,0,.25)';g.fillRect(cx-118,yb-4,250,16);g.fillStyle=night?'#3a4048':'#9aa3ad';g.fillRect(cx-122,yb-8,244,12);g.fillStyle=night?'#4a525c':'#c3cad1';g.fillRect(cx-122,yb-8,244,3);
+  for(const sd of[-1,1]){const bx=cx+sd*101;g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.moveTo(bx+4,y0-2);g.quadraticCurveTo(bx+sd*40+4,yc-10,bx+sd*26+4,y0+h+14);g.lineTo(bx+4,y0+h);g.closePath();g.fill();
+   g.fillStyle='#14325a';g.beginPath();g.moveTo(bx,y0-6);g.quadraticCurveTo(bx+sd*42,yc-14,bx+sd*28,y0+h+10);g.quadraticCurveTo(bx+sd*12,y0+h-4,bx,y0+h);g.closePath();g.fill();
+   g.fillStyle='#2f6fd0';g.beginPath();g.moveTo(bx,y0-2);g.quadraticCurveTo(bx+sd*34,yc-12,bx+sd*24,y0+h+4);g.quadraticCurveTo(bx+sd*12,y0+h-6,bx,y0+h-4);g.closePath();g.fill();
+   g.fillStyle='#9fd8f6';for(let k=0;k<4;k++)g.fillRect(bx+sd*(8+k*5)-(sd<0?3:0),y0+10+k*10,3,2)}}
+ drawJumbo0(g,now);g.restore()}
+function drawJumbo0(g,now){
  const cx=HX/K,x0=cx-95,y0=-18,w=190,h=66;
  // the board stands on steel: lattice legs down to concrete footings just behind the wall, braced across the middle
  {const fy=(HY-fenceDist(0)/FT)/K,yb=fy-8,yt=y0+h+2,night=!!S.night,legs=[x0+26,cx,x0+w-26];

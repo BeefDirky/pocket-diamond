@@ -389,6 +389,7 @@ function render(now){
    ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}}
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
+ drawHarborLights(ctx,vx0,vy0,scale,now);
  if(ST.harbor&&S.phase!=='title'){ctx.save();ctx.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);drawUlsan(ctx,now);ctx.restore()}// the harbor's whales and ships, out past the park
  drawNeon(ctx,vx0,vy0,scale,now);
  if(S.phase!=='title'){ctx.save();ctx.setTransform(scale*K,0,0,scale*K,-vx0*scale,-vy0*scale);ctx.imageSmoothingEnabled=false;drawJumbo(ctx,now);ctx.restore()}// the board stands above everything on its legs

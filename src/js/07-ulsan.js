@@ -95,6 +95,10 @@ function buildField(){H_NIGHT=false;
  const DUGC={1:dugoutFrame(1),'-1':dugoutFrame(-1)};
  const mowK=(x,y,r)=>ST.mow==='wave'?Math.floor((y+Math.sin(x*.06)*7)/17)&1:ST.mow==='stripe'?Math.floor(y/18)&1:ST.mow==='arc'?Math.floor(r/22)&1:ST.mow==='diag'?Math.floor((x+y)/20)&1:(Math.floor((x+y)/26)+Math.floor((x-y)/26))&1;
  PARK_MOW=mowK;
+ // the harbor park: find the 8px tiles that are open sea through and through (they need only the water colour)
+ let HSEA=null;const HSW=Math.ceil(W/8);if(ST.harbor){const LW=Math.ceil(W/4)+1,LH=Math.ceil(H/4)+1,lat=new Uint8Array(LW*LH);
+  for(let ly=0;ly<LH;ly++)for(let lx=0;lx<LW;lx++){harborCol(Math.min(W-1,lx*4)+.5,Math.min(H-1,ly*4)+.5);lat[ly*LW+lx]=H_KIND===1&&!H_SHADE?1:0}
+  HSEA=new Uint8Array(HSW*Math.ceil(H/8));for(let ty=0;ty<Math.ceil(H/8);ty++)for(let tx=0;tx<HSW;tx++){let n=0;for(let a=0;a<=2;a++)for(let b=0;b<=2;b++)n+=lat[Math.min(LH-1,ty*2+b)*LW+Math.min(LW-1,tx*2+a)];if(n===9)HSEA[ty*HSW+tx]=1}}
  // pass 2: paint
  for(let py=0;py<H;py++)for(let px=0;px<W;px++){
   const i=py*W+px;const x=(px+.5-HX)*FT,y=(HY-(py+.5))*FT;const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
@@ -122,7 +126,7 @@ function buildField(){H_NIGHT=false;
   else if(feat==='pool'){if(r<fdh+9||r>fdh+49)col=((px>>2)+(py>>2))&1?C.tile:C.tile2;else{const w=Math.sin(x*.42+y*.31)+Math.sin(y*.53-x*.19);col=w>1.35?C.poolHi:C.pool;seatMask[i]=4}}
   else if(feat==='fort'){const rw=Math.floor(py/7),off=(rw&1)*7;col=(py%7===0||(px+off)%14===0)?C.mortar:(((px+off)/14|0)+rw)%3===0?C.st2:C.st1;if(r<fdh+13&&((px>>3)&1))col=C.st2}
   else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
-  else if(feat==='harbor'){col=harborCol(px+.5,py+.5)||[200,198,192];if(H_SEAT)seatMask[i]=1}
+  else if(feat==='harbor'){if(HSEA&&HSEA[(py>>3)*HSW+(px>>3)])col=hSeaCol(x,y,px+.5,py+.5);else{col=harborCol(px+.5,py+.5)||[200,198,192];if(H_SEAT)seatMask[i]=1}}
   else if(feat==='whale'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea;
    const wx=WHALE.x,wy=WHALE.y,dx=x-wx,dy=y-wy,e=(dx/30)**2+(dy/(9-Math.max(0,dx)*.12))**2;
    if(e<1)col=dy<-3&&e>.35?C.whB:C.wh1;else{const tx=x-(wx+30),ty=y-wy;if(tx>0&&tx<12&&Math.abs(ty)<tx*.85&&Math.abs(ty)>tx*.25)col=C.wh2}}
@@ -151,7 +155,10 @@ function buildField(){H_NIGHT=false;
   }else{
    const dOut=D[i]/3/K;const wallT=fairBig[i]?ST.wallFt*2:6;
    const fair=Math.abs(th)<=45&&y>=0;
-   if(dOut<wallT)col=dOut<1.5?C.pad2:C.pad;
+   if(dOut<wallT&&ST.harbor&&fair){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
+    const sF=r*th*RAD,m=((sF%18)+18)%18,id=Math.floor(sF/18);
+    col=dOut<1.4?HB.wallY:dOut<2.4?HB.wallCap:m<.9?HB.seam:dOut>wallT-2.5?hMul((id&1)?HB.pad2:HB.pad1,.72):(id&1)?HB.pad2:HB.pad1}
+   else if(dOut<wallT)col=dOut<1.5?C.pad2:C.pad;
    else if((fair&&r>fenceDist(th)-14-8*0)||(!fair&&dOut<wallT+12))col=rng()<.2?C.tr2:C.tr;
    else{
     const dm=Math.hypot(x,y-60.5);
@@ -203,7 +210,7 @@ function buildField(){H_NIGHT=false;
  // on-deck circles
  for(const s of[1,-1]){const p=P(s*38,-6);g.strokeStyle='rgba(243,238,224,.7)';g.beginPath();g.arc(p.x,p.y,7,0,Math.PI*2);g.stroke()}
  // distance markers on the warning track
- [[-43,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[43,DIMS[4]]].forEach(([th,t])=>{
+ if(!ST.harbor)[[-43,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[43,DIMS[4]]].forEach(([th,t])=>{// (the harbor park paints them on its wall)
   const r=fenceDist(th)-13;const p=P(r*Math.sin(th*RAD),r*Math.cos(th*RAD));
   g.save();g.translate(p.x,p.y);g.rotate(th*RAD);g.fillStyle='#ffd23f';g.font='bold 18px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText(t,0,0);g.restore();
  });
@@ -212,6 +219,7 @@ function buildField(){H_NIGHT=false;
   g.fillStyle='#c48c56';g.beginPath();g.arc(m.x,m.y,15,0,Math.PI*2);g.fill();g.beginPath();g.arc(k.x,k.y,10,0,Math.PI*2);g.fill();
   g.fillStyle='#f3eee0';g.fillRect(Math.round(m.x)-3,Math.round(m.y),6,2);g.fillRect(Math.round(k.x)-2,Math.round(k.y)+3,5,3);}
  if(ST.village)vTownDraw(g,null);// the buildings behind the open outfield
+ if(ST.harbor)hDecor(g);
  return c;
 }
 

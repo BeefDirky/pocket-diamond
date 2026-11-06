@@ -31,7 +31,9 @@ function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++
 // far enough to see the neighborhood. Copying it into a fresh canvas that's never read keeps it on the card.
 function gpuCopy(src){const c=document.createElement('canvas');c.width=src.width;c.height=src.height;c.getContext('2d').drawImage(src,0,0);return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(S.mode==='bp'&&S.phase!=='title'?'e':'')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
- if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();OUT_CV=gpuCopy(buildOutside(S.you,!!S.night,S.mode==='bp'&&S.phase!=='title'));OUT_FEATHER=buildFeather(OUT_CV);OUT_KEY=key}return OUT_CV}
+ if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();const hit=OUT_CACHE.get(key);if(hit){OUT_CV=hit[0];OUT_FEATHER=hit[1]}else{OUT_CV=gpuCopy(buildOutside(S.you,!!S.night,S.mode==='bp'&&S.phase!=='title'));OUT_FEATHER=buildFeather(OUT_CV);OUT_CACHE.set(key,[OUT_CV,OUT_FEATHER]);if(OUT_CACHE.size>2)OUT_CACHE.delete(OUT_CACHE.keys().next().value)}OUT_KEY=key}return OUT_CV}
+// the last two neighborhoods built (a day/night switch or a quick back-and-forth costs nothing the second time)
+const OUT_CACHE=new Map();
 // the park buffer's straight edges would show as a seam where the extended stands begin: this overlay fades the
 // extended stands in over the last stretch of the buffer (static, so it costs one drawImage a frame)
 let OUT_FEATHER=null;
@@ -43,6 +45,7 @@ function buildFeather(src){const e=EXT_M,c=document.createElement('canvas');c.wi
  g.globalCompositeOperation='destination-in';g.beginPath();PARK_OUTLINE.forEach((q,i)=>g[i?'lineTo':'moveTo']((q.x+e.mx)/2,(q.y+e.my)/2));g.closePath();g.fill();
  return c}
 function buildOutside(k,night,empty){// empty: batting practice, nobody in the seats
+const BT=(l)=>{if(window.__bt)window.__bt.push([l,performance.now()])};BT('start');H_CITYN.apt=H_CITYN.school=H_CITYN.park=H_CITYN.com=0;
  const e=EXT_M,CW=Math.round((W+2*e.mx)/2),CH=Math.round((H+2*e.my)/2),c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
  const rr=mulberry32(hash(k+'-outside')),R=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))};
  const cx=x=>(x+e.mx)/2,cy=y=>(y+e.my)/2,T=TEAMS[k];
@@ -69,6 +72,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
  const roadsV=[],roadsH=[];for(let x=18;x<CW;x+=90+Math.floor(rr()*40))roadsV.push(x);for(let y=16;y<CH;y+=80+Math.floor(rr()*36))roadsH.push(y);
  // city blocks between the avenues, skipping the park, the plaza and the water
  for(let bi=0;bi<roadsV.length;bi++)for(let bj=0;bj<roadsH.length;bj++){const x0=roadsV[bi]+7,y0=roadsH[bj]+7,x1=(roadsV[bi+1]||CW+7)-5,y1=(roadsH[bj+1]||CH+7)-5;if(x1-x0<16||y1-y0<16)continue;
+  if(STADIUMS[k].harbor){const cl=[[x0,y0],[x1,y0],[x0,y1],[x1,y1],[(x0+x1)/2,(y0+y1)/2]].every(([x,y])=>!near(x,y,40)&&!inWater(y,1));if(cl){hCityBlock(g,x0,y0,x1,y1,night,rr);continue}}
   // split each block into lots
   for(let y=y0;y<y1-8;){const lh=Math.min(y1-y,14+Math.floor(rr()*22));for(let x=x0;x<x1-8;){const lw=Math.min(x1-x,14+Math.floor(rr()*26));
     if(!near(x+lw/2,y+lh/2,Math.max(lw,lh)*.6+46)&&!inWater(y,lh)){
@@ -119,11 +123,16 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
  if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}}
- if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
+ BT('city');if(STADIUMS[k].harbor){H_NIGHT=night;// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
   const mc=document.createElement('canvas');mc.width=CW;mc.height=CH;const mg=mc.getContext('2d');mg.beginPath();OL.forEach((q,i)=>mg[i?'lineTo':'moveTo'](q.x,q.y));mg.closePath();mg.fill();const md=mg.getImageData(0,0,CW,CH).data;
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea],img=g.getImageData(0,0,CW,CH),d=img.data;
-  for(let py=0;py<CH;py++){const wy=(py+.5)*2-e.my;for(let px=0;px<CW;px++){const j=(py*CW+px)*4;if(md[j+3]>200)continue;const c=harborCol((px+.5)*2-e.mx,wy);if(!c){if(H_SHADE){d[j]*=.7;d[j+1]*=.7;d[j+2]*=.74}continue}const em=H_EMIS&&night;d[j]=em?c[0]:c[0]*lt[0]/255;d[j+1]=em?c[1]:c[1]*lt[1]/255;d[j+2]=em?c[2]:c[2]*lt[2]/255;d[j+3]=255}}
+  // most of the canvas is plain city: sample each 8px tile on a 3x3 grid and skip it whole when nothing harbor-ish is there
+  const TS=8,TW=Math.ceil(CW/TS),skip=new Uint8Array(TW*Math.ceil(CH/TS)),LW=Math.ceil(CW/4)+1,LH=Math.ceil(CH/4)+1,lat=new Uint8Array(LW*LH);
+  for(let ly=0;ly<LH;ly++)for(let lx=0;lx<LW;lx++){const px=Math.min(CW-1,lx*4),py=Math.min(CH-1,ly*4);if(md[(py*CW+px)*4+3]>200){lat[ly*LW+lx]=0;continue}const c=harborCol((px+.5)*2-e.mx,(py+.5)*2-e.my);lat[ly*LW+lx]=H_SHADE?2:H_KIND===1?1:c?2:0}
+  for(let ty=0;ty*TS<CH;ty++)for(let tx=0;tx<TW;tx++){let any=false,sea=0;for(let a2=0;a2<=2;a2++)for(let b2=0;b2<=2;b2++){const v=lat[Math.min(LH-1,ty*2+b2)*LW+Math.min(LW-1,tx*2+a2)];if(v===2)any=true;else if(v===1)sea++}if(!any)skip[ty*TW+tx]=sea===9?2:sea?0:1;if(!any&&sea&&sea<9)skip[ty*TW+tx]=0}
+  for(let py=0;py<CH;py++){const wy=(py+.5)*2-e.my,trow=((py/TS)|0)*TW;for(let px=0;px<CW;px++){const sk=skip[trow+((px/TS)|0)];if(sk===1)continue;const j=(py*CW+px)*4;if(md[j+3]>200)continue;const wx=(px+.5)*2-e.mx;let c;if(sk===2){c=hSeaCol((wx-HX)*FT,(HY-wy)*FT,wx,wy);H_EMIS=false;H_SHADE=false}else c=harborCol(wx,wy);if(!c){if(H_SHADE){d[j]*=.7;d[j+1]*=.7;d[j+2]*=.74}continue}const em=H_EMIS&&night;d[j]=em?c[0]:c[0]*lt[0]/255;d[j+1]=em?c[1]:c[1]*lt[1]/255;d[j+2]=em?c[2]:c[2]*lt[2]/255;d[j+3]=255}}
   g.putImageData(img,0,0)}// the city dims at night; the stadium stays lit (the village is lit like the park)
+ BT('sea');
  // ---- the stands keep going past the park buffer, out to the outer wall ----
  // Painted with the same rules the park buffer uses (rows that follow the wall, risers, aisles toward home, the upper
  // deck colors, the outfield features) and the same crowd on the same 8px grid, so the two halves read as one bowl.
@@ -137,21 +146,21 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   const C3a=hexRGB(shade(ST.seat[0],-.18)),C3b=hexRGB(shade(ST.seat[1],-.18));
   const wX=px=>(px+.5)*2-e.mx,wY=py=>(py+.5)*2-e.my;
   // the playing field mask (same test as the park buffer), then the distance from it
-  const A=new Int32Array(N);
-  for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const x=(wX(px)-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
+  const A=new Int32Array(N),HB0=ST.harbor;// (the harbor park paints its own stands and needs none of this)
+  if(!HB0)for(let py=0;py<CH;py++){const wy=wY(py),y=(HY-wy)*FT;for(let px=0;px<CW;px++){const x=(wX(px)-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
    const fair=Math.abs(th)<=45&&y>=0,perp=(Math.abs(x)-y)/Math.SQRT2,along=(Math.abs(x)+y)/Math.SQRT2;
    A[py*CW+px]=(fair?r<fenceDist(th):((perp<40&&along<328&&along>-5)||r<34))?0:1e8}}
-  for(let py=0;py<CH;py++)for(let px=0;px<CW;px++){const i=py*CW+px;if(!A[i])continue;let v=A[i];
+  if(!HB0)for(let py=0;py<CH;py++)for(let px=0;px<CW;px++){const i=py*CW+px;if(!A[i])continue;let v=A[i];
    if(px>0)v=Math.min(v,A[i-1]+3);if(py>0){v=Math.min(v,A[i-CW]+3);if(px>0)v=Math.min(v,A[i-CW-1]+4);if(px<CW-1)v=Math.min(v,A[i-CW+1]+4)}A[i]=v}
-  for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!A[i])continue;let v=A[i];
+  if(!HB0)for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!A[i])continue;let v=A[i];
    if(px<CW-1)v=Math.min(v,A[i+1]+3);if(py<CH-1){v=Math.min(v,A[i+CW]+3);if(px<CW-1)v=Math.min(v,A[i+CW+1]+4);if(px>0)v=Math.min(v,A[i+CW-1]+4)}A[i]=v}
   // and the distance from the stands, for the stretch of outfield grass that pokes past the buffer near the poles
-  const DI=new Int32Array(N);for(let i=0;i<N;i++)DI[i]=A[i]?0:1e8;
-  for(let py=0;py<CH;py++)for(let px=0;px<CW;px++){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
+  const DI=new Int32Array(N);if(!HB0)for(let i=0;i<N;i++)DI[i]=A[i]?0:1e8;
+  if(!HB0)for(let py=0;py<CH;py++)for(let px=0;px<CW;px++){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
    if(px>0)v=Math.min(v,DI[i-1]+3);if(py>0){v=Math.min(v,DI[i-CW]+3);if(px>0)v=Math.min(v,DI[i-CW-1]+4);if(px<CW-1)v=Math.min(v,DI[i-CW+1]+4)}DI[i]=v}
-  for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
+  if(!HB0)for(let py=CH-1;py>=0;py--)for(let px=CW-1;px>=0;px--){const i=py*CW+px;if(!DI[i])continue;let v=DI[i];
    if(px<CW-1)v=Math.min(v,DI[i+1]+3);if(py<CH-1){v=Math.min(v,DI[i+CW]+3);if(px<CW-1)v=Math.min(v,DI[i+CW+1]+4);if(px>0)v=Math.min(v,DI[i+CW-1]+4)}DI[i]=v}
-  const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.harbor)H_NIGHT=night;
+  BT('chamfer');const seatM=new Uint8Array(N),EMIS=new Uint8Array(N);if(ST.harbor)H_NIGHT=night;
   // only the stretch outside the buffer (plus the strip the feather fades across) needs painting
   const bx0=cx(0)+16,by0=cy(0)+16,bx1=cx(W)-16,by1=cy(H)-16;
   const put=(i,c)=>{const j=i*4;d[j]=c[0];d[j+1]=c[1];d[j+2]=c[2];d[j+3]=255};
@@ -184,6 +193,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
      else{const row=Math.floor((dO-3)/6),rr2=(dO-3)-row*6;
       if(rr2>=4.6)col=upper?C.riserU:C.riser;else{col=ST.harbor?hSeat(ang,row,upper):upper?((row&1)?C.seatU:C.seatU2):((row&1)?C.seat:C.seat2);seatM[i]=1}}}}
    put(i,col)}}
+  BT('stands');
   // the crowd: same grid and density as the park, same club colors, drawn at this layer's half scale
   const home=TEAMS[k],away=TEAMS[S.opp]||home,misc=['#e8d7c3','#f1ecdc','#6c7a86','#a8c6d8','#2b2b30','#c9a0dc','#7fbf6a','#d98c8c','#f4d58d'].map(hexRGB);
   const hj=hexRGB(home.jersey),hc=hexRGB(home.cap),aj=hexRGB(away.jersey),ac=hexRGB(away.cap),sks=SKINS.map(hexRGB),hairs=['#2a1d14','#4a3020','#7a5230','#1a1a1a','#8a8a8a'].map(hexRGB),shadeC=c=>c.map(v=>v*.78|0);
@@ -198,11 +208,12 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   // light: the same multiply the park gets, so day and night match across the seam
   const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea];
   for(let i=0;i<N;i++){if(md[i*4+3]<128||(night&&EMIS[i]))continue;const py=(i/CW)|0,px=i-py*CW;if(px>bx0&&px<bx1&&py>by0&&py<by1)continue;const j=i*4;d[j]=d[j]*lt[0]/255;d[j+1]=d[j+1]*lt[1]/255;d[j+2]=d[j+2]*lt[2]/255}
-  g.putImageData(img,0,0);
+  g.putImageData(img,0,0);BT('crowd+light');
   // a soft shadow where the roof overhangs the top rows
   g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
   g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';if(ST.openTop)outlinePath(OL,x=>x,y=>y,g);else{g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath()}g.stroke();g.restore()}
-  if(ST.harbor){
+  if(ST.harbor){{const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);hDecor(lg);
+    if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}g.drawImage(L,0,0)}
    // the shore's buildings, ships and the gate, drawn by day and then lit like the rest of this layer
    const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');drawHarbor(lg,k,false,CW,CH,cx,cy,OL,e);
    if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}
@@ -214,4 +225,4 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
    if(night){g.save();g.globalCompositeOperation='lighter';for(const[wx,wy]of glows){const x=(wx+e.mx)/2,y=(wy+e.my)/2;const gr=g.createRadialGradient(x,y,0,x,y,7);gr.addColorStop(0,'rgba(255,214,150,.45)');gr.addColorStop(1,'rgba(255,214,150,0)');g.fillStyle=gr;g.fillRect(x-7,y-7,14,14);g.fillStyle='rgba(255,230,170,.9)';g.fillRect(Math.round(x)-1,Math.round(y),2,1)}
     // streetlights along the town roads
     g.restore()}}
- return c}
+ BT('end');return c}
