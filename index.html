@@ -1765,7 +1765,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
 const VS=150;// plot spacing (world px): one jittered seed per grid cell, plots are their Voronoi cells
 const VC=(()=>{const h=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)];return{
  path:h('#cbb995'),path2:h('#bfad88'),wall:h('#3a3837'),wall2:h('#55514c'),wall3:h('#28272a'),
- orG:h('#6b7f3a'),orG2:h('#62763a'),orT:h('#2f7a3a'),orT2:h('#3c8f44'),orT3:h('#25663a'),orF:h('#ff9a1f'),orF2:h('#ffc04a'),orSh:h('#556a30'),
+ orG:h('#6b7f3a'),orG2:h('#62763a'),orT:h('#2f7a3a'),orT2:h('#3c8f44'),orT3:h('#25663a'),orF:h('#ff9a1f'),orF2:h('#ffd27a'),orFd:h('#d9700e'),orSh:h('#556a30'),
  cedar:h('#2d5530'),cedar2:h('#3b6a3b'),cedar3:h('#22442a'),
  can1:h('#f4d23a'),can2:h('#e8c22c'),canG:h('#8db53e'),
  bar1:h('#a3c75c'),bar2:h('#93b952'),barG1:h('#d8c47a'),barG2:h('#cbb56a'),
@@ -1792,7 +1792,7 @@ function vSeed(i,j){const k=(i+512)*4096+(j+512);let p=V_SEEDS.get(k);if(p)retur
  const orch=y>0&&th<56+((h>>>20)%11)-5,inBuf=sx>-VS&&sx<W+VS&&sy>-VS&&sy<H+VS&&th<64&&y>-20,v=((h>>>4)%1000)/1000,w=((h>>>14)%1000)/1000;
  let t;
  const mark=V_MARKS().some(([mx,my])=>Math.hypot(sx-mx,sy-my)<170);
- const wedge=ST&&ST.openTop&&y>0&&th<ST.openTop+4;
+ const wedge=ST&&ST.openTop&&y>0&&th<ST.openTop+4&&Math.hypot(x,y)>fenceDist(th)+30;// past the outfield fence, never on the field
  if(mark)t='lawn';else if(vTownSeed(sx,sy,wedge,h))t='town';else if(v<core*.92&&!inBuf&&!vNearPark(sx,sy))t='house';
  else if(orch)t=w<.07?'canola':'orchard';
  else t=w<.16?'canola':w<.34?'barley':w<.5?'veg':w<.72?'orchard':'pasture';
@@ -1813,6 +1813,13 @@ function vTreeOK(tcx,tcy,a){const k=Math.round(tcx)*8192+Math.round(tcy);let v=V
 function vWindband(a,x,y){return y-(a.y-VS*.42)}
 const V_BLANKET=['#e0473d','#3f82e6','#f5c935','#f1ecdc','#ef6a1f','#7fbf6a','#c9a0dc'].map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)]);
 // the open outfield, measured in feet past the fence: the stone wall, a picnic lawn, the promenade, the service road
+// tangerines on a tree: five or six fruit spread round the canopy, each a 2x2 block on the even world-pixel grid
+// with a lit corner, so the full-size park shows round fruit and the half-size neighborhood a clean single pixel.
+// 0 = leaf, 1 = fruit, 2 = its highlight
+function vFruit(X,Y,tcx,tcy,seed){const h=vHash(seed%100003,(seed/100003|0)+17),n=5+(h&1),a0=((h>>>3)%628)/100;
+ for(let k=0;k<n;k++){const a=a0+k*(6.283/n),r=k===0?0:4.6,ex=2*Math.round((tcx+Math.cos(a)*r)/2),ey=2*Math.round((tcy+Math.sin(a)*r)/2);
+  const dx=X-ex,dy=Y-ey;if(dx>=0&&dx<=1&&dy>=0&&dy<=1)return dx===0&&dy===0?2:1}return 0}
+const V_NOYARD=new Set();// house plots left empty (a road runs through): their yard is garden instead
 const V_SHIRTS=['#e0781c','#ff9a1f','#f1ecdc','#2f7a3a','#3f82e6','#e0473d','#2b2b30','#f5c935','#a8c6d8'].map(x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)]);
 const V_SKIN=[[234,192,150],[214,166,120],[176,124,84],[60,40,30]];
 // a fan strolling the concourse, on a 9px grid (null if this pixel isn't one)
@@ -1837,7 +1844,7 @@ function vOutfield(wx,wy,q,th,r,fx,fy,d){const n=vHash(Math.floor(wx/3),Math.flo
   if(h%5===0){const ls=s-ci*11,lq=d-cj*8;if(ls>2&&ls<8&&lq>1.5&&lq<6){const c=V_BLANKET[(h>>>4)%V_BLANKET.length];return (Math.floor(ls)+Math.floor(lq))&1?c:c.map(v=>v*.86|0)}}
   return Math.floor(d/4)&1?VC.lawnA:VC.lawnB}
  if(d<0){const ss=((s%32)+32)%32;
-  if(d>-10&&d<-3&&ss>12&&ss<20){const dx=ss-16,dq=d+6.5,dd=dx*dx+dq*dq;if(dd<9)return (n&7)===0?VC.orF:dd<3&&dx<0?VC.orT2:VC.orT;if(dd<12.5)return VC.planter}
+  if(d>-10&&d<-3&&ss>12&&ss<20){const dx=ss-16,dq=d+6.5,dd=dx*dx+dq*dq;if(dd<9){const ci=Math.floor(s/32),fc=(ci*32+16)/(pv.R-6),tcx=HX+Math.sin(fc)*(pv.R-6.5)/FT,tcy=HY-(pv.cy+Math.cos(fc)*(pv.R-6.5))/FT,fr=vFruit(Math.floor(wx),Math.floor(wy),tcx,tcy,ci*7+3);if(fr)return fr===2?VC.orF2:VC.orF;return dd<3&&dx<0?VC.orT2:VC.orT}if(dd<12.5)return VC.planter}
   if(d<-12)return VC.edgeL;
   if(Math.abs(d+11)<.8&&((s%16)+16)%16<1.2)return VC.lamp;
   const p=vPerson(wx,wy,10);if(p)return p;
@@ -1943,13 +1950,13 @@ function villageCol(wx,wy){
   if(P.wind){const wb=vWindband(P,wx,wy);if(wb>=-30&&wb<12&&e>9){if(wb<-28)return VC.cedar3;const n=Math.sin(wx*.9)+Math.sin(wx*.37+wy*.5);return n>.9?VC.cedar2:VC.cedar}}
   const q=Math.floor(wy),p2=Math.floor(wx),cy2=Math.floor(q/22),cx2=Math.floor((p2+(cy2&1)*11)/22),lx=(p2+(cy2&1)*11)-cx2*22-11,ly=q-cy2*22-11,d2=lx*lx+ly*ly;
   const tcx=cx2*22+11-(cy2&1)*11,tcy=cy2*22+11,ok=vTreeOK(tcx,tcy,P);
-  if(ok&&d2<64){if(((lx*7+ly*13+cx2*5+cy2*3)&15)===0||((lx*3-ly*11+cx2)&31)===1)return lx<0&&ly<0?VC.orF2:VC.orF;
+  if(ok&&d2<64){const fr=vFruit(p2,q,tcx,tcy,cx2*7919+cy2*104729);if(fr)return fr===2?VC.orF2:VC.orF;
    if(d2<20&&lx<0&&ly<0)return VC.orT2;if(d2>=40&&lx+ly>3)return VC.orT3;return VC.orT}
   if(ok){const sx=lx-3,sy=ly-3;if(sx*sx+sy*sy<56)return VC.orSh}
   return (q>>1)&1?VC.orG:VC.orG2}
  if(P.t==='canola'){const st=Math.floor((t+Math.sin(s*.04)*4)/4)&1,n=vHash(Math.floor(wx/2),Math.floor(wy/2))&31;return n===0?VC.canG:st?VC.can1:VC.can2}
  if(P.t==='barley'){const st=Math.floor(t/6)&1;return P.gold?(st?VC.barG1:VC.barG2):(st?VC.bar1:VC.bar2)}
- if(P.t==='house'){const rr=vYard(P),ax=Math.abs(wx-P.x)-rr.w/2,ay=Math.abs(wy-P.y)-rr.h/2;
+ if(P.t==='house'){const rr=vYard(P),ax=Math.abs(wx-P.x)-rr.w/2+(V_NOYARD.has(P)?1e4:0),ay=Math.abs(wy-P.y)-rr.h/2;
   if(ax<10&&ay<10){// the house's own stone wall, with a gap for the gate on the lane side
    if(ax>4||ay>4){const gate=ay>4&&wy>P.y&&Math.abs(wx-P.x-(P.h%3-1)*rr.w*.25)<10;if(!gate){const n=vHash(Math.floor(wx/3),Math.floor(wy/3))&15;return n<3?VC.wall2:n===15?VC.wall3:VC.wall}}
    const n=vHash(Math.floor(wx/2),Math.floor(wy/2))&15;return n===0?VC.yard2:VC.yard}
@@ -2003,20 +2010,22 @@ function drawVillage(g,k,night,CW,CH,cx,cy,OL,rr,e){
  // a stone-paved apron around the bowl (none along the open outfield), and the country road that circles it
  const off=(q,o)=>{const dx=q.x-ctr.x,dy=q.y-ctr.y,l=Math.hypot(dx,dy)||1;return{x:q.x+dx/l*o,y:q.y+dy/l*o}};
  const open=q=>q.open;
- const CR=closedRun(OL);
+ const CR=closedRun(OL),V_EXT=[];let V_ROAD=null,roadLater=false;
  g.save();g.beginPath();CR.forEach((q,i)=>{const p=off(q,30);g[i?'lineTo':'moveTo'](p.x,p.y)});for(let i=CR.length-1;i>=0;i--)g.lineTo(CR[i].x,CR[i].y);g.closePath();g.fillStyle=night?'#2a2a2c':'#c8c0ae';g.fill();
  g.clip();g.fillStyle=night?'#232325':'#b9b09c';for(let y=0;y<CH;y+=6)for(let x=(y/6&1)*5;x<CW;x+=10)g.fillRect(x,y,1,6);for(let y=0;y<CH;y+=6)g.fillRect(0,y,CW,1);g.restore();
  // the paved road: around the closed part of the bowl, then out along the lanes of the outfield country on both ends
  g.save();g.lineCap='round';g.lineJoin='round';const road=night?'#1c1d20':'#6a6b6c',edgeC=night?'#2c2d30':'#8d8e8c';
  const RP=new Path2D();CR.forEach((q,i)=>{const p=off(q,42);RP[i?'lineTo':'moveTo'](p.x,p.y)});
  {// past the end of the stands the road runs on out through the orchards
-  for(const[a2,b2]of[[CR[1],CR[0]],[CR[CR.length-2],CR[CR.length-1]]]){const p=off(b2,42),dx=p.x-ctr.x,dy=p.y-ctr.y,l=Math.hypot(dx,dy);RP.moveTo(p.x,p.y);RP.lineTo(p.x+dx/l*1400,p.y+dy/l*1400)}}
- g.strokeStyle=edgeC;g.lineWidth=13;g.stroke(RP);g.strokeStyle=road;g.lineWidth=10;g.stroke(RP);g.setLineDash([3,4]);g.strokeStyle=night?'#6b6030':'#e8d27a';g.lineWidth=1;g.stroke(RP);g.setLineDash([]);
+  for(const[a2,b2]of[[CR[1],CR[0]],[CR[CR.length-2],CR[CR.length-1]]]){const p=off(b2,42),dx=p.x-ctr.x,dy=p.y-ctr.y,l=Math.hypot(dx,dy);RP.moveTo(p.x,p.y);RP.lineTo(p.x+dx/l*1400,p.y+dy/l*1400);V_EXT.push([p.x,p.y,p.x+dx/l*1400,p.y+dy/l*1400])}}
+ V_ROAD=[RP,edgeC,road];g.strokeStyle=edgeC;g.lineWidth=13;g.stroke(RP);g.strokeStyle=road;g.lineWidth=10;g.stroke(RP);g.setLineDash([3,4]);g.strokeStyle=night?'#6b6030':'#e8d27a';g.lineWidth=1;g.stroke(RP);g.setLineDash([]);
  // the main road out of the village, straight down from the plate gate
  const bot=OL.reduce((m,q)=>q.y>m.y?q:m,OL[0]),rx=cx(HX),ry0=bot.y+30;
  g.fillStyle=edgeC;g.fillRect(rx-6.5,ry0,13,CH-ry0);g.fillStyle=road;g.fillRect(rx-5,ry0,10,CH-ry0);g.fillStyle=night?'#6b6030':'#e8d27a';for(let y=ry0;y<CH;y+=8)g.fillRect(rx-.5,y,1,4);
  g.restore();
  const busy=(x,y,w,h)=>{// keep buildings off the apron, the roads and the park buffer
+  const segD=(px,py,[ax,ay,bx,by])=>{const vx=bx-ax,vy=by-ay,t=clamp(((px-ax)*vx+(py-ay)*vy)/(vx*vx+vy*vy),0,1);return Math.hypot(px-ax-vx*t,py-ay-vy*t)};
+  for(const S2 of V_EXT)if(segD(x+w/2,y+h/2,S2)<Math.hypot(w,h)/2+8)return true;
   if(Math.abs(x+w/2-rx)<w/2+10&&y+h>ry0-4)return true;
   const bx0=cx(0),by0=cy(0),bx1=cx(W),by1=cy(H);if(x+w>bx0-6&&x<bx1+6&&y+h>by0-6&&y<by1+6&&insidePoly(OL,x+w/2,y+h/2))return true;
   for(const[qx,qy]of[[x,y],[x+w,y],[x,y+h],[x+w,y+h],[x+w/2,y+h/2]])if(insidePoly(OL,qx,qy))return true;
@@ -2026,7 +2035,11 @@ function drawVillage(g,k,night,CW,CH,cx,cy,OL,rr,e){
  const lamps=[];
  for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const P=vSeed(i,j);if(P.t!=='house')continue;const Y=vYard(P);
   const R={x:(P.x-Y.w/2+e.mx)/2,y:(P.y-Y.h/2+e.my)/2,w:Y.w/2,h:Y.h/2};
-  if(R.w<14||R.x<-R.w||R.y<-R.h||R.x>CW||R.y>CH||busy(R.x,R.y,R.w,R.h))continue;
+  if(R.w<14||R.x<-R.w||R.y<-R.h||R.x>CW||R.y>CH)continue;
+  if(busy(R.x,R.y,R.w,R.h)){// no house where the road runs: grass the yard over instead
+   if(!insidePoly(OL,R.x+R.w/2,R.y+R.h/2)){V_NOYARD.add(P);const x0=Math.max(0,Math.floor(R.x-7)),y0=Math.max(0,Math.floor(R.y-7)),x1=Math.min(CW,Math.ceil(R.x+R.w+7)),y1=Math.min(CH,Math.ceil(R.y+R.h+7));
+    const im=g.getImageData(x0,y0,x1-x0,y1-y0),dd=im.data;let j=0;for(let py=y0;py<y1;py++)for(let px=x0;px<x1;px++,j+=4){const c=villageCol((px+.5)*2-e.mx,(py+.5)*2-e.my);dd[j]=c[0]*lt[0]/255;dd[j+1]=c[1]*lt[1]/255;dd[j+2]=c[2]*lt[2]/255;dd[j+3]=255}
+    g.putImageData(im,x0,y0);roadLater=true}continue}
   const hr=mulberry32(P.h),core=Math.hypot(P.x-HX,P.y-(HY+760))<700,tile=hr()<(core?.4:.15);
   const mw=Math.round(R.w*(.84+hr()*.16)),mh=Math.max(7,Math.round(R.h*.38)),mx=Math.round(R.x+(R.w-mw)*hr()),my=Math.round(R.y);
   const roof=(x,y,w,h)=>tile?vTile(g,x+1,y+1,w-2,h-2,night):vThatch(g,x,y,w,h,night,hr);
@@ -2036,6 +2049,7 @@ function drawVillage(g,k,night,CW,CH,cx,cy,OL,rr,e){
   const yy=(my+mh+sy)/2;
   if(hr()<.75)vJars(g,Math.round(R.x+R.w*(.15+hr()*.4)),Math.round(yy-3),3+((hr()*2)|0),night,hr);
   if(hr()<.7)vTree(g,Math.round(R.x+R.w*(hr()<.5?.08:.92)),Math.round(yy+1),4,night,hr()<.6?'#ff9a1f':'#e8561c')}
+ if(roadLater){g.save();g.lineCap='round';g.lineJoin='round';g.strokeStyle=V_ROAD[1];g.lineWidth=13;g.stroke(V_ROAD[0]);g.strokeStyle=V_ROAD[2];g.lineWidth=10;g.stroke(V_ROAD[0]);g.setLineDash([3,4]);g.strokeStyle=night?'#6b6030':'#e8d27a';g.lineWidth=1;g.stroke(V_ROAD[0]);g.restore()}
  // ---- the village tree: an old zelkova on a stone platform where the lanes meet, a pavilion beside it ----
  {const M=V_MARKS(),tx=(M[1][0]+e.mx)/2,ty=(M[1][1]+e.my)/2;if(!busy(tx-30,ty-30,60,60)||true){
    g.fillStyle=night?'#2c2b2a':'#9a948a';g.beginPath();g.arc(tx,ty,22,0,7);g.fill();g.fillStyle=night?'#242322':'#857f75';g.beginPath();g.arc(tx,ty,22,0,7);g.lineWidth=2;g.strokeStyle=g.fillStyle;g.stroke();
@@ -2065,6 +2079,7 @@ function vTownPlots(){const out=[],i0=Math.floor(-EXT_M.mx/VS)-1,i1=Math.ceil((W
  for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const P=vSeedG(i,j);if(P.t==='town')out.push(P)}return out}
 // spots well inside a plot (clear of its streets and of the outfield road), for the things that sit on it
 function vSpots(P,n,minE,rr){const out=[];for(let k=0;k<n*6&&out.length<n;k++){const x=P.x+(rr()-.5)*VS*.9,y=P.y+(rr()-.5)*VS*.9,q=vNear(x,y);if(q.a!==P||q.e<minE)continue;
+  {const fx=(x-HX)*FT,fy=(HY-y)*FT,th=Math.atan2(fx,fy)/RAD;if(fy>-40&&Math.abs(th)<=48&&Math.hypot(fx,fy)<fenceDist(th)+30)continue}
   if(ST.openTop){const fx=(x-HX)*FT,fy=(HY-y)*FT,th=Math.atan2(fx,fy)/RAD;if(fy>0&&Math.abs(th)<ST.openTop&&(Math.hypot(fx,fy)-fenceDist(th)<96||Math.hypot(fx,fy-vPav().cy)-vPav().R<58))continue}
   out.push([x,y,q.e])}return out}
 function vBuilding(g,x,y,w,h,col,ht,rr,glows){// a flat-roofed low-rise: parapet, water tank, AC units, stair hut
