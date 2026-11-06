@@ -3,9 +3,15 @@ function spout(g,q,ph,big){const a=ph;for(let k=0;k<(big?20:14);k++){const s=(k*
 function drawUlsan(g,now){
  const sec=now/1000;
  // resident whale breathes every few seconds
+ const hb=!!ST.harbor;
+ if(hb){// out in the open sea now, so the resident whale is drawn here rather than painted into the bay
+  const w=toPx(WHALE.x,WHALE.y),L=30/FT,Wd=9/FT,bob=Math.sin(sec*.6)*1.5;g.fillStyle='rgba(10,30,50,.35)';g.beginPath();g.ellipse(w.x+4,w.y+5,L,Wd,0,0,7);g.fill();
+  g.fillStyle='#3b4f62';g.beginPath();g.ellipse(w.x,w.y+bob,L,Wd,0,0,7);g.fill();g.fillStyle='#4c6378';g.beginPath();g.ellipse(w.x-L*.15,w.y-Wd*.35+bob,L*.75,Wd*.45,0,0,7);g.fill();
+  g.fillStyle='#3b4f62';g.beginPath();g.moveTo(w.x+L*.92,w.y+bob);g.lineTo(w.x+L*1.35,w.y-Wd*1.1+bob);g.lineTo(w.x+L*1.2,w.y+bob);g.lineTo(w.x+L*1.35,w.y+Wd*1.1+bob);g.closePath();g.fill();
+  g.fillStyle='rgba(232,246,255,.5)';for(let k=0;k<8;k++){const a=k/8*6.28+sec;g.fillRect(Math.round(w.x+Math.cos(a)*(L+6)),Math.round(w.y+Math.sin(a)*(Wd+5)),3,1)}}
  {const ph=sec%5.5;if(ph<1.4)spout(g,toPx(WHALE.x-22,WHALE.y+3),ph/1.4)}
  // shipyard on the right: dry dock, a hull being built, and a goliath gantry crane that slides along its rails
- {const d=toPx(-226,412);const x0=Math.round(d.x),y0=Math.round(d.y);
+ {const d=hb?toPx(-560,650):toPx(-226,412);const x0=Math.round(d.x),y0=Math.round(d.y);
   g.fillStyle='#5d6873';g.fillRect(x0-6,y0-40,150,84);g.fillStyle='#4a545e';g.fillRect(x0-2,y0-36,142,76);
   g.fillStyle='#2a6e9a';g.fillRect(x0+2,y0-32,134,68);
   // hull under construction (top-down): red bottom paint, grey deck, blocks being set
@@ -20,13 +26,13 @@ function drawUlsan(g,now){
   g.fillStyle='#1b1f24';g.fillRect(cx-3,y0-44,20,5);g.fillRect(cx-3,y0+38,20,5);
   const ty=Math.round(y0-6+Math.sin(sec*.37)*18);g.fillStyle='#ffbf3c';g.fillRect(cx+2,ty,10,8);g.fillStyle='#1b1f24';g.fillRect(cx+6,ty+8,2,6)}
  // a container ship crosses the bay
- {const u=((sec/150)%1),x=-250+u*500,q=toPx(x,441);const qx=Math.round(q.x),qy=Math.round(q.y);
+ {const u=((sec/150)%1),x=hb?-300+u*630:-250+u*500,q=toPx(x,hb?610:441);const qx=Math.round(q.x),qy=Math.round(q.y);
   g.fillStyle='rgba(255,255,255,.35)';for(let k=1;k<6;k++)g.fillRect(qx-30-k*7,qy-2+(k&1),5,1);
   g.fillStyle='#1d2a36';g.beginPath();g.moveTo(qx-30,qy-7);g.lineTo(qx+22,qy-7);g.lineTo(qx+32,qy);g.lineTo(qx+22,qy+7);g.lineTo(qx-30,qy+7);g.closePath();g.fill();
   const cc=['#d23a2e','#3f82e6','#f5c935','#3faa5b','#ef6a1f','#9aa5ae'];for(let k=0;k<6;k++)for(let j=0;j<2;j++){g.fillStyle=cc[(k*3+j*5)%6];g.fillRect(qx-20+k*6,qy-5+j*5,5,4)}
   g.fillStyle='#f4f1e8';g.fillRect(qx-28,qy-5,6,10);g.fillStyle='#1b1f24';g.fillRect(qx-27,qy-2,4,2)}
  // a second whale breaches every so often in the left-center bay
- {const cyc=13,ph=sec%cyc;if(ph<2.6){const k=Math.floor(sec/cyc),th=-16+((k*53)%26),r=fenceDist(th)+30,wp=toPx(Math.sin(th*RAD)*r,Math.cos(th*RAD)*r);
+ {const cyc=13,ph=sec%cyc;if(ph<2.6){const k=Math.floor(sec/cyc),th=-16+((k*53)%26),r=fenceDist(th)+30,wp=hb?toPx(-150+((k*53)%300),640+((k*31)%110)):toPx(Math.sin(th*RAD)*r,Math.cos(th*RAD)*r);
    const a=ph/2.6,up=Math.sin(Math.min(1,a*1.6)*Math.PI);
    if(a<.62){const L=8+up*22,Wd=4+up*7;g.fillStyle='#3b4f62';g.beginPath();g.ellipse(wp.x,wp.y-up*6,L,Wd,-.5,0,Math.PI*2);g.fill();g.fillStyle='#c9d6df';g.beginPath();g.ellipse(wp.x+2,wp.y-up*6+1,L*.6,Wd*.45,-.5,0,Math.PI*2);g.fill()}
    if(a>.5){const s=(a-.5)/.5;g.strokeStyle=`rgba(232,246,255,${(1-s)*.9})`;g.lineWidth=3;g.beginPath();g.ellipse(wp.x,wp.y,10+s*34,5+s*16,0,0,Math.PI*2);g.stroke();
@@ -35,7 +41,7 @@ function drawUlsan(g,now){
 }
 let WHALE={x:-120,y:400},PARK_C=null,PARK_MOW=null;
 function buildField(){
- {const th=12,r=fenceDist(th)+30;WHALE={x:Math.sin(th*RAD)*r,y:Math.cos(th*RAD)*r}}
+ {const th=12,r=fenceDist(th)+30;WHALE=ST.harbor?{x:-60,y:660}:{x:Math.sin(th*RAD)*r,y:Math.cos(th*RAD)*r}}
  const c=document.createElement('canvas');c.width=W;c.height=H;
  const g=c.getContext('2d');const img=g.createImageData(W,H),d=img.data;
  const rng=mulberry32(11);
@@ -86,6 +92,7 @@ function buildField(){
    else if(ST.feature==='fortress'&&th<-4&&th>-34&&r>fdh+10&&r<fdh+48)feat='fort';
    else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
    else if(ST.feature==='honey'&&ath<34&&r>fdh+3&&r<fdh+60)feat='honey';
+   else if(ST.feature==='whale'&&ST.harbor&&ath<ST.openTop&&r>=fdh+4&&!inPen)feat='harbor';
    else if(ST.feature==='whale'&&ath<36&&r>fdh+14)feat='whale';
    else if(ST.feature==='orchard'&&ath<36&&r>fdh+4&&!inPen)feat='orchard';
   }
@@ -95,6 +102,7 @@ function buildField(){
   else if(feat==='pool'){if(r<fdh+9||r>fdh+49)col=((px>>2)+(py>>2))&1?C.tile:C.tile2;else{const w=Math.sin(x*.42+y*.31)+Math.sin(y*.53-x*.19);col=w>1.35?C.poolHi:C.pool;seatMask[i]=4}}
   else if(feat==='fort'){const rw=Math.floor(py/7),off=(rw&1)*7;col=(py%7===0||(px+off)%14===0)?C.mortar:(((px+off)/14|0)+rw)%3===0?C.st2:C.st1;if(r<fdh+13&&((px>>3)&1))col=C.st2}
   else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
+  else if(feat==='harbor'){col=r*(ST.openTop-ath)*RAD<3.5?C.conc:(harborCol(px+.5,py+.5)||C.sea);if(H_SEAT)seatMask[i]=1}
   else if(feat==='whale'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea;
    const wx=WHALE.x,wy=WHALE.y,dx=x-wx,dy=y-wy,e=(dx/30)**2+(dy/(9-Math.max(0,dx)*.12))**2;
    if(e<1)col=dy<-3&&e>.35?C.whB:C.wh1;else{const tx=x-(wx+30),ty=y-wy;if(tx>0&&tx<12&&Math.abs(ty)<tx*.85&&Math.abs(ty)>tx*.25)col=C.wh2}}

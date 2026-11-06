@@ -54,7 +54,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
  const near=(x,y,pad)=>{if(insidePoly(OL,x,y))return true;for(let a=0;a<6.28;a+=.8)if(insidePoly(OL,x+Math.cos(a)*pad,y+Math.sin(a)*pad))return true;return false};
  if(STADIUMS[k].village)drawVillage(g,k,night,CW,CH,cx,cy,OL,rr,e);else{
  // water band along the top: the Han River for Seoul, the sea for the coastal clubs
- const wTop=cy(-660),wBot=cy(-420),hasWater=seoul||coast;
+ const wTop=cy(-660),wBot=cy(-420),hasWater=(seoul||coast)&&!STADIUMS[k].harbor;
  const inWater=(y,h)=>hasWater&&y+h>wTop-14&&y<wBot+14;
  // plaza ring: concrete apron with trees around the outer wall
  g.save();g.beginPath();OL.forEach((q,i)=>{const dx=q.x-cx(HX),dy=q.y-cy(HY),l=Math.hypot(dx,dy)||1,o=34;g[i?'lineTo':'moveTo'](q.x+dx/l*o,q.y+dy/l*o)});g.closePath();g.fillStyle=col.plaza;g.fill();g.restore();
@@ -63,7 +63,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
  g.setLineDash([4,5]);g.strokeStyle=col.lane;g.lineWidth=1;g.stroke();g.restore();
  // plaza trees + lamp posts
  for(let i=0;i<OL.length;i+=2){const q=OL[i],dx=q.x-cx(HX),dy=q.y-cy(HY),l=Math.hypot(dx,dy)||1,o=20+rr()*8,x=q.x+dx/l*o,y=q.y+dy/l*o;
-  if(rr()<.7){g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.arc(x+2,y+2,4,0,7);g.fill();g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x,y,4,0,7);g.fill();g.fillStyle=night?'#22402a':'#5aa64c';g.beginPath();g.arc(x-1,y-1,2,0,7);g.fill()}
+  if(rr()<.7){g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.arc(x+2,y+2,4,0,7);g.fill();if(STADIUMS[k].harbor&&rr()<.6)hBlossom(g,x,y,4,night);else{g.fillStyle=night?'#183020':'#3f8a3c';g.beginPath();g.arc(x,y,4,0,7);g.fill();g.fillStyle=night?'#22402a':'#5aa64c';g.beginPath();g.arc(x-1,y-1,2,0,7);g.fill()}}
   else if(night){const gr=g.createRadialGradient(x,y,0,x,y,10);gr.addColorStop(0,'rgba(255,225,150,.5)');gr.addColorStop(1,'rgba(255,225,150,0)');g.fillStyle=gr;g.fillRect(x-10,y-10,20,20)}}
  // avenues: a grid around the park
  const roadsV=[],roadsH=[];for(let x=18;x<CW;x+=90+Math.floor(rr()*40))roadsV.push(x);for(let y=16;y<CH;y+=80+Math.floor(rr()*36))roadsH.push(y);
@@ -113,7 +113,12 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   // a subway entrance and a row of food stalls on the plaza behind home
   {const p=toPx(0,-95),x=cx(p.x),y=cy(p.y)+6;R(x-30,y,60,8,night?'#2a2f38':'#e8e4dc');for(let q=0;q<6;q++)R(x-28+q*10,y+1,8,5,[T.jersey,'#e0473d','#ffbf3c',T.cap,'#3faa5b','#e8e4dc'][q]);
    R(x+40,y-2,10,10,'#2f7a3a');R(x+42,y,6,6,night?'#ffd98a':'#f4f1e8')}}
- if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}}// the city dims at night; the stadium stays lit (the village is lit like the park)
+ if(night){g.globalAlpha=.22;g.fillStyle='#0b1430';g.fillRect(0,0,CW,CH);g.globalAlpha=1}}
+ if(STADIUMS[k].harbor){// the sea, the shipyard shore and the pier, lit like the park (the bowl itself is painted below)
+  const mc=document.createElement('canvas');mc.width=CW;mc.height=CH;const mg=mc.getContext('2d');mg.beginPath();OL.forEach((q,i)=>mg[i?'lineTo':'moveTo'](q.x,q.y));mg.closePath();mg.fill();const md=mg.getImageData(0,0,CW,CH).data;
+  const lt=night?[0x5a,0x64,0x94]:[0xff,0xf7,0xea],img=g.getImageData(0,0,CW,CH),d=img.data;
+  for(let py=0;py<CH;py++){const wy=(py+.5)*2-e.my;for(let px=0;px<CW;px++){const j=(py*CW+px)*4;if(md[j+3]>200)continue;const c=harborCol((px+.5)*2-e.mx,wy);if(!c)continue;d[j]=c[0]*lt[0]/255;d[j+1]=c[1]*lt[1]/255;d[j+2]=c[2]*lt[2]/255;d[j+3]=255}}
+  g.putImageData(img,0,0)}// the city dims at night; the stadium stays lit (the village is lit like the park)
  // ---- the stands keep going past the park buffer, out to the outer wall ----
  // Painted with the same rules the park buffer uses (rows that follow the wall, risers, aisles toward home, the upper
  // deck colors, the outfield features) and the same crowd on the same 8px grid, so the two halves read as one bowl.
@@ -149,6 +154,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
    const wx=wX(px),x=(wx-HX)*FT,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fdh=fenceDist(th);let col=null,feat=null;
    if(y>0){if(ST.feature==='ocean'&&ath<33&&r>fdh+26)feat='sea';
     else if(ST.feature==='trees'&&ath<17&&r>fdh+8)feat='trees';
+    else if(ST.feature==='whale'&&ST.harbor&&ath<ST.openTop&&r>fdh+4)feat='harbor';
     else if(ST.feature==='whale'&&ath<36&&r>fdh+14)feat='sea';
     else if(ST.feature==='orchard'&&ath<36&&r>fdh+11)feat=ST.openTop&&ath<ST.openTop?'country':'orchard'}
    const j4=i*4,onRing=imd[j4]>200&&imd[j4+3]>128,inOld=imd[j4+3]>128&&!onRing;
@@ -159,6 +165,7 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
     put(i,col);continue}
    if(feat==='sea'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea}
    else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
+   else if(feat==='harbor'){col=r*(ST.openTop-ath)*RAD<3.5?C.conc:(harborCol(wx,wy)||C.sea);if(H_SEAT&&!empty)seatM[i]=1}
    else if(feat==='country'){col=r*(ST.openTop-ath)*RAD<3.5?C.conc:villageCol(wx,wy)}
    else if(feat==='orchard'){const q=Math.round(wy),p2=Math.round(wx),cy2=Math.floor(q/22),cx2=Math.floor((p2+(cy2&1)*11)/22),lx=(p2+(cy2&1)*11)-cx2*22-11,ly=q-cy2*22-11,d2=lx*lx+ly*ly;
     if(d2<64){col=d2<20&&lx<0&&ly<0?C.orT2:C.orT;if(((lx*7+ly*13+cx2*5+cy2*3)&15)===0)col=C.orF}else col=(q>>1)&1?C.orG:C.orG2}
@@ -190,6 +197,11 @@ function buildOutside(k,night,empty){// empty: batting practice, nobody in the s
   // a soft shadow where the roof overhangs the top rows
   g.save();g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath();g.clip();
   g.lineWidth=10;g.strokeStyle='rgba(0,0,0,.18)';if(ST.openTop)outlinePath(OL,x=>x,y=>y,g);else{g.beginPath();OL.forEach((q,i)=>g[i?'lineTo':'moveTo'](q.x,q.y));g.closePath()}g.stroke();g.restore()}
+  if(ST.harbor){drawHarborRoof(g,night,OL);
+   // the shore's buildings, ships and the gate, drawn by day and then lit like the rest of this layer
+   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');drawHarbor(lg,k,false,CW,CH,cx,cy,OL,e);
+   if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}
+   g.drawImage(L,0,0);if(night)drawHarborGlow(g,cx,cy,OL)}
   if(ST.village){// the town's buildings, lit like everything else on this layer
    const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);const glows=[];vTownDraw(lg,night?glows:null);
    const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);

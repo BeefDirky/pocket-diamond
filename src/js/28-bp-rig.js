@@ -349,7 +349,7 @@ function render(now){
      const col={HR:'#ffcf4a',LD:'#ff6a4a',FB:'#7fc8ff',POP:'#c9a6ff',GB:'#f4f1e8',FOUL:'#9aa5ae'}[pl.res.code]||'#f4f1e8';
      wg.fillStyle=col;for(let k=0;k<tr.length-1;k++){wg.globalAlpha=(k/tr.length)*.75;wg.fillRect(Math.round(tr[k].x)-1,Math.round(tr[k].y)-1,k>tr.length*.6?3:2,k>tr.length*.6?3:2)}wg.globalAlpha=1}
     drawBall(wg,q.x,q.y,p.h)}return true})}
- if(ST.feature==='whale')drawUlsan(wg,now);
+ if(ST.feature==='whale'&&!ST.harbor)drawUlsan(wg,now);
  for(const p of S.fx){wg.globalAlpha=Math.max(0,p.life);wg.fillStyle=p.col;wg.fillRect(Math.round(p.x),Math.round(p.y),3,3)}
  wg.globalAlpha=1;
  if(S.night){nightPass(wg,now);
@@ -382,6 +382,7 @@ function render(now){
    ctx.strokeStyle=TEAMS[S.you].jersey;ctx.lineWidth=Math.max(1,2.5*scale);ctx.stroke();ctx.restore()}
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
+ if(ST.harbor&&S.phase!=='title'){ctx.save();ctx.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);drawUlsan(ctx,now);ctx.restore()}// the harbor's whales and ships, out past the park
  drawNeon(ctx,vx0,vy0,scale,now);
  if(S.phase!=='title'){ctx.save();ctx.setTransform(scale*K,0,0,scale*K,-vx0*scale,-vy0*scale);ctx.imageSmoothingEnabled=false;drawJumbo(ctx,now);ctx.restore()}// the board stands above everything on its legs
  drawBallCam(now);

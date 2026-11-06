@@ -136,7 +136,7 @@ function vPavCanvas(night){const key=S.you+DIMS.join(',')+(night?'n':'d');if(V_P
   for(let k=-Math.floor(fm/BL);k<Math.floor(fm/BL);k++){const f=(k+.5)*BL;if(w(f)<.55)continue;const q=pt(f,1);const gr=g.createRadialGradient(q.x,q.y,0,q.x,q.y,30);gr.addColorStop(0,'rgba(255,190,110,.35)');gr.addColorStop(1,'rgba(255,190,110,0)');g.fillStyle=gr;g.fillRect(q.x-30,q.y-30,60,60)}
   g.restore()}
  V_PAVC={c,x0,y0,outer,ow:Array.from({length:N+1},(_,k)=>w(F(k)))};return V_PAVC}
-function drawNeon(c,vx0,vy0,scale,now){if(!ST||!ST.openTop||S.phase==='title')return;const night=!!S.night,P=vPavCanvas(night);
+function drawNeon(c,vx0,vy0,scale,now){if(!ST||!ST.village||S.phase==='title')return;const night=!!S.night,P=vPavCanvas(night);
  c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);c.imageSmoothingEnabled=scale<1.6;c.drawImage(P.c,P.x0,P.y0);
  if(night){c.globalCompositeOperation='lighter';c.lineCap='round';c.lineJoin='round';const show=S.lightShow&&now-S.lightShow<6000,O=P.outer,n=O.length,seg=12;
   for(let i=0;i<n-1;i+=seg){let col='255,138,40';if(show){const k=Math.floor((now-S.lightShow)/120+i/seg)%4;col=['255,138,40','255,70,170','80,220,255','255,230,90'][k]}
