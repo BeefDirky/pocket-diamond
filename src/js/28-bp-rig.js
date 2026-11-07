@@ -203,6 +203,9 @@ function render(now){
   const jp=inPlay&&play.jump&&play.jump.i===i&&t>play.jump.t-.32&&t<play.jump.t+.3?play.jump:null;
   if(jp){const u=(t-(jp.t-.32))/.62,hgt=Math.sin(clamp(u,0,1)*Math.PI)*11;
    add(q.y,()=>{wg.fillStyle='rgba(6,18,10,.3)';wg.fillRect(Math.round(q.x)-4,Math.round(q.y),9,2);drawPlayer(wg,q.x,q.y-hgt,fld,{legs:'lift',arms:'catch',frame:0,skin,pants:fldPants,flip,glove:true})});continue}
+  if(inPlay&&play.errMark&&play.errMark.i===i&&t>=play.errMark.t){// an error: a red "!" pops up over his head and stays through the result
+   const ea=t-play.errMark.t,pop=ea<.18?Math.round((1-ea/.18)*6):0,bob=Math.round(Math.sin(now/160)),ex=Math.round(q.x),ey=Math.round(q.y)-37-pop+bob;
+   add(1e6,()=>{wg.fillStyle='#14181c';wg.fillRect(ex-3,ey-1,7,13);wg.fillStyle='#ff3b30';wg.fillRect(ex-2,ey,5,7);wg.fillRect(ex-2,ey+8,5,3);wg.fillStyle='#ffd0c8';wg.fillRect(ex-2,ey,2,2)})}
   if(i===1&&!moving)add(q.y,()=>drawCatcher(wg,q.x,q.y,fld,{skin,pants:fldPants,target:ph==='windup'||ph==='pitch'}));
   else add(q.y,()=>{if(i===0&&now<S.wildUntil){wg.fillStyle='#1b1f24';wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-38,5,11);wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-25,5,5);wg.fillStyle='#ff4a3d';wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-37,3,9);wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-24,3,3)}if(pT!=null)drawPitcher(wg,q.x,q.y,fld,{skin,pants:fldPants,flip,side:pitcher().slot==='side'},pT);else drawPlayer(wg,q.x,q.y+lean,fld,{legs,arms,frame:fr+i,skin,pants:fldPants,flip,glove:true,...(armO||{})})});
  }
