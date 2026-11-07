@@ -4468,7 +4468,7 @@ function groundOut(play,it,P,runners){
       play.segs.push(holdSeg(play,tp,tt,cov1),throwSeg(tt,P2,BASES[2]));
       const c2=[5,3].find(k=>k!==i&&k!==cov1);if(c2!=null){if(!play.fk[c2])play.fk[c2]=cover(c2,BASES[2],tt+fl);else pushKey(play,c2,{t:tt+fl-.05,x:BASES[2].x,y:BASES[2].y-2})}}}
    }else{batR.out=true;batR.outAt=t1;outs++;code='GO'}
-  }else{code='IFH';batR.round=true}
+  }else{code='IFH'}// beat the throw: he runs straight through the bag, no turn toward second
  }
  if(bob&&code==='IFH'){code='E';note=`E${i+1}`}
  let cap=4;
