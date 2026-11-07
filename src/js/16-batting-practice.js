@@ -335,8 +335,9 @@ function runnerPos(r,t){
 }
 function hrMoment(r){const now=performance.now();if(!r.bp){S.lightShow=now;crowdClip('homer',batKey()===S.you?3:1.1)}// the ball lands in the seats: the crowd erupts (much louder for the home side)
 $('skipBtn').hidden=!!(S.online&&S.online.inGame&&pitching());banner(r.banner,r.sub,'hr');if(r.bp)return;S.baseChase=now;
- if(batKey()===S.you){const pl=S.play;S.hrHype=pl;setTimeout(()=>{if(S.play===pl&&!S.paused){duckMusic();playSample('horn',.9,1)}},700);
-  setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700+((BUF.horn&&BUF.horn.duration)||4.8)*1000+250)}
+ if(batKey()===S.you){const pl=S.play;S.hrHype=pl;const rex=S.you==='changwon'&&BUF.roar;// Fossil Yard answers a home run with one rex roar instead of the horns
+  setTimeout(()=>{if(S.play===pl&&!S.paused){duckMusic();playSample(rex?'roar':'horn',.9,1)}},700);
+  if(!rex)setTimeout(()=>{if(S.play===pl&&!S.paused)playSample('horn',.9,1)},700+((BUF.horn&&BUF.horn.duration)||4.8)*1000+250)}
  if(batKey()===S.you){S.cheerUntil=now+1e9;S.fwUntil=now+4600;setTimeout(()=>{if(!S.paused&&!muted)playSample('fworks',.85,1)},350);S.jumbo={text:r.banner.replace('!',''),kr:'홈런!',until:now+5200}}}
 const sideLabel=()=>S.mode==='arcade'?'INNING OVER':'CHANGE SIDES';
 // would three outs right now end the whole game? (then the final screen does the talking)
