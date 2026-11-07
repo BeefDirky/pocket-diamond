@@ -117,6 +117,16 @@ function drawSlider(g,X,Y,T,o,dir,lift){
  const x=Math.round(X),y=Math.round(Y),sk=o.skin,pa=o.pants,yy=y-Math.round(lift||0);
  const sc=v=>Math.round(v*1.2);const R=(c,dx,dy,w,h)=>{g.fillStyle=c;const x0=sc(dx),x1=sc(dx+w),y0=sc(dy),y1=sc(dy+h);g.fillRect(dir>0?x+x0:x-x1+1,yy+y0,Math.max(1,x1-x0),Math.max(1,y1-y0))};
  g.fillStyle='rgba(6,18,10,.3)';g.fillRect(x-9,y,19,2);
+ if(o.trans===1&&!o.head){// dropping into it: still half up, leaning back, the lead leg kicking out ahead
+  R(T.cap,-4,-17,4,4);R(T.brim,-5,-15,1,2);R(sk,-3,-14,2,2);R(T.jersey,-4,-12,6,6);R(BELT,0,-9,1,3);R(sk,-6,-10,2,2);
+  R(pa,0,-7,4,3);R(pa,4,-6,3,2);R('#f1ecdc',7,-6,1,2);R(SHOE,8,-7,2,3);R(pa,-1,-5,3,3);R(pa,-2,-3,2,2);R(SHOE,-3,-1,3,1);return}
+ if(o.trans===2&&!o.head){// almost down: hips just off the dirt, the trailing hand reaching for the ground
+  R(sk,-10,-5,2,2);R(T.cap,-8,-14,4,4);R(T.brim,-9,-12,1,2);R(sk,-7,-11,2,2);R(T.jersey,-6,-11,6,5);R(T.jersey,-8,-8,3,2);R(BELT,-1,-8,1,4);
+  R(pa,0,-8,5,3);R(pa,5,-7,4,2);R('#f1ecdc',9,-7,2,2);R(SHOE,11,-8,2,3);R(pa,0,-5,4,2);R(pa,3,-4,2,2);R(SHOE,4,-3,2,1);return}
+ if(o.trans===1&&o.head){// launching: body pitched forward, arms reaching, back leg pushing off
+  R(SHOE,-8,-2,3,1);R(pa,-6,-5,2,4);R(pa,-4,-8,3,3);R(BELT,-1,-9,1,3);R(T.jersey,-1,-12,6,5);R(T.cap,4,-15,4,4);R(T.brim,8,-13,1,2);R(sk,5,-12,2,2);R(sk,7,-11,3,1);R(sk,6,-9,3,1);return}
+ if(o.trans===2&&o.head){// flying flat, just off the ground
+  R(SHOE,-11,-7,2,2);R(pa,-9,-7,5,3);R(BELT,-4,-7,1,3);R(T.jersey,-3,-8,8,4);R(T.cap,5,-10,4,4);R(T.brim,9,-8,1,2);R(sk,6,-7,2,2);R(sk,9,-6,3,1);R(sk,9,-9,2,1);return}
  if(o.head){R(SHOE,-11,-5,2,2);R(pa,-9,-5,5,3);R(BELT,-4,-5,1,3);R(T.jersey,-3,-6,8,4);R(T.cap,5,-8,4,4);R(T.brim,9,-6,1,2);R(sk,6,-5,2,2);R(sk,9,-4,3,1);R(sk,9,-7,2,1)}
  else{// feet first: leaning back on one hand, lead leg out straight at the bag with the spikes up, the other tucked under
   R(sk,-11,-3,2,2);// trailing hand on the dirt

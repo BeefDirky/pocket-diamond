@@ -237,7 +237,8 @@ function render(now){
     if(t<r.slide.t1){for(let n=0;n<6;n++)if(Math.random()<.9)DUST.push({x:sq.x+rand(-7,7),y:sq.y+rand(-2,1),vx:rand(-34,34)-dir*18,vy:rand(-42,-8),life:rand(.35,.85),m:0,s:Math.random()<.35?3:2,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a','#ead2ae'])})}
     else if(!r.slide.puff){r.slide.puff=true;const bq2=toPx(bb.x,bb.y);for(let n=0;n<34;n++)DUST.push({x:bq2.x+rand(-8,8),y:bq2.y+rand(-3,2),vx:rand(-55,55),vy:rand(-46,-6),life:rand(.45,1.1),m:0,s:Math.random()<.4?3:2,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a','#ead2ae'])})}
     const back=dir*(r.slide.head?14:16)*K/1.333*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// the lead hand or spikes reach exactly the bag// keep the leading hand (or spikes) on the bag, then get up onto it
-    add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},dir,u<1?(1-u)*3:0));continue}
+    const dn=t-r.slide.t0,upT=t-(r.slide.t1+.3),trans=dn<.09?1:dn<.18?2:upT>.14?1:upT>0?2:0;// in-between frames going down and getting back up
+    add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head,trans},dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));
   }
  }else if(ph!=='title'){
