@@ -31,7 +31,7 @@ function hTheme(){const k=(ST&&ST.bowl)||'harbor';if(!HB0.rail)for(const k2 in H
  H_DK=T.dk||{R:[[68,0],[80,44],[96,82],[118,114],[148,150],[180,168]],L:[[34,0],[52,64],[78,122],[112,148],[180,168]]};H_ROOF=T.roof||[62,84,166];H_GATES=T.gates||[180,-146,146,-112,114];
  const sp=(T.seats||[['#1f3f7a','#1b3870'],['#2f6fd0','#2a63bb'],['#5aa0e6','#5193d6']]).map(p=>p.map(hRGB));H_SEATS.splice(0,3,...sp);H_SEATU.splice(0,2,...(T.seatU||[[27,47,94],[24,42,84]]));H_CHEERI=T.cheer!=null?T.cheer:2;H_SYM=!!T.sym}
 let H_CHEERI=2,H_SYM=false;
-let H_KIND=0,H_SEAT=false,H_EMIS=false,H_SHADE=false,H_NIGHT=false;
+let H_ROWF=0,H_KIND=0,H_SEAT=false,H_EMIS=false,H_SHADE=false,H_NIGHT=false;
 const hRGB=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)];
 const HB=Object.fromEntries(Object.entries({rail:'#c9ced3',railD:'#59626c',conc:'#3a4048',concLit:'#ffcf7a',led1:'#5fd4ff',led2:'#e8f6ff',led3:'#2f6fd0',ledD:'#14325a',
  roof:'#dfe4e9',roof2:'#d2d8de',rib:'#b9c1c9',roofEdge:'#ffffff',gutter:'#8d96a0',par:'#4a525c',fTop:'#d9dde1',fTop2:'#cbd0d5',mull:'#55606c',glass:'#8fb7d3',glass2:'#7ea7c6',
@@ -159,7 +159,7 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
  const seat=(d0,upper)=>{const t=(d-d0)/2.4,row=Math.floor(t),fr=t-row,m=sStep(upper),dm=Math.abs(m-step/2);
   if(dm<1.3)return upper?hMul(HB.rail,.82):HB.rail;// stairs
   if(dm<1.9)return upper?[20,26,34]:[30,38,48];// their edges
-  if(fr>.76)return upper?[22,28,36]:[34,42,52];H_SEAT=true;return hSeat(ha,row,upper,TH.sym?(AL.piece===2?1:AL.piece)*100+Math.floor(Math.abs(AL.s)/(step*3)):AL.piece*100+Math.floor((AL.s+(upper?step/2:0))/(step*3)))};// a mirrored park picks each section's colour from its distance off the centre line
+  if(fr>.76)return upper?[22,28,36]:[34,42,52];H_SEAT=true;H_ROWF=fr;return hSeat(ha,row,upper,TH.sym?(AL.piece===2?1:AL.piece)*100+Math.floor(Math.abs(AL.s)/(step*3)):AL.piece*100+Math.floor((AL.s+(upper?step/2:0))/(step*3)))};// a mirrored park picks each section's colour from its distance off the centre line
  let c;
  const roofPx=k=>{if(k<.8)return HB.gutter;if(k<1.8)return HB.roofEdge;if(d>fac-1.4)return HB.gutter;const m=((sF%10)+10)%10;if(m<1)return HB.rib;return (Math.floor(sF/10)&1)?HB.roof:HB.roof2};
  if(d<L1){c=seat(lo,false);if(D>70&&d>L1-9)c=hMul(c,.5+.3*clamp((L1-d)/9,0,1))}// the upper deck's overhang shades the back rows

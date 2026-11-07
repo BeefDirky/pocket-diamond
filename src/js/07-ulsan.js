@@ -126,7 +126,7 @@ function buildField(){H_NIGHT=false;
   else if(feat==='pool'){if(r<fdh+9||r>fdh+49)col=((px>>2)+(py>>2))&1?C.tile:C.tile2;else{const w=Math.sin(x*.42+y*.31)+Math.sin(y*.53-x*.19);col=w>1.35?C.poolHi:C.pool;seatMask[i]=4}}
   else if(feat==='fort'){const rw=Math.floor(py/7),off=(rw&1)*7;col=(py%7===0||(px+off)%14===0)?C.mortar:(((px+off)/14|0)+rw)%3===0?C.st2:C.st1;if(r<fdh+13&&((px>>3)&1))col=C.st2}
   else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
-  else if(feat==='harbor'){if(HSEA&&HSEA[(py>>3)*HSW+(px>>3)])col=hSeaCol(x,y,px+.5,py+.5);else{col=harborCol(px+.5,py+.5)||(ST.bowl==='brick'?((HY-py)*FT>120?fTrees(px+.5,py+.5):S.night?[44,46,54]:[214,210,200]):ST.bowl==='steel'?(S.night?[44,46,54]:[214,210,200]):[200,198,192]);if(H_SEAT)seatMask[i]=1}}
+  else if(feat==='harbor'){if(HSEA&&HSEA[(py>>3)*HSW+(px>>3)])col=hSeaCol(x,y,px+.5,py+.5);else{col=harborCol(px+.5,py+.5)||(ST.bowl==='brick'?((HY-py)*FT>120?fTrees(px+.5,py+.5):S.night?[44,46,54]:[214,210,200]):ST.bowl==='steel'?(S.night?[44,46,54]:[214,210,200]):[200,198,192]);if(H_SEAT)seatMask[i]=H_ROWF>.16&&H_ROWF<.52?5:1}}
   else if(feat==='whale'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea;
    const wx=WHALE.x,wy=WHALE.y,dx=x-wx,dy=y-wy,e=(dx/30)**2+(dy/(9-Math.max(0,dx)*.12))**2;
    if(e<1)col=dy<-3&&e>.35?C.whB:C.wh1;else{const tx=x-(wx+30),ty=y-wy;if(tx>0&&tx<12&&Math.abs(ty)<tx*.85&&Math.abs(ty)>tx*.25)col=C.wh2}}
@@ -172,7 +172,10 @@ function buildField(){H_NIGHT=false;
  }
  // seat fans on a grid over seat pixels
  FANS=[];
- for(let py=5;py<H-5;py+=8)for(let px=5;px<W-5;px+=8){
+ if(ST.bowl){// the bowl parks: a fan on (nearly) every seat, sitting on the row's centre line, one per 5px cell so they pack like a real crowd
+  for(let cy=0;cy<H-5;cy+=5)for(let cx=0;cx<W-5;cx+=5){let px=-1,py=-1;for(const[ox,oy]of[[2,2],[1,2],[3,2],[2,1],[2,3],[1,1],[3,3],[1,3],[3,1],[0,2],[4,2],[2,0],[2,4]]){const i=(cy+oy)*W+cx+ox;if(seatMask[i]===5){px=cx+ox;py=cy+oy;break}}
+   if(px<0)continue;const ang=Math.atan2(px-HX,HY-py)/RAD,bh=Math.abs(ang)>128;if(rng()>(bh?.95:.8))continue;const j=(py*W+px)*4;FANS.push({x:px,y:py,bg:`rgb(${d[j]},${d[j+1]},${d[j+2]})`,ang,sm:1})}}
+ else for(let py=5;py<H-5;py+=8)for(let px=5;px<W-5;px+=8){
   // behind home plate the seats are full: every seat gets a fan (elsewhere a few are empty)
   const i=py*W+px,bh=Math.abs(Math.atan2(px-HX,HY-py)/RAD)>128;if(!seatMask[i]||(!bh&&(!seatMask[i-3]||!seatMask[i+3])))continue;
   const sm=seatMask[i];if(!bh&&rng()>(sm===2?.22:sm===3?.32:sm===4?.16:.88))continue;
