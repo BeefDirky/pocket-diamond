@@ -3412,7 +3412,10 @@ function orbitCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
  const a=q-hPenOff(th)-H_WALLW;if(a<0)return null;
  if(a>=O_ROOF.a0-2&&a<O_ROOF.a0&&ath>O_ROOF.tEnd)return OC.und;// the shadow under the vault's edge
  if(a>=O_ROOF.a0&&a<O_ROOF.a1){const v=oVault(a,s,th);if(v)return v}
- if(a>=O_ROOF.a1){const c=bCoastCol(x,y,wx,wy);if(c)return c;return null}
+ if(a>=O_ROOF.a1){const c=bCoastCol(x,y,wx,wy);if(c)return c;
+  const b=a-O_ROOF.a1;if(b<16&&ath>2){// a paved apron round the back of the vaults, the vault's shadow lying across it
+   if(b<1)return OC.stlD;const sh=b<7;if((((s%10)+10)%10)<.35||(((b%10)+10)%10)<.35)return sh?hMul(OC.paveJ,.7):OC.paveJ;const p=vPerson(wx,wy,4);if(p)return sh?hMul(p,.7):p;return sh?hMul(OC.pave2,.66):OC.pave}
+  return null}
  if(ath<10&&a<58)return oMC(a,s);
  if(ath<10){const p=vPerson(wx,wy,8);if(p)return p;return (Math.floor(s/9)&1)?OC.pave:OC.pave2}
  if(th<0){if(a<3)return a<1?OC.wallS2:OC.wallS;return oLawn(a,s,wx,wy)}
@@ -3457,10 +3460,26 @@ function drawOrbit(g,k,night,CW,CH,cx,cy,OL,e){
  if(LOGO[k]){g.imageSmoothingEnabled=false;g.fillStyle='#141c44';g.beginPath();g.arc(gx,y0-2,12,0,7);g.fill();g.strokeStyle='#e94e77';g.lineWidth=2;g.stroke();g.drawImage(LOGO[k],gx-9,y0-11,18,18)}
  // tall banners with a planet and its ring
  for(const sd of[-1,1])for(const off of[78,100]){const bx=gx+sd*off-5;R(bx+2,y0+16,10,26,'rgba(0,0,0,.3)');R(bx,y0+14,10,24,'#141c44');R(bx,y0+14,10,2,'#e94e77');g.fillStyle='#ff8ab0';g.beginPath();g.arc(bx+5,y0+25,3,0,7);g.fill();R(bx+1,y0+25,8,1,'#f4f1f8')}
- // Songdo's towers off to the right, tall glass with long shadows
- const T=[[CW*.78,cy(HY-1400),14,'#4a6a90'],[CW*.84,cy(HY-1300),18,'#3e5c80'],[CW*.9,cy(HY-1450),12,'#56789e'],[CW*.82,cy(HY-1150),10,'#5a7896']];
- for(const[tx,ty,s,c]of T){if(tx<0||ty<0||ty>CH)continue;g.fillStyle=night?'rgba(0,0,0,.5)':'rgba(10,20,30,.28)';g.beginPath();g.moveTo(tx-s/2,ty-s/2);g.lineTo(tx+s/2,ty-s/2);g.lineTo(tx+s/2+70,ty+s/2+46);g.lineTo(tx-s/2+70,ty+s/2+46);g.closePath();g.fill();
-  R(tx-s/2,ty-s/2,s,s,night?shade(c,-.45):c);R(tx-s/2,ty-s/2,s,2,night?'#ffc878':'#b8d0e8');R(tx-s/2,ty-s/2,2,s,night?shade(c,-.2):shade(c,.25));if(night)for(let yy=ty-s/2+3;yy<ty+s/2;yy+=3)for(let xx=tx-s/2+3;xx<tx+s/2-1;xx+=3)if(((xx*7+yy*3)|0)%5)R(xx,yy,1,1,'#ffd98a')}
+ // the port along the shore: a container terminal on the quay, ship-to-shore cranes reaching out over the water, a moored ship
+ {const off=u=>bExt()+260+16*Math.sin(u/150)+7*Math.sin(u/61),P=(u,t)=>{const o=off(u),x=.6*u-.8*(t+o),y=180+.8*u+.6*(t+o);return{x:cx(HX+x/FT),y:cy(HY-y/FT)}};
+  let u0=null;for(let u=-3000;u<3000;u+=20){const p=P(u,-30);if(p.x>40&&p.x<CW*.45&&p.y>20&&p.y<CH*.22){u0=u;break}}
+  if(u0!==null){const ang=Math.atan2(P(u0+100,-30).y-P(u0,-30).y,P(u0+100,-30).x-P(u0,-30).x),CC=['#e94e77','#2f6fd0','#1d2a5e','#e8e4dc','#3faa5b','#f5c935','#9aa3ad'],rr=mulberry32(4040);
+   const box=(u,t,lu,lt,col,h)=>{const p=P(u,t);g.save();g.translate(p.x,p.y);g.rotate(ang);g.fillStyle=night?'rgba(0,0,0,.45)':'rgba(10,20,30,.3)';g.fillRect(h,h*.8,lu/FT/2,lt/FT/2);g.fillStyle=night?shade(col,-.45):col;g.fillRect(0,0,lu/FT/2,lt/FT/2);g.fillStyle='rgba(255,255,255,.3)';g.fillRect(0,0,lu/FT/2,1);g.restore()};
+   // the yard: paving over the promenade, then rows of container stacks
+   {const p=P(u0-20,-50);g.save();g.translate(p.x,p.y);g.rotate(ang);g.fillStyle=night?'#2a2d33':'#a7aaae';g.fillRect(0,0,520/FT/2,44/FT/2);g.restore()}
+   for(let u=u0;u<u0+480;u+=22)for(let t=-46;t<-14;t+=11){if(rr()<.15)continue;const ht=1+(rr()*3|0);box(u,t,20,8,CC[(rr()*CC.length)|0],ht)}
+   // a ship alongside
+   {const p=P(u0+60,4);g.save();g.translate(p.x,p.y);g.rotate(ang);const L=320/FT/2,B=36/FT/2;g.fillStyle='rgba(0,0,0,.3)';g.fillRect(4,4,L,B);g.fillStyle='#8f2a24';g.fillRect(0,0,L,B);g.fillStyle='#1d2a36';g.fillRect(3,3,L-6,B-6);
+    for(let x=6;x<L-30;x+=6)for(let y=4;y<B-5;y+=4){g.fillStyle=CC[(rr()*CC.length)|0];g.fillRect(x,y,5,3)}g.fillStyle='#eef1f5';g.fillRect(L-24,2,14,B-4);if(night){g.fillStyle='#ffc878';g.fillRect(L-22,4,2,2)}g.restore()}
+   // cranes: legs on the quay, a boom out over the ship
+   for(const du of[40,140,240,340]){const p=P(u0+du,-10),q=P(u0+du,46);g.fillStyle=night?'rgba(0,0,0,.4)':'rgba(10,20,30,.3)';g.save();g.translate(p.x+14,p.y+10);g.rotate(Math.atan2(q.y-p.y,q.x-p.x));g.fillRect(0,-2,Math.hypot(q.x-p.x,q.y-p.y),4);g.restore();
+    g.save();g.translate(p.x,p.y);g.rotate(Math.atan2(q.y-p.y,q.x-p.x));const bl=Math.hypot(q.x-p.x,q.y-p.y);g.fillStyle='#eef1f5';g.fillRect(-10,-2,bl+10,4);g.fillStyle='#e94e77';for(let x=-8;x<bl;x+=8)g.fillRect(x,-2,4,4);
+    g.fillStyle='#e94e77';g.fillRect(-12,-7,5,14);g.fillRect(-2,-7,5,14);g.fillStyle='#22262e';g.fillRect(bl*.45,-3,5,6);if(night){g.fillStyle='#ff4a4a';g.fillRect(bl-1,-1,2,2)}g.restore()}}}
+ // Songdo's towers to the upper right: tall glass slabs and one twisted crown, long shadows
+ const T=[[.80,.07,46,'#4a6a90'],[.88,.05,58,'#3e5c80'],[.95,.12,40,'#56789e'],[.83,.17,34,'#5a7896'],[.93,.24,44,'#4a6a90'],[.86,.29,30,'#62809c']];
+ for(const[fx,fy,sz,c]of T){const tx=CW*fx,ty=CH*fy,hh=sz*1.6;g.fillStyle=night?'rgba(0,0,0,.5)':'rgba(10,20,30,.28)';g.beginPath();g.moveTo(tx-sz/2,ty-sz/2);g.lineTo(tx+sz/2,ty-sz/2);g.lineTo(tx+sz/2+hh,ty+sz/2+hh*.66);g.lineTo(tx-sz/2+hh,ty+sz/2+hh*.66);g.closePath();g.fill();
+  R(tx-sz/2,ty-sz/2,sz,sz,night?shade(c,-.45):c);R(tx-sz/2,ty-sz/2,sz,2,night?'#ff8ab0':'#b8d0e8');R(tx-sz/2,ty-sz/2,2,sz,night?shade(c,-.2):shade(c,.25));R(tx-4,ty-4,8,8,night?'#ffc878':'#eef1f5');R(tx-2,ty-2,4,4,'#e94e77');if(!night)for(let xx=tx-sz/2+4;xx<tx+sz/2-2;xx+=4)R(xx,ty-sz/2+3,1,sz-5,'rgba(255,255,255,.18)');
+  if(night)for(let yy=ty-sz/2+3;yy<ty+sz/2;yy+=3)for(let xx=tx-sz/2+3;xx<tx+sz/2-1;xx+=3)if(((xx*7+yy*3)|0)%5)R(xx,yy,1,1,'#ffd98a')}
  // an airliner on approach to the airport, far off over the water
  {const ax=CW*.1,ay=CH*.08;g.save();g.translate(ax,ay);g.rotate(-.5);g.fillStyle='rgba(0,0,0,.18)';g.fillRect(14,20,22,3);g.fillStyle='#eef1f5';g.fillRect(-11,-1,22,3);g.fillRect(-2,-9,4,18);g.fillRect(-11,-4,2,8);g.fillStyle='#e94e77';g.fillRect(-11,-4,2,3);if(night){g.fillStyle='#ff4a4a';g.fillRect(-2,-9,1,1);g.fillStyle='#4aff7a';g.fillRect(1,8,1,1)}g.restore()}}
 // ---- night: magenta accents along the vault edges and the entrance, warm light from the concourse and the hill's lamps ----
@@ -3472,7 +3491,7 @@ function drawOrbitLights(c,vx0,vy0,scale,now){if(!ST||ST.bowl!=='orbit'||!S.nigh
   for(let th=-44;th<=44;th+=3){if(Math.abs(th)<O_ROOF.tEnd+1)continue;const p=oXY(th,O_ROOF.a0+1);glow(p.x,p.y,26,'233,78,119',.28)}
   for(let th=12;th<44;th+=4){const p=oXY(th,7);glow(p.x,p.y,30,'255,200,120',.3)}
   for(let th=-42;th<-12;th+=5){const p=oXY(th,22);glow(p.x,p.y,26,'255,214,160',.18)}
-  {const p=oXY(0,8);glow(p.x,p.y,80,'255,200,130',.25)}
+  {const p=oXY(0,8);glow(p.x,p.y,90,'255,200,130',.32);for(const th of[-7,-3.5,0,3.5,7]){const q=oXY(th,4);glow(q.x,q.y,22,'255,210,150',.35)}}
   O_NL={cv,x0,y0,x1,y1}}
  const N=O_NL;c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);c.globalCompositeOperation='lighter';c.drawImage(N.cv,N.x0,N.y0,N.x1-N.x0,N.y1-N.y0);c.restore()}
 // ---- the board (K units): set into mission control's front, ORBIT PARK lit above it, INCHEON COSMOS below, a countdown and an orbit ----
