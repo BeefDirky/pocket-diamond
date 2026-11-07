@@ -332,7 +332,7 @@ function hSpots(){const key=DIMS.join(',');if(H_SPOTS&&H_SPOTS_K===key)return H_
  return H_SPOTS=out}
 // is this point on (or right by) the right-field deck?
 function hOwnDeck(x,y){const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;if(y<=0||th<=8||th>45)return false;return r<fenceDist(th)+hPenOff(th)+H_WALLW+hDeckW(th)+10}
-const H_PCOL=[['#2f6fd0','#f4f6fa'],['#14325a','#f4f6fa'],['#5aa0e6','#f4f6fa']];
+const H_PCOL=[['#2f6fd0','#f4f6fa'],['#14325a','#f4f6fa'],['#5aa0e6','#f4f6fa'],['#e8642a','#f4f6fa'],['#e8642a','#1d3f78']];
 function hParasol(g,x,y,col,sc){sc=sc||1;const r=11*sc,[c1,c2]=H_PCOL[col];
  g.fillStyle='rgba(16,24,32,.28)';g.beginPath();g.arc(x+5*sc,y+4*sc,r,0,7);g.fill();// its shadow on the boards
  g.fillStyle='#6b4a2e';const ch=Math.max(2,Math.round(3*sc));g.fillRect(Math.round(x-r-ch),Math.round(y-1),ch,ch);g.fillRect(Math.round(x+r),Math.round(y-1),ch,ch);// two chairs peeking out
