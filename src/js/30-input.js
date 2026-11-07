@@ -47,7 +47,10 @@ $('goMulti').addEventListener('click',()=>{ensureAudio();openOnline()});
 // first frame of the new park has been drawn
 function withLoading(work){const L=$('loadScr');if(L.parentNode!==document.body)document.body.appendChild(L);/* above every stage layer */const k=S.you,T=TEAMS[k];$('loadLogo').src=LOGO_URL[k]||'';$('loadPark').textContent=(STADIUMS[k]&&STADIUMS[k].name)||'';$('loadClub').textContent=T?`${T.city} ${T.name}`:'';
  L.style.setProperty('--tc',T?T.jersey:'#2f6fd0');L.hidden=false;L.classList.remove('out');
- const t0=performance.now();requestAnimationFrame(()=>requestAnimationFrame(()=>{setTimeout(()=>{try{work()}finally{requestAnimationFrame(()=>requestAnimationFrame(()=>{setTimeout(()=>{L.classList.add('out');setTimeout(()=>{L.hidden=true},260)},Math.max(0,700-(performance.now()-t0)))}))}},30)}))}
+ const bar=L.querySelector('.ldBar i');bar.style.transition='none';bar.style.width='0%';void bar.offsetWidth;
+ requestAnimationFrame(()=>{bar.style.transition='width .5s steps(10,end)';bar.style.width='80%';// fill most of the way, then build the park
+  setTimeout(()=>{try{work()}finally{bar.style.transition='width .2s steps(4,end)';bar.style.width='100%';
+   requestAnimationFrame(()=>requestAnimationFrame(()=>{setTimeout(()=>{L.classList.add('out');setTimeout(()=>{L.hidden=true},260)},280)}))}},520)})}
 $('playGo').addEventListener('click',()=>{tsInfoOpen(false);if(parkFromBP){withLoading(()=>{tsFlush();backToCage()});return}const m=pendingMode;pendingMode=null;$('playGo').hidden=true;
  if(m==='playoffs'){tsFlush();openBracket(true);return}if(m==='online'){tsFlush();openOnline();return}
  withLoading(()=>{tsFlush();if(m==='watch'){S.auto=true;syncAuto();startGame('full');return}if(m){S.auto=false;syncAuto();startGame(m)}if(typeof render==='function')render(performance.now())})});

@@ -58,7 +58,7 @@ function dustAt(key,x,y,h){let st=GROUND.get(key);if(!st){GROUND.set(key,{h,n:0}
   for(let k=0;k<n;k++)DUST.push({x:q.x+rand(-2,2),y:q.y+rand(-1,1),vx:rand(-34,34),vy:rand(-34,-6),life:rand(.35,.7),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
 }
 function drawDust(g,now){const dt=Math.min(.05,(now-(dustT||now))/1000);dustT=now;
- for(const d of DUST){d.m+=dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.vy+=70*dt;d.vx*=.92;const a=Math.max(0,1-d.m/d.life);if(a<=0)continue;g.globalAlpha=a*.85;g.fillStyle=d.c;g.fillRect(Math.round(d.x),Math.round(d.y),2,2)}
+ for(const d of DUST){d.m+=dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.vy+=70*dt;d.vx*=.92;const a=Math.max(0,1-d.m/d.life);if(a<=0)continue;g.globalAlpha=a*.85;g.fillStyle=d.c;g.fillRect(Math.round(d.x),Math.round(d.y),d.s||2,d.s||2)}
  g.globalAlpha=1;DUST=DUST.filter(d=>d.m<d.life)}
 // light towers: on all night, off by day; after a home run each bank blinks off and on, one after another
 function towerOn(i,now){const s=S.lightShow,base=!!S.night;if(!s)return base;const t=now-s-i*380;if(t<0||t>4400)return base;return Math.floor(t/440)%2===(base?0:1)?!base:base}
@@ -225,8 +225,8 @@ function render(now){
     if(!r.slide.p0)r.slide.p0=runnerPos(r,r.slide.t0);const p0=r.slide.p0,E=r.out?{x:lerp(bb.x,p0.x,.12),y:lerp(bb.y,p0.y,.12)}:bb,k3=1-(1-u)*(1-u);
     const sp={x:lerp(p0.x,E.x,k3),y:lerp(p0.y,E.y,k3)},sq=toPx(sp.x,sp.y);
     // a rooster tail of dirt kicked up along the slide, and a puff at the bag when he gets there
-    if(t<r.slide.t1){for(let n=0;n<2;n++)if(Math.random()<.85)DUST.push({x:sq.x+rand(-4,4),y:sq.y+rand(-1,1),vx:rand(-26,26)-dir*12,vy:rand(-30,-8),life:rand(.3,.6),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
-    else if(!r.slide.puff){r.slide.puff=true;const bq2=toPx(bb.x,bb.y);for(let n=0;n<14;n++)DUST.push({x:bq2.x+rand(-5,5),y:bq2.y+rand(-2,2),vx:rand(-40,40),vy:rand(-34,-6),life:rand(.4,.8),m:0,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a'])})}
+    if(t<r.slide.t1){for(let n=0;n<6;n++)if(Math.random()<.9)DUST.push({x:sq.x+rand(-7,7),y:sq.y+rand(-2,1),vx:rand(-34,34)-dir*18,vy:rand(-42,-8),life:rand(.35,.85),m:0,s:Math.random()<.35?3:2,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a','#ead2ae'])})}
+    else if(!r.slide.puff){r.slide.puff=true;const bq2=toPx(bb.x,bb.y);for(let n=0;n<34;n++)DUST.push({x:bq2.x+rand(-8,8),y:bq2.y+rand(-3,2),vx:rand(-55,55),vy:rand(-46,-6),life:rand(.45,1.1),m:0,s:Math.random()<.4?3:2,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a','#ead2ae'])})}
     const back=dir*(r.slide.head?14:16)*K/1.333*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// the lead hand or spikes reach exactly the bag// keep the leading hand (or spikes) on the bag, then get up onto it
     add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head},dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));

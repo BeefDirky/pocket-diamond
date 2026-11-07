@@ -756,9 +756,11 @@ body.inMenu .olNet{display:none!important}
 #loadScr #loadClub{font-size:26px;letter-spacing:.08em;margin-top:6px}
 #loadScr #loadPark{font-size:13px;letter-spacing:.2em;color:#9aa6b0}
 #loadScr .ldBar{width:240px;height:14px;border:3px solid #f4f1e8;margin-top:14px;padding:2px;box-sizing:content-box;overflow:hidden}
-#loadScr .ldBar i{display:block;height:100%;width:40%;background:repeating-linear-gradient(90deg,var(--tc) 0 10px,transparent 10px 14px);animation:ldRun .9s steps(12) infinite}
+#loadScr .ldBar i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,var(--tc) 0 10px,transparent 10px 14px)}
 #loadScr .ldTxt{font-size:12px;letter-spacing:.2em;color:#ffbf3c;margin-top:4px}
 #loadScr .ldTxt span{display:inline-block;width:3ch;text-align:left;animation:ldDots 1.2s steps(4) infinite;overflow:hidden;vertical-align:bottom}
 @keyframes ldRun{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
 @keyframes ldBob{50%{transform:translateY(-4px)}}
 @keyframes ldDots{from{width:0}to{width:4ch}}
+/* the loading bar fills from left to right (width is driven by the loader) */
+#loadScr .ldBar i{animation:none;transform:none;width:0;background:repeating-linear-gradient(90deg,var(--tc) 0 10px,transparent 10px 14px)}
