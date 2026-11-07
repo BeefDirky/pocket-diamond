@@ -830,6 +830,7 @@ body.inMenu .olNet{display:none!important}
 .lfField{aspect-ratio:115/100;image-rendering:pixelated}
 @media (max-width:720px){.lfField{aspect-ratio:115/100}}
 .lfField{max-height:56vh;width:auto;max-width:100%}
+body.phOver .pauseBtn{display:none!important}
 </style>
 
 <div class="app">
@@ -3869,7 +3870,7 @@ const onlineGame=()=>!!(S.online&&S.online.inGame);
 const S={phase:'title',pt:0,you:(()=>{try{const k=localStorage.getItem('pd-club');if(k&&/^[a-z]+$/.test(k))return k}catch(e){}return 'busan'})(),opp:'seoul',mode:'arcade',half:'bot',bat:null,fld:null,orderOf:{},pIdxOf:{},pcOf:{},pRunsOf:{},pBFOf:{},myErrs:0,myK:0,wildUntil:0,inning:1,totalInn:INNINGS,outs:0,balls:0,strikes:0,runs:0,hits:0,hr:0,ks:0,
  target:0,oppLine:[],youLine:[],oppHits:0,bases:[null,null,null],order:0,pitch:null,swing:null,play:null,
  cam:{...CAM_FULL},zoom:1,camMode:'full',camV:{x:0,y:0,z:0},flame:0,umpPunch:0,camFrom:null,camTo:null,camT:0,camDur:1,cheerUntil:0,jumbo:null,presIdx:2,wave:null,fx:[],fwUntil:0,flashes:[],fidg:[],bb:null,gulls:[],nextGull:0,vendors:null};
-const setPhase=p=>{S.phase=p;S.pt=0;document.body.classList.toggle('inMenu',p==='title');const sb=document.getElementById('skipBtn');if(sb&&p!=='play')sb.hidden=true};
+const setPhase=p=>{S.phase=p;S.pt=0;document.body.classList.toggle('inMenu',p==='title');document.body.classList.toggle('phOver',p==='over');const sb=document.getElementById('skipBtn');if(sb&&p!=='play')sb.hidden=true};
 const fldKey=()=>S.fld||S.opp,batKey=()=>S.bat||S.you;
 const pitcher=()=>{const k=fldKey(),T=TEAMS[k];return(T.staff||[T.pitcher])[(S.pIdxOf&&S.pIdxOf[k])||0]};
 const curBatter=()=>{const k=batKey();return TEAMS[k].lineup[(S.orderOf&&S.orderOf[k])||0]};
@@ -4764,7 +4765,7 @@ function gameOver(win){const onl=onlineGame();
  awardPacks(win);
  $('toLobby').hidden=!onl;if(onl){resumeClear();$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false}
- if(S.celebr){const ce=S.celebr;setTimeout(()=>{if(S.phase==='over'&&S.celebr===ce)$('over').hidden=false},3400)}else $('over').hidden=false;updateHUD();
+ if(S.celebr){const gid=S.overGid=(S.overGid||0)+1;setTimeout(()=>{if(S.phase==='over'&&S.overGid===gid&&$('title').hidden)$('over').hidden=false},3400)}else $('over').hidden=false;// the results card always follows the celebration, even if the celebration was swapped out meanwhileupdateHUD();
 }
 
 // the player line in the at-bat / pitching boxes: the club's logo, then the name

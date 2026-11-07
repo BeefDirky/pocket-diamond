@@ -817,3 +817,4 @@ body.inMenu .olNet{display:none!important}
 .lfField{aspect-ratio:115/100;image-rendering:pixelated}
 @media (max-width:720px){.lfField{aspect-ratio:115/100}}
 .lfField{max-height:56vh;width:auto;max-width:100%}
+body.phOver .pauseBtn{display:none!important}

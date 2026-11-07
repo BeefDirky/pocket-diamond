@@ -51,6 +51,6 @@ function gameOver(win){const onl=onlineGame();
  awardPacks(win);
  $('toLobby').hidden=!onl;if(onl){resumeClear();$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false}
- if(S.celebr){const ce=S.celebr;setTimeout(()=>{if(S.phase==='over'&&S.celebr===ce)$('over').hidden=false},3400)}else $('over').hidden=false;updateHUD();
+ if(S.celebr){const gid=S.overGid=(S.overGid||0)+1;setTimeout(()=>{if(S.phase==='over'&&S.overGid===gid&&$('title').hidden)$('over').hidden=false},3400)}else $('over').hidden=false;// the results card always follows the celebration, even if the celebration was swapped out meanwhileupdateHUD();
 }
 
