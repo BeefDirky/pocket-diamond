@@ -133,7 +133,9 @@ function drawCatcher(g,X,Y,T,o){
  R(T.jersey,-4,-10,9,2);R(GEAR,-3,-9,7,4);R(T.jersey,-4,-8,1,3);R(T.jersey,4,-8,1,3);
  R(sk,-1,-11,3,1);R(T.cap,-2,-14,5,3);R(GEAR,-2,-13,5,1);R('rgba(255,255,255,.35)',-1,-14,1,1);
  R(T.cap,-1,-15,3,1);
- if(o.target){R(sk,-1,-8,1,1);R(GLOVE,-2,-11,3,3)}else R(GLOVE,-6,-7,2,2);
+ if(o.reach){const rx=o.reach.x,ry=o.reach.y,n=Math.max(2,Math.ceil(Math.hypot(rx+2,ry+9)*1.2));for(let k=0;k<=n;k++)R(sk,-2+(rx+2)*k/n,-9+(ry+9)*k/n,1,1);// the arm out to the mitt
+  R('#2a1a10',rx-2,ry-2,4,4);R(GLOVE,rx-1.5,ry-1.5,3,3);R('#c8935a',rx-1.5,ry-1.5,3,.8);if(o.held)R('#ffffff',rx-.5,ry-.5,1,1)}
+ else if(o.target){R(sk,-1,-8,1,1);R(GLOVE,-2,-11,3,3)}else R(GLOVE,-6,-7,2,2);
 }
 function drawBat(g,bx,by,ang,hand,col,ls){
  // a tapered bat from the hands out: knob and dark grip, then the barrel thickening toward the end, with a light edge.

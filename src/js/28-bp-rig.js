@@ -1,3 +1,6 @@
+// where the catcher takes the pitch: just in front of him, his mitt reaching left/right and up/down to where it crosses
+const CATCH_U=(54+3)/52;
+function catchPt(pt){const p1=pitchPos(pt,pt.travel),x=clamp(p1.x,-3.2,3.2),y=-3,h=clamp(p1.h,.8,5.2),q=toPx(x,y),lift=h/FT;return{x,y,h,scr:{x:q.x-lift*.2,y:q.y-lift*.5}}}
 // ---------- batting practice rig on the mound: machine, L-screen, ball bucket and a coach feeding it ----------
 function drawBPRig(add,now,ph){
  const T=TEAMS[S.you],M=toPx(0,57.5),L=toPx(-2.2,52.5),B=toPx(5.5,58.5),F=toPx(3.6,60.5);
@@ -206,7 +209,9 @@ function render(now){
   if(inPlay&&play.errMark&&play.errMark.i===i&&t>=play.errMark.t&&t<play.errMark.t+1.3){// an error: a red "!" pops up over his head and stays through the result
    const ea=t-play.errMark.t,pop=ea<.18?Math.round((1-ea/.18)*6):0,bob=Math.round(Math.sin(now/160)),ex=Math.round(q.x),ey=Math.round(q.y)-35-pop+bob;
    add(1e6,()=>{wg.fillStyle='#14181c';wg.fillRect(ex-2,ey-1,5,11);wg.fillStyle='#ff3b30';wg.fillRect(ex-1,ey,3,6);wg.fillRect(ex-1,ey+7,3,2);wg.fillStyle='#ffd0c8';wg.fillRect(ex-1,ey,1,2)})}
-  if(i===1&&!moving)add(q.y,()=>drawCatcher(wg,q.x,q.y,fld,{skin,pants:fldPants,target:ph==='windup'||ph==='pitch'}));
+  if(i===1&&!moving){let reach=null,held=false;const ck=ph==='pitch'&&S.pitch&&S.pitch.releaseAt&&!S.pitch.wild&&S.mode!=='bp'?catchPt(S.pitch):null;
+   if(ck){const el=now-S.pitch.releaseAt,k=ease(clamp((el/S.pitch.travel-.5)/.45,0,1)),G=ck.scr;reach={x:lerp(-.5,(G.x-q.x)/1.2,k),y:lerp(-9.5,(G.y-q.y)/1.2,k)};held=el>=S.pitch.travel*CATCH_U}
+   add(q.y,()=>drawCatcher(wg,q.x,q.y,fld,{skin,pants:fldPants,target:ph==='windup'||ph==='pitch',reach,held}))}
   else add(q.y,()=>{if(i===0&&now<S.wildUntil){wg.fillStyle='#1b1f24';wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-38,5,11);wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-25,5,5);wg.fillStyle='#ff4a3d';wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-37,3,9);wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-24,3,3)}if(pT!=null)drawPitcher(wg,q.x,q.y,fld,{skin,pants:fldPants,flip,side:pitcher().slot==='side'},pT);else drawPlayer(wg,q.x,q.y+lean,fld,{legs,arms,frame:fr+i,skin,pants:fldPants,flip,glove:true,...(armO||{})})});
  }
  // runners
@@ -215,14 +220,15 @@ function render(now){
   for(const r of play.runners){
    if(r.batter&&t<.6)continue;
    const tw=ph==='result'?play.end+Math.max(0,(now-(S.postAt||now))/1000):t;// a retired runner keeps jogging off after the play is over
-   if(r.out&&tw>r.outAt+.3){const o=runnerPos(r,r.outAt+.3),sd=batKey()===S.you?1:-1,D={x:sd*84,y:14},dd=dist(o,D),k=Math.min(1,(tw-r.outAt-.3)*6.5/Math.max(1,dd));
+   const offAt=r.out?(r.slide&&!r.slide.back?Math.max(r.outAt,r.slide.t1+.25):r.outAt)+.3:1e9;// a runner who slid into the tag finishes his slide before he jogs off
+   if(r.out&&tw>offAt){const o=r.slide&&!r.slide.back&&r.slide.p0?(()=>{const bb=BASES[r.slide.b%4],p0=r.slide.p0;return{x:lerp(bb.x,p0.x,.12),y:lerp(bb.y,p0.y,.12)}})():runnerPos(r,offAt),sd=batKey()===S.you?1:-1,D={x:sd*84,y:14},dd=dist(o,D),k=Math.min(1,(tw-offAt)*6.5/Math.max(1,dd));
     if(k>=1)continue;const w={x:lerp(o.x,D.x,k),y:lerp(o.y,D.y,k)},q=toPx(w.x,w.y);
     add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:'run',arms:'down',frame:Math.floor(now/190)+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants,flip:D.x<w.x}));continue}
    const p=runnerPos(r,t);const q=toPx(p.x,p.y);
    if(r.tagAt!=null&&r.dest>r.from&&t>=r.start-.05&&t<r.start+.35){const bq=toPx(baseP(r.from).x,baseP(r.from).y),k2=(t-r.start+.05)/.4;
     add(1e6,()=>{wg.globalAlpha=1-k2;wg.strokeStyle='#ffffff';wg.lineWidth=1;wg.beginPath();wg.arc(bq.x,bq.y,4+k2*10,0,Math.PI*2);wg.stroke();
      wg.font='bold 11px "Pixelify Sans", monospace';wg.textAlign='center';wg.fillStyle='#ffbf3c';wg.fillText('TAG!',bq.x,bq.y-24-k2*6);wg.globalAlpha=1})}
-   if(r.slide&&t>=r.slide.t0&&t<r.slide.t1+.55&&!(r.out&&t>r.outAt+.3)){const bb=BASES[r.slide.b%4],pv=r.slide.back?baseP(r.slide.b+1):baseP(r.slide.b-1),dir=Math.sign(bb.x-pv.x)||1;
+   if(r.slide&&t>=r.slide.t0&&t<r.slide.t1+.55&&!(r.out&&t>offAt)){const bb=BASES[r.slide.b%4],pv=r.slide.back?baseP(r.slide.b+1):baseP(r.slide.b-1),dir=Math.sign(bb.x-pv.x)||1;
     const u=clamp((t-r.slide.t0)/(r.slide.t1-r.slide.t0),0,1);
     // one continuous glide from where he left his feet to the bag (a tagged-out runner comes up a foot short)
     if(!r.slide.p0)r.slide.p0=runnerPos(r,r.slide.t0);const p0=r.slide.p0,E=r.out?{x:lerp(bb.x,p0.x,.12),y:lerp(bb.y,p0.y,.12)}:bb,k3=1-(1-u)*(1-u);
@@ -334,7 +340,10 @@ function render(now){
   const pl={segs:[fnSeg(0,.62,t=>{const e=t/.62,o=1-(1-e)*(1-e);return{x:H.x+dx*o,y:H.y+back*o,h:Math.max(0,H.h*(1-e)*(1-e))+Math.abs(Math.sin(e*Math.PI*2.4))*1.1*(1-e)}})],fullEnd:1.12,res:{hr:false},ballGone:null};
   (S.bpFly=S.bpFly||[]).push({play:pl,at:now});sfx('fence')}
  if(ph==='pitch'&&!S.pitch.reb){
-  const p=pitchPos(S.pitch,S.pitch.wild?Math.min(now-S.pitch.releaseAt,S.pitch.travel*1.5):S.mode==='bp'?Math.min(now-S.pitch.releaseAt,S.pitch.travel*1.36):Math.min(now-S.pitch.releaseAt,S.pitch.travel*1.135));const P=PITCHES[S.pitch.k];
+  const elP=now-S.pitch.releaseAt,inMitt=!S.pitch.wild&&S.mode!=='bp'&&elP>=S.pitch.travel*CATCH_U;
+  let p=pitchPos(S.pitch,S.pitch.wild?Math.min(elP,S.pitch.travel*1.5):S.mode==='bp'?Math.min(elP,S.pitch.travel*1.36):Math.min(elP,S.pitch.travel*CATCH_U));const P=PITCHES[S.pitch.k];
+  // past the plate the ball bends into the catcher's mitt (it never flies on through him)
+  if(!S.pitch.wild&&S.mode!=='bp'&&elP>S.pitch.travel){const ck=catchPt(S.pitch),f=clamp((elP/S.pitch.travel-1)/(CATCH_U-1),0,1),p1=pitchPos(S.pitch,S.pitch.travel);p={x:lerp(p1.x,ck.x,f),y:lerp(p1.y,ck.y,f),h:lerp(p1.h,ck.h,f)}}
   const tl=S.pitch.k==='FB'?Math.round(10+(S.pitch.mph-90)*1.8):P.tl;
   const tr=S.pitch.trail;tr.push(p);while(tr.length>tl)tr.shift();
   for(let k=0;k<tr.length-1;k++){const a=tr[k];const q=toPx(a.x,a.y);const lift=a.h/FT;const oy=Math.round(lift*.5),ox=Math.round(-lift*.2);
@@ -342,7 +351,7 @@ function render(now){
   wg.globalAlpha=1;
   const q=toPx(p.x,p.y);
   const spin=S.pitch.k==='SL'?Math.floor(now/30):S.pitch.k==='CB'?Math.floor(now/45):(S.pitch.k==='CH'||S.pitch.k==='SP')?Math.floor(now/90):null;
-  dustAt(S.pitch,p.x,p.y,p.h);drawBall(wg,q.x,q.y,p.h,spin,S.pitch.k==='CB'?Math.round(Math.max(0,p.h-4.2)/2):0);
+  if(!inMitt){dustAt(S.pitch,p.x,p.y,p.h);drawBall(wg,q.x,q.y,p.h,spin,S.pitch.k==='CB'?Math.round(Math.max(0,p.h-4.2)/2):0)}
  }else if(S.hbpFx&&now-S.hbpFx.at<1150){const f=S.hbpFx,e=(now-f.at)/1150,o=1-(1-e)*(1-e);
   // the pitch ricochets off the hitter and dribbles away
   const x=f.x0+f.dx*o,y=f.y0+f.dy*o,h=f.h0*Math.max(0,1-e*2.4)+Math.abs(Math.sin(e*Math.PI*2.2))*1.6*(1-e),q=toPx(x,y);drawBall(wg,q.x,q.y,h,null)}

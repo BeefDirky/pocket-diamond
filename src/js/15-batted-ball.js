@@ -91,7 +91,7 @@ function finalize(play,runners,res){
   let tThr=null;for(const sg of play.segs)if(sg.thr&&dist(sg.to,BASES[b%4])<5)tThr=sg.t1;
   // every runner going into second or third slides in feet first; stealers (and close plays at home) may dive head first
   const into23=(b===2||b===3)&&!r.steal;
-  if(into23||r.steal||(r.out&&r.outAt!=null)||(tThr!=null&&Math.abs(tThr-tArr)<.7)){const tA=r.out?Math.min(tArr,r.outAt):tArr;r.slide={t0:tA-.5,t1:tA,head:into23?false:(r.steal||Math.random()<.4),b}}}
+  if(into23||r.steal||(r.out&&r.outAt!=null)||(tThr!=null&&Math.abs(tThr-tArr)<.7)){const tA=tArr;r.slide={t0:tA-.5,t1:tA,head:into23?false:(r.steal||Math.random()<.4),b}}}
  {let tE=0;for(const sg of play.segs)tE=Math.max(tE,sg.t1);
   for(let i=0;i<9;i++){if(play.dive&&play.dive.i===i)continue;const f=POS[i],ks=play.fk[i],lastT=ks?ks[ks.length-1].t:0,t0=Math.max(tE+.2,lastT),a=fpos(play,i,t0),d=dist(a,f);if(d<4)continue;
    if(!play.fk[i])play.fk[i]=[{t:0,x:f.x,y:f.y}];
