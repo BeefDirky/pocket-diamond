@@ -63,7 +63,7 @@ function ambient(play){
    for(const i of[2,3,4,5])go(i,{x:lerp(POS[i].x,bp.x,.06),y:lerp(POS[i].y,bp.y,.06)},.4);
    for(const i of[6,7,8])go(i,{x:lerp(POS[i].x,bp.x,.25),y:lerp(POS[i].y,bp.y,.25)},.7);return}
   go(2,B1);go(4,B3);
-  const tgt=(S.bases[0]||S.bases[1])?B3:B2,cp={x:lerp(tgt.x,bp.x,.42),y:lerp(tgt.y,bp.y,.42)},cut=nearMid(cp),cov=cut===5?3:5;go(cov,B2);
+  const tgt=(S.bases[0]||S.bases[1])?B3:B2,cp={x:lerp(tgt.x,bp.x,.42),y:lerp(tgt.y,bp.y,.42)},cut=nearMid(cp);
   go(cut,cp,.95);
   go(0,on?{x:-12,y:-24}:{x:-42,y:34},.8);go(1,{x:0,y:-1},.5);
   for(const i of[6,7,8])go(i,{x:lerp(POS[i].x,bp.x,.3),y:lerp(POS[i].y,bp.y,.3)},.85);

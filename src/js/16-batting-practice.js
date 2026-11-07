@@ -87,7 +87,8 @@ function outfieldHit(play,it,P,runners,delay,errBy){
   const o=fromF(play,it.i,t0),dd=dist(tb,o),C={x:tb.x+(o.x-tb.x)*Math.min(.32,34/Math.max(1,dd)),y:tb.y+(o.y-tb.y)*Math.min(.32,34/Math.max(1,dd))};
   rcv=nearMid(C,play);cov=rcv===5?3:5;play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,C));tArr=t0+dist(o,C)/THROW;if(!play.fk[rcv])play.fk[rcv]=cover(rcv,C,tArr)
  }else{play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,fromF(play,it.i,t0),tb));tArr=t0+dist(it.p,tb)/THROW}
- if(cov!==it.i&&!play.fk[cov])play.fk[cov]=cover(cov,tb,tArr);
+ const midTaken=[3,5].some(k=>k!==cov&&play.fk[k]&&k!==it.i)&&(cov===3||cov===5);// one middle infielder has the cutoff: the other stays at his spot
+ if(cov!==it.i&&!play.fk[cov]&&!midTaken)play.fk[cov]=cover(cov,tb,tArr);
  if(sendHome){const r2=sendHome,tR=r2.start+2*LEG/r2.speed;
   if(r2.out){if(tR<tArr+.12)r2.speed=2*LEG/Math.max(.5,tArr+.15-r2.start);r2.outAt=tArr+.05}
   else if(tR>tArr-.1)r2.speed=2*LEG/Math.max(.5,tArr-(r2.closeHome?.1:.4)-r2.start)}
@@ -251,7 +252,7 @@ function buildAir(P,dir,b){
     cand.out=true;cand.outAt=tt;cand.dblOff=true;dbl=cand;const cv=cand.from===1?(best===2?0:2):(best===5?3:5);if(cv!==best&&!play.fk[cv])play.fk[cv]=cover(cv,bb,tt)}}
   const empty=!S.bases.some(Boolean);
   if(best>=6){const tg0=tag?BASES[0]:empty?land:BASES[2],mi=empty?(land.x<0?5:3):nearMid({x:lerp(tg0.x,land.x,.45),y:lerp(tg0.y,land.y,.45)},play),tgt=tag?BASES[0]:empty?{x:lerp(POS[mi].x,land.x,.12),y:lerp(POS[mi].y,land.y,.12)}:(()=>{const b2=BASES[2],dd=dist(b2,land),f=Math.min(.32,34/Math.max(1,dd));return{x:b2.x+(land.x-b2.x)*f,y:b2.y+(land.y-b2.y)*f}})();if(!tag&&!play.fk[mi])play.fk[mi]=cover(mi,tgt,T+XF+dist(land,tgt)/THROW);play.segs.push(holdSeg(play,T,T+XF,best),throwSeg(T+XF,fromF(play,best,T+XF),tgt));
-   const cov=tag?1:(mi===5?3:5);if(!play.fk[cov]&&!tag)play.fk[cov]=cover(cov,empty?tgt:BASES[2],T+XF+dist(land,tgt)/THROW)}
+   if(tag&&!play.fk[1])play.fk[1]=cover(1,tgt,T+XF+dist(land,tgt)/THROW)}// the other middle infielder stays put
   const kind=(P.L>=45||(best<=5&&P.L>=30))?'P':P.L<22?'L':'F';
   const diving=bn>T-.12&&kind!=='P';
   if(diving)play.dive=diveOf(best,T,land);
