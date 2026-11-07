@@ -4,7 +4,10 @@ let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;cons
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
 function saveOpts(){try{localStorage.setItem('pd-opts2',JSON.stringify(OPT))}catch(e){}}
-function applyVolumes(){if(!AC)return;const bpq=!!S.bpOn;BUS.music.gain.value=(bpq||S.rampSrc||S.musicDuck)?0:OPT.music/100*.7;BUS.crowd.gain.value=bpq?0:OPT.crowd/100*.4;if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
+const inTeamSel=()=>{const t=document.getElementById('title'),c=document.getElementById('scrTeams');return !!(t&&c&&!t.hidden&&!c.hidden)};
+function applyVolumes(){if(!AC)return;const bpq=!!S.bpOn,ts=inTeamSel(),t0=AC.currentTime;// the club-select screen is quiet: no organ, no crowd
+ const mv=(bpq||ts||S.rampSrc||S.musicDuck)?0:OPT.music/100*.7,cv2=(bpq||ts)?0:OPT.crowd/100*.4;
+ for(const[g,v]of[[BUS.music.gain,mv],[BUS.crowd.gain,cv2]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+.35)}if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
 function b64buf(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer}
 function loopOn(k,bus){if(!BUF[k]||!AC)return null;const src=AC.createBufferSource();src.buffer=BUF[k];src.loop=true;src.connect(bus);src.start();return src}
 function startOrgan(){if(!organSrc)organSrc=loopOn('organ',BUS.music)}

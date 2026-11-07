@@ -43,9 +43,14 @@ $('goBP').addEventListener('click',()=>chooseMode('bp'));
 $('goPO').addEventListener('click',()=>chooseMode('playoffs'));
 $('goWatch').addEventListener('click',()=>chooseMode('watch'));
 $('goMulti').addEventListener('click',()=>{ensureAudio();openOnline()});
-$('playGo').addEventListener('click',()=>{tsFlush();tsInfoOpen(false);if(parkFromBP){backToCage();return}const m=pendingMode;pendingMode=null;$('playGo').hidden=true;
- if(m==='playoffs'){openBracket(true);return}if(m==='online'){openOnline();return}if(m==='watch'){S.auto=true;syncAuto();startGame('full');return}
- if(m){S.auto=false;syncAuto();startGame(m)}});
+// a loading screen while the park is built: shown first, painted, then the heavy work runs, then it fades once the
+// first frame of the new park has been drawn
+function withLoading(work){const L=$('loadScr');if(L.parentNode!==document.body)document.body.appendChild(L);/* above every stage layer */const k=S.you,T=TEAMS[k];$('loadLogo').src=LOGO_URL[k]||'';$('loadPark').textContent=(STADIUMS[k]&&STADIUMS[k].name)||'';$('loadClub').textContent=T?`${T.city} ${T.name}`:'';
+ L.style.setProperty('--tc',T?T.jersey:'#2f6fd0');L.hidden=false;L.classList.remove('out');
+ const t0=performance.now();requestAnimationFrame(()=>requestAnimationFrame(()=>{setTimeout(()=>{try{work()}finally{requestAnimationFrame(()=>requestAnimationFrame(()=>{setTimeout(()=>{L.classList.add('out');setTimeout(()=>{L.hidden=true},260)},Math.max(0,700-(performance.now()-t0)))}))}},30)}))}
+$('playGo').addEventListener('click',()=>{tsInfoOpen(false);if(parkFromBP){withLoading(()=>{tsFlush();backToCage()});return}const m=pendingMode;pendingMode=null;$('playGo').hidden=true;
+ if(m==='playoffs'){tsFlush();openBracket(true);return}if(m==='online'){tsFlush();openOnline();return}
+ withLoading(()=>{tsFlush();if(m==='watch'){S.auto=true;syncAuto();startGame('full');return}if(m){S.auto=false;syncAuto();startGame(m)}if(typeof render==='function')render(performance.now())})});
 const setBP=k=>{S.bpPitch=k;document.body.classList.remove('bpPopOpen');for(const b of $('bpBar').querySelectorAll('.pbtn'))b.setAttribute('aria-pressed',String(b.dataset.k===k));updateHUD()};
 $('bpBar').addEventListener('click',e=>{const b=e.target.closest('.pbtn');if(b){ensureAudio();setBP(b.dataset.k)}});
 $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;startGame(S.mode)});

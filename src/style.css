@@ -747,3 +747,18 @@ body.inMenu .olNet{display:none!important}
 .app.deskApp>.matchup{bottom:157px}
 .app.deskApp>.matchup>.muPit{bottom:157px}
 @media (max-width:999px){.app.deskApp>.matchup{bottom:123px}.app.deskApp>.matchup>.muPit{bottom:123px}}
+/* loading screen between club select and the first pitch */
+#loadScr{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:#0b1410;--tc:#2f6fd0;transition:opacity .25s;
+ background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:16px 16px}
+#loadScr[hidden]{display:none}#loadScr.out{opacity:0}
+#loadScr .ldCard{display:flex;flex-direction:column;align-items:center;gap:8px;font-family:var(--f-hud);color:#f4f1e8;text-align:center}
+#loadScr img{width:112px;height:112px;image-rendering:pixelated;filter:drop-shadow(4px 4px 0 rgba(0,0,0,.5));animation:ldBob 1s steps(2) infinite}
+#loadScr #loadClub{font-size:26px;letter-spacing:.08em;margin-top:6px}
+#loadScr #loadPark{font-size:13px;letter-spacing:.2em;color:#9aa6b0}
+#loadScr .ldBar{width:240px;height:14px;border:3px solid #f4f1e8;margin-top:14px;padding:2px;box-sizing:content-box;overflow:hidden}
+#loadScr .ldBar i{display:block;height:100%;width:40%;background:repeating-linear-gradient(90deg,var(--tc) 0 10px,transparent 10px 14px);animation:ldRun .9s steps(12) infinite}
+#loadScr .ldTxt{font-size:12px;letter-spacing:.2em;color:#ffbf3c;margin-top:4px}
+#loadScr .ldTxt span{display:inline-block;width:3ch;text-align:left;animation:ldDots 1.2s steps(4) infinite;overflow:hidden;vertical-align:bottom}
+@keyframes ldRun{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+@keyframes ldBob{50%{transform:translateY(-4px)}}
+@keyframes ldDots{from{width:0}to{width:4ch}}

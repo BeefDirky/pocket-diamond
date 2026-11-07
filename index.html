@@ -760,6 +760,21 @@ body.inMenu .olNet{display:none!important}
 .app.deskApp>.matchup{bottom:157px}
 .app.deskApp>.matchup>.muPit{bottom:157px}
 @media (max-width:999px){.app.deskApp>.matchup{bottom:123px}.app.deskApp>.matchup>.muPit{bottom:123px}}
+/* loading screen between club select and the first pitch */
+#loadScr{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:#0b1410;--tc:#2f6fd0;transition:opacity .25s;
+ background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:16px 16px}
+#loadScr[hidden]{display:none}#loadScr.out{opacity:0}
+#loadScr .ldCard{display:flex;flex-direction:column;align-items:center;gap:8px;font-family:var(--f-hud);color:#f4f1e8;text-align:center}
+#loadScr img{width:112px;height:112px;image-rendering:pixelated;filter:drop-shadow(4px 4px 0 rgba(0,0,0,.5));animation:ldBob 1s steps(2) infinite}
+#loadScr #loadClub{font-size:26px;letter-spacing:.08em;margin-top:6px}
+#loadScr #loadPark{font-size:13px;letter-spacing:.2em;color:#9aa6b0}
+#loadScr .ldBar{width:240px;height:14px;border:3px solid #f4f1e8;margin-top:14px;padding:2px;box-sizing:content-box;overflow:hidden}
+#loadScr .ldBar i{display:block;height:100%;width:40%;background:repeating-linear-gradient(90deg,var(--tc) 0 10px,transparent 10px 14px);animation:ldRun .9s steps(12) infinite}
+#loadScr .ldTxt{font-size:12px;letter-spacing:.2em;color:#ffbf3c;margin-top:4px}
+#loadScr .ldTxt span{display:inline-block;width:3ch;text-align:left;animation:ldDots 1.2s steps(4) infinite;overflow:hidden;vertical-align:bottom}
+@keyframes ldRun{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+@keyframes ldBob{50%{transform:translateY(-4px)}}
+@keyframes ldDots{from{width:0}to{width:4ch}}
 </style>
 
 <div class="app">
@@ -794,6 +809,7 @@ body.inMenu .olNet{display:none!important}
     <div class="ballCam" id="ballCam" hidden><canvas id="ballCamCv"></canvas><span id="ballCamTxt"></span><i>BALL CAM</i></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
 
+    <div id="loadScr" hidden><div class="ldCard"><img id="loadLogo" alt=""><div id="loadClub"></div><div id="loadPark"></div><div class="ldBar"><i></i></div><div class="ldTxt">LOADING THE PARK<span>...</span></div></div></div>
     <div class="overlay" id="title">
       <canvas class="tsBg" id="tsBg" aria-hidden="true"></canvas>
       <div class="card menuMain" id="scrMain">
@@ -3705,7 +3721,10 @@ let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;cons
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
 function saveOpts(){try{localStorage.setItem('pd-opts2',JSON.stringify(OPT))}catch(e){}}
-function applyVolumes(){if(!AC)return;const bpq=!!S.bpOn;BUS.music.gain.value=(bpq||S.rampSrc||S.musicDuck)?0:OPT.music/100*.7;BUS.crowd.gain.value=bpq?0:OPT.crowd/100*.4;if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
+const inTeamSel=()=>{const t=document.getElementById('title'),c=document.getElementById('scrTeams');return !!(t&&c&&!t.hidden&&!c.hidden)};
+function applyVolumes(){if(!AC)return;const bpq=!!S.bpOn,ts=inTeamSel(),t0=AC.currentTime;// the club-select screen is quiet: no organ, no crowd
+ const mv=(bpq||ts||S.rampSrc||S.musicDuck)?0:OPT.music/100*.7,cv2=(bpq||ts)?0:OPT.crowd/100*.4;
+ for(const[g,v]of[[BUS.music.gain,mv],[BUS.crowd.gain,cv2]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+.35)}if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
 function b64buf(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer}
 function loopOn(k,bus){if(!BUF[k]||!AC)return null;const src=AC.createBufferSource();src.buffer=BUF[k];src.loop=true;src.connect(bus);src.start();return src}
 function startOrgan(){if(!organSrc)organSrc=loopOn('organ',BUS.music)}
@@ -4935,7 +4954,9 @@ addEventListener('keydown',e=>{if($('title').hidden||$('scrTeams').hidden)return
  if(e.key==='ArrowLeft'){e.preventDefault();tsGo(-1)}else if(e.key==='ArrowRight'){e.preventDefault();tsGo(1)}
  else if(e.key==='Enter'&&!$('playGo').hidden&&document.activeElement===document.body){e.preventDefault();$('playGo').click()}});
 // start the background whenever the screen opens
-new MutationObserver(()=>{if(!$('scrTeams').hidden&&!$('title').hidden){tsRender();tsStart()}else tsInfoOpen(false)}).observe($('scrTeams'),{attributes:true,attributeFilter:['hidden']});
+new MutationObserver(()=>{if(typeof applyVolumes==='function')applyVolumes();if(!$('scrTeams').hidden&&!$('title').hidden){tsRender();tsStart()}else tsInfoOpen(false)}).observe($('scrTeams'),{attributes:true,attributeFilter:['hidden']});
+
+new MutationObserver(()=>{if(typeof applyVolumes==='function')applyVolumes()}).observe($('title'),{attributes:true,attributeFilter:['hidden']});
 // ---------- pick a hitter: tap the at-bat panel ----------
 function openPicker(){
  if(S.phase==='title'||S.phase==='over'||pitching()||onlineGame())return;
@@ -6510,9 +6531,14 @@ $('goBP').addEventListener('click',()=>chooseMode('bp'));
 $('goPO').addEventListener('click',()=>chooseMode('playoffs'));
 $('goWatch').addEventListener('click',()=>chooseMode('watch'));
 $('goMulti').addEventListener('click',()=>{ensureAudio();openOnline()});
-$('playGo').addEventListener('click',()=>{tsFlush();tsInfoOpen(false);if(parkFromBP){backToCage();return}const m=pendingMode;pendingMode=null;$('playGo').hidden=true;
- if(m==='playoffs'){openBracket(true);return}if(m==='online'){openOnline();return}if(m==='watch'){S.auto=true;syncAuto();startGame('full');return}
- if(m){S.auto=false;syncAuto();startGame(m)}});
+// a loading screen while the park is built: shown first, painted, then the heavy work runs, then it fades once the
+// first frame of the new park has been drawn
+function withLoading(work){const L=$('loadScr');if(L.parentNode!==document.body)document.body.appendChild(L);/* above every stage layer */const k=S.you,T=TEAMS[k];$('loadLogo').src=LOGO_URL[k]||'';$('loadPark').textContent=(STADIUMS[k]&&STADIUMS[k].name)||'';$('loadClub').textContent=T?`${T.city} ${T.name}`:'';
+ L.style.setProperty('--tc',T?T.jersey:'#2f6fd0');L.hidden=false;L.classList.remove('out');
+ const t0=performance.now();requestAnimationFrame(()=>requestAnimationFrame(()=>{setTimeout(()=>{try{work()}finally{requestAnimationFrame(()=>requestAnimationFrame(()=>{setTimeout(()=>{L.classList.add('out');setTimeout(()=>{L.hidden=true},260)},Math.max(0,700-(performance.now()-t0)))}))}},30)}))}
+$('playGo').addEventListener('click',()=>{tsInfoOpen(false);if(parkFromBP){withLoading(()=>{tsFlush();backToCage()});return}const m=pendingMode;pendingMode=null;$('playGo').hidden=true;
+ if(m==='playoffs'){tsFlush();openBracket(true);return}if(m==='online'){tsFlush();openOnline();return}
+ withLoading(()=>{tsFlush();if(m==='watch'){S.auto=true;syncAuto();startGame('full');return}if(m){S.auto=false;syncAuto();startGame(m)}if(typeof render==='function')render(performance.now())})});
 const setBP=k=>{S.bpPitch=k;document.body.classList.remove('bpPopOpen');for(const b of $('bpBar').querySelectorAll('.pbtn'))b.setAttribute('aria-pressed',String(b.dataset.k===k));updateHUD()};
 $('bpBar').addEventListener('click',e=>{const b=e.target.closest('.pbtn');if(b){ensureAudio();setBP(b.dataset.k)}});
 $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;startGame(S.mode)});

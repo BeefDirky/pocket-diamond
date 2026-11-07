@@ -51,4 +51,6 @@ addEventListener('keydown',e=>{if($('title').hidden||$('scrTeams').hidden)return
  if(e.key==='ArrowLeft'){e.preventDefault();tsGo(-1)}else if(e.key==='ArrowRight'){e.preventDefault();tsGo(1)}
  else if(e.key==='Enter'&&!$('playGo').hidden&&document.activeElement===document.body){e.preventDefault();$('playGo').click()}});
 // start the background whenever the screen opens
-new MutationObserver(()=>{if(!$('scrTeams').hidden&&!$('title').hidden){tsRender();tsStart()}else tsInfoOpen(false)}).observe($('scrTeams'),{attributes:true,attributeFilter:['hidden']});
+new MutationObserver(()=>{if(typeof applyVolumes==='function')applyVolumes();if(!$('scrTeams').hidden&&!$('title').hidden){tsRender();tsStart()}else tsInfoOpen(false)}).observe($('scrTeams'),{attributes:true,attributeFilter:['hidden']});
+
+new MutationObserver(()=>{if(typeof applyVolumes==='function')applyVolumes()}).observe($('title'),{attributes:true,attributeFilter:['hidden']});
