@@ -156,8 +156,9 @@ function buildField(){H_NIGHT=false;
    const fair=Math.abs(th)<=45&&y>=0;
    let dOut=ST.bowl&&fair?(fenceDist(th)-r)/FT/K:D[i]/3/K,wallT=fairBig[i]?ST.wallFt*2:6;
    if(ST.bowl&&!fair){// foul ground in the bowl parks: measure straight to the stands' front (the box along each line) so the wall runs clean round the corner
-    const sd=x>=0?1:-1,al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;if(pe>=0&&al>-5){const e1=40-pe,e2=328-al;dOut=Math.min(e1,e2)/FT/K;wallT=e2<e1?ST.wallFt*2:6}}// the bowl parks measure the wall straight from the fence line, so its top line runs clean
-   if(dOut<wallT&&ST.bowl&&(fair||dOut<wallT)){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
+    const sd=x>=0?1:-1,al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;if(pe>=0&&al>-5){const e1=40-pe,e2=fenceDist(sd*45)-al;dOut=Math.min(e1,e2)/FT/K;wallT=e2<e1?ST.wallFt*2:6;if(e2<0&&e1>0)dOut=-1}}// the end wall lines up with the outfield wall at the pole// the bowl parks measure the wall straight from the fence line, so its top line runs clean
+   if(ST.bowl&&dOut<0)col=hMul(HB.pad1,.8);
+   else if(dOut<wallT&&ST.bowl&&(fair||dOut<wallT)){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
     const sF=r*th*RAD,m=((sF%18)+18)%18,id=Math.floor(sF/18);
     col=dOut<1.4?HB.wallY:dOut<2.4?HB.wallCap:m<.9?HB.seam:dOut>wallT-2.5?hMul((id&1)?HB.pad2:HB.pad1,.72):(id&1)?HB.pad2:HB.pad1}
    else if(dOut<wallT)col=dOut<1.5?C.pad2:C.pad;

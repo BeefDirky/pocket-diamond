@@ -186,8 +186,8 @@ function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const
  if(d<=0&&PARK_C){// the last of the field, past the park buffer's edge: the warning track runs on round the corners, fair and foul
   const trk=()=>((vHash(Math.floor(wx),Math.floor(wy))%5)===0?PARK_C.tr2:PARK_C.tr);
   if(y>0&&ath<=45&&r>fenceDist(th)-14)return trk();
-  if(!(y>0&&ath<=45)){const sd=x>=0?1:-1,al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;if(pe>=0&&al>-5){const e=Math.min(40-pe,328-al),wt=328-al<40-pe?H_WALLW*.8:3;
-   if(e<wt){const s2=328-al<40-pe?pe:al,m=((s2%18)+18)%18;return e<.8?HB.wallY:e<1.6?HB.wallCap:m<.9?HB.seam:(Math.floor(s2/18)&1)?HB.pad2:HB.pad1}// the wall carries on round the corner
+  if(!(y>0&&ath<=45)){const sd=x>=0?1:-1,al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;if(pe>=0&&al>-5){const fd=fenceDist(sd*45),e2=fd-al;if(e2<0&&40-pe>0)return hMul(HB.pad1,.8);const e=Math.min(40-pe,e2),wt=e2<40-pe?8:3;
+   if(e<wt){const s2=e2<40-pe?pe:al,m=((s2%18)+18)%18;return e<.8?HB.wallY:e<1.6?HB.wallCap:m<.9?HB.seam:(Math.floor(s2/18)&1)?HB.pad2:HB.pad1}// the wall carries on round the corner
    if(e<wt+14/1)return trk()}}// within the track's width of the stands
   return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2}// the last of the foul ground, past the park buffer's edge
  if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
