@@ -818,3 +818,16 @@ body.inMenu .olNet{display:none!important}
 @media (max-width:720px){.lfField{aspect-ratio:115/100}}
 .lfField{max-height:56vh;width:auto;max-width:100%}
 body.phOver .pauseBtn{display:none!important}
+/* phones: players on the field shrink to tokens so the diamond shows; tapping one names him in the hint below */
+@media (max-width:720px){
+ .lfField{aspect-ratio:1/1.02}
+ .lfField .lfc{width:34px;padding:1px;border-width:2px;box-shadow:0 2px 0 rgba(0,0,0,.55)}
+ .lfField .lfc img{aspect-ratio:1/1;object-fit:cover;object-position:50% 28%;border-width:1px}
+ .lfField .lfc .lfNm{display:none}
+ .lfField .lfc .lfPos{font-size:8px;line-height:1.2}
+ .lfField .lfc .lfOvr{font-size:7px;left:-5px;top:-6px;padding:1px 2px;min-width:12px;border-width:1px}
+ .lfField .lfc .lfOrd{width:12px;height:12px;font-size:7px;right:-5px;top:-6px;border-width:1px}
+ .lfField .lfc.sel{transform:translateY(-3px) scale(1.15)}
+}
+.lfField{width:100%;max-width:calc(56vh * 1.15);max-height:none;justify-self:center}
+@media (max-width:720px){.lfField{max-width:100%}}
