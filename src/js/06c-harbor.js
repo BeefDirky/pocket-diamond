@@ -183,7 +183,11 @@ function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const
  const n=vHash(Math.floor(wx/3),Math.floor(wy/3)),fair=y>0&&ath<=45,q=fair?r-fenceDist(th):-1,s=r*th*RAD;
  if(fair&&q>=0){const q0=hPenOff(th);if(q0>.5&&q<q0)return HB.wallCap;if(q<q0+H_WALLW){const w=hWall(q-q0,s,n);return q0>.5&&w===HB.wallY?HB.wallCap:w}}// behind a bullpen the wall carries no home-run line
  const phi=hPhi(x,y),D=hD(phi),Ro=hRout(phi),rc=Math.hypot(x-H_CC.x,y-H_CC.y),d=rc<Ro+4?hFieldD(x,y):1e4;
- if(d<=0&&PARK_C)return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2;// the last of the foul ground, past the park buffer's edge
+ if(d<=0&&PARK_C){// the last of the field, past the park buffer's edge: the warning track runs on round the corners, fair and foul
+  const trk=()=>((vHash(Math.floor(wx),Math.floor(wy))%5)===0?PARK_C.tr2:PARK_C.tr);
+  if(y>0&&ath<=45&&r>fenceDist(th)-14)return trk();
+  if(!(y>0&&ath<=45))for(let k=0;k<8;k++){const a2=k*Math.PI/4;if(hFieldD(x+Math.cos(a2)*18,y+Math.sin(a2)*18)>0)return trk()}// within the track's width of the stands
+  return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2}// the last of the foul ground, past the park buffer's edge
  if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
  const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
  if(H_THEME!=='harbor'){const c=(H_THEME==='steel'?steelCol:H_THEME==='brick'?brickCol:H_THEME==='orbit'?orbitCol:fortCol)(x,y,wx,wy,r,th,ath,q,s,n,fair);if(c)return c;if(D>8){const x2=x-6,y2=y+6,p2=hPhi(x2,y2);if(hD(p2)>8&&Math.hypot(x2-H_CC.x,y2-H_CC.y)<hRout(p2))H_SHADE=true}return null}
