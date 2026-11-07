@@ -12,7 +12,7 @@ const HB0={};let H_THEME='harbor';
 const H_THEMES={
  harbor:{},
  brick:{dk:{L:[[50,0],[58,22],[78,66],[108,108],[148,146],[180,164]],R:[[47,0],[55,24],[76,70],[110,110],[148,148],[180,164]]},roof:[94,86,181],gates:[-140,140,-104,104],brick:true,roofIn:.62,facT:1.5,
-  seats:[['#1d3f78','#1a386c'],['#e8642a','#d65a25'],['#2f5fb0','#2a56a0']],seatU:[[22,40,82],[19,35,72]],cheer:1,
+  seats:[['#1d3f78','#1a386c'],['#e8642a','#d65a25'],['#2f5fb0','#2a56a0']],seatU:[[22,40,82],[19,35,72]],cheer:1,sym:true,
   pal:{pad1:'#13254a',pad2:'#182c56',pad3:'#e8eef5',pad4:'#3a6ab0',seam:'#08142a',wallY:'#ffcc48',led1:'#ffb04a',led2:'#fff1d0',led3:'#e8642a',ledD:'#2a1608',
    fTop:'#8e8a86',fTop2:'#837f7b',mull:'#1c222a',glass:'#33475c',glass2:'#2a3c50',glassN:'#ffc46a',glassN2:'#ffb04a',fEdge:'#1a1d22',par:'#2a2e34',gate:'#1a1d22',gateN:'#ffd08a',
    roof:'#5c6169',roof2:'#555a62',rib:'#4a4f56',roofEdge:'#9aa0a8',gutter:'#25292e',conc:'#2e3238',rail:'#c9ced3',railD:'#4a525c',wallCap:'#a3a9b1',wallCap2:'#727880'}},
@@ -29,8 +29,8 @@ const H_THEMES={
 function hTheme(){const k=(ST&&ST.bowl)||'harbor';if(!HB0.rail)for(const k2 in HB)HB0[k2]=HB[k2].slice();H_THEME=k;const T=H_THEMES[k]||{};
  for(const k2 in HB0)HB[k2]=HB0[k2].slice();for(const k2 in (T.pal||{}))HB[k2]=hRGB(T.pal[k2]);
  H_DK=T.dk||{R:[[68,0],[80,44],[96,82],[118,114],[148,150],[180,168]],L:[[34,0],[52,64],[78,122],[112,148],[180,168]]};H_ROOF=T.roof||[62,84,166];H_GATES=T.gates||[180,-146,146,-112,114];
- const sp=(T.seats||[['#1f3f7a','#1b3870'],['#2f6fd0','#2a63bb'],['#5aa0e6','#5193d6']]).map(p=>p.map(hRGB));H_SEATS.splice(0,3,...sp);H_SEATU.splice(0,2,...(T.seatU||[[27,47,94],[24,42,84]]));H_CHEERI=T.cheer!=null?T.cheer:2}
-let H_CHEERI=2;
+ const sp=(T.seats||[['#1f3f7a','#1b3870'],['#2f6fd0','#2a63bb'],['#5aa0e6','#5193d6']]).map(p=>p.map(hRGB));H_SEATS.splice(0,3,...sp);H_SEATU.splice(0,2,...(T.seatU||[[27,47,94],[24,42,84]]));H_CHEERI=T.cheer!=null?T.cheer:2;H_SYM=!!T.sym}
+let H_CHEERI=2,H_SYM=false;
 let H_KIND=0,H_SEAT=false,H_EMIS=false,H_SHADE=false,H_NIGHT=false;
 const hRGB=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),parseInt(x.slice(5,7),16)];
 const HB=Object.fromEntries(Object.entries({rail:'#c9ced3',railD:'#59626c',conc:'#3a4048',concLit:'#ffcf7a',led1:'#5fd4ff',led2:'#e8f6ff',led3:'#2f6fd0',ledD:'#14325a',
@@ -105,7 +105,7 @@ const H_SEATS=[['#1f3f7a','#1b3870'],['#2f6fd0','#2a63bb'],['#5aa0e6','#5193d6']
  H_SEATU=[[27,47,94],[24,42,84]],H_WHITE=[232,238,245],H_CHEER=[[255,210,63],[240,196,50]];
 function hSeat(ang,row,upper,secId){const sec=secId!=null?secId+1000:Math.floor((ang+400)/10),h=vHash(sec,77);
  if(upper)return H_SEATU[row&1];
- if((ang>14&&ang<34)||(ang<-14&&ang>-34)){if(ang>0)return H_SEATS[H_CHEERI][row&1]}// the home cheering block on the first-base side
+ if((ang>14&&ang<34)||(ang<-14&&ang>-34)){if(ang>0||H_SYM)return H_SEATS[H_CHEERI][row&1]}// the home cheering block on the first-base side
  const p=H_SEATS[h%3];return p[row&1]}
 // the boardwalk: warm planks, blue-and-white parasols over tables, a cafe kiosk every so often
 const H_PARA=[[47,111,208],[244,246,250]];
@@ -159,7 +159,7 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
  const seat=(d0,upper)=>{const t=(d-d0)/2.4,row=Math.floor(t),fr=t-row,m=sStep(upper),dm=Math.abs(m-step/2);
   if(dm<1.3)return upper?hMul(HB.rail,.82):HB.rail;// stairs
   if(dm<1.9)return upper?[20,26,34]:[30,38,48];// their edges
-  if(fr>.76)return upper?[22,28,36]:[34,42,52];H_SEAT=true;return hSeat(ha,row,upper,AL.piece*100+Math.floor((AL.s+(upper?step/2:0))/(step*3)))};
+  if(fr>.76)return upper?[22,28,36]:[34,42,52];H_SEAT=true;return hSeat(ha,row,upper,TH.sym?(AL.piece===2?1:AL.piece)*100+Math.floor(Math.abs(AL.s)/(step*3)):AL.piece*100+Math.floor((AL.s+(upper?step/2:0))/(step*3)))};// a mirrored park picks each section's colour from its distance off the centre line
  let c;
  const roofPx=k=>{if(k<.8)return HB.gutter;if(k<1.8)return HB.roofEdge;if(d>fac-1.4)return HB.gutter;const m=((sF%10)+10)%10;if(m<1)return HB.rib;return (Math.floor(sF/10)&1)?HB.roof:HB.roof2};
  if(d<L1){c=seat(lo,false);if(D>70&&d>L1-9)c=hMul(c,.5+.3*clamp((L1-d)/9,0,1))}// the upper deck's overhang shades the back rows
