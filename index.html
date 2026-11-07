@@ -1769,7 +1769,7 @@ function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++
 // far enough to see the neighborhood. Copying it into a fresh canvas that's never read keeps it on the card.
 function gpuCopy(src){const c=document.createElement('canvas');c.width=src.width;c.height=src.height;c.getContext('2d').drawImage(src,0,0);return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(S.mode==='bp'&&S.phase!=='title'?'e':'')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
- if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();const hit=OUT_CACHE.get(key);if(hit){OUT_CV=hit[0];OUT_FEATHER=hit[1]}else{OUT_CV=gpuCopy(buildOutside(S.you,!!S.night,S.mode==='bp'&&S.phase!=='title'));OUT_FEATHER=buildFeather(OUT_CV);OUT_CACHE.set(key,[OUT_CV,OUT_FEATHER]);if(OUT_CACHE.size>2)OUT_CACHE.delete(OUT_CACHE.keys().next().value)}OUT_KEY=key}return OUT_CV}
+ if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();const hit=OUT_CACHE.get(key);if(hit){OUT_CV=hit[0];OUT_FEATHER=hit[1]}else{OUT_CV=gpuCopy(buildOutside(S.you,!!S.night,S.mode==='bp'&&S.phase!=='title'));OUT_FEATHER=ST.bowl?null:buildFeather(OUT_CV);/* the bowl parks paint both layers from one function, so they meet with no fade */OUT_CACHE.set(key,[OUT_CV,OUT_FEATHER]);if(OUT_CACHE.size>2)OUT_CACHE.delete(OUT_CACHE.keys().next().value)}OUT_KEY=key}return OUT_CV}
 // the last two neighborhoods built (a day/night switch or a quick back-and-forth costs nothing the second time)
 const OUT_CACHE=new Map();
 // the park buffer's straight edges would show as a seam where the extended stands begin: this overlay fades the
@@ -2502,7 +2502,9 @@ function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const
  if(d<=0&&PARK_C){// the last of the field, past the park buffer's edge: the warning track runs on round the corners, fair and foul
   const trk=()=>((vHash(Math.floor(wx),Math.floor(wy))%5)===0?PARK_C.tr2:PARK_C.tr);
   if(y>0&&ath<=45&&r>fenceDist(th)-14)return trk();
-  if(!(y>0&&ath<=45))for(let k=0;k<8;k++){const a2=k*Math.PI/4;if(hFieldD(x+Math.cos(a2)*18,y+Math.sin(a2)*18)>0)return trk()}// within the track's width of the stands
+  if(!(y>0&&ath<=45)){const sd=x>=0?1:-1,al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;if(pe>=0&&al>-5){const e=Math.min(40-pe,328-al),wt=328-al<40-pe?H_WALLW*.8:3;
+   if(e<wt){const s2=328-al<40-pe?pe:al,m=((s2%18)+18)%18;return e<.8?HB.wallY:e<1.6?HB.wallCap:m<.9?HB.seam:(Math.floor(s2/18)&1)?HB.pad2:HB.pad1}// the wall carries on round the corner
+   if(e<wt+14/1)return trk()}}// within the track's width of the stands
   return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2}// the last of the foul ground, past the park buffer's edge
  if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
  const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
@@ -3671,12 +3673,14 @@ function buildField(){H_NIGHT=false;
    }
   }else{
    const fair=Math.abs(th)<=45&&y>=0;
-   const dOut=ST.bowl&&fair?(fenceDist(th)-r)/FT/K:D[i]/3/K;const wallT=fairBig[i]?ST.wallFt*2:6;// the bowl parks measure the wall straight from the fence line, so its top line runs clean
-   if(dOut<wallT&&ST.bowl&&fair){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
+   let dOut=ST.bowl&&fair?(fenceDist(th)-r)/FT/K:D[i]/3/K,wallT=fairBig[i]?ST.wallFt*2:6;
+   if(ST.bowl&&!fair){// foul ground in the bowl parks: measure straight to the stands' front (the box along each line) so the wall runs clean round the corner
+    const sd=x>=0?1:-1,al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;if(pe>=0&&al>-5){const e1=40-pe,e2=328-al;dOut=Math.min(e1,e2)/FT/K;wallT=e2<e1?ST.wallFt*2:6}}// the bowl parks measure the wall straight from the fence line, so its top line runs clean
+   if(dOut<wallT&&ST.bowl&&(fair||dOut<wallT)){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
     const sF=r*th*RAD,m=((sF%18)+18)%18,id=Math.floor(sF/18);
     col=dOut<1.4?HB.wallY:dOut<2.4?HB.wallCap:m<.9?HB.seam:dOut>wallT-2.5?hMul((id&1)?HB.pad2:HB.pad1,.72):(id&1)?HB.pad2:HB.pad1}
    else if(dOut<wallT)col=dOut<1.5?C.pad2:C.pad;
-   else if((fair&&r>fenceDist(th)-14-8*0)||(!fair&&dOut<wallT+12))col=rng()<.2?C.tr2:C.tr;
+   else if((fair&&r>fenceDist(th)-14-8*0)||(!fair&&dOut<wallT+(ST.bowl?14/FT/K-wallT+wallT:12)))col=rng()<.2?C.tr2:C.tr;
    else{
     const dm=Math.hypot(x,y-60.5);
     const grassIn=Math.abs(x)+Math.abs(y-63.64)<63.64-9;

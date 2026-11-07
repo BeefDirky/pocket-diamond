@@ -154,12 +154,14 @@ function buildField(){H_NIGHT=false;
    }
   }else{
    const fair=Math.abs(th)<=45&&y>=0;
-   const dOut=ST.bowl&&fair?(fenceDist(th)-r)/FT/K:D[i]/3/K;const wallT=fairBig[i]?ST.wallFt*2:6;// the bowl parks measure the wall straight from the fence line, so its top line runs clean
-   if(dOut<wallT&&ST.bowl&&fair){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
+   let dOut=ST.bowl&&fair?(fenceDist(th)-r)/FT/K:D[i]/3/K,wallT=fairBig[i]?ST.wallFt*2:6;
+   if(ST.bowl&&!fair){// foul ground in the bowl parks: measure straight to the stands' front (the box along each line) so the wall runs clean round the corner
+    const sd=x>=0?1:-1,al=(sd*x+y)/Math.SQRT2,pe=(sd*x-y)/Math.SQRT2;if(pe>=0&&al>-5){const e1=40-pe,e2=328-al;dOut=Math.min(e1,e2)/FT/K;wallT=e2<e1?ST.wallFt*2:6}}// the bowl parks measure the wall straight from the fence line, so its top line runs clean
+   if(dOut<wallT&&ST.bowl&&(fair||dOut<wallT)){// the Whales' padded wall: royal and navy panels with seams, a yellow line along the top, a lit lip
     const sF=r*th*RAD,m=((sF%18)+18)%18,id=Math.floor(sF/18);
     col=dOut<1.4?HB.wallY:dOut<2.4?HB.wallCap:m<.9?HB.seam:dOut>wallT-2.5?hMul((id&1)?HB.pad2:HB.pad1,.72):(id&1)?HB.pad2:HB.pad1}
    else if(dOut<wallT)col=dOut<1.5?C.pad2:C.pad;
-   else if((fair&&r>fenceDist(th)-14-8*0)||(!fair&&dOut<wallT+12))col=rng()<.2?C.tr2:C.tr;
+   else if((fair&&r>fenceDist(th)-14-8*0)||(!fair&&dOut<wallT+(ST.bowl?14/FT/K-wallT+wallT:12)))col=rng()<.2?C.tr2:C.tr;
    else{
     const dm=Math.hypot(x,y-60.5);
     const grassIn=Math.abs(x)+Math.abs(y-63.64)<63.64-9;

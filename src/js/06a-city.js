@@ -31,7 +31,7 @@ function insidePoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++
 // far enough to see the neighborhood. Copying it into a fresh canvas that's never read keeps it on the card.
 function gpuCopy(src){const c=document.createElement('canvas');c.width=src.width;c.height=src.height;c.getContext('2d').drawImage(src,0,0);return c}
 function outsideFor(){const key=S.you+(S.night?'n':'d')+(S.mode==='bp'&&S.phase!=='title'?'e':'')+(STADIUMS[S.you]?STADIUMS[S.you].dims.join(','):'');
- if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();const hit=OUT_CACHE.get(key);if(hit){OUT_CV=hit[0];OUT_FEATHER=hit[1]}else{OUT_CV=gpuCopy(buildOutside(S.you,!!S.night,S.mode==='bp'&&S.phase!=='title'));OUT_FEATHER=buildFeather(OUT_CV);OUT_CACHE.set(key,[OUT_CV,OUT_FEATHER]);if(OUT_CACHE.size>2)OUT_CACHE.delete(OUT_CACHE.keys().next().value)}OUT_KEY=key}return OUT_CV}
+ if(OUT_KEY!==key){PARK_OUTLINE=parkOutline();const hit=OUT_CACHE.get(key);if(hit){OUT_CV=hit[0];OUT_FEATHER=hit[1]}else{OUT_CV=gpuCopy(buildOutside(S.you,!!S.night,S.mode==='bp'&&S.phase!=='title'));OUT_FEATHER=ST.bowl?null:buildFeather(OUT_CV);/* the bowl parks paint both layers from one function, so they meet with no fade */OUT_CACHE.set(key,[OUT_CV,OUT_FEATHER]);if(OUT_CACHE.size>2)OUT_CACHE.delete(OUT_CACHE.keys().next().value)}OUT_KEY=key}return OUT_CV}
 // the last two neighborhoods built (a day/night switch or a quick back-and-forth costs nothing the second time)
 const OUT_CACHE=new Map();
 // the park buffer's straight edges would show as a seam where the extended stands begin: this overlay fades the
