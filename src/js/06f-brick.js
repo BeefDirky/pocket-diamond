@@ -146,7 +146,7 @@ function bDecor(g){
  const wv=(th,len)=>{for(let i=-len;i<=len;i++){const t=th+i*.22,p=bXY(t,4.6+Math.sin(i*.42)*1.4),q=bXY(t,3.4+Math.sin(i*.42)*1.4);g.fillStyle='#3a6ab0';g.fillRect(p.x,p.y,1,1);if((i&3)===0){g.fillStyle='#8fb6e8';g.fillRect(q.x,q.y,1,1)}}};
  for(const th of[-25,-19,-4,4,19,24])wv(th,10);
  // umbrella tables on each terrace step, and shade trees along the concourse (round, drawn as shapes)
- for(let rw=0;rw<4;rw++){const A=2.5+rw*5.5+3.2;for(let th=-36+(rw&1)*1.6;th<-12;th+=3.4){const p=bXY(th,A+H_WALLW);hParasol(g,p.x,p.y,[3,0,4,1,3,0][vHash(rw*31+Math.round(th*10),7)%6],.62)}}
+ for(let rw=0;rw<4;rw++){const A=2.5+rw*5.5+3.2;let n=rw;for(let th=-31.5+(rw&1)*1.7;th<-13;th+=3.4,n++){const p=bXY(th,A+H_WALLW),fx=(p.x-HX)*FT,fy=(HY-p.y)*FT;if([[0,0],[8,0],[-8,0],[0,8],[0,-8]].some(([dx,dy])=>{const X=fx+dx,Y=fy+dy,ph=hPhi(X,Y);return hD(ph)>8&&Math.hypot(X-H_CC.x,Y-H_CC.y)<hRout(ph)+4})){n--;continue}hParasol(g,p.x,p.y,n&1?3:0,.62)}/* blue-and-white, orange-and-white, one after the other; kept clear of the stands */}
  for(let th=-43;th<=8;th+=4.2){const A=th<-11?40:46,p=bXY(th,A+H_WALLW+((Math.round(th*7)&3)-1.5));if(Math.abs(th)<5)continue;(Math.round(th*3)%5===0?hBlossom:hGreenTree)(g,p.x,p.y,13,false)}
  for(const th of[-33,-11.5,11.5]){const p=bXY(th,4.2);g.fillStyle='#e8eef5';B_GULL.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='X')g.fillRect(p.x-3+i,p.y-2+j,1,1)})}
  // the team's name on the bridge's outer face, mid-span
