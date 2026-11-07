@@ -64,8 +64,13 @@ function drawJumbo0(g,now,noLegs){
  g.textBaseline='middle';
  if(msg){
   const flash=Math.floor(now/180)%2;
+  if(msg.kBig){// a strikeout fills the board with a giant K, mirrored when he was caught looking
+   g.save();g.translate(cx-34,y0+h/2-2);if(msg.look){g.scale(-1,1)}g.fillStyle=flash?'#c7262e':'#f4f1e8';g.font='bold 58px "Pixelify Sans", monospace';g.textAlign='center';g.fillText('K',0,0);g.restore();
+   g.fillStyle='#ffbf3c';g.font='10px "Press Start 2P", monospace';g.textAlign='left';g.fillText(msg.text,cx-2,y0+h/2-8,w/2-6);
+   g.fillStyle='#f1ecdc';g.font='15px Jua, sans-serif';g.fillText(msg.look?'루킹 삼진':'헛스윙 삼진',cx-2,y0+h/2+12,w/2-6)}else{
   g.fillStyle=flash?TEAMS[S.you].jersey:'#ffbf3c';g.font='12px "Press Start 2P", monospace';g.textAlign='center';g.fillText(msg.text,cx,y0+h/2-(msg.kr?12:6),w-12);
   if(msg.kr){g.fillStyle='#f1ecdc';g.font='16px Jua, sans-serif';g.fillText(msg.kr,cx,y0+h/2+10,w-12)}else g.drawImage(LOGO[S.you],cx-9,y0+h-24,18,18);
+  }
  }else{
   g.drawImage(LOGO[S.you],x0+6,y0+8,50,50);
   g.textAlign='left';g.font='bold 12px "Pixelify Sans", monospace';
@@ -76,7 +81,7 @@ function drawJumbo0(g,now,noLegs){
   g.fillStyle='#94b4a1';g.textAlign='left';g.font='12px "Pixelify Sans", monospace';
   g.fillText(started?`${S.half==='top'?'TOP':'BOT'} ${ord(S.inning).toUpperCase()} · ${Math.min(S.outs,2)} OUT · ${S.balls}-${S.strikes}`:(S.night?'TONIGHT AT THE PARK':'TODAY AT THE PARK'),x0+64,y0+50,w-70);
   // strikeout cards along the bottom edge of the screen, one per K
-  for(let k=0;k<Math.min(S.ks,18);k++){const x=x0+64+k*7,y=y0+h-9;g.fillStyle='#f4f1e8';g.fillRect(x,y,6,7);g.fillStyle='#c7262e';KMAP.forEach((row,ry)=>{for(let rx=0;rx<4;rx++)if(row[rx]==='1')g.fillRect(x+1+rx,y+1+ry,1,1)})}
+  for(let k=0;k<Math.min(S.ks,18);k++){const x=x0+64+k*7,y=y0+h-9,bk=!!(S.kLook&&S.kLook[k]);g.fillStyle='#f4f1e8';g.fillRect(x,y,6,7);g.fillStyle='#c7262e';KMAP.forEach((row,ry)=>{for(let rx=0;rx<4;rx++)if(row[rx]==='1')g.fillRect(x+1+(bk?3-rx:rx),y+1+ry,1,1)})}// a backwards K for a called third strike
  }
  g.fillStyle='rgba(0,0,0,.28)';for(let yy=y0;yy<y0+h;yy+=2)g.fillRect(x0,yy,w,1);
 }

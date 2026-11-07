@@ -4025,7 +4025,7 @@ function pitchEnd(){
 }
 function strike(swinging,b,buntMiss){
  S.strikes++;if(!swinging)S.umpPunch=performance.now()+800;
- if(S.strikes>=3){S.outs++;if(batKey()===S.you){S.ks++;if(S.mode!=='bp')crowdSad()}else{S.myK++;S.cheerUntil=performance.now()+1800;if(fldKey()===S.you)organCue('klost')}
+ if(S.strikes>=3){S.outs++;S.jumbo={kBig:true,look:!swinging,text:swinging?'STRIKEOUT':'CAUGHT LOOKING',until:performance.now()+2800};if(batKey()===S.you){S.ks++;(S.kLook=S.kLook||[]).push(!swinging);if(S.mode!=='bp')crowdSad()}else{S.myK++;S.cheerUntil=performance.now()+1800;if(fldKey()===S.you)organCue('klost')}
   logPA(b,swinging?'Strikeout swinging, K':'Called strike three, backwards K',false);
   banner(swinging?'STRIKEOUT':'STRIKE THREE',swinging?`Got him with the ${S.pitch.name.toLowerCase()}`:'Caught looking','strike');sfx('out');S.koWalk={who:b,at:performance.now(),sd:batKey()===S.you?1:-1,T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5',hand:effHand(b)};nextBatter();
  }else banner(buntMiss?'MISSED THE BUNT':swinging?'SWING AND MISS':'STRIKE',`${S.balls}-${S.strikes}`,'strike');
@@ -4572,7 +4572,7 @@ function finishPlay(){
   banner(r.banner,r.sub,r.tone);logPA(curBatter(),r.desc,r.hr||r.code==='LD');
   setPhase('result');updateHUD();return}
  if(r.code==='FOUL'&&S.play.bunt&&S.strikes>=2){
-  S.outs++;if(batKey()===S.you){S.ks++;crowdSad()}else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
+  S.outs++;S.jumbo={kBig:true,look:false,text:'STRIKEOUT',until:performance.now()+2800};if(batKey()===S.you){S.ks++;(S.kLook=S.kLook||[]).push(false);crowdSad()}else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
  }else if(r.code==='FOUL'){
   if(S.strikes<2)S.strikes++;
   banner(S.play.bunt?'FOUL BUNT':'FOUL BALL',S.strikes<2?`${S.balls}-${S.strikes}`:'Still two strikes');
@@ -4644,7 +4644,7 @@ const ord=n=>n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%10
 // ---------- game flow ----------
 function startGame(mode){tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
- S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.wildUntil=0;
+ S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.kLook=[];S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();
  S.inning=1;S.errs=0;S.outs=0;S.balls=0;S.strikes=0;S.runs=0;S.hits=0;S.hr=0;S.ks=0;
  S.bases=[null,null,null];S.play=null;S.swing=null;S.pitch=null;S.jumbo=null;
@@ -5615,8 +5615,13 @@ function drawJumbo0(g,now,noLegs){
  g.textBaseline='middle';
  if(msg){
   const flash=Math.floor(now/180)%2;
+  if(msg.kBig){// a strikeout fills the board with a giant K, mirrored when he was caught looking
+   g.save();g.translate(cx-34,y0+h/2-2);if(msg.look){g.scale(-1,1)}g.fillStyle=flash?'#c7262e':'#f4f1e8';g.font='bold 58px "Pixelify Sans", monospace';g.textAlign='center';g.fillText('K',0,0);g.restore();
+   g.fillStyle='#ffbf3c';g.font='10px "Press Start 2P", monospace';g.textAlign='left';g.fillText(msg.text,cx-2,y0+h/2-8,w/2-6);
+   g.fillStyle='#f1ecdc';g.font='15px Jua, sans-serif';g.fillText(msg.look?'루킹 삼진':'헛스윙 삼진',cx-2,y0+h/2+12,w/2-6)}else{
   g.fillStyle=flash?TEAMS[S.you].jersey:'#ffbf3c';g.font='12px "Press Start 2P", monospace';g.textAlign='center';g.fillText(msg.text,cx,y0+h/2-(msg.kr?12:6),w-12);
   if(msg.kr){g.fillStyle='#f1ecdc';g.font='16px Jua, sans-serif';g.fillText(msg.kr,cx,y0+h/2+10,w-12)}else g.drawImage(LOGO[S.you],cx-9,y0+h-24,18,18);
+  }
  }else{
   g.drawImage(LOGO[S.you],x0+6,y0+8,50,50);
   g.textAlign='left';g.font='bold 12px "Pixelify Sans", monospace';
@@ -5627,7 +5632,7 @@ function drawJumbo0(g,now,noLegs){
   g.fillStyle='#94b4a1';g.textAlign='left';g.font='12px "Pixelify Sans", monospace';
   g.fillText(started?`${S.half==='top'?'TOP':'BOT'} ${ord(S.inning).toUpperCase()} · ${Math.min(S.outs,2)} OUT · ${S.balls}-${S.strikes}`:(S.night?'TONIGHT AT THE PARK':'TODAY AT THE PARK'),x0+64,y0+50,w-70);
   // strikeout cards along the bottom edge of the screen, one per K
-  for(let k=0;k<Math.min(S.ks,18);k++){const x=x0+64+k*7,y=y0+h-9;g.fillStyle='#f4f1e8';g.fillRect(x,y,6,7);g.fillStyle='#c7262e';KMAP.forEach((row,ry)=>{for(let rx=0;rx<4;rx++)if(row[rx]==='1')g.fillRect(x+1+rx,y+1+ry,1,1)})}
+  for(let k=0;k<Math.min(S.ks,18);k++){const x=x0+64+k*7,y=y0+h-9,bk=!!(S.kLook&&S.kLook[k]);g.fillStyle='#f4f1e8';g.fillRect(x,y,6,7);g.fillStyle='#c7262e';KMAP.forEach((row,ry)=>{for(let rx=0;rx<4;rx++)if(row[rx]==='1')g.fillRect(x+1+(bk?3-rx:rx),y+1+ry,1,1)})}// a backwards K for a called third strike
  }
  g.fillStyle='rgba(0,0,0,.28)';for(let yy=y0;yy<y0+h;yy+=2)g.fillRect(x0,yy,w,1);
 }
