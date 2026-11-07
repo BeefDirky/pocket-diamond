@@ -6,7 +6,11 @@ const K=SCALE/3;const toPx3=(x,y)=>{const p=toPx(x,y);return{x:p.x/K,y:p.y/K}};
 const BASES=[{x:0,y:0},{x:63.64,y:63.64},{x:0,y:127.28},{x:-63.64,y:63.64}];
 const baseP=k=>k===4?BASES[0]:BASES[k];
 let DIMS=[325,375,400,375,325],ST=null;
-function fenceDist(th){const a=clamp(th,-45,45),pts=[-45,-22,0,22,45];for(let k=0;k<4;k++)if(a<=pts[k+1]){const u=(a-pts[k])/(pts[k+1]-pts[k]);return lerp(DIMS[k],DIMS[k+1],u)}return DIMS[4]}
+// the wall runs through the five posted distances on one smooth curve (Catmull-Rom), so there is no point in centre field
+function fenceDist(th){const a=clamp(th,-45,45),P=[-45,-22,0,22,45],D=DIMS;
+ const m=k=>k===0?(D[1]-D[0])/(P[1]-P[0]):k===4?(D[4]-D[3])/(P[4]-P[3]):(D[k+1]-D[k-1])/(P[k+1]-P[k-1]);
+ for(let k=0;k<4;k++)if(a<=P[k+1]){const h=P[k+1]-P[k],u=(a-P[k])/h,u2=u*u,u3=u2*u;
+  return (2*u3-3*u2+1)*D[k]+(u3-2*u2+u)*h*m(k)+(-2*u3+3*u2)*D[k+1]+(u3-u2)*h*m(k+1)}return D[4]}
 function setStadium(){ST=STADIUMS[S.you];DIMS=ST.dims;if(typeof hTheme==='function')hTheme()}
 const POS=[
  {n:'pitcher',x:0,y:60.5,sp:19,re:.25,reach:5},

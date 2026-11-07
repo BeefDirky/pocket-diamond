@@ -63,7 +63,8 @@ function hitAdvance(runners,tp,Pp,delay,ex){
 }
 function outfieldHit(play,it,P,runners,delay,errBy){
  // retrieval time: an outfielder who had to run it down, dig it off the wall or chase a carom in the corner needs longer to get rid of it
- const ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(Math.hypot(it.p.x,it.p.y)>285?.75:0)+(P.line?.9:0)):0;
+ const rp=Math.hypot(it.p.x,it.p.y),ath=Math.abs(Math.atan2(it.p.x,it.p.y)/RAD),gap=ath>12&&ath<34,corner=ath>=36;
+ const ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(rp>285?.75:0)+(rp>275&&gap?1.7:0)+(rp>265&&corner?1.9:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
  hitAdvance(runners,it.t,it.p,delay,ex);
  const bd=runners.find(r=>r.batter).dest;runners.find(r=>r.batter).round=true;
  // on a single, the runner from second tries to score on speed: 70+ scores, 50-69 is a play at the plate, under 50 holds at third

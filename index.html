@@ -1093,7 +1093,11 @@ const K=SCALE/3;const toPx3=(x,y)=>{const p=toPx(x,y);return{x:p.x/K,y:p.y/K}};
 const BASES=[{x:0,y:0},{x:63.64,y:63.64},{x:0,y:127.28},{x:-63.64,y:63.64}];
 const baseP=k=>k===4?BASES[0]:BASES[k];
 let DIMS=[325,375,400,375,325],ST=null;
-function fenceDist(th){const a=clamp(th,-45,45),pts=[-45,-22,0,22,45];for(let k=0;k<4;k++)if(a<=pts[k+1]){const u=(a-pts[k])/(pts[k+1]-pts[k]);return lerp(DIMS[k],DIMS[k+1],u)}return DIMS[4]}
+// the wall runs through the five posted distances on one smooth curve (Catmull-Rom), so there is no point in centre field
+function fenceDist(th){const a=clamp(th,-45,45),P=[-45,-22,0,22,45],D=DIMS;
+ const m=k=>k===0?(D[1]-D[0])/(P[1]-P[0]):k===4?(D[4]-D[3])/(P[4]-P[3]):(D[k+1]-D[k-1])/(P[k+1]-P[k-1]);
+ for(let k=0;k<4;k++)if(a<=P[k+1]){const h=P[k+1]-P[k],u=(a-P[k])/h,u2=u*u,u3=u2*u;
+  return (2*u3-3*u2+1)*D[k]+(u3-2*u2+u)*h*m(k)+(-2*u3+3*u2)*D[k+1]+(u3-u2)*h*m(k+1)}return D[4]}
 function setStadium(){ST=STADIUMS[S.you];DIMS=ST.dims;if(typeof hTheme==='function')hTheme()}
 const POS=[
  {n:'pitcher',x:0,y:60.5,sp:19,re:.25,reach:5},
@@ -4284,7 +4288,8 @@ function hitAdvance(runners,tp,Pp,delay,ex){
 }
 function outfieldHit(play,it,P,runners,delay,errBy){
  // retrieval time: an outfielder who had to run it down, dig it off the wall or chase a carom in the corner needs longer to get rid of it
- const ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(Math.hypot(it.p.x,it.p.y)>285?.75:0)+(P.line?.9:0)):0;
+ const rp=Math.hypot(it.p.x,it.p.y),ath=Math.abs(Math.atan2(it.p.x,it.p.y)/RAD),gap=ath>12&&ath<34,corner=ath>=36;
+ const ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(rp>285?.75:0)+(rp>275&&gap?1.7:0)+(rp>265&&corner?1.9:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
  hitAdvance(runners,it.t,it.p,delay,ex);
  const bd=runners.find(r=>r.batter).dest;runners.find(r=>r.batter).round=true;
  // on a single, the runner from second tries to score on speed: 70+ scores, 50-69 is a play at the plate, under 50 holds at third
