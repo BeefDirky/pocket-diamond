@@ -41,6 +41,7 @@
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
+          <button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button>
         </nav>
         <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
         <small class="mmFoot">AN IMUGI LABS GAME</small>
@@ -92,6 +93,11 @@
           <button class="tile" type="button" data-go="scrCards"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M3 1h10v14H3z" opacity=".35"/><path fill="currentColor" d="M3 1h10v3H3zM6 6h4v4H6zM3 12h10v3H3z"/></svg><span>Cards</span><em class="pkBadge" id="pkBadge" hidden></em></button>
         </div>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
+      <div class="card" id="scrAds" hidden>
+        <h1><span>SPONSORS</span><small>SAMPLE SIGNS · PREVIEW ONLY</small></h1>
+        <div class="adsWrap" id="adsWrap"></div>
+        <button class="big" type="button" data-go="scrMain">BACK</button>
       </div>
       <div class="card" id="scrAbout" hidden>
         <h1><span>ABOUT</span></h1>

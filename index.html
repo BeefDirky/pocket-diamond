@@ -777,6 +777,59 @@ body.inMenu .olNet{display:none!important}
 @keyframes ldDots{from{width:0}to{width:4ch}}
 /* the loading bar fills from left to right (width is driven by the loader) */
 #loadScr .ldBar i{animation:none;transform:none;width:0;background:repeating-linear-gradient(90deg,var(--tc) 0 10px,transparent 10px 14px)}
+/* sponsor preview screen */
+.mmAds{width:100%;color:var(--amber)}.mmAds small{font-size:9px;color:var(--dim);margin-left:6px}
+#scrAds{max-width:min(1100px,96vw);width:96vw}
+#scrAds h1 small{display:block;font-size:11px;color:var(--dim);letter-spacing:.14em;margin-top:4px}
+.adsWrap{max-height:62vh;overflow:auto;text-align:left;padding:4px 2px 10px;margin-bottom:12px}
+.adsH{font-family:var(--f-hud);font-size:14px;letter-spacing:.12em;color:var(--amber);margin:16px 0 8px}
+.adsH small{display:block;color:var(--dim);font-size:11px;letter-spacing:.04em;margin-top:2px}
+.adsRow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.adCv{image-rendering:pixelated;width:auto;height:auto;zoom:1.5;display:block}
+@media (max-width:600px){.adCv{zoom:1.15}}
+/* ---- lineup: the club on a field, cards at each position, the collection tray below ---- */
+#scrLineup .cards{display:block}
+.lfWrap{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px;align-items:start}
+.lfField{position:relative;aspect-ratio:1/1;max-height:62vh;width:100%;margin:0 auto;background-size:100% 100%;image-rendering:pixelated;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px rgba(255,255,255,.06),0 4px 0 var(--edge)}
+.lfSlot{position:absolute;transform:translate(-50%,-50%);z-index:1}
+.lfDhTag{position:absolute;left:3%;bottom:2%;font-family:var(--f-px);font-size:9px;color:var(--dim);letter-spacing:.1em}
+.lfc{--rc:#8a96a0;position:relative;width:72px;padding:3px 3px 2px;display:flex;flex-direction:column;align-items:stretch;cursor:pointer;font-family:var(--f-hud);color:#fff;
+ background:linear-gradient(170deg,var(--tj) 0 55%,var(--tc) 55% 100%);border:3px solid var(--rc);box-shadow:0 3px 0 rgba(0,0,0,.55),inset 0 0 0 1px rgba(0,0,0,.35);transition:transform .08s steps(2)}
+.lfc.r1{--rc:#4f9fe0}.lfc.r2{--rc:#b77cff}.lfc.r3{--rc:#ffcf4a}
+.lfc img{width:100%;aspect-ratio:64/80;image-rendering:pixelated;display:block;border:2px solid rgba(8,20,14,.7);background:#0b1410}
+.lfc .lfOvr{position:absolute;left:-6px;top:-8px;font-family:var(--f-px);font-size:10px;background:#0b1410;border:2px solid var(--rc);padding:2px 3px;z-index:2;min-width:16px;text-align:center}
+.lfc .lfOrd{position:absolute;right:-7px;top:-8px;width:18px;height:18px;display:grid;place-items:center;font-family:var(--f-px);font-size:10px;background:#ffbf3c;color:#14181c;border:2px solid #14181c;z-index:2}
+.lfc .lfNm{font-size:10px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(8,20,14,.82);padding:2px 3px;margin-top:2px;text-align:center}
+.lfc .lfPos{font-size:9px;letter-spacing:.08em;text-align:center;color:#ffbf3c;background:rgba(8,20,14,.6)}
+.lfc:hover{transform:translateY(-2px)}
+.lfc.sel{transform:translateY(-6px) scale(1.08);outline:3px solid #ffbf3c;outline-offset:2px;box-shadow:0 0 0 6px rgba(255,191,60,.25),0 6px 0 rgba(0,0,0,.5);z-index:3}
+.lfc.drop{animation:lfPulse .8s steps(2) infinite}
+.lfc.deck.ready{animation:lfPulse .8s steps(2) infinite}
+.lfc.used{opacity:.4;filter:grayscale(.6);cursor:default}
+.lfc.nudge{transform:translateX(3px)}
+@keyframes lfPulse{50%{box-shadow:0 0 0 3px #ffbf3c,0 3px 0 rgba(0,0,0,.55)}}
+.lfSide h4,.lfTrayHead h4{font-family:var(--f-hud);font-size:12px;letter-spacing:.14em;color:var(--amber);margin:0 0 8px}
+.lfPen{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 8px;padding-top:8px}
+.lfPen .lfc{width:100%}
+.lfRestore{margin-top:12px;width:100%}
+.lfHint{margin:10px 0 6px;font-size:13px;min-height:1.4em}.lfHint b{color:var(--amber);font-weight:400}
+.lfTrayHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+.lfTray{display:flex;gap:12px;overflow-x:auto;padding:12px 8px 10px;background:rgba(8,20,14,.55);border:3px solid var(--edge);scroll-snap-type:x proximity}
+.lfTray .lfc{flex:0 0 78px;width:78px;scroll-snap-align:start}
+.lfEmpty{color:var(--dim);font-size:12px;padding:10px}
+@media (max-width:720px){
+ .lfWrap{grid-template-columns:1fr}.lfPen{grid-template-columns:repeat(5,1fr);gap:10px 6px}
+ .lfc{width:52px;padding:2px}.lfc .lfNm{font-size:8px}.lfc .lfPos{font-size:8px}.lfc .lfOvr,.lfc .lfOrd{font-size:8px}
+ .lfField{max-height:none}.lfTray .lfc{flex-basis:64px;width:64px}
+}
+#scrLineup.card.wide{max-width:min(1120px,97vw);width:97vw}
+.lfWrap{grid-template-columns:minmax(0,1fr) 170px}
+.lfField{max-height:66vh;aspect-ratio:1.15/1}
+.lfField .lfc{width:62px}
+@media (max-width:720px){.lfWrap{grid-template-columns:1fr}.lfField .lfc{width:46px}.lfField{aspect-ratio:1/1}}
+.lfField{aspect-ratio:115/100;image-rendering:pixelated}
+@media (max-width:720px){.lfField{aspect-ratio:115/100}}
+.lfField{max-height:56vh;width:auto;max-width:100%}
 </style>
 
 <div class="app">
@@ -821,6 +874,7 @@ body.inMenu .olNet{display:none!important}
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
+          <button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button>
         </nav>
         <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
         <small class="mmFoot">AN IMUGI LABS GAME</small>
@@ -872,6 +926,11 @@ body.inMenu .olNet{display:none!important}
           <button class="tile" type="button" data-go="scrCards"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M3 1h10v14H3z" opacity=".35"/><path fill="currentColor" d="M3 1h10v3H3zM6 6h4v4H6zM3 12h10v3H3z"/></svg><span>Cards</span><em class="pkBadge" id="pkBadge" hidden></em></button>
         </div>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
+      <div class="card" id="scrAds" hidden>
+        <h1><span>SPONSORS</span><small>SAMPLE SIGNS · PREVIEW ONLY</small></h1>
+        <div class="adsWrap" id="adsWrap"></div>
+        <button class="big" type="button" data-go="scrMain">BACK</button>
       </div>
       <div class="card" id="scrAbout" hidden>
         <h1><span>ABOUT</span></h1>
@@ -4804,6 +4863,7 @@ function renderCards(){
  $('lnTitle').textContent=`${T.city} ${T.name}`;
  $('lnHint').textContent=mine?'Tap a player to sign one of your cards into his spot, or move him in the batting order.':'Scouting report. Their gloves and their starter shape every play.';
  $('lnMine').setAttribute('aria-pressed',String(mine));$('lnCreate').hidden=!mine;$('lnOpp').setAttribute('aria-pressed',String(!mine));
+ if(typeof lineupRender==='function')return lineupRender();
  const stat=(l,v)=>`<div class="st"><span>${l}</span><i><u style="width:${Math.min(100,v)}%;background:${rcol(v)}"></u></i><b style="color:${rcol(v)}">${v}</b></div>`;
  const card=(p,slot,i)=>`<button type="button" class="pcard${lnSel===i?' sel':''}${!mine?' ro':''}${p.custom?' mine':''}${p.signed?' signed':''}" data-i="${i}" style="--tc:${T.jersey};--tc2:${T.cap}">
   <div class="pcTop"><span class="slot">${slot}</span><span class="pcPos">${p.pos}${p.custom?' ★':''}${p.signed?' · CARD':''}</span><span class="pcOvr">${ovr(p)}</span></div>
@@ -4822,7 +4882,7 @@ $('lnOpp').addEventListener('click',()=>{lnView='opp';lnSel=null;renderCards()})
 let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.fillStyle='#1b1f24';g.beginPath();g.arc(48,48,44,0,Math.PI*2);g.fill();g.strokeStyle='#3a4048';g.lineWidth=6;g.stroke();g.fillStyle='#ffbf3c';g.font='48px "Press Start 2P", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('?',50,52);return Q_URL=c.toDataURL()}
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
-function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>PICK YOUR CLUB</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct'])$(k).hidden=k!==id;if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>PICK YOUR CLUB</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds'])$(k).hidden=k!==id;if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
 {let lastDesk=null;addEventListener('resize',()=>{const d=isDesk();if(lastDesk===null||d!==lastDesk)applyWide();lastDesk=d})}
 function applyWide(){$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize()})}
@@ -4906,6 +4966,131 @@ $('shList').addEventListener('click',e=>{const b=e.target.closest('.shRow');if(!
  if(signPlayer(S.you,sheetFor.origName,b.dataset.id,sheetFor.pit)){applyDefense();updateHUD();sfx('glove')}closeSheet();renderCards()});
 $('shOrig').addEventListener('click',()=>{if(!sheetFor)return;releasePlayer(S.you,sheetFor.origName,sheetFor.pit);applyDefense();updateHUD();closeSheet();renderCards()});
 $('shMove').addEventListener('click',()=>{if(!sheetFor)return;lnSel=sheetFor.i;closeSheet();renderCards();$('lnHint').textContent='Now tap the spot to swap him with.'});
+// ---------- sponsor preview (menu → SPONSORS): sample signs in the shapes they'd take around a park. Fictional brands only. ----------
+const AD_SPONSORS=[
+ {n:'GULL AIR',k:'갈매기 항공',bg:'#13254a',fg:'#ffffff',ac:'#e8642a',ic:'plane',tag:'FLY THE COAST'},
+ {n:'HANSOL RAMYUN',k:'한솔 라면',bg:'#c8202a',fg:'#ffd23f',ac:'#ffffff',ic:'bowl',tag:'SPICY SINCE 1978'},
+ {n:'PALDO MART',k:'팔도 마트',bg:'#1f7a3a',fg:'#ffffff',ac:'#ffd23f',ic:'cart',tag:'OPEN 24 HOURS'},
+ {n:'HWASEONG BANK',k:'화성 은행',bg:'#2a1650',fg:'#e8dcff',ac:'#ffd23f',ic:'coin',tag:'SAVE LIKE A WIZARD'},
+ {n:'DINO DIG',k:'디노 디그',bg:'#123a2a',fg:'#b9e6c9',ac:'#e2b93a',ic:'bone',tag:'FAMILY DIG PARK'},
+ {n:'SEA SALT SODA',k:'바다 소다',bg:'#5aa0e6',fg:'#ffffff',ac:'#14325a',ic:'can',tag:'ICE COLD AT EVERY STAND'},
+ {n:'TANGERINE TELECOM',k:'귤 통신',bg:'#f08a1c',fg:'#ffffff',ac:'#2f6a32',ic:'phone',tag:'5G FROM JEJU TO SEOUL'},
+ {n:'REX MOTORS',k:'렉스 모터스',bg:'#1b1f24',fg:'#e8f0e0',ac:'#2fa86a',ic:'car',tag:'BUILT IN CHANGWON'},
+ {n:'BLUE WHALE COFFEE',k:'고래 커피',bg:'#0f2f55',fg:'#cfe6ff',ac:'#ffffff',ic:'cup',tag:'DEEP ROAST'},
+ {n:'GWANGAN FRIED CHICKEN',k:'광안 치킨',bg:'#ffd23f',fg:'#7a2a10',ac:'#c8202a',ic:'chick',tag:'CHIMAEK NIGHT'}];
+// tiny pixel icons, 8x8, drawn in the sign's accent colour
+const AD_ICON={plane:['...X....','...XX...','XXXXXXXX','.XXXXXX.','...XX...','..XXXX..','...XX...','........'],
+ bowl:['.X.X.X..','..X.X...','XXXXXXXX','XXXXXXXX','.XXXXXX.','..XXXX..','...XX...','........'],
+ cart:['X.......','XXXXXXX.','.XXXXXX.','.XXXXXX.','..XXXXX.','........','..X..X..','........'],
+ coin:['..XXXX..','.X....X.','X..XX..X','X.X..X.X','X..XX..X','X.X..X.X','.X....X.','..XXXX..'],
+ bone:['XX....XX','XXX..XXX','.XXXXXX.','..XXXX..','..XXXX..','.XXXXXX.','XXX..XXX','XX....XX'],
+ can:['.XXXXX..','XXXXXXX.','X.....X.','XXXXXXX.','X.....X.','XXXXXXX.','XXXXXXX.','.XXXXX..'],
+ phone:['.XXXXX..','.X...X..','.X...X..','.X...X..','.X...X..','.XXXXX..','.XX.XX..','.XXXXX..'],
+ car:['........','..XXXX..','.X....X.','XXXXXXXX','XXXXXXXX','.X....X.','........','........'],
+ cup:['.X.X....','..X.X...','XXXXXX..','X....XXX','X....X.X','X....XXX','.XXXX...','XXXXXXX.'],
+ chick:['..XX....','.XXXX...','XXX.XXX.','.XXXXXXX','.XXXXXX.','..XXXX..','..X..X..','.XX.XX..']};
+function adIcon(g,x,y,ic,c,s){g.fillStyle=c;(AD_ICON[ic]||[]).forEach((r,j)=>{for(let i=0;i<8;i++)if(r[i]==='X')g.fillRect(x+i*s,y+j*s,s,s)})}
+function adCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;c.className='adCv';const g=c.getContext('2d');g.imageSmoothingEnabled=false;return[c,g]}
+// 1. outfield wall pad: the sponsor painted on the padded panel, with the yellow home-run line on top
+function adWall(sp){const[c,g]=adCanvas(240,44);g.fillStyle='#ffd23f';g.fillRect(0,0,240,3);g.fillStyle=sp.bg;g.fillRect(0,3,240,38);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(0,35,240,6);
+ for(let x=0;x<240;x+=60){g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x,3,1,38)}adIcon(g,10,10,sp.ic,sp.ac,3);
+ g.fillStyle=sp.fg;g.font='bold 16px "Pixelify Sans", monospace';g.textBaseline='middle';g.fillText(sp.n,42,16,190);g.fillStyle=sp.ac;g.font='12px Jua, sans-serif';g.fillText(sp.k,42,32,190);return c}
+// 2. LED ribbon on the upper-deck fascia: dot-matrix lettering, lit
+function adRibbon(sp,now){const[c,g]=adCanvas(320,22);g.fillStyle='#05080a';g.fillRect(0,0,320,22);const txt=`${sp.n} · ${sp.k} · ${sp.tag} · `;
+ const t=document.createElement('canvas');t.width=900;t.height=14;const tg=t.getContext('2d');tg.font='bold 12px "Pixelify Sans", monospace';tg.textBaseline='middle';tg.fillStyle=sp.ac==='#ffffff'?sp.fg:sp.ac;tg.fillText(txt+txt,0,8);
+ const off=Math.floor(now/40)%Math.max(1,Math.round(tg.measureText(txt).width));const d=tg.getImageData(0,0,900,14).data;
+ for(let y=0;y<14;y++)for(let x=0;x<160;x++){const sx=x*2+off,i=(y*900+sx)*4;if(sx<900&&d[i+3]>110){g.fillStyle=`rgb(${d[i]},${d[i+1]},${d[i+2]})`;g.fillRect(x*2,y+4,2,1)}else if(((x+y)&1)===0){g.fillStyle='#10151a';g.fillRect(x*2,y+4,1,1)}}
+ return c}
+// 3. outfield billboard on legs above the bleachers
+function adBoard(sp){const[c,g]=adCanvas(150,96);g.fillStyle='#3a4048';g.fillRect(26,62,5,34);g.fillRect(119,62,5,34);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(8,8,140,58);
+ g.fillStyle='#22262c';g.fillRect(2,2,146,62);g.fillStyle=sp.bg;g.fillRect(5,5,140,56);g.fillStyle=sp.ac;g.fillRect(5,5,140,3);adIcon(g,12,16,sp.ic,sp.ac,4);
+ g.fillStyle=sp.fg;g.font='bold 13px "Pixelify Sans", monospace';g.textBaseline='middle';g.fillText(sp.n,52,22,90);g.font='14px Jua, sans-serif';g.fillText(sp.k,52,38,90);g.fillStyle=sp.ac;g.font='9px "Pixelify Sans", monospace';g.fillText(sp.tag,12,54,128);return c}
+// 4. the jumbotron's between-innings spot
+function adJumbo(sp,now){const[c,g]=adCanvas(190,66);g.fillStyle='#05080a';g.fillRect(0,0,190,66);const fl=Math.floor(now/500)%2;
+ g.fillStyle=sp.bg;g.fillRect(4,4,182,58);adIcon(g,12,13,sp.ic,fl?sp.fg:sp.ac,5);g.fillStyle=sp.fg;g.font='bold 15px "Pixelify Sans", monospace';g.textBaseline='middle';g.fillText(sp.n,62,20,120);
+ g.fillStyle=sp.ac;g.font='15px Jua, sans-serif';g.fillText(sp.k,62,38,120);g.fillStyle=sp.fg;g.font='9px "Press Start 2P", monospace';g.fillText(fl?'INNING BREAK':sp.tag,62,54,120);
+ g.fillStyle='rgba(0,0,0,.28)';for(let y=0;y<66;y+=2)g.fillRect(0,y,190,1);return c}
+// 5. the hand-held fan banner in the stands
+function adFan(sp){const[c,g]=adCanvas(150,40);g.fillStyle='rgba(0,0,0,.3)';g.fillRect(4,6,144,32);g.fillStyle='#f4f1e8';g.fillRect(1,3,144,30);g.fillStyle=sp.bg;g.fillRect(1,3,144,4);g.fillRect(1,29,144,4);
+ g.fillStyle=sp.bg;g.font='bold 12px "Pixelify Sans", monospace';g.textBaseline='middle';g.textAlign='center';g.fillText(`${sp.n}!`,73,18,136);g.fillStyle='#2b3038';g.fillRect(14,33,2,7);g.fillRect(130,33,2,7);return c}
+// 6. foul-pole screen and backstop rotating board
+function adBackstop(sp){const[c,g]=adCanvas(240,26);g.fillStyle='#1b1f24';g.fillRect(0,0,240,26);g.fillStyle=sp.bg;g.fillRect(2,2,236,22);g.fillStyle=sp.ac;g.fillRect(2,2,4,22);g.fillRect(234,2,4,22);
+ adIcon(g,12,5,sp.ic,sp.fg,2);adIcon(g,212,5,sp.ic,sp.fg,2);g.fillStyle=sp.fg;g.font='bold 13px "Pixelify Sans", monospace';g.textBaseline='middle';g.textAlign='center';g.fillText(`${sp.n} · ${sp.k}`,120,14,180);return c}
+let ADS_RAF=0;
+function adsRender(){const W=$('adsWrap');W.innerHTML='';const live=[];
+ const sec=(t,d)=>{const h=document.createElement('h3');h.className='adsH';h.innerHTML=`${t}<small>${d}</small>`;W.appendChild(h);const r=document.createElement('div');r.className='adsRow';W.appendChild(r);return r};
+ let r=sec('OUTFIELD WALL PADS','Painted on the padded wall between the yellow line and the warning track');AD_SPONSORS.forEach(sp=>r.appendChild(adWall(sp)));
+ r=sec('UPPER-DECK LED RIBBON','Scrolls along the fascia between the decks');AD_SPONSORS.slice(0,4).forEach(sp=>{const box=document.createElement('div');box.className='adLive';r.appendChild(box);live.push([box,now=>adRibbon(sp,now)])});
+ r=sec('BILLBOARDS','On legs above the outfield seats and the concourse');AD_SPONSORS.forEach(sp=>r.appendChild(adBoard(sp)));
+ r=sec('JUMBOTRON SPOTS','Between innings and during pitching changes');AD_SPONSORS.slice(0,6).forEach(sp=>{const box=document.createElement('div');box.className='adLive';r.appendChild(box);live.push([box,now=>adJumbo(sp,now)])});
+ r=sec('BACKSTOP BOARDS','The rotating board behind home plate, seen on every pitch');AD_SPONSORS.forEach(sp=>r.appendChild(adBackstop(sp)));
+ r=sec('FAN BANNERS','Hand-held in the stands');AD_SPONSORS.forEach(sp=>r.appendChild(adFan(sp)));
+ cancelAnimationFrame(ADS_RAF);const tick=now=>{if($('scrAds').hidden)return;for(const[b,f]of live){const c=f(now);b.replaceChildren(c)}ADS_RAF=setTimeout(()=>requestAnimationFrame(tick),80)};requestAnimationFrame(tick)}
+// ---------- lineup screen: the club laid out on a field, a card at every position, your card collection in a tray below.
+// Tap a player on the field to pick him up; tap a card in the tray to sign it into his spot, or tap another hitter on the
+// field to swap their places in the batting order. Uses the signings layer (19a) for the actual roster changes. ----------
+const LF_POS={C:[50,90],'1B':[77,61],'2B':[63,40],SS:[37,40],'3B':[23,61],LF:[17,18],CF:[50,10],RF:[83,18],DH:[9,86],SP:[50,66]};
+let lfDeck='bat',lfField=null;
+function lfFieldArt(){if(lfField)return lfField;const W=115,H=100,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+ // seen straight down: dark stands, a grass fan with mowing stripes and a warning track, the skinned infield, base paths,
+ // bases, mound and plate, chalk lines out to the corners
+ const hx=57.5,hy=93,d=30,B1=[hx+d*.707,hy-d*.707],B2=[hx,hy-d*1.414],B3=[hx-d*.707,hy-d*.707];
+ g.fillStyle='#16241c';g.fillRect(0,0,W,H);for(let y=0;y<H;y+=3)for(let x=(y%2);x<W;x+=3){g.fillStyle=((x*7+y*13)%5)?'#1b2c22':'#24382c';g.fillRect(x,y,1,1)}
+ const fan=r=>{g.beginPath();g.moveTo(hx,hy);g.arc(hx,hy,r,-Math.PI*3/4,-Math.PI/4);g.closePath()};
+ fan(91);g.fillStyle='#8a6440';g.fill();fan(86);g.fillStyle='#3c9a3c';g.fill();
+ g.save();fan(86);g.clip();g.fillStyle='#46aa44';for(let y=0;y<H;y+=8)g.fillRect(0,y,W,4);
+ // the infield dirt: an arc round the mound, out past the bases
+ g.fillStyle='#c48c56';g.beginPath();g.arc(hx,hy-d*.95,d*1.02,0,7);g.fill();
+ g.beginPath();g.moveTo(hx,hy+3);g.lineTo(B1[0]+5,B1[1]);g.lineTo(B2[0],B2[1]-5);g.lineTo(B3[0]-5,B3[1]);g.closePath();g.fill();
+ g.restore();
+ // the infield grass inside the base paths
+ const ins=4.5;g.fillStyle='#3c9a3c';g.beginPath();g.moveTo(hx,hy-ins*1.4);g.lineTo(B1[0]-ins,B1[1]);g.lineTo(B2[0],B2[1]+ins*1.4);g.lineTo(B3[0]+ins,B3[1]);g.closePath();g.fill();
+ g.save();g.clip();g.fillStyle='#46aa44';for(let y=0;y<H;y+=8)g.fillRect(0,y,W,4);g.restore();
+ g.fillStyle='#c48c56';g.beginPath();g.arc(hx,hy-d*.707,3.6,0,7);g.fill();g.beginPath();g.arc(hx,hy,6,0,7);g.fill();
+ g.fillStyle='#f4f1e8';for(let k=0;k<64;k++){g.fillRect(Math.round(hx+k*.707),Math.round(hy-k*.707),1,1);g.fillRect(Math.round(hx-k*.707),Math.round(hy-k*.707),1,1)}
+ for(const[x,y]of[B1,B2,B3])g.fillRect(Math.round(x)-1,Math.round(y)-1,3,3);g.fillRect(Math.round(hx)-1,hy-1,3,2);g.fillRect(Math.round(hx)-1,Math.round(hy-d*.707),2,1);
+ return lfField=c.toDataURL()}
+// the card for a roster player: his collectible card if there is one, else the club's portrait
+function lfCard(k,p){if(!CARDS.length)buildCardDB();if(p.signed&&CARD_BY[p.signed])return CARD_BY[p.signed];return CARDS.find(c=>c.k===k&&c.p===p)||CARDS.find(c=>c.k===k&&c.p.name===p.name)||null}
+function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c):portrait(T,p,k===S.you),o=ovr(p);
+ return `<button type="button" class="lfc r${r}${opt.sel?' sel':''}${opt.drop?' drop':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}">
+  <span class="lfOvr" style="color:${rcol(o)}">${o}</span>${opt.order?`<span class="lfOrd">${opt.order}</span>`:''}
+  <img alt="" src="${art}"><span class="lfNm">${p.name}</span><span class="lfPos">${opt.pos}</span></button>`}
+function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
+ const selPit=lnSel!=null&&lnSel<0,selBat=lnSel!=null&&lnSel>=0;
+ let field='';
+ T.lineup.forEach((p,i)=>{const pos=LF_POS[p.pos]?p.pos:'DH',[x,y]=LF_POS[pos];field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i,order:i+1,pos,sel:lnSel===i,drop:mine&&selBat&&lnSel!==i})}</div>`});
+ {const p=T.staff[0],[x,y]=LF_POS.SP;if(p)field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i:-1,pos:'SP',sel:lnSel===-1})}</div>`}
+ const pen=T.staff.slice(1).map((p,j)=>lfMini(T,key,p,{i:-2-j,pos:p.pos||'RP',sel:lnSel===-2-j})).join('');
+ // the tray: the cards you own, hitters or pitchers, best first; a selected spot narrows it to cards that fit
+ let tray='';
+ if(mine){if(selPit)lfDeck='pit';else if(selBat)lfDeck='bat';
+  if(!CARDS.length)buildCardDB();const used=usedCards(S.you);
+  const own=CARDS.filter(c=>COL.owned[c.id]&&c.pit===(lfDeck==='pit')).sort((a,b)=>b.o-a.o);
+  tray=own.length?own.map(c=>{const q=c.p,T2=c.T||TEAMS[c.k],inUse=used.has(c.id);
+    return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lnSel!=null&&!inUse?' ready':''}" data-id="${c.id}" ${inUse?'disabled':''} style="--tj:${T2.jersey};--tc:${T2.cap}">
+     <span class="lfOvr" style="color:${rcol(c.o)}">${c.o}</span><img alt="" src="${cardArt(c)}"><span class="lfNm">${q.name}</span><span class="lfPos">${c.pit?(q.pos==='SP'?'SP':'RP'):q.pos}${inUse?' · IN':''}</span></button>`}).join('')
+   :`<p class="lfEmpty">No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Card Collection to get players.</p>`}
+ const sel=lnSel==null?null:lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];
+ const hint=!mine?'Scouting report: their lineup in the field, their staff in the bullpen.':sel?(lnSel>=0?`<b>${sel.name}</b> (${sel.pos}) picked up. Tap a card below to sign it into his spot, or another player on the field to swap batting order.`:`<b>${sel.name}</b> picked up. Tap a pitcher card below to sign it into his spot.`):'Tap a player on the field to change him.';
+ $('cards').innerHTML=`<div class="lfWrap"><div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>
+  <div class="lfSide"><h4>BULLPEN</h4><div class="lfPen">${pen}</div>${mine&&sel&&sel.signed?`<button type="button" class="mbtn lfRestore">Restore original player</button>`:''}</div></div>
+  <p class="lfHint">${hint}</p>
+  ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><div class="seg lfTabs"><button type="button" data-d="bat" aria-pressed="${lfDeck==='bat'}">Hitters</button><button type="button" data-d="pit" aria-pressed="${lfDeck==='pit'}">Pitchers</button></div></div><div class="lfTray">${tray}</div>`:''}`;
+ $('lnHint').textContent='';}
+$('cards').addEventListener('click',e=>{
+ const tab=e.target.closest('.lfTabs button');if(tab){lfDeck=tab.dataset.d;lnSel=null;lineupRender();return}
+ if(lnView!=='mine')return;
+ if(e.target.closest('.lfRestore')){const T=TEAMS[S.you],p=lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];if(p){const real=p.custom?T.benched||p:p;releasePlayer(S.you,real.signedFor||real.name,lnSel<0);applyDefense();updateHUD()}lnSel=null;lineupRender();return}
+ const b=e.target.closest('.lfc');if(!b)return;
+ if(b.classList.contains('deck')){if(b.disabled||lnSel==null){if(!b.disabled&&lnSel==null){b.classList.add('nudge');setTimeout(()=>b.classList.remove('nudge'),300)}return}
+  const T=TEAMS[S.you],pit=lnSel<0,p=pit?T.staff[-1-lnSel]:T.lineup[lnSel],real=p.custom?T.benched||p:p;
+  if(signPlayer(S.you,real.signedFor||real.name,b.dataset.id,pit)){applyDefense();updateHUD();try{sfx('glove')}catch(_){}}lnSel=null;lineupRender();return}
+ const i=+b.dataset.i;
+ if(lnSel===i){lnSel=null}
+ else if(lnSel!=null&&lnSel>=0&&i>=0){const L=TEAMS[S.you].lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}applyDefense();updateHUD();lnSel=null}
+ else lnSel=i;
+ lineupRender()});
 // ---------- title picker ----------
 function buildPicker(){
  const mk=(id,key)=>{$(id).innerHTML=TS_ORDER.map(t=>`<button type="button" class="chip" data-t="${t}"><img alt="" src="${LOGO_URL[t]}"><span class="c">${TEAMS[t].city}</span><span class="n">${TEAMS[t].name}</span><span class="c kr">${TEAMS[t].kcity} ${TEAMS[t].kname}</span></button>`).join('');
