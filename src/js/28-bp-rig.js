@@ -408,7 +408,7 @@ function render(now){
   else ctx.drawImage(wb,ix0,iy0,ix1-ix0,iy1-iy0,dx,dy,dw,dh)}
  drawRoofLights(ctx,vx0,vy0,scale,now);
  drawHarborLights(ctx,vx0,vy0,scale,now);
- drawFortLights(ctx,vx0,vy0,scale,now);drawSteelLights(ctx,vx0,vy0,scale,now);
+ drawFortLights(ctx,vx0,vy0,scale,now);drawSteelLights(ctx,vx0,vy0,scale,now);drawOrbitLights(ctx,vx0,vy0,scale,now);
  drawSplashes(ctx,vx0,vy0,scale,now);
  if(ST.harbor&&S.phase!=='title'){ctx.save();ctx.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);drawUlsan(ctx,now);ctx.restore()}// the harbor's whales and ships, out past the park
  drawNeon(ctx,vx0,vy0,scale,now);

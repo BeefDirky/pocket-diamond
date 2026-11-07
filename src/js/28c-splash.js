@@ -2,7 +2,7 @@
 let SPLASH=[];
 function waterAt(x,y){if(!ST)return false;const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fd=y>0?fenceDist(Math.max(-45,Math.min(45,th))):0;
  if(ST.harbor){harborCol(HX+x/FT,HY-y/FT);return H_KIND===1||(hInCove(x,y)&&hCoveR(x,y)-Math.hypot(x-H_COVE_C.x,y-H_COVE_C.y)>8)}
- if(ST.bowl==='brick')return bOcean(x,y);
+ if(ST.bowl==='brick'||ST.bowl==='orbit')return bOcean(x,y);
  if(y<=0)return false;
  if(ST.feature==='ocean')return ath<33&&r>fd+26;
  if(ST.feature==='pool')return th>8&&th<30&&r>fd+9&&r<fd+49;

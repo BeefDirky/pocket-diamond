@@ -11,6 +11,11 @@ const HC=(()=>{const h=x=>[parseInt(x.slice(1,3),16),parseInt(x.slice(3,5),16),p
 const HB0={};let H_THEME='harbor';
 const H_THEMES={
  harbor:{},
+ orbit:{dk:{L:[[52,0],[60,24],[80,68],[110,110],[148,148],[180,166]],R:[[48,0],[56,22],[74,64],[106,108],[148,150],[180,166]]},roof:[64,70,181],gates:[-140,140,-104,104],orbit:true,roofIn:.6,facT:1.5,
+  seats:[['#1d2a5e','#1a2552'],['#e94e77','#d6446b'],['#2c3c7a','#27366e']],seatU:[[26,36,84],[22,31,74]],cheer:1,
+  pal:{pad1:'#141c44',pad2:'#1a2452',pad3:'#f4f1f8',pad4:'#e94e77',seam:'#0a0f26',wallY:'#e94e77',led1:'#ff6fa0',led2:'#ffe6f0',led3:'#e94e77',ledD:'#2a0a1a',
+   fTop:'#c9ced6',fTop2:'#bcc2cb',mull:'#2a2f38',glass:'#2e4260',glass2:'#26385a',glassN:'#ffc878',glassN2:'#ffb35a',fEdge:'#22262e',par:'#3a3f4a',gate:'#1a1e26',gateN:'#ffd8a0',
+   roof:'#d3d8df',roof2:'#c6ccd4',rib:'#9aa2ad',roofEdge:'#eef1f5',gutter:'#5a616b',conc:'#2a2e38',rail:'#d3d8df',railD:'#4a5060',wallCap:'#b4bac4',wallCap2:'#7a808c'}},
  brick:{dk:{L:[[50,0],[58,22],[78,66],[108,108],[148,146],[180,164]],R:[[47,0],[55,24],[76,70],[110,110],[148,148],[180,164]]},roof:[94,86,181],gates:[-140,140,-104,104],brick:true,roofIn:.62,facT:1.5,
   seats:[['#1d3f78','#1a386c'],['#e8642a','#d65a25'],['#2f5fb0','#2a56a0']],seatU:[[22,40,82],[19,35,72]],cheer:1,sym:true,
   pal:{pad1:'#13254a',pad2:'#182c56',pad3:'#e8eef5',pad4:'#3a6ab0',seam:'#08142a',wallY:'#ffcc48',led1:'#ffb04a',led2:'#fff1d0',led3:'#e8642a',ledD:'#2a1608',
@@ -97,7 +102,7 @@ const hRout=phi=>{const T=hRS(),f=phi+180,i=Math.floor(f),u=f-i;return T.R[(i+36
 // the outline of the bowl (world px), traced where the stands end; open across the outfield
 function hOutline(){const T=hRS(),out=[];for(let i=0;i<360;i+=1){const phi=i-180,dx=Math.sin(phi*RAD),dy=Math.cos(phi*RAD);let t=T.R[i],op=!!T.open[i];
   if(H_THEME==='steel'){const tr=sTrR(phi);if(tr>0&&(op||tr+16>t)){t=Math.max(t,tr+16);op=false}}
-  if(H_THEME==='brick'&&op){t=bOpenR(phi,t);op=false}// Harbor Field's outfield buildings close the ring// Fossil Yard closes over the outfield with its truss
+  if((H_THEME==='brick'||H_THEME==='orbit')&&op){t=bOpenR(phi,t);op=false}// Harbor Field's outfield buildings close the ring// Fossil Yard closes over the outfield with its truss
   out.push({x:HX+(H_CC.x+dx*t)/FT,y:HY-(H_CC.y+dy*t)/FT,open:op})}return out}
 // seats by section: navy, royal and sky blue blocks, a cheering block on each side of the infield, white seats
 // tracing a wave through some sections
@@ -143,7 +148,7 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
   if(D<=40)return k<1.4?HB.par:HB.fEdge;
   let gate=false;for(const gg of H_GATES){const dg=Math.abs(((phi-gg+540)%360)-180)*RAD*rC;if(dg<6){gate=true;break}}
   if(gate){if(k<1.5)return HB.par;H_EMIS=H_NIGHT;return H_NIGHT?(k>9?HB.gateN:hMul(HB.gateN,.75)):HB.gate}
-  if(k<1.6)return HB.par;if(TH.steel&&k<T-1.4)return sFacade(k,T,sF);if(TH.brick&&k<T-1.4)return bFacade(k,T,sF);if(k<5.6){if(((sF%22)+22)%22<3&&k>2.4&&k<4.6)return HB.wallCap2;return (Math.floor(sF/6)&1)?HB.fTop:HB.fTop2}// facade top, with rooftop plant
+  if(k<1.6)return HB.par;if(TH.steel&&k<T-1.4)return sFacade(k,T,sF);if(TH.brick&&k<T-1.4)return bFacade(k,T,sF);if(TH.orbit&&k<T-1.4)return oFacade(k,T,sF);if(k<5.6){if(((sF%22)+22)%22<3&&k>2.4&&k<4.6)return HB.wallCap2;return (Math.floor(sF/6)&1)?HB.fTop:HB.fTop2}// facade top, with rooftop plant
   if(TH.stone&&k<T-1.4){// stone masonry with arched windows, a floor at a time; warm light in them at night
    const fl=((k-5.6)%5.2+5.2)%5.2,band=Math.floor((k-5.6)/5.2),m=((sF%12)+12)%12,wx2=m-6,inW=Math.abs(wx2)<2.8&&fl>1&&fl<4.6&&!(fl<2.2&&Math.abs(wx2)>1.6);
    if(inW){H_EMIS=H_NIGHT;return H_NIGHT?((vHash(Math.floor(sF/12),band)&7)===0?hMul(HB.glassN,.4):HB.glassN):(fl<2.2?HB.glass2:HB.glass)}
@@ -166,7 +171,7 @@ function hBowl(x,y,wx,wy,d,D,phi,lo){const ha=Math.atan2(x,y)/RAD,rh=Math.hypot(
  else if(d<C1){const p=vPerson(wx,wy,12);if(p)return hMul(p,.6);if(H_NIGHT&&((Math.floor(sF/9)+Math.floor(d))&7)===0){H_EMIS=true;return HB.concLit}return (n&3)?HB.conc:hMul(HB.conc,.85)}
  else if(d<U0){const m=((sF%6)+6)%6;H_EMIS=H_NIGHT;if(d<C1+.4||d>U0-.3)return HB.ledD;return m<2?HB.led1:m<4?HB.led2:HB.led3}
  else if(d<RI){c=seat(U0,true);if(RI<fac&&d>RI-13)c=hMul(c,.42+.36*clamp((RI-d)/13,0,1))}// the roof's shadow on the top rows
- else{const k=d-RI;if(TH.steel)return sRoof(k,fac-RI,phi,sF,()=>seat(U0,true));if(TH.brick)return bRoof(k,fac-RI,phi,sF,()=>seat(U0,true));
+ else{const k=d-RI;if(TH.steel)return sRoof(k,fac-RI,phi,sF,()=>seat(U0,true));if(TH.brick)return bRoof(k,fac-RI,phi,sF,()=>seat(U0,true));if(TH.orbit)return oRoof(k,fac-RI,phi,sF);
   if(TH.tile&&Math.abs(phi)>TH.tile){// a Korean tiled roof: charcoal tile rows running down to a pale lifted eave, a light ridge on top
    const kk=fac-d;if(k<1)return [24,22,30];if(k<2.2)return [214,206,190];if(kk<1.4)return [178,172,160];
    const m=((sF%2.1)+2.1)%2.1,sh=.8+.3*clamp(k/Math.max(4,fac-RI),0,1),c0=m<.55?[26,26,34]:m<1.15?[70,70,84]:[50,50,62];// channels run ridge to eave; the cap tiles catch the light
@@ -181,7 +186,7 @@ function harborCol(wx,wy){H_KIND=0;H_SEAT=false;H_EMIS=false;H_SHADE=false;const
  if(d<=0&&PARK_C)return PARK_MOW(x,y,r)?PARK_C.g1:PARK_C.g2;// the last of the foul ground, past the park buffer's edge
  if(D>8){if(rc<Ro&&d>0){{const ph2=phi-Math.sign(phi)*1.6*60/Math.max(60,rc);if(hD(ph2)<=8)return d<5?HB.railD:(Math.floor(rc/4)&1)?HB.fEdge:HB.par}// the end wall where a stand stops
  const De=d+(Ro-rc);return hBowl(x,y,wx,wy,d,De,phi,fair?7:3)}}
- if(H_THEME!=='harbor'){const c=(H_THEME==='steel'?steelCol:H_THEME==='brick'?brickCol:fortCol)(x,y,wx,wy,r,th,ath,q,s,n,fair);if(c)return c;if(D>8){const x2=x-6,y2=y+6,p2=hPhi(x2,y2);if(hD(p2)>8&&Math.hypot(x2-H_CC.x,y2-H_CC.y)<hRout(p2))H_SHADE=true}return null}
+ if(H_THEME!=='harbor'){const c=(H_THEME==='steel'?steelCol:H_THEME==='brick'?brickCol:H_THEME==='orbit'?orbitCol:fortCol)(x,y,wx,wy,r,th,ath,q,s,n,fair);if(c)return c;if(D>8){const x2=x-6,y2=y+6,p2=hPhi(x2,y2);if(hD(p2)>8&&Math.hypot(x2-H_CC.x,y2-H_CC.y)<hRout(p2))H_SHADE=true}return null}
  // past the open outfield wall: a terrace behind centre, a boardwalk behind right field, then the sea wall
  if(fair&&th>8){const q0=hPenOff(th)+H_WALLW,dw=hDeckW(th);if(q<q0)return HB.wallCap;if(q<q0+dw)return hTerr(wx,wy,s,q-q0,dw,th)}
  if(fair&&q<26){const m=((s%26)+26)%26;
@@ -352,10 +357,10 @@ function hDecor(g){
  const wallAt=th=>fenceDist(th)-4.6;// the middle of the padded face, just inside the fence
  g.save();g.textAlign='center';g.textBaseline='middle';
  const paint=(th,txt,col,font)=>{const p=hW(th,wallAt(th));g.save();g.translate(p.x,p.y);g.rotate(th*RAD);g.font=font;g.fillStyle='rgba(0,0,0,.35)';g.fillText(txt,1,1);g.fillStyle=col;g.fillText(txt,0,0);g.restore()};
- const ADS=H_THEME==='fortress'?F_ADS:H_THEME==='steel'?S_ADS:H_THEME==='brick'?B_ADS:H_ADS;[-36,-30,-15,-8,8,15,30,36].forEach((th,i)=>{const[t,c]=ADS[i%ADS.length];paint(th,t,c,/[A-Z]/.test(t)?'bold 12px "Pixelify Sans", monospace':'14px Jua, sans-serif')});
- [[-42.5,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[42.5,DIMS[4]]].forEach(([th,v])=>paint(th,v+'',H_THEME==='fortress'?'#ffd23f':H_THEME==='steel'?'#e2b93a':H_THEME==='brick'?'#ffcc48':'#ffffff','bold 15px "Pixelify Sans", monospace'));
+ const ADS=H_THEME==='fortress'?F_ADS:H_THEME==='steel'?S_ADS:H_THEME==='brick'?B_ADS:H_THEME==='orbit'?O_ADS:H_ADS;[-36,-30,-15,-8,8,15,30,36].forEach((th,i)=>{const[t,c]=ADS[i%ADS.length];paint(th,t,c,/[A-Z]/.test(t)?'bold 12px "Pixelify Sans", monospace':'14px Jua, sans-serif')});
+ [[-42.5,DIMS[0]],[-22,DIMS[1]],[0,DIMS[2]],[22,DIMS[3]],[42.5,DIMS[4]]].forEach(([th,v])=>paint(th,v+'',H_THEME==='fortress'?'#ffd23f':H_THEME==='steel'?'#e2b93a':H_THEME==='brick'?'#ffcc48':H_THEME==='orbit'?'#f4f1f8':'#ffffff','bold 15px "Pixelify Sans", monospace'));
  g.restore();
- if(H_THEME!=='harbor'){(H_THEME==='steel'?sDecor:H_THEME==='brick'?bDecor:fDecor)(g);return}
+ if(H_THEME!=='harbor'){(H_THEME==='steel'?sDecor:H_THEME==='brick'?bDecor:H_THEME==='orbit'?oDecor:fDecor)(g);return}
  // benches facing the water round the cove, and lamp posts
  for(let a=-180;a<180;a+=5.5){const ar=a*RAD,R=hCoveR(H_COVE_C.x+Math.sin(ar),H_COVE_C.y+Math.cos(ar))+15.5,x=H_COVE_C.x+Math.sin(ar)*R,y=H_COVE_C.y+Math.cos(ar)*R;if(!hEastLand(x,y))continue;
   const p={x:HX+x/FT,y:HY-y/FT};g.save();g.translate(p.x,p.y);g.rotate(-ar+Math.PI/2);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(-6,1,13,4);g.fillStyle='#8a5a32';g.fillRect(-7,-2,14,3);g.fillStyle='#a8743f';g.fillRect(-7,-2,14,1);g.restore()}

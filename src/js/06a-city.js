@@ -217,11 +217,11 @@ if(STADIUMS[k].bowl){H_NIGHT=night;// the sea, the shipyard shore and the pier, 
   if(ST.bowl){{const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);hDecor(lg);
     if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.setTransform(1,0,0,1,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}g.drawImage(L,0,0)}
    // the shore's buildings, ships and the gate, drawn by day and then lit like the rest of this layer
-   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');(ST.harbor?drawHarbor:ST.bowl==='steel'?drawSteel:ST.bowl==='brick'?drawBrick:drawFortress)(lg,k,false,CW,CH,cx,cy,OL,e);
+   const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');(ST.harbor?drawHarbor:ST.bowl==='steel'?drawSteel:ST.bowl==='brick'?drawBrick:ST.bowl==='orbit'?drawOrbit:drawFortress)(lg,k,false,CW,CH,cx,cy,OL,e);
    if(night){const M=document.createElement('canvas');M.width=CW;M.height=CH;M.getContext('2d').drawImage(L,0,0);lg.globalCompositeOperation='multiply';lg.fillStyle='#5a6494';lg.fillRect(0,0,CW,CH);lg.globalCompositeOperation='destination-in';lg.drawImage(M,0,0)}
    g.drawImage(L,0,0);if(night&&ST.harbor)drawHarborGlow(g,cx,cy,OL);
    // the lit windows and lamps keep their own colour at night: draw the night version and lay over just its warm light
-   if(night&&!ST.harbor){const N=document.createElement('canvas');N.width=CW;N.height=CH;const ng=N.getContext('2d');(ST.bowl==='steel'?drawSteel:ST.bowl==='brick'?drawBrick:drawFortress)(ng,k,true,CW,CH,cx,cy,OL,e);
+   if(night&&!ST.harbor){const N=document.createElement('canvas');N.width=CW;N.height=CH;const ng=N.getContext('2d');(ST.bowl==='steel'?drawSteel:ST.bowl==='brick'?drawBrick:ST.bowl==='orbit'?drawOrbit:drawFortress)(ng,k,true,CW,CH,cx,cy,OL,e);
     const id=ng.getImageData(0,0,CW,CH),dd=id.data;for(let i=0;i<dd.length;i+=4){if(!(dd[i+3]>200&&dd[i]>190&&dd[i+1]>120&&dd[i+2]<170&&dd[i]-dd[i+2]>70))dd[i+3]=0}ng.putImageData(id,0,0);g.drawImage(N,0,0)}}
   if(ST.village){// the town's buildings, lit like everything else on this layer
    const L=document.createElement('canvas');L.width=CW;L.height=CH;const lg=L.getContext('2d');lg.setTransform(.5,0,0,.5,e.mx/2,e.my/2);const glows=[];vTownDraw(lg,night?glows:null);

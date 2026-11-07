@@ -52,17 +52,18 @@ function bRoof(k,Rd,phi,sF,gapSeat){
  const c=k<rid?hMul(HB.roof,1.18):hMul(HB.roof2,.8);return c}
 // ---- where the outfield ring closes: 74 ft past the wall, measured along each ray from the bowl's centre ----
 function bOpenR(phi,t0){const dx=Math.sin(phi*RAD),dy=Math.cos(phi*RAD);let lo=0,hi=1400;for(let i=0;i<22;i++){const m=(lo+hi)/2,x=H_CC.x+dx*m,y=H_CC.y+dy*m,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
-  const q=y>0&&Math.abs(th)<=45?r-fenceDist(th)-hPenOff(th)-H_WALLW:(y>0?r-fenceDist(Math.sign(th)*45)-H_WALLW:-1);if(q>84)hi=m;else lo=m}return Math.max(t0,lo)}
+  const q=y>0&&Math.abs(th)<=45?r-fenceDist(th)-hPenOff(th)-H_WALLW:(y>0?r-fenceDist(Math.sign(th)*45)-H_WALLW:-1);if(q>B_LIM())hi=m;else lo=m}return Math.max(t0,lo)}
 // ---- the coast: a shoreline off to the upper left, everything measured as t (ft seaward) and u (ft along it) ----
+const B_LIM=()=>H_THEME==='orbit'?104:84;// how far past the wall the outfield buildings run before the ring closes
 let B_EXT=null,B_EXT_K='',B_OR=null,B_OR_K='';
-function bInOL(x,y){const k=DIMS.join(',');if(!B_OR||B_OR_K!==k){B_OR_K=k;const T=hRS();B_OR=new Float32Array(360);for(let i=0;i<360;i++)B_OR[i]=T.open[i]?bOpenR(i-180,T.R[i]):T.R[i]}
+function bInOL(x,y){const k=DIMS.join(',')+H_THEME;if(!B_OR||B_OR_K!==k){B_OR_K=k;const T=hRS();B_OR=new Float32Array(360);for(let i=0;i<360;i++)B_OR[i]=T.open[i]?bOpenR(i-180,T.R[i]):T.R[i]}
  const phi=Math.atan2(x-H_CC.x,y-H_CC.y)/RAD,f=phi+180,i=Math.floor(f)%360,j=(i+1)%360,R=B_OR[i]+(B_OR[j]-B_OR[i])*(f-Math.floor(f));return Math.hypot(x-H_CC.x,y-H_CC.y)<R+2}
 // beyond the outline, round the outfield half: a belt of trees hugging the park, its outer edge ragged like a real treeline
 function bBelt(x,y,wx,wy){if(y<60)return null;const phi=Math.atan2(x-H_CC.x,y-H_CC.y)/RAD,f=phi+180,i=Math.floor(f)%360,j=(i+1)%360,R=B_OR[i]+(B_OR[j]-B_OR[i])*(f-Math.floor(f)),d=Math.hypot(x-H_CC.x,y-H_CC.y)-R;
  const lim=34+7*Math.sin(phi*.9)+4*Math.sin(phi*2.3+1)-clamp((140-y)/30,0,1)*34;if(d>lim)return d<lim+60&&y>120?fTrees(wx,wy):null;return fTrees(wx,wy)}
-function bExt(){const k=DIMS.join(',');if(B_EXT!=null&&B_EXT_K===k)return B_EXT;B_EXT_K=k;let m=0;for(let ph=-180;ph<180;ph+=1){const T=hRS(),i=((ph+180)%360+360)%360;let t=T.R[i];if(T.open[i])t=bOpenR(ph,t);
+function bExt(){const k=DIMS.join(',')+H_THEME;if(B_EXT!=null&&B_EXT_K===k)return B_EXT;B_EXT_K=k;let m=0;for(let ph=-180;ph<180;ph+=1){const T=hRS(),i=((ph+180)%360+360)%360;let t=T.R[i];if(T.open[i])t=bOpenR(ph,t);
   const x=Math.sin(ph*RAD)*t,y=Math.cos(ph*RAD)*t;m=Math.max(m,-.8*x+.6*y)}return B_EXT=m}
-function bCoast(x,y){const u=.6*x+.8*(y-180),t=-.8*x+.6*(y-180)-(bExt()+34+16*Math.sin(u/150)+7*Math.sin(u/61));return{t,u}}
+function bCoast(x,y){const u=.6*x+.8*(y-180),t=-.8*x+.6*(y-180)-(bExt()+(H_THEME==='orbit'?260:34)+16*Math.sin(u/150)+7*Math.sin(u/61));return{t,u}}
 function bOcean(x,y){return bCoast(x,y).t>4}
 function bTet(u,t){// tetrapods on a jittered 7 ft lattice: four stubby legs from a hub, lit on top
  const cs=7,i=Math.floor(u/cs),j=Math.floor(t/cs);for(let di=0;di<2;di++)for(let dj=0;dj<2;dj++){const ii=i-di+1,jj=j-dj+1,h=vHash(ii+977,jj+313);if(h%7===0)continue;
