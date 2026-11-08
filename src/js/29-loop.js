@@ -60,7 +60,7 @@ function guard(name,fn){try{fn();if(name==='update')frameErrs=0}catch(e){const m
  if(name==='update'&&++frameErrs>30&&(S.phase==='play'||S.phase==='result')){frameErrs=0;try{hideBanner();setPhase('reset');setCam('pitch')}catch(_){}}}}
 /* batting practice: the machine waits until the last ball hit has stopped and the ball cam has had its look at it */
 const BP_CAM_HOLD=900;
-function bpBallLive(now){const c=S.bpCam;if(!c||!c.pl)return false;return now-c.at<c.pl.fullEnd/SPEED*1000+BP_CAM_HOLD}
+function bpBallLive(now){const c=S.bpCam;if(!OPT.bpWait||!c||!c.pl)return false;return now-c.at<c.pl.fullEnd/SPEED*1000+BP_CAM_HOLD}
 function frame(now){requestAnimationFrame(frame);const dt=Math.min(50,now-last);last=now;
  guard('update',()=>update(dt,now));
  if(!(TS.cur&&!$('scrTeams').hidden&&!$('title').hidden))guard('render',()=>render(now));/* the club-select wall covers the park, so skip drawing it */

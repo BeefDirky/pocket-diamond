@@ -61,12 +61,14 @@ function bpLayout(){const bar=document.querySelector('.acts .bpBar');if(!documen
  document.body.style.setProperty('--bpA',a+'px');document.body.style.setProperty('--bpM',Math.round(a+ab+10)+'px')}
 const isPhoneLand=()=>isDesk()&&innerHeight<=520;/* a phone on its side: PC layout, phone-style pitch menu */
 function applyWide(){document.querySelector('.app').classList.toggle('phoneLand',isPhoneLand());if(!isPhoneLand()&&document.body.classList.contains('bpPopOpen')&&typeof bpPop==='function')bpPop(false);$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize();bpLayout()})}
-function syncOpts(){for(const b of $('optBallCam').children)b.setAttribute('aria-pressed',String((b.dataset.v==='on')===(OPT.ballCam!==false)));for(const b of $('optTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const b of $('mTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']]){$(id).value=OPT[k];$(id+'V').textContent=OPT[k]}}
+function syncOpts(){$('optBpWaitRow').hidden=!(S.mode==='bp'&&S.phase!=='title');for(const b of $('optBpWait').children)b.setAttribute('aria-pressed',String((b.dataset.v==='wait')===!!OPT.bpWait));for(const b of $('optBallCam').children)b.setAttribute('aria-pressed',String((b.dataset.v==='on')===(OPT.ballCam!==false)));for(const b of $('optTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const b of $('mTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']]){$(id).value=OPT[k];$(id+'V').textContent=OPT[k]}}
 for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']])$(id).addEventListener('input',e=>{OPT[k]=+e.target.value;$(id+'V').textContent=OPT[k];ensureAudio();applyVolumes();saveOpts()});
 function decideTime(){const n=OPT.time==='night'?true:OPT.time==='day'?false:Math.random()<.55;if(n!==S.night){S.night=n;if(FIELD)SIGNS=buildSigns()}if($('mLogoY'))refreshMenu()}
 const setTime=v=>{OPT.time=v;saveOpts();syncOpts();decideTime()};
 $('optTime').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTime(b.dataset.v)});
 $('mTime').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTime(b.dataset.v)});
+/* batting cage only: wait for the last ball hit to stop (and the ball cam to close) before the next pitch */
+$('optBpWait').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;OPT.bpWait=b.dataset.v==='wait';saveOpts();syncOpts()});
 $('optBallCam').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;OPT.ballCam=b.dataset.v==='on';saveOpts();syncOpts()});// batting practice corner camera
 let optsFromGame=false,pausedAt=0,lineFromPause=false;
 const canPause=()=>!(S.online&&S.online.inGame)&&S.phase!=='title'&&S.phase!=='over'&&!S.paused&&$('title').hidden&&$('over').hidden;
