@@ -972,6 +972,8 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
  .lfField .lfc .lfNm{font-size:clamp(9px,1.9cqw,13px)}.lfField .lfc .lfPos{font-size:clamp(8px,1.75cqw,12px)}
  .lfField .lfB .lfBNm{font-size:clamp(8px,1.6cqw,11px)}.lfField .lfSt,.lfField .lfSt b{font-size:clamp(7px,1.3cqw,9px)}.lfField .lfBOvr{font-size:clamp(10px,2.2cqw,16px)}}
 @media (min-width:721px){.lfField .lfc img{aspect-ratio:1/1;object-fit:cover;object-position:50% 24%}}
+/* sidearm pitchers: a tag beside the throwing hand in the pitcher box header, on every screen size */
+.muPos.side{color:#7fd3ff;border-color:#7fd3ff;margin-left:4px}
 </style>
 
 <div class="app">
@@ -5194,7 +5196,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  $('pcV').textContent=(S.pcOf&&S.pcOf[fldKey()])||0;$('bugInn').textContent=S.phase==='title'?'':`${S.mode==='full'&&S.half==='top'?'▲':'▼'}${S.inning}`;
  muSet('abName',batKey(),b.name,[`#${b.no}`],`${((S.orderOf&&S.orderOf[batKey()])||0)+1}.`);$('abTeam').innerHTML=`AT BAT<span class="muPos">${b.hand}</span>`;
  $('abHand').innerHTML=muStats([['POS',`<b>${b.pos}</b>`],['CON',rb(b.con)],['POW',rb(b.pow)],['SPD',rb(b.spd)]]);
- muSet('pName',fldKey(),p.name,[`#${p.no}`,p.slot==='side'?'SIDEARM':'']);if(!(S.mode==='bp'&&S.phase!=='title'))$('pTeam').innerHTML=`PITCHING${pitching()?' (YOU)':''}<span class="muPos">${p.hand}</span>`;
+ muSet('pName',fldKey(),p.name,[`#${p.no}`]);if(!(S.mode==='bp'&&S.phase!=='title'))$('pTeam').innerHTML=`PITCHING${pitching()?' (YOU)':''}<span class="muPos">${p.hand}</span>${p.slot==='side'?'<span class="muPos side">SIDEARM</span>':''}`;
  if(S.mode==='bp'&&S.phase!=='title'){$('pName').innerHTML=`<span class="bpThrow">Throwing:</span><button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button>`;$('pHand').innerHTML=`<span class="bpStat">${S.bp.sw} swings <i class=muSep></i> ${S.bp.hr} HR <i class=muSep></i> longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=muStats([['POS',`<b>${p.pos||'P'}</b>`],['VEL',rb(p.vel)],['MOV',rb(p.mov)],['CTL',rb(p.ctl)]])+(p.type==='demon'?'<span class="muTag dmn">SPEED DEMON</span>':p.type==='knuckle'?'<span class="muTag knk">KNUCKLER</span>':'');
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});
@@ -5244,7 +5246,7 @@ function renderCards(){
  const stat=(l,v)=>`<div class="st"><span>${l}</span><i><u style="width:${Math.min(100,v)}%;background:${rcol(v)}"></u></i><b style="color:${rcol(v)}">${v}</b></div>`;
  const card=(p,slot,i)=>`<button type="button" class="pcard${lnSel===i?' sel':''}${!mine?' ro':''}${p.custom?' mine':''}${p.signed?' signed':''}" data-i="${i}" style="--tc:${T.jersey};--tc2:${T.cap}">
   <div class="pcTop"><span class="slot">${slot}</span><span class="pcPos">${p.pos}${p.custom?' ★':''}${p.signed?' · CARD':''}</span><span class="pcOvr">${ovr(p)}</span></div>
-  <div class="pcMid"><img alt="" src="${portrait(T,p,key===S.you)}"><div class="pcId"><b>${p.name}</b><span>#${p.no} · ${(p.pos==='SP'||p.pos==='RP')?'Throws '+p.hand+(p.slot==='side'?' side':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':''):'B/T '+p.hand+'/'+p.thr}</span></div></div>
+  <div class="pcMid"><img alt="" src="${portrait(T,p,key===S.you)}"><div class="pcId"><b>${p.name}</b><span>#${p.no} · ${(p.pos==='SP'||p.pos==='RP')?'Throws '+p.hand+(p.slot==='side'?' · sidearm':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':''):'B/T '+p.hand+'/'+p.thr}</span></div></div>
   <div class="pcStats">${(p.pos==='SP'||p.pos==='RP')?stat('VEL',p.vel)+stat('MOV',p.mov)+stat('CTL',p.ctl)+stat('DEF',p.def):stat('CON',p.con)+stat('POW',p.pow)+stat('SPD',p.spd)+stat('DEF',p.def)}</div></button>`;
  $('cards').innerHTML=T.lineup.map((p,i)=>card(p,i+1,i)).join('')+T.staff.map((p,k)=>card(p,'',-1-k)).join('');
 }
@@ -5438,11 +5440,11 @@ function lfCard(k,p){if(!CARDS.length)buildCardDB();if(p.signed&&CARD_BY[p.signe
 function lfStats(p,pit){const rows=pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
  return rows.map(([l,v])=>`<span class="lfSt"><i>${l}</i><b style="color:${rcol(v)}">${v}</b><u><s style="width:${v}%;background:${rcol(v)}"></s></u></span>`).join('')}
 function lfFace(art,o,nm,pos,order){return `<span class="lfF"><span class="lfOvr">${o}</span>${order?`<span class="lfOrd">${order}</span>`:''}<img alt="" src="${art}"><span class="lfNm">${nm}</span><span class="lfPos">${pos}</span></span>`}
-function lfBackFace(p,pit,o,pos,extra){return `<span class="lfB"><span class="lfBNm">${p.name}</span><span class="lfBSub">${pos} · ${p.hand||p.thr||'R'}</span><span class="lfBOvr" style="color:${rcol(o)}">${o}<small>OVR</small></span>${lfStats(p,pit)}${extra||''}</span>`}
+function lfBackFace(p,pit,o,pos,extra){return `<span class="lfB"><span class="lfBNm">${p.name}</span><span class="lfBSub">${pos} · ${p.hand||p.thr||'R'}${p.slot==='side'?' · SIDEARM':''}</span><span class="lfBOvr" style="color:${rcol(o)}">${o}<small>OVR</small></span>${lfStats(p,pit)}${extra||''}</span>`}
 let lfFlip=null,lfMove=false;
 function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c,k):portrait(T,p,k===S.you),o=ovr(p),pit=opt.i<0,fk='f'+opt.i;
  return `<button type="button" class="lfc r${r}${lfFlip===fk?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
-  ${lfFace(art,o,p.name,opt.pos,opt.order)}${lfBackFace(p,pit,o,opt.pos)}</span></button>`}
+  ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'?' · SIDE':''),opt.order)}${lfBackFace(p,pit,o,opt.pos)}</span></button>`}
 function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
  if(!mine)lfMove=false;
  lnSel=lfFlip&&lfFlip[0]==='f'?+lfFlip.slice(1):null;
@@ -5459,7 +5461,7 @@ function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=
   tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':'RP'):q.pos;
     const can=lnSel!=null&&!inUse&&(lnSel<0)===c.pit;
     return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlip===fk?' flip':''}" data-id="${c.id}"><span class="lfIn">
-     ${lfFace(cardArt(c),c.o,q.name,pos+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,can?`<span class="lfSign" data-sign="${c.id}">SIGN IN</span>`:'')}</span></button>`}).join('')
+     ${lfFace(cardArt(c),c.o,q.name,pos+(c.pit&&q.slot==='side'?' · SIDE':'')+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,can?`<span class="lfSign" data-sign="${c.id}">SIGN IN</span>`:'')}</span></button>`}).join('')
    :`<p class="lfEmpty">No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Card Collection to get players.</p>`}
  const sel=lnSel==null?null:lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];
  const acts=mine&&sel?`${lnSel>=0?`<button type="button" class="mbtn lfMoveB" aria-pressed="${lfMove}">${lfMove?'Tap a hitter to swap with…':'⇅ Batting order'}</button>`:''}${sel.signed?`<button type="button" class="mbtn lfRestore">Restore original</button>`:''}`:'';
@@ -5900,7 +5902,7 @@ function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key]
  return ART[c.id]=cv2.toDataURL()}
 function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],p=c.p,own=COL.owned[c.id]|0,lock=opts.lock;
  const st=c.pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl],['DEF',p.def]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
- const tag=p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'';
+ const tag=(p.slot==='side'?' · SIDEARM':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'');
  return `<div class="tc r${c.r}${lock?' lock':''}${c.set==='bl'?' bl':''}" data-id="${c.id}" style="--tj:${T.jersey};--tc:${T.cap}">
   <div class="tcHead"><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">${c.set==='bl'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(c.o)}"`}>${lock?'??':c.o}</span></div>
   <img class="art" alt="" src="${cardArt(c)}">

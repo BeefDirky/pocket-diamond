@@ -43,7 +43,7 @@ function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key]
  return ART[c.id]=cv2.toDataURL()}
 function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],p=c.p,own=COL.owned[c.id]|0,lock=opts.lock;
  const st=c.pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl],['DEF',p.def]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
- const tag=p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'';
+ const tag=(p.slot==='side'?' · SIDEARM':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'');
  return `<div class="tc r${c.r}${lock?' lock':''}${c.set==='bl'?' bl':''}" data-id="${c.id}" style="--tj:${T.jersey};--tc:${T.cap}">
   <div class="tcHead"><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">${c.set==='bl'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(c.o)}"`}>${lock?'??':c.o}</span></div>
   <img class="art" alt="" src="${cardArt(c)}">

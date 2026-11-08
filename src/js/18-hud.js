@@ -48,7 +48,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  $('pcV').textContent=(S.pcOf&&S.pcOf[fldKey()])||0;$('bugInn').textContent=S.phase==='title'?'':`${S.mode==='full'&&S.half==='top'?'▲':'▼'}${S.inning}`;
  muSet('abName',batKey(),b.name,[`#${b.no}`],`${((S.orderOf&&S.orderOf[batKey()])||0)+1}.`);$('abTeam').innerHTML=`AT BAT<span class="muPos">${b.hand}</span>`;
  $('abHand').innerHTML=muStats([['POS',`<b>${b.pos}</b>`],['CON',rb(b.con)],['POW',rb(b.pow)],['SPD',rb(b.spd)]]);
- muSet('pName',fldKey(),p.name,[`#${p.no}`,p.slot==='side'?'SIDEARM':'']);if(!(S.mode==='bp'&&S.phase!=='title'))$('pTeam').innerHTML=`PITCHING${pitching()?' (YOU)':''}<span class="muPos">${p.hand}</span>`;
+ muSet('pName',fldKey(),p.name,[`#${p.no}`]);if(!(S.mode==='bp'&&S.phase!=='title'))$('pTeam').innerHTML=`PITCHING${pitching()?' (YOU)':''}<span class="muPos">${p.hand}</span>${p.slot==='side'?'<span class="muPos side">SIDEARM</span>':''}`;
  if(S.mode==='bp'&&S.phase!=='title'){$('pName').innerHTML=`<span class="bpThrow">Throwing:</span><button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button>`;$('pHand').innerHTML=`<span class="bpStat">${S.bp.sw} swings <i class=muSep></i> ${S.bp.hr} HR <i class=muSep></i> longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=muStats([['POS',`<b>${p.pos||'P'}</b>`],['VEL',rb(p.vel)],['MOV',rb(p.mov)],['CTL',rb(p.ctl)]])+(p.type==='demon'?'<span class="muTag dmn">SPEED DEMON</span>':p.type==='knuckle'?'<span class="muTag knk">KNUCKLER</span>':'');
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});

@@ -959,3 +959,5 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
  .lfField .lfc .lfNm{font-size:clamp(9px,1.9cqw,13px)}.lfField .lfc .lfPos{font-size:clamp(8px,1.75cqw,12px)}
  .lfField .lfB .lfBNm{font-size:clamp(8px,1.6cqw,11px)}.lfField .lfSt,.lfField .lfSt b{font-size:clamp(7px,1.3cqw,9px)}.lfField .lfBOvr{font-size:clamp(10px,2.2cqw,16px)}}
 @media (min-width:721px){.lfField .lfc img{aspect-ratio:1/1;object-fit:cover;object-position:50% 24%}}
+/* sidearm pitchers: a tag beside the throwing hand in the pitcher box header, on every screen size */
+.muPos.side{color:#7fd3ff;border-color:#7fd3ff;margin-left:4px}
