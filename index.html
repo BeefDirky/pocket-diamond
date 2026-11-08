@@ -939,6 +939,16 @@ body.phOver .pauseBtn{display:none!important}
  .lfTray .lfc .lfNm{font-size:12px;letter-spacing:-.03em}.lfTray .lfc .lfPos{font-size:11px}
 }
 @media (max-width:720px){.lfField{container-type:inline-size}.lfField .lfc{width:min(76px,20cqw)}.lfField .lfc .lfNm{font-size:min(11px,3.6cqw)}.lfField .lfc .lfPos{font-size:min(10px,3.3cqw)}}
+/* pitching machine box: "Throwing: FASTBALL" is the big line; the machine's menu label only shows in the phone pop-up */
+#pName .bpThrow{color:var(--chalk);margin-right:.35em}
+#pName .bpPick{font:inherit;font-size:1em;margin-left:0}
+.app .bpStat{display:block;margin:2px 0 0;font-size:.95em}
+.app.deskApp .acts .bpBar .k{display:none}
+/* full-screen batting practice: the pitch buttons stack left of Bunt, so both info boxes ride above them */
+body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{bottom:var(--bpLift,190px)}
+@media (max-width:999px){body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{bottom:var(--bpLift,170px)}}
+body.bpMode .app.deskApp>.meter{left:90px;transform:scale(.86);transform-origin:bottom left}
+@media (max-width:999px){body.bpMode .app.deskApp>.meter{transform:scale(.68)}}
 </style>
 
 <div class="app">
@@ -4203,7 +4213,7 @@ function clampCam(c){const e=EXT(),[vw,vh]=viewWH(c.z),WW=W+2*e.mx,HH=H+2*e.my;
  return{x:vw>=WW?W/2:clamp(c.x,vw/2-e.mx,W+e.mx-vw/2),y:vh>=HH?H/2:clamp(c.y,vh/2-e.my,H+e.my-vh/2),z:c.z}}
 // any sideways screen (computer, tablet, phone on its side) plays full screen with the wide camera
 const isLandscape=()=>innerWidth>=innerHeight*1.15&&innerWidth>=640;/* near-square or taller windows (portrait monitors, split screens) get the phone layout */
-const isWide=()=>isLandscape()||(OPT.cam==='wide'&&innerWidth>innerHeight);// a portrait screen, phone or PC monitor, always gets the phone layout
+const isWide=()=>isLandscape();/* one rule for every screen: landscape gets the PC layout, anything portrait or near-square gets the phone layout */
 function camTarget(){
  if(S.camMode==='follow'&&S.play){
   const play=S.play;const t=S.phase==='result'?play.end:play.t;const b=ballAt(play,t);
@@ -5128,7 +5138,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  const hrTrot=S.phase==='play'&&S.play&&S.play.hrFired;
  for(let k=1;k<=3;k++)if(!S.baseChase)$('d'+k).classList.toggle('on',!hrTrot&&!!S.bases[k-1]);
  const b=curBatter(),p=pitcher();
- $('abTeam').textContent='AT BAT';$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE':`PITCHING${pitching()?' (YOU)':''}`;
+ $('abTeam').textContent='AT BAT';$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'PITCHING MACHINE':`PITCHING${pitching()?' (YOU)':''}`;
  const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;if(pit){const A=arsOf(pitcher());for(const pb of document.querySelectorAll('#actsPitch .pbtn[data-k]')){const i=A.indexOf(pb.dataset.k);pb.hidden=i<0;if(i>=0)pb.querySelector('small').textContent=i+1}
   $('actsPitch').style.gridTemplateColumns=isWide()?'':`repeat(${A.length},1fr)`}$('muPit').classList.toggle('canPen',canPen());document.querySelector('.meter').hidden=pit;
  for(const pb of document.querySelectorAll('#actsPitch .pbtn'))pb.disabled=S.phase!=='choose';
@@ -5137,7 +5147,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  muSet('abName',batKey(),b.name,[`#${b.no}`],`${((S.orderOf&&S.orderOf[batKey()])||0)+1}.`);$('abTeam').innerHTML=`AT BAT<span class="muPos">${b.hand}</span>`;
  $('abHand').innerHTML=muStats([['POS',`<b>${b.pos}</b>`],['CON',rb(b.con)],['POW',rb(b.pow)],['SPD',rb(b.spd)]]);
  muSet('pName',fldKey(),p.name,[`#${p.no}`,p.slot==='side'?'SIDEARM':'']);if(!(S.mode==='bp'&&S.phase!=='title'))$('pTeam').innerHTML=`PITCHING${pitching()?' (YOU)':''}<span class="muPos">${p.hand}</span>`;
- if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing: <button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button><span class="bpStat">${S.bp.sw} swings <i class=muSep></i> ${S.bp.hr} HR <i class=muSep></i> longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=muStats([['POS',`<b>${p.pos||'P'}</b>`],['VEL',rb(p.vel)],['MOV',rb(p.mov)],['CTL',rb(p.ctl)]])+(p.type==='demon'?'<span class="muTag dmn">SPEED DEMON</span>':p.type==='knuckle'?'<span class="muTag knk">KNUCKLER</span>':'');
+ if(S.mode==='bp'&&S.phase!=='title'){$('pName').innerHTML=`<span class="bpThrow">Throwing:</span><button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button>`;$('pHand').innerHTML=`<span class="bpStat">${S.bp.sw} swings <i class=muSep></i> ${S.bp.hr} HR <i class=muSep></i> longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=muStats([['POS',`<b>${p.pos||'P'}</b>`],['VEL',rb(p.vel)],['MOV',rb(p.mov)],['CTL',rb(p.ctl)]])+(p.type==='demon'?'<span class="muTag dmn">SPEED DEMON</span>':p.type==='knuckle'?'<span class="muTag knk">KNUCKLER</span>':'');
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});
 }
@@ -5203,7 +5213,7 @@ function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>PICK YOUR CLUB</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds'])$(k).hidden=k!==id;if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
-{let lastDesk=null;addEventListener('resize',()=>{const d=isDesk();if(lastDesk===null||d!==lastDesk)applyWide();lastDesk=d})}
+{let lastK=null;const chk=()=>{const k=isWide()+'|'+isDesk();if(k!==lastK){lastK=k;applyWide()}};addEventListener('resize',chk);addEventListener('orientationchange',chk);if(window.visualViewport)visualViewport.addEventListener('resize',chk)}
 function applyWide(){$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize()})}
 function syncOpts(){for(const b of $('optBallCam').children)b.setAttribute('aria-pressed',String((b.dataset.v==='on')===(OPT.ballCam!==false)));for(const b of $('optCam').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.cam));for(const b of $('optTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const b of $('mTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']]){$(id).value=OPT[k];$(id+'V').textContent=OPT[k]}}
 for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']])$(id).addEventListener('input',e=>{OPT[k]=+e.target.value;$(id+'V').textContent=OPT[k];ensureAudio();applyVolumes();saveOpts()});

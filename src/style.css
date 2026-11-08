@@ -926,3 +926,13 @@ body.phOver .pauseBtn{display:none!important}
  .lfTray .lfc .lfNm{font-size:12px;letter-spacing:-.03em}.lfTray .lfc .lfPos{font-size:11px}
 }
 @media (max-width:720px){.lfField{container-type:inline-size}.lfField .lfc{width:min(76px,20cqw)}.lfField .lfc .lfNm{font-size:min(11px,3.6cqw)}.lfField .lfc .lfPos{font-size:min(10px,3.3cqw)}}
+/* pitching machine box: "Throwing: FASTBALL" is the big line; the machine's menu label only shows in the phone pop-up */
+#pName .bpThrow{color:var(--chalk);margin-right:.35em}
+#pName .bpPick{font:inherit;font-size:1em;margin-left:0}
+.app .bpStat{display:block;margin:2px 0 0;font-size:.95em}
+.app.deskApp .acts .bpBar .k{display:none}
+/* full-screen batting practice: the pitch buttons stack left of Bunt, so both info boxes ride above them */
+body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{bottom:var(--bpLift,190px)}
+@media (max-width:999px){body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{bottom:var(--bpLift,170px)}}
+body.bpMode .app.deskApp>.meter{left:90px;transform:scale(.86);transform-origin:bottom left}
+@media (max-width:999px){body.bpMode .app.deskApp>.meter{transform:scale(.68)}}

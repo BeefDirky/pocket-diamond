@@ -26,7 +26,7 @@ function clampCam(c){const e=EXT(),[vw,vh]=viewWH(c.z),WW=W+2*e.mx,HH=H+2*e.my;
  return{x:vw>=WW?W/2:clamp(c.x,vw/2-e.mx,W+e.mx-vw/2),y:vh>=HH?H/2:clamp(c.y,vh/2-e.my,H+e.my-vh/2),z:c.z}}
 // any sideways screen (computer, tablet, phone on its side) plays full screen with the wide camera
 const isLandscape=()=>innerWidth>=innerHeight*1.15&&innerWidth>=640;/* near-square or taller windows (portrait monitors, split screens) get the phone layout */
-const isWide=()=>isLandscape()||(OPT.cam==='wide'&&innerWidth>innerHeight);// a portrait screen, phone or PC monitor, always gets the phone layout
+const isWide=()=>isLandscape();/* one rule for every screen: landscape gets the PC layout, anything portrait or near-square gets the phone layout */
 function camTarget(){
  if(S.camMode==='follow'&&S.play){
   const play=S.play;const t=S.phase==='result'?play.end:play.t;const b=ballAt(play,t);

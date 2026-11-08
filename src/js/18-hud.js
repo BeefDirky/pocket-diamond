@@ -40,7 +40,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  const hrTrot=S.phase==='play'&&S.play&&S.play.hrFired;
  for(let k=1;k<=3;k++)if(!S.baseChase)$('d'+k).classList.toggle('on',!hrTrot&&!!S.bases[k-1]);
  const b=curBatter(),p=pitcher();
- $('abTeam').textContent='AT BAT';$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'BATTING PRACTICE':`PITCHING${pitching()?' (YOU)':''}`;
+ $('abTeam').textContent='AT BAT';$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'PITCHING MACHINE':`PITCHING${pitching()?' (YOU)':''}`;
  const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;if(pit){const A=arsOf(pitcher());for(const pb of document.querySelectorAll('#actsPitch .pbtn[data-k]')){const i=A.indexOf(pb.dataset.k);pb.hidden=i<0;if(i>=0)pb.querySelector('small').textContent=i+1}
   $('actsPitch').style.gridTemplateColumns=isWide()?'':`repeat(${A.length},1fr)`}$('muPit').classList.toggle('canPen',canPen());document.querySelector('.meter').hidden=pit;
  for(const pb of document.querySelectorAll('#actsPitch .pbtn'))pb.disabled=S.phase!=='choose';
@@ -49,7 +49,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  muSet('abName',batKey(),b.name,[`#${b.no}`],`${((S.orderOf&&S.orderOf[batKey()])||0)+1}.`);$('abTeam').innerHTML=`AT BAT<span class="muPos">${b.hand}</span>`;
  $('abHand').innerHTML=muStats([['POS',`<b>${b.pos}</b>`],['CON',rb(b.con)],['POW',rb(b.pow)],['SPD',rb(b.spd)]]);
  muSet('pName',fldKey(),p.name,[`#${p.no}`,p.slot==='side'?'SIDEARM':'']);if(!(S.mode==='bp'&&S.phase!=='title'))$('pTeam').innerHTML=`PITCHING${pitching()?' (YOU)':''}<span class="muPos">${p.hand}</span>`;
- if(S.mode==='bp'&&S.phase!=='title'){$('pName').textContent='PITCHING MACHINE';$('pHand').innerHTML=`Throwing: <button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button><span class="bpStat">${S.bp.sw} swings <i class=muSep></i> ${S.bp.hr} HR <i class=muSep></i> longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=muStats([['POS',`<b>${p.pos||'P'}</b>`],['VEL',rb(p.vel)],['MOV',rb(p.mov)],['CTL',rb(p.ctl)]])+(p.type==='demon'?'<span class="muTag dmn">SPEED DEMON</span>':p.type==='knuckle'?'<span class="muTag knk">KNUCKLER</span>':'');
+ if(S.mode==='bp'&&S.phase!=='title'){$('pName').innerHTML=`<span class="bpThrow">Throwing:</span><button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button>`;$('pHand').innerHTML=`<span class="bpStat">${S.bp.sw} swings <i class=muSep></i> ${S.bp.hr} HR <i class=muSep></i> longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=muStats([['POS',`<b>${p.pos||'P'}</b>`],['VEL',rb(p.vel)],['MOV',rb(p.mov)],['CTL',rb(p.ctl)]])+(p.type==='demon'?'<span class="muTag dmn">SPEED DEMON</span>':p.type==='knuckle'?'<span class="muTag knk">KNUCKLER</span>':'');
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});
 }
