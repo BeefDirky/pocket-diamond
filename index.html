@@ -849,6 +849,32 @@ body.phOver .pauseBtn{display:none!important}
 .lnPreTop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.lnPreTop b{font-family:var(--f-hud);font-size:14px;color:var(--amber)}.lnPreTop span{font-size:11px;letter-spacing:.14em;color:var(--dim)}
 .lnPre .big{width:auto;min-width:180px;margin:0}
 @media (max-width:720px){.lnPre .big{width:100%}}
+/* lineup: bigger, easier to read cards with skinnier borders; tighter top so the diamond sits right under the header */
+#scrLineup #lnHint:empty{display:none}
+#scrLineup .lnTop{margin-bottom:6px}
+#scrLineup .cards{margin-top:0;padding-top:0}
+#scrLineup .lnPre{margin:4px 0 8px}
+.lfc{border-width:2px;box-shadow:0 2px 0 rgba(0,0,0,.55)}
+.lfc img{border-width:1px}
+.lfc .lfOvr,.lfc .lfOrd{border-width:1px}
+.lfField{max-width:calc(64vh * 1.15)}
+.lfField .lfc{width:84px}
+.lfc .lfNm{font-size:12px;padding:2px 3px}
+.lfc .lfPos{font-size:11px;font-weight:700}
+.lfc .lfOvr{font-size:12px;padding:2px 4px;min-width:20px}
+.lfc .lfOrd{width:20px;height:20px;font-size:11px}
+.lfTray .lfc{flex:0 0 92px;width:92px}
+@media (max-width:720px){
+ .lfField{max-width:100%}
+ .lfField .lfc{width:54px;padding:1px;border-width:1px}
+ .lfField .lfc img{aspect-ratio:1/1;object-fit:cover;object-position:50% 28%;border-width:1px}
+ .lfField .lfc .lfNm{display:block;font-size:9px;padding:1px;margin-top:1px}
+ .lfField .lfc .lfPos{font-size:9px;line-height:1.2}
+ .lfField .lfc .lfOvr{font-size:9px;left:-5px;top:-7px;padding:1px 2px;min-width:16px}
+ .lfField .lfc .lfOrd{width:15px;height:15px;font-size:9px;right:-5px;top:-7px}
+ .lfc{width:60px}.lfc .lfNm,.lfc .lfPos{font-size:9px}.lfc .lfOvr,.lfc .lfOrd{font-size:9px}
+ .lfTray .lfc{flex-basis:74px;width:74px}
+}
 </style>
 
 <div class="app">
@@ -1001,7 +1027,6 @@ body.phOver .pauseBtn{display:none!important}
           <div class="lnPreTop"><b id="lnPreVs"></b><span>SERIES</span><div class="seg" id="lnSeries"><button type="button" data-n="1" aria-pressed="true">1 game</button><button type="button" data-n="3" aria-pressed="false">Best of 3</button><button type="button" data-n="5" aria-pressed="false">Best of 5</button></div></div>
           <button class="big" id="lnPlay" type="button">PLAY BALL</button>
         </div>
-        <button class="mbtn" id="lnCreate" type="button" data-go="scrEdit">★ Create-a-player</button>
         <div class="cards" id="cards"></div>
         <div class="lnSheet" id="lnSheet" hidden><div class="shBox"><div class="shHead"><b id="shTitle"></b><button type="button" class="xClose" id="shClose" aria-label="Close">✕</button></div>
           <p id="shSub"></p><div class="shActs"><button type="button" class="mbtn" id="shMove">↕ Move in batting order</button><button type="button" class="mbtn" id="shOrig" hidden></button></div>
@@ -4113,8 +4138,8 @@ function viewWH(z){const HH=H+2*EXT().my;let vw=W/z,vh=vw*VA;if(vh>HH){vh=HH;vw=
 function clampCam(c){const e=EXT(),[vw,vh]=viewWH(c.z),WW=W+2*e.mx,HH=H+2*e.my;
  return{x:vw>=WW?W/2:clamp(c.x,vw/2-e.mx,W+e.mx-vw/2),y:vh>=HH?H/2:clamp(c.y,vh/2-e.my,H+e.my-vh/2),z:c.z}}
 // any sideways screen (computer, tablet, phone on its side) plays full screen with the wide camera
-const isLandscape=()=>innerWidth>innerHeight&&innerWidth>=640;
-const isWide=()=>OPT.cam==='wide'||isLandscape();
+const isLandscape=()=>innerWidth>=innerHeight*1.15&&innerWidth>=640;/* near-square or taller windows (portrait monitors, split screens) get the phone layout */
+const isWide=()=>isLandscape()||(OPT.cam==='wide'&&innerWidth>innerHeight);// a portrait screen, phone or PC monitor, always gets the phone layout
 function camTarget(){
  if(S.camMode==='follow'&&S.play){
   const play=S.play;const t=S.phase==='result'?play.end:play.t;const b=ballAt(play,t);
@@ -5092,7 +5117,7 @@ function renderCards(){
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
  $('lnTitle').textContent=`${T.city} ${T.name}`;
  $('lnHint').textContent=mine?'Tap a player to sign one of your cards into his spot, or move him in the batting order.':'Scouting report. Their gloves and their starter shape every play.';
- $('lnMine').setAttribute('aria-pressed',String(mine));$('lnCreate').hidden=!mine;$('lnOpp').setAttribute('aria-pressed',String(!mine));
+ $('lnMine').setAttribute('aria-pressed',String(mine));$('lnOpp').setAttribute('aria-pressed',String(!mine));
  if(typeof lineupRender==='function')return lineupRender();
  const stat=(l,v)=>`<div class="st"><span>${l}</span><i><u style="width:${Math.min(100,v)}%;background:${rcol(v)}"></u></i><b style="color:${rcol(v)}">${v}</b></div>`;
  const card=(p,slot,i)=>`<button type="button" class="pcard${lnSel===i?' sel':''}${!mine?' ro':''}${p.custom?' mine':''}${p.signed?' signed':''}" data-i="${i}" style="--tc:${T.jersey};--tc2:${T.cap}">
