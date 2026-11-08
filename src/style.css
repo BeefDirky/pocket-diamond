@@ -831,3 +831,8 @@ body.phOver .pauseBtn{display:none!important}
 }
 .lfField{width:100%;max-width:calc(56vh * 1.15);max-height:none;justify-self:center}
 @media (max-width:720px){.lfField{max-width:100%}}
+/* arcade game day strip on the lineup screen */
+.lnPre{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 10px;padding:10px 12px;background:rgba(8,20,14,.6);border:3px solid var(--edge)}
+.lnPreTop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.lnPreTop b{font-family:var(--f-hud);font-size:14px;color:var(--amber)}.lnPreTop span{font-size:11px;letter-spacing:.14em;color:var(--dim)}
+.lnPre .big{width:auto;min-width:180px;margin:0}
+@media (max-width:720px){.lnPre .big{width:100%}}

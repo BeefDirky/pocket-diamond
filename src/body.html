@@ -145,6 +145,10 @@
       <div class="card wide" id="scrLineup" hidden>
         <div class="lnTop"><h2 id="lnTitle"></h2><div class="seg"><button type="button" id="lnMine" aria-pressed="true">Your club</button><button type="button" id="lnOpp" aria-pressed="false">Scout visitors</button></div></div>
         <p id="lnHint"></p>
+        <div class="lnPre" id="lnPre" hidden>
+          <div class="lnPreTop"><b id="lnPreVs"></b><span>SERIES</span><div class="seg" id="lnSeries"><button type="button" data-n="1" aria-pressed="true">1 game</button><button type="button" data-n="3" aria-pressed="false">Best of 3</button><button type="button" data-n="5" aria-pressed="false">Best of 5</button></div></div>
+          <button class="big" id="lnPlay" type="button">PLAY BALL</button>
+        </div>
         <button class="mbtn" id="lnCreate" type="button" data-go="scrEdit">★ Create-a-player</button>
         <div class="cards" id="cards"></div>
         <div class="lnSheet" id="lnSheet" hidden><div class="shBox"><div class="shHead"><b id="shTitle"></b><button type="button" class="xClose" id="shClose" aria-label="Close">✕</button></div>
@@ -261,9 +265,9 @@
         <h1 id="overT">FINAL</h1>
         <p id="overS"></p>
         <div class="stats" id="overStats"></div>
+        <p class="olSeries" id="olSeries" hidden></p>
         <button class="big" id="again" type="button">PLAY AGAIN</button>
         <button class="big" id="toBracket" type="button" hidden>BACK TO THE BRACKET</button>
-        <p class="olSeries" id="olSeries" hidden></p>
         <button class="big" id="olNext" type="button" hidden>NEXT GAME</button>
         <button class="big" id="toLobby" type="button" hidden>BACK TO THE ROOM</button>
         <button class="big alt" id="change" type="button">MAIN MENU</button>

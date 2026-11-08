@@ -1,5 +1,5 @@
 // ---------- game flow ----------
-function startGame(mode){tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
+function startGame(mode){S.gameNo=(S.gameNo||0)+1;tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
  S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.kLook=[];S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();
@@ -8,7 +8,8 @@ function startGame(mode){tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clu
  if(S.mode==='full'){
   S.totalInn=9;S.schedInn=9;S.target=0;S.oppLine=Array(9).fill(0);S.youLine=Array(9).fill(0);S.oppHits=0;
  }else{
-  S.totalInn=INNINGS;{const edge=(typeof teamStr==='function')?teamStr(S.opp)-teamStr(S.you):0;S.target=clamp(1+Math.floor(Math.random()*3)+(edge>3?1:0)-(edge<-3?1:0),1,5)}
+  S.totalInn=INNINGS;{const edge=(typeof teamStr==='function')?teamStr(S.opp)-teamStr(S.you):0;let k=1;{const W=[8,20,28,23,14,7];let u=Math.random()*100;while(k<6&&u>=W[k-1]){u-=W[k-1];k++}}// 1-6 runs, mostly 2-4
+   if(edge>3&&Math.random()<.4)k++;if(edge<-3&&Math.random()<.4)k--;S.target=clamp(k,1,6)}
   const line=[0,0,0];for(let k=0;k<S.target;k++)line[Math.floor(Math.random()*3)]++;
   S.oppLine=line;S.oppHits=S.target+2+Math.floor(Math.random()*4);S.youLine=[0,0,0];
  }
@@ -19,6 +20,8 @@ function startGame(mode){tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clu
  setCam('pitch');
  $('bpBar').hidden=S.mode!=='bp';$('parkBtn').hidden=S.mode!=='bp';$('actsBat').classList.toggle('withBP',S.mode==='bp');S.bpBalls=[];S.bpFly=[];if(S.mode==='bp')setBP(S.bpPitch);applyVolumes();
  if(S.mode==='bp'){S.target=0;S.totalInn=1;S.oppLine=[0];S.youLine=[0];S.oppHits=0;banner('BATTING PRACTICE','Pick a pitch for the machine. It keeps throwing it until you change.');S.jumbo={text:'BATTING PRACTICE',kr:'타격 연습',until:performance.now()+2500};setPhase('inning');updateHUD();return}
+ const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;
+ if(se){const g=se.w+se.l+1;banner(`GAME ${g} OF ${se.len} · ${TEAMS[S.opp].name} POSTED ${S.target}`,`Series ${se.w}-${se.l} · ${TEAMS[S.you].city} needs ${S.target+1} in ${INNINGS} innings`);S.jumbo={text:`GAME ${g}`,kr:`${g}차전`,until:performance.now()+3000};setPhase('inning');updateHUD();return}
  if(S.mode==='full')banner('PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name}, 9 innings. You pitch the top halves.`);
  else banner(`${TEAMS[S.opp].name} POSTED ${S.target}`,`${TEAMS[S.you].city} needs ${S.target+1} in ${INNINGS} innings`);
  S.jumbo={text:'PLAY BALL',kr:'플레이 볼!',until:performance.now()+3000};
@@ -48,9 +51,13 @@ function gameOver(win){const onl=onlineGame();
    if(se.done)$('overT').innerHTML=mw>tw?'<span>SERIES</span> WON':'SERIES LOST';
    $('olSeries').hidden=false;$('olSeries').textContent=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw} · ${me==='host'?`start game ${se.gn+1} when you're both ready.`:`waiting for the host to start game ${se.gn+1}…`}`;
    $('olNext').hidden=!(me==='host'&&!se.done);$('olNext').textContent=`START GAME ${se.gn+1}`}}
+ if(!onl&&!S.poGame&&S.mode==='arcade'&&S.series&&S.series.len>1){const se=S.series;if(se.counted!==S.gameNo){se.counted=S.gameNo;win?se.w++:se.l++}
+  const need=Math.ceil(se.len/2);se.done=se.w>=need||se.l>=need;$('olSeries').hidden=false;
+  if(se.done){$('overT').innerHTML=se.w>se.l?'<span>SERIES</span> WON':'SERIES LOST';$('olSeries').textContent=`${se.w>se.l?you.name+' take':opp.name+' take'} the best of ${se.len}, ${Math.max(se.w,se.l)}-${Math.min(se.w,se.l)}.`}
+  else $('olSeries').textContent=`Best of ${se.len} · ${you.name} ${se.w}, ${opp.name} ${se.l} · game ${se.w+se.l+1} next.`}
  awardPacks(win);
  $('toLobby').hidden=!onl;if(onl){resumeClear();$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
- else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false}
- if(S.celebr){const gid=S.overGid=(S.overGid||0)+1;setTimeout(()=>{if(S.phase==='over'&&S.overGid===gid&&$('title').hidden)$('over').hidden=false},3400)}else $('over').hidden=false;// the results card always follows the celebration, even if the celebration was swapped out meanwhileupdateHUD();
+ else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false;const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;$('again').textContent=se?(se.done?'NEW SERIES':`GAME ${se.w+se.l+1}`):'PLAY AGAIN'}
+ if(S.celebr){const gid=S.overGid=(S.overGid||0)+1;setTimeout(()=>{if(S.phase==='over'&&S.overGid===gid&&$('title').hidden)$('over').hidden=false},3400)}else $('over').hidden=false;/* the results card always follows the celebration */updateHUD();
 }
 
