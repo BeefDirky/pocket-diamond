@@ -961,6 +961,10 @@ body.bpPopOpen>.bpBar.bpFloat:not([hidden]){display:grid!important;position:fixe
 body.bpPopOpen>.bpBar.bpFloat .pbtn{padding:10px 4px;font-size:11px}
 body.bpPopOpen>.bpBar.bpFloat .k{display:block;font-size:12px;margin-bottom:2px}
 body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
+/* phone on its side: a smaller ball cam so it doesn't eat the field */
+.app.deskApp.phoneLand .ballCam{top:8px;right:8px;width:min(150px,22vw);border-width:2px}
+.app.deskApp.phoneLand .ballCam i{font-size:8px;padding:0 4px}
+.app.deskApp.phoneLand .ballCam span{font-size:9px;padding:1px 3px}
 </style>
 
 <div class="app">
