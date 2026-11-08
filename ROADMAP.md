@@ -22,6 +22,14 @@
 - [x] Club info + fun facts in the club picker; local banner slogans; city murals in left field
 - [x] Diving plays error more often; NPC pickoffs wait a beat; walk-off mob starts when the game is won; crowd cheer on the ball landing
 - [x] Suwon Foxes + Changwon Armadillos redesign (logos, mascots)
+- [x] New stadiums: Suwon Fortress Field, Changwon Fossil Yard, Busan Harbor Field, Incheon Orbit Park (shared bowl engine)
+- [x] Arcade: 1/3/5-game series, lineup page before the game, opponent target 1-6 (extremes rarer)
+- [x] Lineup screen: cards on the field, flip for stats, rarity colours, sign cards from your collection
+- [x] Layout follows the window: portrait/near-square = phone layout, landscape = PC; phone-sideways pop-up pitch menu
+- [x] Perf pass on the new stadiums (cached jumbotron art, sprite cache, baked light pools)
+- [x] Extra-base hits: ball runs to the wall and caroms, outfielder chases it down
+- [x] Error guard: one bad frame can't freeze the game; silent if audio isn't on yet
+- [x] Outfield throws to second always have a fielder on the bag
 
 ## Online failsafes
 - [ ] Rejoin after a page reload (same room code restores the game)
@@ -29,7 +37,11 @@
 - [ ] Rematch button
 - [ ] Version lock: both players must be on the same build
 
-## Balance
+## Balance (audit, Nov 2026: 15k simulated swings, 13 full bot games)
+- [ ] Perfect timing should be the best timing: right now a perfect swing hits .51 with 47% outs, a slightly-off swing hits .60
+- [ ] Too many home runs, too few singles: ~15% of fair balls leave the park; perfect contact is a HR 37% of the time
+- [ ] Scoring runs high: bot games average ~8.5 runs a team (KBO ~5); finals like 13-7, 14-11, 15-1
+- [ ] Watch mode takes 22-26 minutes for 9 innings
 - [ ] Team + player rating pass with bot sims
 - [ ] Pitcher fatigue and bullpen use
 - [ ] Online timing window tuned for network delay
@@ -37,6 +49,15 @@
 ## Game feel
 - [ ] Pitch location control for the online pitcher
 - [ ] Faster time between pitches
+
+## Look and readability (audit)
+- [ ] PC menus are small in a normal window (Options, How to Play, About at 1400x900)
+- [ ] Card Collection: ~150 bits of text under 10px
+- [ ] Portrait PC monitor: the phone-layout HUD stays phone-sized and tiny at 1050x1780; scale it up
+- [ ] Older parks still on the original look: Seoul, Gwangju, Daegu, Daejeon, Jeju (Daegu and Jeju plainest)
+- [ ] Playoffs behind the new arcade flow: no lineup page, Menu button instead of the X, no series banner
+- [ ] Stadium leftovers: Busan plaza detail, Changwon entrance, Suwon tower size, Orbit Park reference image
+- [ ] claude.ai build is 7.9 MB (all audio inlined); slow on phones. Vercel build is 0.7 MB
 
 ## Later
 - [ ] Custom domain (play.imugilabs.com: CNAME at Squarespace)

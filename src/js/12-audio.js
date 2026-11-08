@@ -50,7 +50,7 @@ function duckMusic(){if(!AC||!BUS.music||S.musicDuck)return;S.musicDuck=true;con
 function unduckMusic(){if(!S.musicDuck)return;S.musicDuck=false;if(!AC||!BUS.music||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t+1.8)}
 function stopRamp(){if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
 function playSample(k,vol,rate){if(!AC||!BUF[k])return false;const src=AC.createBufferSource(),gn=AC.createGain();src.buffer=BUF[k];src.playbackRate.value=rate||1;gn.gain.value=vol;src.connect(gn).connect(BUS.sfx);src.start();return true}
-function noise(dur,type,freq,vol,swell){
+function noise(dur,type,freq,vol,swell){if(!AC||!BUS.sfx)return;/* sound not switched on yet: stay silent */
  const len=Math.max(1,Math.floor(AC.sampleRate*dur));const b=AC.createBuffer(1,len,AC.sampleRate);const dd=b.getChannelData(0);
  for(let i=0;i<len;i++)dd[i]=Math.random()*2-1;
  const s=AC.createBufferSource();s.buffer=b;const f=AC.createBiquadFilter();f.type=type;f.frequency.value=freq;
@@ -59,7 +59,7 @@ function noise(dur,type,freq,vol,swell){
  else{gn.gain.setValueAtTime(vol,t);gn.gain.exponentialRampToValueAtTime(.0001,t+dur)}
  s.connect(f).connect(gn).connect(BUS.sfx);s.start(t);s.stop(t+dur);
 }
-function tone(freq,dur,type,vol,delay){
+function tone(freq,dur,type,vol,delay){if(!AC||!BUS.sfx)return;
  const o=AC.createOscillator(),gn=AC.createGain();const t=AC.currentTime+(delay||0);
  o.type=type;o.frequency.value=freq;gn.gain.setValueAtTime(vol,t);gn.gain.exponentialRampToValueAtTime(.0001,t+dur);
  o.connect(gn).connect(BUS.sfx);o.start(t);o.stop(t+dur+.02);

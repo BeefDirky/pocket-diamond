@@ -965,6 +965,13 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
 .app.deskApp.phoneLand .ballCam{top:8px;right:8px;width:min(150px,22vw);border-width:2px}
 .app.deskApp.phoneLand .ballCam i{font-size:8px;padding:0 4px}
 .app.deskApp.phoneLand .ballCam span{font-size:9px;padding:1px 3px}
+/* small phones on their side: the centred timing meter narrows so it never runs under Bunt/Swing */
+@media (max-width:999px){.app.deskApp.phoneLand>.meter{width:min(420px,calc((100vw - 490px) * 1.47))}}
+/* PC lineup: cards scale with the field so the spacing holds at every window size */
+@media (min-width:721px){.lfField{container-type:inline-size}.lfField .lfc{width:14cqw}
+ .lfField .lfc .lfNm{font-size:clamp(9px,1.9cqw,13px)}.lfField .lfc .lfPos{font-size:clamp(8px,1.75cqw,12px)}
+ .lfField .lfB .lfBNm{font-size:clamp(8px,1.6cqw,11px)}.lfField .lfSt,.lfField .lfSt b{font-size:clamp(7px,1.3cqw,9px)}.lfField .lfBOvr{font-size:clamp(10px,2.2cqw,16px)}}
+@media (min-width:721px){.lfField .lfc img{aspect-ratio:1/1;object-fit:cover;object-position:50% 24%}}
 </style>
 
 <div class="app">
@@ -1190,7 +1197,6 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
         <label class="opt" for="vCrowd"><span>Crowd</span><input type="range" id="vCrowd" min="0" max="100" step="5"><b id="vCrowdV"></b></label>
         <label class="opt" for="vSfx"><span>Effects</span><input type="range" id="vSfx" min="0" max="100" step="5"><b id="vSfxV"></b></label>
         <div class="opt"><span>Game time</span><div class="seg" id="optTime"><button type="button" data-v="day">Day</button><button type="button" data-v="night">Night</button><button type="button" data-v="random">Random</button></div><b></b></div>
-        <div class="opt"><span>Camera</span><div class="seg" id="optCam"><button type="button" data-v="broadcast">Broadcast</button><button type="button" data-v="wide">Wide (landscape)</button></div><b></b></div>
         <div class="opt"><span>Ball cam</span><div class="seg" id="optBallCam"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
         <button class="mbtn back" type="button" id="optBack">Back</button>
       </div>
@@ -4169,7 +4175,7 @@ function duckMusic(){if(!AC||!BUS.music||S.musicDuck)return;S.musicDuck=true;con
 function unduckMusic(){if(!S.musicDuck)return;S.musicDuck=false;if(!AC||!BUS.music||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t+1.8)}
 function stopRamp(){if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
 function playSample(k,vol,rate){if(!AC||!BUF[k])return false;const src=AC.createBufferSource(),gn=AC.createGain();src.buffer=BUF[k];src.playbackRate.value=rate||1;gn.gain.value=vol;src.connect(gn).connect(BUS.sfx);src.start();return true}
-function noise(dur,type,freq,vol,swell){
+function noise(dur,type,freq,vol,swell){if(!AC||!BUS.sfx)return;/* sound not switched on yet: stay silent */
  const len=Math.max(1,Math.floor(AC.sampleRate*dur));const b=AC.createBuffer(1,len,AC.sampleRate);const dd=b.getChannelData(0);
  for(let i=0;i<len;i++)dd[i]=Math.random()*2-1;
  const s=AC.createBufferSource();s.buffer=b;const f=AC.createBiquadFilter();f.type=type;f.frequency.value=freq;
@@ -4178,7 +4184,7 @@ function noise(dur,type,freq,vol,swell){
  else{gn.gain.setValueAtTime(vol,t);gn.gain.exponentialRampToValueAtTime(.0001,t+dur)}
  s.connect(f).connect(gn).connect(BUS.sfx);s.start(t);s.stop(t+dur);
 }
-function tone(freq,dur,type,vol,delay){
+function tone(freq,dur,type,vol,delay){if(!AC||!BUS.sfx)return;
  const o=AC.createOscillator(),gn=AC.createGain();const t=AC.currentTime+(delay||0);
  o.type=type;o.frequency.value=freq;gn.gain.setValueAtTime(vol,t);gn.gain.exponentialRampToValueAtTime(.0001,t+dur);
  o.connect(gn).connect(BUS.sfx);o.start(t);o.stop(t+dur+.02);
@@ -4718,10 +4724,10 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  const tgt=sendHome?4:bd>=3?4:bd+1,tb=baseP(tgt);
  const t0=it.t+.65+ex;
  let cov=tgt===4?1:tgt===3?4:(it.p.x<0?3:5);
- let tArr,rcv=null;
+ let tArr,rcv=null,cutMan=null;
  if(it.i>=6&&Math.hypot(it.p.x,it.p.y)>200){
   // deep hit: the outfielder hits the cutoff man, who turns and relays to the base
-  const Cc={x:lerp(tb.x,it.p.x,.45),y:lerp(tb.y,it.p.y,.45)},cut=nearMid(Cc,play),o=fromF(play,it.i,t0),t1=t0+dist(o,Cc)/THROW;
+  const Cc={x:lerp(tb.x,it.p.x,.45),y:lerp(tb.y,it.p.y,.45)},cut=nearMid(Cc,play),o=fromF(play,it.i,t0),t1=t0+dist(o,Cc)/THROW;cutMan=cut;
   play.fk[cut]=cover(cut,Cc,t1);
   play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,Cc),holdSeg(play,t1,t1+.32,cut),throwSeg(t1+.32,Cc,tb));
   tArr=t1+.32+dist(Cc,tb)/THROW;
@@ -4731,8 +4737,11 @@ function outfieldHit(play,it,P,runners,delay,errBy){
   const o=fromF(play,it.i,t0),dd=dist(tb,o),C={x:tb.x+(o.x-tb.x)*Math.min(.32,34/Math.max(1,dd)),y:tb.y+(o.y-tb.y)*Math.min(.32,34/Math.max(1,dd))};
   rcv=nearMid(C,play);cov=rcv===5?3:5;play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,C));tArr=t0+dist(o,C)/THROW;if(!play.fk[rcv])play.fk[rcv]=cover(rcv,C,tArr)
  }else{play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,fromF(play,it.i,t0),tb));tArr=t0+dist(it.p,tb)/THROW}
- const midTaken=[3,5].some(k=>k!==cov&&play.fk[k]&&k!==it.i)&&(cov===3||cov===5);// one middle infielder has the cutoff: the other stays at his spot
- if(cov!==it.i&&!play.fk[cov]&&!midTaken)play.fk[cov]=cover(cov,tb,tArr);
+ /* whoever the last throw goes to must be standing on the bag when it gets there. When the ball comes in to a middle
+    infielder out on the grass (rcv), nobody needs the bag and the other one stays put; when it's thrown to the bag itself,
+    the cutoff man can't also be the one covering, so the other middle infielder takes it */
+ if(rcv==null){if(cov===cutMan||cov===it.i)cov=cov===3?5:cov===5?3:cov;
+  if(cov!==it.i&&cov!==cutMan&&!play.fk[cov])play.fk[cov]=cover(cov,tb,tArr)}
  if(sendHome){const r2=sendHome,tR=r2.start+2*LEG/r2.speed;
   if(r2.out){if(tR<tArr+.12)r2.speed=2*LEG/Math.max(.5,tArr+.15-r2.start);r2.outAt=tArr+.05}
   else if(tR>tArr-.1)r2.speed=2*LEG/Math.max(.5,tArr-(r2.closeHome?.1:.4)-r2.start)}
@@ -5259,14 +5268,13 @@ function bpLayout(){const bar=document.querySelector('.acts .bpBar');if(!documen
  document.body.style.setProperty('--bpA',a+'px');document.body.style.setProperty('--bpM',Math.round(a+ab+10)+'px')}
 const isPhoneLand=()=>isDesk()&&innerHeight<=520;/* a phone on its side: PC layout, phone-style pitch menu */
 function applyWide(){document.querySelector('.app').classList.toggle('phoneLand',isPhoneLand());if(!isPhoneLand()&&document.body.classList.contains('bpPopOpen')&&typeof bpPop==='function')bpPop(false);$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize();bpLayout()})}
-function syncOpts(){for(const b of $('optBallCam').children)b.setAttribute('aria-pressed',String((b.dataset.v==='on')===(OPT.ballCam!==false)));for(const b of $('optCam').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.cam));for(const b of $('optTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const b of $('mTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']]){$(id).value=OPT[k];$(id+'V').textContent=OPT[k]}}
+function syncOpts(){for(const b of $('optBallCam').children)b.setAttribute('aria-pressed',String((b.dataset.v==='on')===(OPT.ballCam!==false)));for(const b of $('optTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const b of $('mTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']]){$(id).value=OPT[k];$(id+'V').textContent=OPT[k]}}
 for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']])$(id).addEventListener('input',e=>{OPT[k]=+e.target.value;$(id+'V').textContent=OPT[k];ensureAudio();applyVolumes();saveOpts()});
 function decideTime(){const n=OPT.time==='night'?true:OPT.time==='day'?false:Math.random()<.55;if(n!==S.night){S.night=n;if(FIELD)SIGNS=buildSigns()}if($('mLogoY'))refreshMenu()}
 const setTime=v=>{OPT.time=v;saveOpts();syncOpts();decideTime()};
 $('optTime').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTime(b.dataset.v)});
 $('mTime').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTime(b.dataset.v)});
 $('optBallCam').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;OPT.ballCam=b.dataset.v==='on';saveOpts();syncOpts()});// batting practice corner camera
-$('optCam').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;OPT.cam=b.dataset.v;saveOpts();syncOpts();applyWide()});
 let optsFromGame=false,pausedAt=0,lineFromPause=false;
 const canPause=()=>!(S.online&&S.online.inGame)&&S.phase!=='title'&&S.phase!=='over'&&!S.paused&&$('title').hidden&&$('over').hidden;
 function pauseGame(){if(!canPause())return;S.paused=true;pausedAt=performance.now();
@@ -5402,7 +5410,7 @@ function adsRender(){const W=$('adsWrap');W.innerHTML='';const live=[];
 // ---------- lineup screen: the club laid out on a field, a card at every position, your card collection in a tray below.
 // Tap a player on the field to pick him up; tap a card in the tray to sign it into his spot, or tap another hitter on the
 // field to swap their places in the batting order. Uses the signings layer (19a) for the actual roster changes. ----------
-const LF_POS={C:[50,90],'1B':[77,61],'2B':[63,40],SS:[37,40],'3B':[23,61],LF:[17,18],CF:[50,10],RF:[83,18],DH:[9,86],SP:[50,66]};
+const LF_POS={C:[50,86],'1B':[85,58],'2B':[67,43],SS:[33,43],'3B':[15,58],LF:[16,20],CF:[50,14],RF:[84,20],DH:[15,86],SP:[50,58]};/* spaced so no two cards touch at any window size */
 const LF_POS_M={C:[50,90],'1B':[82,72],'2B':[68,49],SS:[32,49],'3B':[18,72],LF:[18,25],CF:[50,9],RF:[82,25],DH:[13,91],SP:[50,69]};/* phones: a taller field so no two cards touch */
 const lfMob=()=>matchMedia('(max-width:720px)').matches;
 let lfDeck='bat',lfFieldC={};
@@ -7130,7 +7138,15 @@ function update(dt,now){
 }
 let last=performance.now();
 function updateRelMeter(now){if(S.phase==='windup'&&pitching()&&S.pitch){const m=S.pitch.mFreeze!=null?S.pitch.mFreeze:meterPos(now);$('rmMk').style.left=`${m*100}%`}}
-function frame(now){const dt=Math.min(50,now-last);last=now;update(dt,now);if(!(TS.cur&&!$('scrTeams').hidden&&!$('title').hidden))render(now);/* the club-select wall covers the park, so skip drawing it */updateRelMeter(now);drawFlame(now);baseChase(now);requestAnimationFrame(frame)}
+/* error guard: the next frame is booked first and each stage runs on its own, so one bad frame can't stop the game for good;
+   a stage that keeps throwing is reported once in the console, and a play that keeps throwing is ended so the game moves on */
+let frameErrs=0,lastErrMsg='';
+function guard(name,fn){try{fn();if(name==='update')frameErrs=0}catch(e){const m=name+': '+(e&&e.message);if(m!==lastErrMsg){lastErrMsg=m;console.error('[Pocket Diamond] '+m,e)}
+ if(name==='update'&&++frameErrs>30&&(S.phase==='play'||S.phase==='result')){frameErrs=0;try{hideBanner();setPhase('reset');setCam('pitch')}catch(_){}}}}
+function frame(now){requestAnimationFrame(frame);const dt=Math.min(50,now-last);last=now;
+ guard('update',()=>update(dt,now));
+ if(!(TS.cur&&!$('scrTeams').hidden&&!$('title').hidden))guard('render',()=>render(now));/* the club-select wall covers the park, so skip drawing it */
+ guard('hud',()=>{updateRelMeter(now);drawFlame(now);baseChase(now)})}
 
 // ---------- input ----------
 const overlayOpen=()=>!$('title').hidden||!$('over').hidden;

@@ -97,10 +97,10 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  const tgt=sendHome?4:bd>=3?4:bd+1,tb=baseP(tgt);
  const t0=it.t+.65+ex;
  let cov=tgt===4?1:tgt===3?4:(it.p.x<0?3:5);
- let tArr,rcv=null;
+ let tArr,rcv=null,cutMan=null;
  if(it.i>=6&&Math.hypot(it.p.x,it.p.y)>200){
   // deep hit: the outfielder hits the cutoff man, who turns and relays to the base
-  const Cc={x:lerp(tb.x,it.p.x,.45),y:lerp(tb.y,it.p.y,.45)},cut=nearMid(Cc,play),o=fromF(play,it.i,t0),t1=t0+dist(o,Cc)/THROW;
+  const Cc={x:lerp(tb.x,it.p.x,.45),y:lerp(tb.y,it.p.y,.45)},cut=nearMid(Cc,play),o=fromF(play,it.i,t0),t1=t0+dist(o,Cc)/THROW;cutMan=cut;
   play.fk[cut]=cover(cut,Cc,t1);
   play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,Cc),holdSeg(play,t1,t1+.32,cut),throwSeg(t1+.32,Cc,tb));
   tArr=t1+.32+dist(Cc,tb)/THROW;
@@ -110,8 +110,11 @@ function outfieldHit(play,it,P,runners,delay,errBy){
   const o=fromF(play,it.i,t0),dd=dist(tb,o),C={x:tb.x+(o.x-tb.x)*Math.min(.32,34/Math.max(1,dd)),y:tb.y+(o.y-tb.y)*Math.min(.32,34/Math.max(1,dd))};
   rcv=nearMid(C,play);cov=rcv===5?3:5;play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,C));tArr=t0+dist(o,C)/THROW;if(!play.fk[rcv])play.fk[rcv]=cover(rcv,C,tArr)
  }else{play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,fromF(play,it.i,t0),tb));tArr=t0+dist(it.p,tb)/THROW}
- const midTaken=[3,5].some(k=>k!==cov&&play.fk[k]&&k!==it.i)&&(cov===3||cov===5);// one middle infielder has the cutoff: the other stays at his spot
- if(cov!==it.i&&!play.fk[cov]&&!midTaken)play.fk[cov]=cover(cov,tb,tArr);
+ /* whoever the last throw goes to must be standing on the bag when it gets there. When the ball comes in to a middle
+    infielder out on the grass (rcv), nobody needs the bag and the other one stays put; when it's thrown to the bag itself,
+    the cutoff man can't also be the one covering, so the other middle infielder takes it */
+ if(rcv==null){if(cov===cutMan||cov===it.i)cov=cov===3?5:cov===5?3:cov;
+  if(cov!==it.i&&cov!==cutMan&&!play.fk[cov])play.fk[cov]=cover(cov,tb,tArr)}
  if(sendHome){const r2=sendHome,tR=r2.start+2*LEG/r2.speed;
   if(r2.out){if(tR<tArr+.12)r2.speed=2*LEG/Math.max(.5,tArr+.15-r2.start);r2.outAt=tArr+.05}
   else if(tR>tArr-.1)r2.speed=2*LEG/Math.max(.5,tArr-(r2.closeHome?.1:.4)-r2.start)}

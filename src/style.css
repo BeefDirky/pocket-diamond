@@ -952,3 +952,10 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
 .app.deskApp.phoneLand .ballCam{top:8px;right:8px;width:min(150px,22vw);border-width:2px}
 .app.deskApp.phoneLand .ballCam i{font-size:8px;padding:0 4px}
 .app.deskApp.phoneLand .ballCam span{font-size:9px;padding:1px 3px}
+/* small phones on their side: the centred timing meter narrows so it never runs under Bunt/Swing */
+@media (max-width:999px){.app.deskApp.phoneLand>.meter{width:min(420px,calc((100vw - 490px) * 1.47))}}
+/* PC lineup: cards scale with the field so the spacing holds at every window size */
+@media (min-width:721px){.lfField{container-type:inline-size}.lfField .lfc{width:14cqw}
+ .lfField .lfc .lfNm{font-size:clamp(9px,1.9cqw,13px)}.lfField .lfc .lfPos{font-size:clamp(8px,1.75cqw,12px)}
+ .lfField .lfB .lfBNm{font-size:clamp(8px,1.6cqw,11px)}.lfField .lfSt,.lfField .lfSt b{font-size:clamp(7px,1.3cqw,9px)}.lfField .lfBOvr{font-size:clamp(10px,2.2cqw,16px)}}
+@media (min-width:721px){.lfField .lfc img{aspect-ratio:1/1;object-fit:cover;object-position:50% 24%}}

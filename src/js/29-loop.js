@@ -53,5 +53,13 @@ function update(dt,now){
 }
 let last=performance.now();
 function updateRelMeter(now){if(S.phase==='windup'&&pitching()&&S.pitch){const m=S.pitch.mFreeze!=null?S.pitch.mFreeze:meterPos(now);$('rmMk').style.left=`${m*100}%`}}
-function frame(now){const dt=Math.min(50,now-last);last=now;update(dt,now);if(!(TS.cur&&!$('scrTeams').hidden&&!$('title').hidden))render(now);/* the club-select wall covers the park, so skip drawing it */updateRelMeter(now);drawFlame(now);baseChase(now);requestAnimationFrame(frame)}
+/* error guard: the next frame is booked first and each stage runs on its own, so one bad frame can't stop the game for good;
+   a stage that keeps throwing is reported once in the console, and a play that keeps throwing is ended so the game moves on */
+let frameErrs=0,lastErrMsg='';
+function guard(name,fn){try{fn();if(name==='update')frameErrs=0}catch(e){const m=name+': '+(e&&e.message);if(m!==lastErrMsg){lastErrMsg=m;console.error('[Pocket Diamond] '+m,e)}
+ if(name==='update'&&++frameErrs>30&&(S.phase==='play'||S.phase==='result')){frameErrs=0;try{hideBanner();setPhase('reset');setCam('pitch')}catch(_){}}}}
+function frame(now){requestAnimationFrame(frame);const dt=Math.min(50,now-last);last=now;
+ guard('update',()=>update(dt,now));
+ if(!(TS.cur&&!$('scrTeams').hidden&&!$('title').hidden))guard('render',()=>render(now));/* the club-select wall covers the park, so skip drawing it */
+ guard('hud',()=>{updateRelMeter(now);drawFlame(now);baseChase(now)})}
 

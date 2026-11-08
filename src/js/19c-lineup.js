@@ -1,7 +1,7 @@
 // ---------- lineup screen: the club laid out on a field, a card at every position, your card collection in a tray below.
 // Tap a player on the field to pick him up; tap a card in the tray to sign it into his spot, or tap another hitter on the
 // field to swap their places in the batting order. Uses the signings layer (19a) for the actual roster changes. ----------
-const LF_POS={C:[50,90],'1B':[77,61],'2B':[63,40],SS:[37,40],'3B':[23,61],LF:[17,18],CF:[50,10],RF:[83,18],DH:[9,86],SP:[50,66]};
+const LF_POS={C:[50,86],'1B':[85,58],'2B':[67,43],SS:[33,43],'3B':[15,58],LF:[16,20],CF:[50,14],RF:[84,20],DH:[15,86],SP:[50,58]};/* spaced so no two cards touch at any window size */
 const LF_POS_M={C:[50,90],'1B':[82,72],'2B':[68,49],SS:[32,49],'3B':[18,72],LF:[18,25],CF:[50,9],RF:[82,25],DH:[13,91],SP:[50,69]};/* phones: a taller field so no two cards touch */
 const lfMob=()=>matchMedia('(max-width:720px)').matches;
 let lfDeck='bat',lfFieldC={};
