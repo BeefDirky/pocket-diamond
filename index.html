@@ -947,8 +947,11 @@ body.phOver .pauseBtn{display:none!important}
 /* full-screen batting practice: the pitch buttons stack left of Bunt, so both info boxes ride above them */
 body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{bottom:var(--bpLift,190px)}
 @media (max-width:999px){body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{bottom:var(--bpLift,170px)}}
-body.bpMode .app.deskApp>.meter{left:90px;transform:scale(.86);transform-origin:bottom left}
-@media (max-width:999px){body.bpMode .app.deskApp>.meter{transform:scale(.68)}}
+/* the timing meter stays centred; the pitch buttons sit in two rows right above Bunt/Swing, AUTO/INFO above them, then the info boxes */
+.app.deskApp>.acts.withBP .bpBar{right:0;bottom:calc(100% + 8px);width:100%;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:auto}
+.app.deskApp>.acts.withBP .bpBar .pbtn{padding:6px 2px;font-size:10px}
+body.bpMode .app.deskApp .infoBtn,body.bpMode .app.deskApp .autoBtn{bottom:var(--bpA,178px)!important}
+body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{bottom:var(--bpM,224px)!important}
 </style>
 
 <div class="app">
@@ -5121,7 +5124,7 @@ function logPA(b,desc,good){
  log.prepend(li);while(log.children.length>14)log.lastChild.remove();
 }
 function bulbs(id,n,on,cls){$(id).innerHTML=Array.from({length:n},(_,i)=>`<i class="bulb ${cls}${i<on?' on':''}"></i>`).join('')}
-function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.phase!=='title');
+function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.phase!=='title');requestAnimationFrame(()=>{if(typeof bpLayout==='function')bpLayout()});
  const you=TEAMS[S.you],opp=TEAMS[S.opp],n=S.totalInn;
  const started=S.phase!=='title';
  let h='<tr><th></th>';for(let i=0;i<n;i++)h+=`<th>${i+1}</th>`;h+='<th>R</th><th>H</th><th>E</th></tr>';
@@ -5213,8 +5216,12 @@ function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>PICK YOUR CLUB</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds'])$(k).hidden=k!==id;if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
-{let lastK=null;const chk=()=>{const k=isWide()+'|'+isDesk();if(k!==lastK){lastK=k;applyWide()}};addEventListener('resize',chk);addEventListener('orientationchange',chk);if(window.visualViewport)visualViewport.addEventListener('resize',chk)}
-function applyWide(){$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize()})}
+{let lastK=null;const chk=()=>{const k=isWide()+'|'+isDesk();if(k!==lastK){lastK=k;applyWide()}};addEventListener('resize',chk);addEventListener('resize',()=>requestAnimationFrame(bpLayout));addEventListener('orientationchange',chk);if(window.visualViewport)visualViewport.addEventListener('resize',chk)}
+/* full-screen batting practice: measure where the pitch buttons end and stack AUTO/INFO, then the info boxes, above them */
+function bpLayout(){const bar=document.querySelector('.acts .bpBar');if(!document.body.classList.contains('bpMode')||!isDesk()||!bar)return;
+ const r=bar.getBoundingClientRect();if(!r.height)return;const a=Math.round(innerHeight-r.top+8),ab=$('autoBtn').getBoundingClientRect().height||28;
+ document.body.style.setProperty('--bpA',a+'px');document.body.style.setProperty('--bpM',Math.round(a+ab+10)+'px')}
+function applyWide(){$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize();bpLayout()})}
 function syncOpts(){for(const b of $('optBallCam').children)b.setAttribute('aria-pressed',String((b.dataset.v==='on')===(OPT.ballCam!==false)));for(const b of $('optCam').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.cam));for(const b of $('optTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const b of $('mTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']]){$(id).value=OPT[k];$(id+'V').textContent=OPT[k]}}
 for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']])$(id).addEventListener('input',e=>{OPT[k]=+e.target.value;$(id+'V').textContent=OPT[k];ensureAudio();applyVolumes();saveOpts()});
 function decideTime(){const n=OPT.time==='night'?true:OPT.time==='day'?false:Math.random()<.55;if(n!==S.night){S.night=n;if(FIELD)SIGNS=buildSigns()}if($('mLogoY'))refreshMenu()}
