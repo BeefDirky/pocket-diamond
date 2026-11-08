@@ -31,7 +31,15 @@ try:
   B.click('#olPick [data-t=seoul]');B.wait_for_timeout(300);print('same-club warning:',B.inner_text('#olStatus')[:70])
   B.evaluate("__pd.S.you='seoul'");B.click('#olPick [data-t=busan]');B.wait_for_timeout(800)
   print('A:',A.inner_text('#olStatus'),'| B:',B.inner_text('#olStatus'))
-  A.click('#olInn [data-v="3"]');A.click('#olGo');A.wait_for_timeout(1500)
+  A.click('#olInn [data-v="3"]')
+  # ready-up: nobody is ready to begin with; one ready waits, both ready starts
+  assert A.inner_text('#olGo').strip()=='READY' and B.inner_text('#olGo').strip()=='READY','someone started out ready'
+  A.click('#olGo');A.wait_for_timeout(1200)
+  print('host ready -> A:',A.inner_text('#olStatus'),'| B:',B.inner_text('#olStatus'))
+  assert 'Waiting for opponent' in A.inner_text('#olStatus') and 'Opponent is ready' in B.inner_text('#olStatus'),'ready status wrong'
+  assert not A.evaluate("__pd.S.online.inGame"),'started with only one player ready'
+  A.click('#olGo');A.wait_for_timeout(800);assert 'Opponent is ready' not in B.inner_text('#olStatus'),'un-ready not shown';A.click('#olGo')
+  B.click('#olGo');A.wait_for_timeout(1500)
   print('host lineup on guest phone:',B.evaluate("__pd.TEAMS.seoul.lineup[3].name+' / '+__pd.TEAMS.seoul.staff[0].name"),'| on host:',A.evaluate("__pd.TEAMS.seoul.lineup[3].name+' / '+__pd.TEAMS.seoul.staff[0].name"))
   assert A.evaluate("__pd.S.online.inGame") and B.evaluate("__pd.S.online.inGame"),'game did not start'
   bot="""()=>{let last=null;setInterval(()=>{const S=__pd.S;if(!S.online||!S.online.inGame)return;

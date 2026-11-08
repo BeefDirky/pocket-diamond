@@ -49,8 +49,8 @@ function gameOver(win){const onl=onlineGame();
   const o=S.online,se=o.series;if(se&&se.bo>1&&se.counted!==o.gid){se.counted=o.gid;const me=o.role,them=me==='host'?'guest':'host';se.w[iWin?me:them]++;
    const need=Math.ceil(se.bo/2),mw=se.w[me],tw=se.w[them];se.done=mw>=need||tw>=need;
    if(se.done)$('overT').innerHTML=mw>tw?'<span>SERIES</span> WON':'SERIES LOST';
-   $('olSeries').hidden=false;$('olSeries').textContent=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw} · ${me==='host'?`start game ${se.gn+1} when you're both ready.`:`waiting for the host to start game ${se.gn+1}…`}`;
-   $('olNext').hidden=!(me==='host'&&!se.done);$('olNext').textContent=`START GAME ${se.gn+1}`}}
+   $('olSeries').hidden=false;se.tally=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw}`;
+   netPresence({rdy:null});nextRender()}}
  if(!onl&&!S.poGame&&S.mode==='arcade'&&S.series&&S.series.len>1){const se=S.series;if(se.counted!==S.gameNo){se.counted=S.gameNo;win?se.w++:se.l++}
   const need=Math.ceil(se.len/2);se.done=se.w>=need||se.l>=need;$('olSeries').hidden=false;
   if(se.done){$('overT').innerHTML=se.w>se.l?'<span>SERIES</span> WON':'SERIES LOST';$('olSeries').textContent=`${se.w>se.l?you.name+' take':opp.name+' take'} the best of ${se.len}, ${Math.max(se.w,se.l)}-${Math.min(se.w,se.l)}.`}

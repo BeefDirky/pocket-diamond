@@ -974,6 +974,9 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
 @media (min-width:721px){.lfField .lfc img{aspect-ratio:1/1;object-fit:cover;object-position:50% 24%}}
 /* sidearm pitchers: a tag beside the throwing hand in the pitcher box header, on every screen size */
 .muPos.side{color:#7fd3ff;border-color:#7fd3ff;margin-left:4px}
+/* online ready-up: your Ready button turns green once you're in; "Opponent is ready" glows */
+#olGo.isReady,#olNext.isReady{background:#3fae5a;border-color:#2b7d40;color:#fff}
+.oppLine.olReady{color:#7be38f}
 </style>
 
 <div class="app">
@@ -1178,7 +1181,7 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
           <div class="opt" id="olInnRow"><span>Innings</span><div class="seg" id="olInn"><button type="button" data-v="3" aria-pressed="true">3</button><button type="button" data-v="6">6</button><button type="button" data-v="9">9</button></div><b></b></div>
           <div class="opt" id="olBoRow"><span>Series</span><div class="seg" id="olBo"><button type="button" data-v="1" aria-pressed="true">Best of 1</button><button type="button" data-v="3">Best of 3</button><button type="button" data-v="5">Best of 5</button></div><b></b></div>
           <p id="olStatus" class="oppLine"></p>
-          <button class="big" id="olGo" type="button" hidden>START GAME</button>
+          <button class="big" id="olGo" type="button" aria-pressed="false" hidden>READY</button>
           <button class="mbtn" id="olLeave" type="button">Leave room</button>
         </div>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
@@ -4836,6 +4839,7 @@ function groundOut(play,it,P,runners){
   if(code==='E')d=bob?(forced(r.from)?r.from+1:r.from):Math.min(4,r.from+2);
   else if(P.bunt&&code==='GO')d=r.from+1;
   else if(forced(r.from))d=r.from+1;
+  else if(outsBefore>=2)d=r.from+1;/* two outs: everyone runs on contact */
   else if(code!=='IFH'){if(r.from===3&&outsBefore<2)d=4;else if(r.from===2&&Pp.x>0)d=3}
   d=Math.min(d,cap);if(d<r.from)d=r.from;
   r.dest=d;cap=d===4?4:d-1;
@@ -4900,7 +4904,9 @@ function buildAir(P,dir,b){
    if(tArr+.15<tThrow){r3.dest=4;r3.start=T+.1;tag=true}
   }
   if(outsAfter<3&&r2&&best>=6&&D>260&&(!r3||r3.dest===4)){r2.dest=3;r2.start=T+.1}
-  for(const r of runners)if(!r.batter){r.tagAt=T;if(r.dest===r.from)r.start=T+.2}
+  /* two outs: the runners are off on contact, no tagging up (if it's caught the inning's over anyway) */
+  if(outsAfter>=3&&S.mode!=='bp'){for(const r of runners)if(!r.batter){r.dest=Math.min(4,r.from+1);r.start=r.L0!=null?0:.1}}
+  else for(const r of runners)if(!r.batter){r.tagAt=T;if(r.dest===r.from)r.start=T+.2}
   let dbl=null;
   if(outsAfter<3&&P.L<22&&best<=5){const cand=runners.find(r=>!r.batter&&(r.from===1||r.from===2)&&r.dest===r.from);
    if(cand&&Math.random()<.35){const bb=BASES[cand.from],tt=T+.35+dist(land,bb)/THROW;play.segs.push(holdSeg(play,T,T+.35,best),throwSeg(T+.35,fromF(play,best,T+.35),bb));
@@ -5134,8 +5140,8 @@ function gameOver(win){const onl=onlineGame();
   const o=S.online,se=o.series;if(se&&se.bo>1&&se.counted!==o.gid){se.counted=o.gid;const me=o.role,them=me==='host'?'guest':'host';se.w[iWin?me:them]++;
    const need=Math.ceil(se.bo/2),mw=se.w[me],tw=se.w[them];se.done=mw>=need||tw>=need;
    if(se.done)$('overT').innerHTML=mw>tw?'<span>SERIES</span> WON':'SERIES LOST';
-   $('olSeries').hidden=false;$('olSeries').textContent=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw} · ${me==='host'?`start game ${se.gn+1} when you're both ready.`:`waiting for the host to start game ${se.gn+1}…`}`;
-   $('olNext').hidden=!(me==='host'&&!se.done);$('olNext').textContent=`START GAME ${se.gn+1}`}}
+   $('olSeries').hidden=false;se.tally=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw}`;
+   netPresence({rdy:null});nextRender()}}
  if(!onl&&!S.poGame&&S.mode==='arcade'&&S.series&&S.series.len>1){const se=S.series;if(se.counted!==S.gameNo){se.counted=S.gameNo;win?se.w++:se.l++}
   const need=Math.ceil(se.len/2);se.done=se.w>=need||se.l>=need;$('olSeries').hidden=false;
   if(se.done){$('overT').innerHTML=se.w>se.l?'<span>SERIES</span> WON':'SERIES LOST';$('olSeries').textContent=`${se.w>se.l?you.name+' take':opp.name+' take'} the best of ${se.len}, ${Math.max(se.w,se.l)}-${Math.min(se.w,se.l)}.`}
@@ -5717,7 +5723,7 @@ function netTick(now){const o=S.online,opp=o.opp;
    if(o.seenW===pt.id&&pt.st==='r'&&o.seenR!==pt.id&&S.pitch&&S.pitch.pid===pt.id)applyRelease(pt)}}
  else{const dc=opp.dc;if(dc&&S.phase==='pitch'&&S.pitch&&dc.id===S.pitch.pid)applyDecision(dc);
   if(opp.sk&&S.phase==='play'&&S.play&&S.play.hrFired&&S.pitch&&opp.sk===S.pitch.pid&&S.play.t<S.play.end)S.play.t=S.play.end}}
-function startOnline(st){const o=S.online;o.gid=st.gid;o.start=st;
+function startOnline(st){const o=S.online;o.gid=st.gid;o.start=st;if(o.mine.rdy)netPresence({rdy:null});
  o.series={sid:st.sid||st.gid,bo:st.bo||1,gn:st.gn||1,inn:st.inn,w:{host:(st.sw||[0,0])[0],guest:(st.sw||[0,0])[1]},done:false};$('olNext').hidden=true;$('olSeries').hidden=true;o.inGame=true;o.n=0;o.seenW=o.seenR=null;
  o.prevCustom=CUSTOM.active;CUSTOM.active=false;applyCustom();
  {const ok=o.role==='host'?st.away:st.home;if(o.opp&&o.opp.ros)applyRosterSpec(ok,o.opp.ros)}// field the opponent exactly as their phone does
@@ -5734,10 +5740,25 @@ function lobbyRender(){const o=S.online;netPill();if(!o)return;{const r=resumeGe
  if(!$('olPick').children.length){$('olPick').innerHTML=ORDER.map(t=>`<button type="button" data-t="${t}" aria-label="${TEAMS[t].city} ${TEAMS[t].name}"><img alt="" src="${LOGO_URL[t]}"><span>${TEAMS[t].name.toUpperCase()}</span></button>`).join('')}
  for(const c of $('olPick').children){c.setAttribute('aria-pressed',String(c.dataset.t===meK));c.classList.toggle('taken',c.dataset.t===thK)}
  const same=thK&&thK===meK;
- if(o.warnUntil>performance.now())return void($('olGo').hidden=!(o.role==='host'&&o.opp&&!same));
- $('olStatus').classList.toggle('olWarn',!!same);
- $('olStatus').textContent=!o.opp?(o.role==='host'?'Share the code. Waiting for your friend to join…':'Waiting for the host…'):same?`You both picked the ${TEAMS[meK].name}. The same club can't play itself. One of you needs to pick another.`:o.role==='host'?'Both here. Start when ready.':'Both here. Waiting for the host to start.';
- $('olGo').hidden=!(o.role==='host'&&o.opp&&!same)}
+ /* the game starts when both players are ready; nobody is ready by default */
+ const meR=o.mine.rdy==='L',thR=!!(o.opp&&o.opp.rdy==='L'),canR=!!(o.opp&&!same);
+ const goB=$('olGo');goB.hidden=!canR;goB.textContent=meR?'READY ✓':'READY';goB.setAttribute('aria-pressed',String(meR));goB.classList.toggle('isReady',meR);
+ if(o.warnUntil>performance.now())return;
+ $('olStatus').classList.toggle('olWarn',!!same);$('olStatus').classList.toggle('olReady',canR&&thR&&!meR);
+ $('olStatus').textContent=!o.opp?(o.role==='host'?'Share the code. Waiting for your friend to join…':'Waiting for the host…'):same?`You both picked the ${TEAMS[meK].name}. The same club can't play itself. One of you needs to pick another.`:
+  meR&&thR?'Both ready. Starting…':meR?'Waiting for opponent…':thR?'Opponent is ready.':'Both here. Press Ready when you are.';
+ readyCheck()}
+/* host's phone starts the game the moment both ready flags match (the room, or the next game of a series) */
+function readyCheck(){const o=S.online;if(!o||!o.opp||o.inGame||o.role!=='host'||o.opp.team===o.mine.team)return;
+ const a=o.mine.rdy,b=o.opp.rdy;if(!a||a!==b)return;
+ if(a==='L'){netPresence({rdy:null});hostStart(false)}
+ else if(o.series&&!o.series.done&&a==='N'+o.series.gn){netPresence({rdy:null});hostStart(true)}}
+/* the results card in a series: both players press Ready for the next game */
+function nextRender(){const o=S.online,se=o&&o.series,b=$('olNext');if(!se||se.bo<2){b.hidden=true;return}
+ if(se.done){b.hidden=true;$('olSeries').textContent=se.tally||'';return}
+ const tok='N'+se.gn,meR=o.mine.rdy===tok,thR=!!(o.opp&&o.opp.rdy===tok);
+ b.hidden=false;b.textContent=meR?`READY ✓ · GAME ${se.gn+1}`:`READY FOR GAME ${se.gn+1}`;b.classList.toggle('isReady',meR);
+ $('olSeries').textContent=`${se.tally||''} · ${meR&&thR?'Both ready. Starting…':meR?'Waiting for opponent…':thR?'Opponent is ready.':'Press Ready for the next game.'}`;readyCheck()}
 async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.textContent=t;n.style.color='var(--amber)';n.scrollIntoView({block:'nearest'})};
  if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on play.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
  code=code.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4);if(code.length<4){note('Room codes are 4 letters.');return}
@@ -5761,11 +5782,12 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
    clearTimeout(o.lostT);o.lostT=setTimeout(()=>{if(S.online!==o||o.opp||!o.inGame)return;banner('OPPONENT LEFT','They did not come back. Back to the room.');o.inGame=false;setTimeout(()=>{if(S.online!==o||o.inGame)return;toTitle();openOnline()},2500)},45000)}
   if(o.inGame&&o.opp){if(o.opp.ing===o.gid)o.sawIng=true;else if(o.sawIng){o.sawIng=false;clearTimeout(o.lostT);o.lostAt=0;o.lostBan=false;banner('OPPONENT LEFT','They quit the game. Back to the room.');o.inGame=false;setTimeout(()=>{if(S.online!==o||o.inGame)return;toTitle();openOnline()},2500)}}
   if(o.inGame&&o.opp&&o.lostAt){o.lostAt=0;clearTimeout(o.lostT);if(o.lostBan){o.lostBan=false;hideBanner()}}
-  lobbyRender()});
- netPresence({v:1,role,team:S.you,ros:rosterSpec(S.you),...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}
+  if(!o.opp&&prev&&!o.inGame&&o.mine.rdy)netPresence({rdy:null});
+  lobbyRender();if(!o.inGame)nextRender()});
+ netPresence({v:1,role,team:S.you,ros:rosterSpec(S.you),rdy:null,...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
- S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:rosterSpec(t)});lobbyRender()});
+ S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:rosterSpec(t),rdy:null});lobbyRender()});
 function openOnline(){if(!S.online)S.online={mine:{},opp:null};lobbyRender();showScreen('scrOnline')}
 $('olCreate').addEventListener('click',()=>{const L='abcdefghjkmnpqrstuvwxyz';let c='';for(let i=0;i<4;i++)c+=L[Math.floor(Math.random()*L.length)];joinRoom(c,'host')});
 $('olJoin').addEventListener('click',()=>joinRoom($('olCode').value,'guest'));
@@ -5780,10 +5802,10 @@ function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o
  const st={gid:Math.random().toString(36).slice(2,8),home:o.mine.team,away:o.opp.team,inn,night:Math.random()<.55,
   bo,sid:se?se.sid:Math.random().toString(36).slice(2,8),gn:se?se.gn+1:1,sw:se?[se.w.host,se.w.guest]:[0,0]};
  netPresence({start:st});startOnline(st)}
-$('olGo').addEventListener('click',()=>hostStart(false));
-$('olNext').addEventListener('click',()=>hostStart(true));
+$('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp||o.inGame)return;netPresence({rdy:o.mine.rdy==='L'?null:'L'});lobbyRender()});
+$('olNext').addEventListener('click',()=>{const o=S.online,se=o&&o.series;if(!se||se.done||o.inGame)return;const tok='N'+se.gn;netPresence({rdy:o.mine.rdy===tok?null:tok});nextRender()});
 $('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;openOnline()});
-$('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
+$('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
 
 // the connection pill: shown during an online game; green when live, amber while it reconnects (tap to retry now)
 function netPill(){const o=S.online,el=$('olNet');const on=!!(o&&o.nr&&o.inGame);el.hidden=!on;if(!on)return;
@@ -7032,7 +7054,7 @@ function bcPos(pl,tt){let seg=null;for(const sg of pl.segs)if(tt>=sg.t0&&tt<=sg.
 function drawBallCam(now){const box=$('ballCam'),cam=S.bpCam;
  if(S.mode!=='bp'||!cam||S.phase==='title'||S.paused||OPT.ballCam===false){if(!box.hidden)box.hidden=true;return}
  const pl=cam.pl,tt=(now-cam.at)/1000*SPEED,done=tt>=pl.fullEnd;
- if(now-cam.at>pl.fullEnd/SPEED*1000+2600){box.hidden=true;return}// it holds on the landing spot, then tucks away
+ if(now-cam.at>pl.fullEnd/SPEED*1000+BP_CAM_HOLD){box.hidden=true;return}// it holds on the landing spot, then tucks away
  const p=bcPos(pl,Math.min(tt,pl.fullEnd));if(!p)return;
  if(box.hidden)box.hidden=false;
  const cv=$('ballCamCv'),dpr=Math.min(devicePixelRatio||1,2),cw=Math.round(cv.clientWidth*dpr),ch=Math.round(cv.clientHeight*dpr);if(!cw||!ch)return;
@@ -7133,7 +7155,7 @@ function update(dt,now){
    if(r.hr&&!r.bp&&!S.play.hrFired&&S.play.t>=S.play.ballGone){S.play.hrFired=true;hrMoment(r);splashCheck(S.play)}
    if(S.play.t>=S.play.end){S.play.t=S.play.end;finishPlay()}break}
   case'result':if(S.pt>(S.mode==='bp'?420:1450)){hideBanner();setPhase('reset');setCam('pitch')}break;
-  case'reset':if(S.pt>(S.mode==='bp'?200:540)){S.play=null;afterPA()}break;
+  case'reset':if(S.pt>(S.mode==='bp'?200:540)&&!(S.mode==='bp'&&bpBallLive(now))){S.play=null;afterPA()}break;
   case'call':if(S.pt>(S.koWalk&&now-S.koWalk.at<1800?1750:850))afterPA();break;
   case'inning':if(S.pt>1900){hideBanner();$('tag').hidden=true;setPhase('ready');updateHUD()}break;
  }
@@ -7145,6 +7167,9 @@ function updateRelMeter(now){if(S.phase==='windup'&&pitching()&&S.pitch){const m
 let frameErrs=0,lastErrMsg='';
 function guard(name,fn){try{fn();if(name==='update')frameErrs=0}catch(e){const m=name+': '+(e&&e.message);if(m!==lastErrMsg){lastErrMsg=m;console.error('[Pocket Diamond] '+m,e)}
  if(name==='update'&&++frameErrs>30&&(S.phase==='play'||S.phase==='result')){frameErrs=0;try{hideBanner();setPhase('reset');setCam('pitch')}catch(_){}}}}
+/* batting practice: the machine waits until the last ball hit has stopped and the ball cam has had its look at it */
+const BP_CAM_HOLD=900;
+function bpBallLive(now){const c=S.bpCam;if(!c||!c.pl)return false;return now-c.at<c.pl.fullEnd/SPEED*1000+BP_CAM_HOLD}
 function frame(now){requestAnimationFrame(frame);const dt=Math.min(50,now-last);last=now;
  guard('update',()=>update(dt,now));
  if(!(TS.cur&&!$('scrTeams').hidden&&!$('title').hidden))guard('render',()=>render(now));/* the club-select wall covers the park, so skip drawing it */

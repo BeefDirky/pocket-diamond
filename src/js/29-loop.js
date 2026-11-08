@@ -46,7 +46,7 @@ function update(dt,now){
    if(r.hr&&!r.bp&&!S.play.hrFired&&S.play.t>=S.play.ballGone){S.play.hrFired=true;hrMoment(r);splashCheck(S.play)}
    if(S.play.t>=S.play.end){S.play.t=S.play.end;finishPlay()}break}
   case'result':if(S.pt>(S.mode==='bp'?420:1450)){hideBanner();setPhase('reset');setCam('pitch')}break;
-  case'reset':if(S.pt>(S.mode==='bp'?200:540)){S.play=null;afterPA()}break;
+  case'reset':if(S.pt>(S.mode==='bp'?200:540)&&!(S.mode==='bp'&&bpBallLive(now))){S.play=null;afterPA()}break;
   case'call':if(S.pt>(S.koWalk&&now-S.koWalk.at<1800?1750:850))afterPA();break;
   case'inning':if(S.pt>1900){hideBanner();$('tag').hidden=true;setPhase('ready');updateHUD()}break;
  }
@@ -58,6 +58,9 @@ function updateRelMeter(now){if(S.phase==='windup'&&pitching()&&S.pitch){const m
 let frameErrs=0,lastErrMsg='';
 function guard(name,fn){try{fn();if(name==='update')frameErrs=0}catch(e){const m=name+': '+(e&&e.message);if(m!==lastErrMsg){lastErrMsg=m;console.error('[Pocket Diamond] '+m,e)}
  if(name==='update'&&++frameErrs>30&&(S.phase==='play'||S.phase==='result')){frameErrs=0;try{hideBanner();setPhase('reset');setCam('pitch')}catch(_){}}}}
+/* batting practice: the machine waits until the last ball hit has stopped and the ball cam has had its look at it */
+const BP_CAM_HOLD=900;
+function bpBallLive(now){const c=S.bpCam;if(!c||!c.pl)return false;return now-c.at<c.pl.fullEnd/SPEED*1000+BP_CAM_HOLD}
 function frame(now){requestAnimationFrame(frame);const dt=Math.min(50,now-last);last=now;
  guard('update',()=>update(dt,now));
  if(!(TS.cur&&!$('scrTeams').hidden&&!$('title').hidden))guard('render',()=>render(now));/* the club-select wall covers the park, so skip drawing it */

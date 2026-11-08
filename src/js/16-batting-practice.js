@@ -207,6 +207,7 @@ function groundOut(play,it,P,runners){
   if(code==='E')d=bob?(forced(r.from)?r.from+1:r.from):Math.min(4,r.from+2);
   else if(P.bunt&&code==='GO')d=r.from+1;
   else if(forced(r.from))d=r.from+1;
+  else if(outsBefore>=2)d=r.from+1;/* two outs: everyone runs on contact */
   else if(code!=='IFH'){if(r.from===3&&outsBefore<2)d=4;else if(r.from===2&&Pp.x>0)d=3}
   d=Math.min(d,cap);if(d<r.from)d=r.from;
   r.dest=d;cap=d===4?4:d-1;
@@ -271,7 +272,9 @@ function buildAir(P,dir,b){
    if(tArr+.15<tThrow){r3.dest=4;r3.start=T+.1;tag=true}
   }
   if(outsAfter<3&&r2&&best>=6&&D>260&&(!r3||r3.dest===4)){r2.dest=3;r2.start=T+.1}
-  for(const r of runners)if(!r.batter){r.tagAt=T;if(r.dest===r.from)r.start=T+.2}
+  /* two outs: the runners are off on contact, no tagging up (if it's caught the inning's over anyway) */
+  if(outsAfter>=3&&S.mode!=='bp'){for(const r of runners)if(!r.batter){r.dest=Math.min(4,r.from+1);r.start=r.L0!=null?0:.1}}
+  else for(const r of runners)if(!r.batter){r.tagAt=T;if(r.dest===r.from)r.start=T+.2}
   let dbl=null;
   if(outsAfter<3&&P.L<22&&best<=5){const cand=runners.find(r=>!r.batter&&(r.from===1||r.from===2)&&r.dest===r.from);
    if(cand&&Math.random()<.35){const bb=BASES[cand.from],tt=T+.35+dist(land,bb)/THROW;play.segs.push(holdSeg(play,T,T+.35,best),throwSeg(T+.35,fromF(play,best,T+.35),bb));

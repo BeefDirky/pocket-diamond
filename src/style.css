@@ -961,3 +961,6 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
 @media (min-width:721px){.lfField .lfc img{aspect-ratio:1/1;object-fit:cover;object-position:50% 24%}}
 /* sidearm pitchers: a tag beside the throwing hand in the pitcher box header, on every screen size */
 .muPos.side{color:#7fd3ff;border-color:#7fd3ff;margin-left:4px}
+/* online ready-up: your Ready button turns green once you're in; "Opponent is ready" glows */
+#olGo.isReady,#olNext.isReady{background:#3fae5a;border-color:#2b7d40;color:#fff}
+.oppLine.olReady{color:#7be38f}

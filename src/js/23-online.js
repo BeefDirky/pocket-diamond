@@ -89,7 +89,7 @@ function netTick(now){const o=S.online,opp=o.opp;
    if(o.seenW===pt.id&&pt.st==='r'&&o.seenR!==pt.id&&S.pitch&&S.pitch.pid===pt.id)applyRelease(pt)}}
  else{const dc=opp.dc;if(dc&&S.phase==='pitch'&&S.pitch&&dc.id===S.pitch.pid)applyDecision(dc);
   if(opp.sk&&S.phase==='play'&&S.play&&S.play.hrFired&&S.pitch&&opp.sk===S.pitch.pid&&S.play.t<S.play.end)S.play.t=S.play.end}}
-function startOnline(st){const o=S.online;o.gid=st.gid;o.start=st;
+function startOnline(st){const o=S.online;o.gid=st.gid;o.start=st;if(o.mine.rdy)netPresence({rdy:null});
  o.series={sid:st.sid||st.gid,bo:st.bo||1,gn:st.gn||1,inn:st.inn,w:{host:(st.sw||[0,0])[0],guest:(st.sw||[0,0])[1]},done:false};$('olNext').hidden=true;$('olSeries').hidden=true;o.inGame=true;o.n=0;o.seenW=o.seenR=null;
  o.prevCustom=CUSTOM.active;CUSTOM.active=false;applyCustom();
  {const ok=o.role==='host'?st.away:st.home;if(o.opp&&o.opp.ros)applyRosterSpec(ok,o.opp.ros)}// field the opponent exactly as their phone does
@@ -106,10 +106,25 @@ function lobbyRender(){const o=S.online;netPill();if(!o)return;{const r=resumeGe
  if(!$('olPick').children.length){$('olPick').innerHTML=ORDER.map(t=>`<button type="button" data-t="${t}" aria-label="${TEAMS[t].city} ${TEAMS[t].name}"><img alt="" src="${LOGO_URL[t]}"><span>${TEAMS[t].name.toUpperCase()}</span></button>`).join('')}
  for(const c of $('olPick').children){c.setAttribute('aria-pressed',String(c.dataset.t===meK));c.classList.toggle('taken',c.dataset.t===thK)}
  const same=thK&&thK===meK;
- if(o.warnUntil>performance.now())return void($('olGo').hidden=!(o.role==='host'&&o.opp&&!same));
- $('olStatus').classList.toggle('olWarn',!!same);
- $('olStatus').textContent=!o.opp?(o.role==='host'?'Share the code. Waiting for your friend to join…':'Waiting for the host…'):same?`You both picked the ${TEAMS[meK].name}. The same club can't play itself. One of you needs to pick another.`:o.role==='host'?'Both here. Start when ready.':'Both here. Waiting for the host to start.';
- $('olGo').hidden=!(o.role==='host'&&o.opp&&!same)}
+ /* the game starts when both players are ready; nobody is ready by default */
+ const meR=o.mine.rdy==='L',thR=!!(o.opp&&o.opp.rdy==='L'),canR=!!(o.opp&&!same);
+ const goB=$('olGo');goB.hidden=!canR;goB.textContent=meR?'READY ✓':'READY';goB.setAttribute('aria-pressed',String(meR));goB.classList.toggle('isReady',meR);
+ if(o.warnUntil>performance.now())return;
+ $('olStatus').classList.toggle('olWarn',!!same);$('olStatus').classList.toggle('olReady',canR&&thR&&!meR);
+ $('olStatus').textContent=!o.opp?(o.role==='host'?'Share the code. Waiting for your friend to join…':'Waiting for the host…'):same?`You both picked the ${TEAMS[meK].name}. The same club can't play itself. One of you needs to pick another.`:
+  meR&&thR?'Both ready. Starting…':meR?'Waiting for opponent…':thR?'Opponent is ready.':'Both here. Press Ready when you are.';
+ readyCheck()}
+/* host's phone starts the game the moment both ready flags match (the room, or the next game of a series) */
+function readyCheck(){const o=S.online;if(!o||!o.opp||o.inGame||o.role!=='host'||o.opp.team===o.mine.team)return;
+ const a=o.mine.rdy,b=o.opp.rdy;if(!a||a!==b)return;
+ if(a==='L'){netPresence({rdy:null});hostStart(false)}
+ else if(o.series&&!o.series.done&&a==='N'+o.series.gn){netPresence({rdy:null});hostStart(true)}}
+/* the results card in a series: both players press Ready for the next game */
+function nextRender(){const o=S.online,se=o&&o.series,b=$('olNext');if(!se||se.bo<2){b.hidden=true;return}
+ if(se.done){b.hidden=true;$('olSeries').textContent=se.tally||'';return}
+ const tok='N'+se.gn,meR=o.mine.rdy===tok,thR=!!(o.opp&&o.opp.rdy===tok);
+ b.hidden=false;b.textContent=meR?`READY ✓ · GAME ${se.gn+1}`:`READY FOR GAME ${se.gn+1}`;b.classList.toggle('isReady',meR);
+ $('olSeries').textContent=`${se.tally||''} · ${meR&&thR?'Both ready. Starting…':meR?'Waiting for opponent…':thR?'Opponent is ready.':'Press Ready for the next game.'}`;readyCheck()}
 async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.textContent=t;n.style.color='var(--amber)';n.scrollIntoView({block:'nearest'})};
  if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on play.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
  code=code.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4);if(code.length<4){note('Room codes are 4 letters.');return}
@@ -133,11 +148,12 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
    clearTimeout(o.lostT);o.lostT=setTimeout(()=>{if(S.online!==o||o.opp||!o.inGame)return;banner('OPPONENT LEFT','They did not come back. Back to the room.');o.inGame=false;setTimeout(()=>{if(S.online!==o||o.inGame)return;toTitle();openOnline()},2500)},45000)}
   if(o.inGame&&o.opp){if(o.opp.ing===o.gid)o.sawIng=true;else if(o.sawIng){o.sawIng=false;clearTimeout(o.lostT);o.lostAt=0;o.lostBan=false;banner('OPPONENT LEFT','They quit the game. Back to the room.');o.inGame=false;setTimeout(()=>{if(S.online!==o||o.inGame)return;toTitle();openOnline()},2500)}}
   if(o.inGame&&o.opp&&o.lostAt){o.lostAt=0;clearTimeout(o.lostT);if(o.lostBan){o.lostBan=false;hideBanner()}}
-  lobbyRender()});
- netPresence({v:1,role,team:S.you,ros:rosterSpec(S.you),...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}
+  if(!o.opp&&prev&&!o.inGame&&o.mine.rdy)netPresence({rdy:null});
+  lobbyRender();if(!o.inGame)nextRender()});
+ netPresence({v:1,role,team:S.you,ros:rosterSpec(S.you),rdy:null,...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
- S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:rosterSpec(t)});lobbyRender()});
+ S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:rosterSpec(t),rdy:null});lobbyRender()});
 function openOnline(){if(!S.online)S.online={mine:{},opp:null};lobbyRender();showScreen('scrOnline')}
 $('olCreate').addEventListener('click',()=>{const L='abcdefghjkmnpqrstuvwxyz';let c='';for(let i=0;i<4;i++)c+=L[Math.floor(Math.random()*L.length)];joinRoom(c,'host')});
 $('olJoin').addEventListener('click',()=>joinRoom($('olCode').value,'guest'));
@@ -152,10 +168,10 @@ function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o
  const st={gid:Math.random().toString(36).slice(2,8),home:o.mine.team,away:o.opp.team,inn,night:Math.random()<.55,
   bo,sid:se?se.sid:Math.random().toString(36).slice(2,8),gn:se?se.gn+1:1,sw:se?[se.w.host,se.w.guest]:[0,0]};
  netPresence({start:st});startOnline(st)}
-$('olGo').addEventListener('click',()=>hostStart(false));
-$('olNext').addEventListener('click',()=>hostStart(true));
+$('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp||o.inGame)return;netPresence({rdy:o.mine.rdy==='L'?null:'L'});lobbyRender()});
+$('olNext').addEventListener('click',()=>{const o=S.online,se=o&&o.series;if(!se||se.done||o.inGame)return;const tok='N'+se.gn;netPresence({rdy:o.mine.rdy===tok?null:tok});nextRender()});
 $('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;openOnline()});
-$('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
+$('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
 
 // the connection pill: shown during an online game; green when live, amber while it reconnects (tap to retry now)
 function netPill(){const o=S.online,el=$('olNet');const on=!!(o&&o.nr&&o.inGame);el.hidden=!on;if(!on)return;
