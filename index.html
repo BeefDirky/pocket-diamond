@@ -6146,7 +6146,7 @@ function drawJumboFort(g,now){const cx=HX/K,sc=1.18,y0=-18,h=66,w=190,x0=cx-95,y
  g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);drawJumbo0(g,now,true);
  // the purple frame and the pavilion roof on top
  g.strokeStyle='#8a5ae0';g.lineWidth=2;g.strokeRect(x0-3,y0-3,w+6,h+6);if(night){g.strokeStyle='rgba(176,124,255,.5)';g.lineWidth=5;g.strokeRect(x0-5,y0-5,w+10,h+10)}
- kRoof(g,cx,y0-26,170,30,0,S.night);kRoof(g,cx,y0-30,96,16,0,S.night);
+ g.drawImage(jCache('fortRoof'+night+cx,cx-92,y0-48,184,40,g=>{kRoof(g,cx,y0-26,170,30,0,night);kRoof(g,cx,y0-30,96,16,0,night)}),cx-92,y0-48,184,40);/* the pavilion roof, painted once */
  {const p=y0-14;g.fillStyle='#5a2a2a';for(const px of[cx-70,cx-40,cx+40,cx+70]){g.fillRect(px-2,p,4,6)}}// the pavilion's red posts
  g.restore()}
 function drawJumbo(g,now){if(S.you==='suwon')return drawJumboFort(g,now);if(S.you==='changwon')return drawJumboSteel(g,now);if(S.you==='busan')return drawJumboBrick(g,now);if(S.you==='incheon')return drawJumboOrbit(g,now);if(S.you!=='ulsan')return drawJumbo0(g,now);
