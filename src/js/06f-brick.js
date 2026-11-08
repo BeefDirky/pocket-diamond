@@ -215,12 +215,12 @@ function drawJumboBrick(g,now){const cx=HX/K,x0=cx-95,y0=-18,w=190,h=66,night=!!
  g.fillStyle='#1c2b4a';g.fillRect(legs[0],yt+(yb-yt)*.45,legs[1]-legs[0],2);
  drawJumbo0(g,now,true);
  // the strip under the score with the bridge drawn in white line
- const sy=y0+h+1;g.fillStyle='#05070c';g.fillRect(x0,sy,w,ex);g.fillStyle='#e8eef5';const P=(x,y)=>g.fillRect(Math.round(x),Math.round(y),1,1);
+ const sy=y0+h+1;g.drawImage(jCache('brickStrip'+cx,x0,sy,w,ex,g=>{g.fillStyle='#05070c';g.fillRect(x0,sy,w,ex);g.fillStyle='#e8eef5';const P=(x,y)=>g.fillRect(Math.round(x),Math.round(y),1,1);
  const by=sy+ex-4;for(let x=x0+8;x<x0+w-8;x++)P(x,by);
  for(const tx of[cx-40,cx+40]){for(let y=sy+3;y<by;y++){P(tx-1,y);P(tx+1,y)}P(tx,sy+3)}
  const top=sy+3,sag=(by-top)*.72;for(let x=x0+8;x<x0+w-8;x++){const dx=Math.abs(x-cx);let y;if(dx<=40)y=top+sag*(1-(dx/40)**2);else{const f=(dx-40)/(w/2-48);y=top+(by-1-top)*Math.pow(clamp(f,0,1),.75)}P(x,y)}
  for(let x=cx-36;x<=cx+36;x+=6){const dx=Math.abs(x-cx),y=top+sag*(1-(dx/40)**2);for(let yy=Math.ceil(y)+1;yy<by;yy+=2)P(x,yy)}// hangers
- for(let x=x0+10;x<x0+w-10;x+=4)if(Math.abs(Math.abs(x-cx)-40)>2)P(x,by+1);
+ for(let x=x0+10;x<x0+w-10;x+=4)if(Math.abs(Math.abs(x-cx)-40)>2)P(x,by+1);}),x0,sy,w,ex);
  g.strokeStyle='#1c2b4a';g.lineWidth=3;g.strokeRect(x0-3.5,y0-3.5,w+7,h+ex+8);g.strokeStyle='#3a5482';g.lineWidth=1;g.strokeRect(x0-5,y0-5,w+10,h+ex+11);
  // flags above
  const cols=['#e8642a','#13254a','#e8eef5','#13254a','#e8642a'];for(let i=0;i<5;i++){const fx=x0+18+i*(w-36)/4,wv=Math.sin(now/300+i)*1.2;g.fillStyle='#9aa0a8';g.fillRect(fx,y0-22,1.2,18);g.fillStyle=cols[i];g.beginPath();g.moveTo(fx+1.2,y0-22);g.lineTo(fx+11,y0-20+wv);g.lineTo(fx+1.2,y0-16);g.closePath();g.fill()}}

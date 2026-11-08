@@ -8,16 +8,21 @@ new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(locati
 
 // Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
 // Suwon's board is built into the fortress: a stone bastion around it, a purple frame, a tiled pavilion roof above
+/* a static piece of scenery painted once (at 3x, so it stays crisp when zoomed) and reused: key, its box in the caller's units, and the painter */
+const JC=new Map();
+function jCache(key,x,y,w,h,paint){let c=JC.get(key);if(c)return c;const R=3;c=document.createElement('canvas');c.width=Math.ceil(w*R);c.height=Math.ceil(h*R);
+ const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.scale(R,R);g.translate(-x,-y);paint(g);JC.set(key,c);return c}
 function drawJumboFort(g,now){const cx=HX/K,sc=1.18,y0=-18,h=66,w=190,x0=cx-95,yb=(HY-fenceDist(0)/FT)/K-8,night=!!S.night;
  g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);
  // the bastion: stone courses, crenellated top, and its shadow
- const bx=x0-22,bw=w+44,by=y0-14,bh=h+44;g.fillStyle='rgba(0,0,0,.32)';g.fillRect(bx+6,by+6,bw,bh);
+ const bx=x0-22,bw=w+44,by=y0-14,bh=h+44;
+ /* the bastion never changes, so its ~6,000 stone blocks are painted once and reused every frame */
+ g.drawImage(jCache('fort'+night+cx,bx,by-5,bw+6,bh+11,g=>{g.fillStyle='rgba(0,0,0,.32)';g.fillRect(bx+6,by+6,bw,bh);
  for(let y=0;y<bh;y+=2)for(let x=0;x<bw;x+=2){const c=fStone(x*.55,y*.55,1.6,false);g.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;g.fillRect(bx+x,by+y,2,2)}
  g.fillStyle='rgba(0,0,0,.18)';g.fillRect(bx,by+bh-6,bw,6);
  for(let x=bx;x<bx+bw;x+=10){g.fillStyle='#d4cab2';g.fillRect(x,by-5,6,5);g.fillStyle='#8a806a';g.fillRect(x+6,by-3,4,3)}
  if(night){const gr=g.createLinearGradient(0,by+bh,0,by);gr.addColorStop(0,'rgba(255,190,100,.45)');gr.addColorStop(1,'rgba(255,190,100,0)');g.fillStyle=gr;g.fillRect(bx,by,bw,bh)}
- // banners either side of the board
- for(const sd of[-1,1]){const fx=sd<0?bx+4:bx+bw-14;g.fillStyle='#4a2a8a';g.fillRect(fx,y0+4,10,34);g.beginPath();g.moveTo(fx,y0+38);g.lineTo(fx+5,y0+43);g.lineTo(fx+10,y0+38);g.fill();g.fillStyle='#ffd23f';g.fillRect(fx+4,y0+18,2,2);g.fillRect(fx+3,y0+19,4,1)}
+ for(const sd of[-1,1]){const fx=sd<0?bx+4:bx+bw-14;g.fillStyle='#4a2a8a';g.fillRect(fx,y0+4,10,34);g.beginPath();g.moveTo(fx,y0+38);g.lineTo(fx+5,y0+43);g.lineTo(fx+10,y0+38);g.fill();g.fillStyle='#ffd23f';g.fillRect(fx+4,y0+18,2,2);g.fillRect(fx+3,y0+19,4,1)}}),bx,by-5,bw+6,bh+11);
  g.restore();
  g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);drawJumbo0(g,now,true);
  // the purple frame and the pavilion roof on top

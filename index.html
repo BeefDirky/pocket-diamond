@@ -3453,12 +3453,12 @@ function drawJumboBrick(g,now){const cx=HX/K,x0=cx-95,y0=-18,w=190,h=66,night=!!
  g.fillStyle='#1c2b4a';g.fillRect(legs[0],yt+(yb-yt)*.45,legs[1]-legs[0],2);
  drawJumbo0(g,now,true);
  // the strip under the score with the bridge drawn in white line
- const sy=y0+h+1;g.fillStyle='#05070c';g.fillRect(x0,sy,w,ex);g.fillStyle='#e8eef5';const P=(x,y)=>g.fillRect(Math.round(x),Math.round(y),1,1);
+ const sy=y0+h+1;g.drawImage(jCache('brickStrip'+cx,x0,sy,w,ex,g=>{g.fillStyle='#05070c';g.fillRect(x0,sy,w,ex);g.fillStyle='#e8eef5';const P=(x,y)=>g.fillRect(Math.round(x),Math.round(y),1,1);
  const by=sy+ex-4;for(let x=x0+8;x<x0+w-8;x++)P(x,by);
  for(const tx of[cx-40,cx+40]){for(let y=sy+3;y<by;y++){P(tx-1,y);P(tx+1,y)}P(tx,sy+3)}
  const top=sy+3,sag=(by-top)*.72;for(let x=x0+8;x<x0+w-8;x++){const dx=Math.abs(x-cx);let y;if(dx<=40)y=top+sag*(1-(dx/40)**2);else{const f=(dx-40)/(w/2-48);y=top+(by-1-top)*Math.pow(clamp(f,0,1),.75)}P(x,y)}
  for(let x=cx-36;x<=cx+36;x+=6){const dx=Math.abs(x-cx),y=top+sag*(1-(dx/40)**2);for(let yy=Math.ceil(y)+1;yy<by;yy+=2)P(x,yy)}// hangers
- for(let x=x0+10;x<x0+w-10;x+=4)if(Math.abs(Math.abs(x-cx)-40)>2)P(x,by+1);
+ for(let x=x0+10;x<x0+w-10;x+=4)if(Math.abs(Math.abs(x-cx)-40)>2)P(x,by+1);}),x0,sy,w,ex);
  g.strokeStyle='#1c2b4a';g.lineWidth=3;g.strokeRect(x0-3.5,y0-3.5,w+7,h+ex+8);g.strokeStyle='#3a5482';g.lineWidth=1;g.strokeRect(x0-5,y0-5,w+10,h+ex+11);
  // flags above
  const cols=['#e8642a','#13254a','#e8eef5','#13254a','#e8642a'];for(let i=0;i<5;i++){const fx=x0+18+i*(w-36)/4,wv=Math.sin(now/300+i)*1.2;g.fillStyle='#9aa0a8';g.fillRect(fx,y0-22,1.2,18);g.fillStyle=cols[i];g.beginPath();g.moveTo(fx+1.2,y0-22);g.lineTo(fx+11,y0-20+wv);g.lineTo(fx+1.2,y0-16);g.closePath();g.fill()}}
@@ -6127,16 +6127,21 @@ new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(locati
 
 // Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
 // Suwon's board is built into the fortress: a stone bastion around it, a purple frame, a tiled pavilion roof above
+/* a static piece of scenery painted once (at 3x, so it stays crisp when zoomed) and reused: key, its box in the caller's units, and the painter */
+const JC=new Map();
+function jCache(key,x,y,w,h,paint){let c=JC.get(key);if(c)return c;const R=3;c=document.createElement('canvas');c.width=Math.ceil(w*R);c.height=Math.ceil(h*R);
+ const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.scale(R,R);g.translate(-x,-y);paint(g);JC.set(key,c);return c}
 function drawJumboFort(g,now){const cx=HX/K,sc=1.18,y0=-18,h=66,w=190,x0=cx-95,yb=(HY-fenceDist(0)/FT)/K-8,night=!!S.night;
  g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);
  // the bastion: stone courses, crenellated top, and its shadow
- const bx=x0-22,bw=w+44,by=y0-14,bh=h+44;g.fillStyle='rgba(0,0,0,.32)';g.fillRect(bx+6,by+6,bw,bh);
+ const bx=x0-22,bw=w+44,by=y0-14,bh=h+44;
+ /* the bastion never changes, so its ~6,000 stone blocks are painted once and reused every frame */
+ g.drawImage(jCache('fort'+night+cx,bx,by-5,bw+6,bh+11,g=>{g.fillStyle='rgba(0,0,0,.32)';g.fillRect(bx+6,by+6,bw,bh);
  for(let y=0;y<bh;y+=2)for(let x=0;x<bw;x+=2){const c=fStone(x*.55,y*.55,1.6,false);g.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;g.fillRect(bx+x,by+y,2,2)}
  g.fillStyle='rgba(0,0,0,.18)';g.fillRect(bx,by+bh-6,bw,6);
  for(let x=bx;x<bx+bw;x+=10){g.fillStyle='#d4cab2';g.fillRect(x,by-5,6,5);g.fillStyle='#8a806a';g.fillRect(x+6,by-3,4,3)}
  if(night){const gr=g.createLinearGradient(0,by+bh,0,by);gr.addColorStop(0,'rgba(255,190,100,.45)');gr.addColorStop(1,'rgba(255,190,100,0)');g.fillStyle=gr;g.fillRect(bx,by,bw,bh)}
- // banners either side of the board
- for(const sd of[-1,1]){const fx=sd<0?bx+4:bx+bw-14;g.fillStyle='#4a2a8a';g.fillRect(fx,y0+4,10,34);g.beginPath();g.moveTo(fx,y0+38);g.lineTo(fx+5,y0+43);g.lineTo(fx+10,y0+38);g.fill();g.fillStyle='#ffd23f';g.fillRect(fx+4,y0+18,2,2);g.fillRect(fx+3,y0+19,4,1)}
+ for(const sd of[-1,1]){const fx=sd<0?bx+4:bx+bw-14;g.fillStyle='#4a2a8a';g.fillRect(fx,y0+4,10,34);g.beginPath();g.moveTo(fx,y0+38);g.lineTo(fx+5,y0+43);g.lineTo(fx+10,y0+38);g.fill();g.fillStyle='#ffd23f';g.fillRect(fx+4,y0+18,2,2);g.fillRect(fx+3,y0+19,4,1)}}),bx,by-5,bw+6,bh+11);
  g.restore();
  g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);drawJumbo0(g,now,true);
  // the purple frame and the pavilion roof on top
@@ -6397,7 +6402,7 @@ function drawPitcher(g,X,Y,TM,o,T){
 }
 function armPath(u,side){const P=side?ARM_SIDE:ARM_OVER;u=clamp(u,0,1);let k=0;while(k<P.length-2&&u>P[k+1][0])k++;const a=P[k],b=P[k+1],f=ease(clamp((u-a[0])/(b[0]-a[0]),0,1));return{x:lerp(a[1],b[1],f),y:lerp(a[2],b[2],f)}}
 function gloveAt(u){return u<.55?{x:lerp(-6,-8,u/.55),y:lerp(-11,-13,u/.55)}:u<.8?{x:lerp(-8,-5,(u-.55)/.25),y:lerp(-13,-9,(u-.55)/.25)}:{x:-5,y:-9}}
-function drawPlayer(g,X,Y,T,o){
+function drawPlayerRaw(g,X,Y,T,o){
  o=o||{};const x=Math.round(X),y=Math.round(Y);
  const sk=o.skin||SKINS[1],pa=o.pants||'#eeeae0',f=o.flip?-1:1,fr=(((o.frame|0)%4)+4)%4;
  const legs=o.legs||'stand',arms=o.arms||'down';
@@ -6455,6 +6460,14 @@ function drawPlayer(g,X,Y,T,o){
    break}
  }
 }
+/* every player sprite is ~50 little rectangles; paint each distinct pose once into a small canvas and stamp it after that */
+const PSPR=new Map();
+function drawPlayer(g,X,Y,T,o){o=o||{};const m=g.getTransform();
+ if(m.a!==1||m.d!==1||m.b||m.c||(m.e%1)||(m.f%1))return drawPlayerRaw(g,X,Y,T,o);
+ const key=T.jersey+T.cap+T.brim+'|'+o.skin+o.pants+(o.flip?1:0)+(o.frame|0)%4+o.legs+o.arms+(o.sc||1.2)+'|'+(o.back==null?'':o.back)+(o.helmet?1:0)+(o.glove==null?'':JSON.stringify(o.glove))+(o.arm?Math.round(o.arm.x*4)+','+Math.round(o.arm.y*4):'')+(o.gloveAt?Math.round(o.gloveAt.x*4)+','+Math.round(o.gloveAt.y*4):'')+(o.ball?1:0);
+ let c=PSPR.get(key);
+ if(!c){if(PSPR.size>900)PSPR.clear();c=document.createElement('canvas');c.width=80;c.height=88;drawPlayerRaw(c.getContext('2d'),40,68,T,o);PSPR.set(key,c)}
+ g.drawImage(c,Math.round(X)-40,Math.round(Y)-68)}
 function drawDiver(g,X,Y,T,o,dir,lift){if(o.noGlove)return drawSlider(g,X,Y,T,o,dir,lift);
  const x=Math.round(X),y=Math.round(Y),sk=o.skin,pa=o.pants,yy=y-Math.round(lift);
  const sc=v=>Math.round(v*1.2);const R=(c,dx,dy,w,h)=>{g.fillStyle=c;const x0=sc(dx),x1=sc(dx+w),y0=sc(dy),y1=sc(dy+h);g.fillRect(dir>0?x+x0:x-x1+1,yy+y0,Math.max(1,x1-x0),Math.max(1,y1-y0))};
@@ -6958,10 +6971,19 @@ function roofLights(){const key=S.you+(STADIUMS[S.you]?STADIUMS[S.you].dims.join
 function rlOn(){return true}// the roof ring stays on; the home-run show belongs to the light towers
 let RL_GLOW=null;// one pre-drawn halo for every lamp bar (instead of a fresh gradient per lamp per frame)
 function rlGlow(){if(RL_GLOW)return RL_GLOW;const c=document.createElement('canvas');c.width=c.height=60;const g=c.getContext('2d'),gr=g.createRadialGradient(30,30,0,30,30,30);gr.addColorStop(0,'rgba(255,248,220,.4)');gr.addColorStop(1,'rgba(255,248,220,0)');g.fillStyle=gr;g.fillRect(0,0,60,60);return RL_GLOW=c}
+/* the light pools never change (the roof ring is always on), so all of them are added together once into one soft layer
+   and that layer goes down in a single pass, instead of thirty-odd overlapping full-size blends every frame */
+let RLP=null;
+function rlPools(R){if(RLP&&RLP.R===R)return RLP;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+ for(const L of R){const ca=Math.cos(L.ang),sa=Math.sin(L.ang);for(const[u,v]of[[-260,-170],[260,-170],[-260,170],[260,170]]){const x=L.px+u*ca-v*sa,y=L.py+u*sa+v*ca;x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)}}
+ const q=.35,cv=document.createElement('canvas');cv.width=Math.max(1,Math.ceil((x1-x0)*q));cv.height=Math.max(1,Math.ceil((y1-y0)*q));const g=cv.getContext('2d');
+ g.scale(q,q);g.translate(-x0,-y0);g.globalCompositeOperation='lighter';
+ for(const L of R){g.save();g.translate(L.px,L.py);g.rotate(L.ang);g.drawImage(RL_POOL,-260,-170,520,340);g.restore()}
+ return RLP={R,cv,x:x0,y:y0,w:x1-x0,h:y1-y0}}
 function drawRoofLights(c,vx0,vy0,scale,now){if(window.__noRL)return;if(S.phase==='title')return;const R=roofLights(),night=!!S.night;
  c.save();c.setTransform(scale,0,0,scale,-vx0*scale,-vy0*scale);
  if(night){c.save();c.clip(R.clip,'evenodd');c.globalCompositeOperation='lighter';
-  for(const L of R){if(!rlOn(L,now))continue;c.save();c.translate(L.px,L.py);c.rotate(L.ang);c.drawImage(RL_POOL,-260,-170,520,340);c.restore()}
+  {const P=rlPools(R);c.drawImage(P.cv,P.x,P.y,P.w,P.h)}
   c.restore()}
  // the fixtures themselves: a lamp bar on a little bracket at the roof's edge, facing the field
  for(const L of R){const on=rlOn(L,now);c.save();c.translate(L.x,L.y);c.rotate(L.ang+Math.PI/2);

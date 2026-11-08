@@ -47,7 +47,7 @@ function drawPitcher(g,X,Y,TM,o,T){
 }
 function armPath(u,side){const P=side?ARM_SIDE:ARM_OVER;u=clamp(u,0,1);let k=0;while(k<P.length-2&&u>P[k+1][0])k++;const a=P[k],b=P[k+1],f=ease(clamp((u-a[0])/(b[0]-a[0]),0,1));return{x:lerp(a[1],b[1],f),y:lerp(a[2],b[2],f)}}
 function gloveAt(u){return u<.55?{x:lerp(-6,-8,u/.55),y:lerp(-11,-13,u/.55)}:u<.8?{x:lerp(-8,-5,(u-.55)/.25),y:lerp(-13,-9,(u-.55)/.25)}:{x:-5,y:-9}}
-function drawPlayer(g,X,Y,T,o){
+function drawPlayerRaw(g,X,Y,T,o){
  o=o||{};const x=Math.round(X),y=Math.round(Y);
  const sk=o.skin||SKINS[1],pa=o.pants||'#eeeae0',f=o.flip?-1:1,fr=(((o.frame|0)%4)+4)%4;
  const legs=o.legs||'stand',arms=o.arms||'down';
@@ -105,6 +105,14 @@ function drawPlayer(g,X,Y,T,o){
    break}
  }
 }
+/* every player sprite is ~50 little rectangles; paint each distinct pose once into a small canvas and stamp it after that */
+const PSPR=new Map();
+function drawPlayer(g,X,Y,T,o){o=o||{};const m=g.getTransform();
+ if(m.a!==1||m.d!==1||m.b||m.c||(m.e%1)||(m.f%1))return drawPlayerRaw(g,X,Y,T,o);
+ const key=T.jersey+T.cap+T.brim+'|'+o.skin+o.pants+(o.flip?1:0)+(o.frame|0)%4+o.legs+o.arms+(o.sc||1.2)+'|'+(o.back==null?'':o.back)+(o.helmet?1:0)+(o.glove==null?'':JSON.stringify(o.glove))+(o.arm?Math.round(o.arm.x*4)+','+Math.round(o.arm.y*4):'')+(o.gloveAt?Math.round(o.gloveAt.x*4)+','+Math.round(o.gloveAt.y*4):'')+(o.ball?1:0);
+ let c=PSPR.get(key);
+ if(!c){if(PSPR.size>900)PSPR.clear();c=document.createElement('canvas');c.width=80;c.height=88;drawPlayerRaw(c.getContext('2d'),40,68,T,o);PSPR.set(key,c)}
+ g.drawImage(c,Math.round(X)-40,Math.round(Y)-68)}
 function drawDiver(g,X,Y,T,o,dir,lift){if(o.noGlove)return drawSlider(g,X,Y,T,o,dir,lift);
  const x=Math.round(X),y=Math.round(Y),sk=o.skin,pa=o.pants,yy=y-Math.round(lift);
  const sc=v=>Math.round(v*1.2);const R=(c,dx,dy,w,h)=>{g.fillStyle=c;const x0=sc(dx),x1=sc(dx+w),y0=sc(dy),y1=sc(dy+h);g.fillRect(dir>0?x+x0:x-x1+1,yy+y0,Math.max(1,x1-x0),Math.max(1,y1-y0))};
