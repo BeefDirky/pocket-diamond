@@ -4684,9 +4684,32 @@ function hitAdvance(runners,tp,Pp,delay,ex){
 }
 function outfieldHit(play,it,P,runners,delay,errBy){
  // retrieval time: an outfielder who had to run it down, dig it off the wall or chase a carom in the corner needs longer to get rid of it
- const rp=Math.hypot(it.p.x,it.p.y),ath=Math.abs(Math.atan2(it.p.x,it.p.y)/RAD),gap=ath>12&&ath<34,corner=ath>=36;
- const ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(rp>285?.75:0)+(rp>275&&gap?1.7:0)+(rp>265&&corner?1.9:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
+ const rp=Math.hypot(it.p.x,it.p.y),ath=Math.abs(Math.atan2(it.p.x,it.p.y)/RAD),gap=ath>12&&ath<34,corner=ath>=36;let ex;
+ ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(rp>285?.75:0)+(rp>275&&gap?1.7:0)+(rp>265&&corner?1.9:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
  hitAdvance(runners,it.t,it.p,delay,ex);
+ /* instead of the outfielder standing over the ball for that extra time, the time goes into the chase: the ball keeps on
+    its own roll past where he'd have cut it off, out to the wall (kicking back off it), and he runs it down at full speed,
+    taking a bad angle or bobbling it if he'd otherwise get there too soon, then scoops it and comes up throwing */
+ const last=play.segs[play.segs.length-1];
+ if(it.i>=6&&ex>.45&&last&&last.fn&&Math.abs(last.t1-it.t)<.05){
+  const tPick=it.t+.65+ex-.42,F=POS[it.i],ball=t=>last.fn(t);
+  let tStop=it.t;{let pr=ball(it.t);for(let t=it.t+.05;t<tPick;t+=.05){const q=ball(t);if(Math.hypot(q.x-pr.x,q.y-pr.y)>.04)tStop=t;pr=q}}
+  const rest0=ball(tStop),r0=Math.max(1,Math.hypot(rest0.x,rest0.y)),kw=keepIn({x:rest0.x*1.03,y:rest0.y*1.03}),atWall=Math.hypot(kw.x-rest0.x*1.03,kw.y-rest0.y*1.03)>.5;
+  /* off the wall it comes back a few feet towards the infield */
+  const kick=atWall?rand(6,11):0,kx=-rest0.x/r0*kick,ky=-rest0.y/r0*kick,tK=Math.min(tPick-.2,tStop+.55);
+  const pos=t=>{if(t<=tStop||!kick)return ball(Math.min(t,tStop));const u=clamp((t-tStop)/Math.max(.1,tK-tStop),0,1),e=1-(1-u)*(1-u);return{x:rest0.x+kx*e,y:rest0.y+ky*e,h:Math.abs(Math.sin(u*5))*2*(1-u)}};
+  const rest=pos(tPick),rs=fnSeg(it.t,tPick,pos);rs.snd=true;last.t1=it.t;play.segs.push(rs);
+  /* his run: full speed after a read; if that's too quick, a rounder route out and a bobble at the end soak up the rest */
+  const re=Math.min(F.re,.4),d=dist(F,rest),sp=F.sp*.97,avail=tPick-re;let ks;
+  if(d/sp>=avail-.05)ks=[{t:0,x:F.x,y:F.y},{t:re,x:F.x,y:F.y},{t:tPick,x:rest.x,y:rest.y}];
+  else{let spare=avail-d/sp;const bob=Math.min(.7,spare*.35);spare-=bob;
+   const L=Math.min(d*1.35,d+spare*sp),h=Math.sqrt(Math.max(0,(L/2)**2-(d/2)**2)),mx=(F.x+rest.x)/2,my=(F.y+rest.y)/2,nx=-(rest.y-F.y)/Math.max(1,d),ny=(rest.x-F.x)/Math.max(1,d),sg=(mx*nx+my*ny)>0?-1:1;
+   const W={x:mx+nx*h*sg,y:my+ny*h*sg},tArr=tPick-bob,tRun=re+Math.max(.2,tArr-re-L/sp);
+   ks=[{t:0,x:F.x,y:F.y},{t:tRun,x:F.x,y:F.y},{t:tRun+(tArr-tRun)*dist(F,W)/Math.max(1,L),x:W.x,y:W.y},{t:tArr,x:rest.x,y:rest.y}];
+   if(bob>.15){/* it squirts off the glove a couple of steps and he picks it up again */const bx=rest.x+rand(-3,3),by=rest.y+rand(-3,3);ks.push({t:tPick,x:bx,y:by});
+    const b0=tArr,pre=pos;play.segs[play.segs.length-1]=fnSeg(it.t,tPick,t=>t<b0?pre(t):{x:lerp(rest.x,bx,(t-b0)/(tPick-b0)),y:lerp(rest.y,by,(t-b0)/(tPick-b0)),h:Math.sin((t-b0)/(tPick-b0)*Math.PI)*2});play.segs[play.segs.length-1].snd=true}}
+  play.fk[it.i]=ks;const fin=ks[ks.length-1];
+  it={...it,t:tPick,p:{x:fin.x,y:fin.y}};ex=.42-.65}
  const bd=runners.find(r=>r.batter).dest;runners.find(r=>r.batter).round=true;
  // on a single, the runner from second tries to score on speed: 70+ scores, 50-69 is a play at the plate, under 50 holds at third
  let sendHome=null;
