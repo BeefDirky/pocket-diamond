@@ -55,7 +55,7 @@ $('playGo').addEventListener('click',()=>{tsInfoOpen(false);if(parkFromBP){withL
  if(m==='playoffs'){tsFlush();openBracket(true);return}if(m==='online'){tsFlush();openOnline();return}
  if(m==='arcade'){tsFlush();openPregame();return}
  withLoading(()=>{tsFlush();if(m==='watch'){S.auto=true;syncAuto();startGame('full');return}if(m){S.auto=false;syncAuto();startGame(m)}if(typeof render==='function')render(performance.now())})});
-const setBP=k=>{S.bpPitch=k;document.body.classList.remove('bpPopOpen');for(const b of $('bpBar').querySelectorAll('.pbtn'))b.setAttribute('aria-pressed',String(b.dataset.k===k));updateHUD()};
+const setBP=k=>{S.bpPitch=k;bpPop(false);for(const b of $('bpBar').querySelectorAll('.pbtn'))b.setAttribute('aria-pressed',String(b.dataset.k===k));updateHUD()};
 $('bpBar').addEventListener('click',e=>{const b=e.target.closest('.pbtn');if(b){ensureAudio();setBP(b.dataset.k)}});
 $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;
  if(se&&se.done){S.series={len:se.len,w:0,l:0};drawOpp();withLoading(()=>{startGame('arcade');render(performance.now())});return}startGame(S.mode)});
@@ -107,5 +107,9 @@ function addCloseX(){for(const back of document.querySelectorAll('#title .card .
   x.addEventListener('click',e=>{e.stopPropagation();back.click()});card.prepend(x);card.classList.add('hasX');back.hidden=true}}
 
 // batting practice on a phone: the machine's pitch menu is a pop-up, opened from the pitcher box
-document.addEventListener('click',e=>{if(e.target.closest('#bpPickBtn')){e.stopPropagation();document.body.classList.toggle('bpPopOpen')}},true);
-document.getElementById('bpScrim').addEventListener('pointerdown',e=>{e.stopPropagation();document.body.classList.remove('bpPopOpen')});
+/* on a phone held sideways the menu lifts out of the scaled button bar onto the page, so it opens full size in the middle */
+function bpPop(open){const bar=document.getElementById('bpBar'),home=document.getElementById('actsBat');document.body.classList.toggle('bpPopOpen',open);
+ if(open&&document.querySelector('.app').classList.contains('phoneLand')){document.body.appendChild(bar);bar.classList.add('bpFloat')}
+ else if(bar.parentNode!==home){home.appendChild(bar);bar.classList.remove('bpFloat')}}
+document.addEventListener('click',e=>{if(e.target.closest('#bpPickBtn')){e.stopPropagation();bpPop(!document.body.classList.contains('bpPopOpen'))}},true);
+document.getElementById('bpScrim').addEventListener('pointerdown',e=>{e.stopPropagation();bpPop(false)});

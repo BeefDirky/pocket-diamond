@@ -952,6 +952,15 @@ body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{botto
 .app.deskApp>.acts.withBP .bpBar .pbtn{padding:6px 2px;font-size:10px}
 body.bpMode .app.deskApp .infoBtn,body.bpMode .app.deskApp .autoBtn{bottom:var(--bpA,178px)!important}
 body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{bottom:var(--bpM,224px)!important}
+/* phone on its side, batting practice: no pitch buttons beside Swing; tap "Throwing: FASTBALL ▾" for the pop-up menu, info boxes back at their usual height */
+.app.deskApp.phoneLand .acts .bpBar{display:none!important}
+.app.deskApp.phoneLand .bpPick{pointer-events:auto;background:rgba(0,0,0,.25);border:2px solid var(--edge);padding:1px 6px;margin-left:4px}.app.deskApp.phoneLand .bpPick i{display:inline}
+body.bpMode .app.deskApp.phoneLand .infoBtn,body.bpMode .app.deskApp.phoneLand .autoBtn{bottom:82px!important}
+body.bpMode .app.deskApp.phoneLand>.matchup,body.bpMode .app.deskApp.phoneLand>.matchup>.muPit{bottom:123px!important}
+body.bpPopOpen>.bpBar.bpFloat:not([hidden]){display:grid!important;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:41;width:min(420px,80vw);grid-template-columns:repeat(4,minmax(0,1fr));background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--panel-hi),6px 6px 0 rgba(0,0,0,.4);padding:12px;gap:8px;grid-auto-rows:auto}
+body.bpPopOpen>.bpBar.bpFloat .pbtn{padding:10px 4px;font-size:11px}
+body.bpPopOpen>.bpBar.bpFloat .k{display:block;font-size:12px;margin-bottom:2px}
+body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
 </style>
 
 <div class="app">
@@ -5216,12 +5225,13 @@ function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>PICK YOUR CLUB</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds'])$(k).hidden=k!==id;if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
-{let lastK=null;const chk=()=>{const k=isWide()+'|'+isDesk();if(k!==lastK){lastK=k;applyWide()}};addEventListener('resize',chk);addEventListener('resize',()=>requestAnimationFrame(bpLayout));addEventListener('orientationchange',chk);if(window.visualViewport)visualViewport.addEventListener('resize',chk)}
+{let lastK=null;const chk=()=>{const k=isWide()+'|'+isDesk()+'|'+isPhoneLand();if(k!==lastK){lastK=k;applyWide()}};addEventListener('resize',chk);addEventListener('resize',()=>requestAnimationFrame(bpLayout));addEventListener('orientationchange',chk);if(window.visualViewport)visualViewport.addEventListener('resize',chk)}
 /* full-screen batting practice: measure where the pitch buttons end and stack AUTO/INFO, then the info boxes, above them */
-function bpLayout(){const bar=document.querySelector('.acts .bpBar');if(!document.body.classList.contains('bpMode')||!isDesk()||!bar)return;
+function bpLayout(){const bar=document.querySelector('.acts .bpBar');if(!document.body.classList.contains('bpMode')||!isDesk()||isPhoneLand()||!bar)return;
  const r=bar.getBoundingClientRect();if(!r.height)return;const a=Math.round(innerHeight-r.top+8),ab=$('autoBtn').getBoundingClientRect().height||28;
  document.body.style.setProperty('--bpA',a+'px');document.body.style.setProperty('--bpM',Math.round(a+ab+10)+'px')}
-function applyWide(){$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize();bpLayout()})}
+const isPhoneLand=()=>isDesk()&&innerHeight<=520;/* a phone on its side: PC layout, phone-style pitch menu */
+function applyWide(){document.querySelector('.app').classList.toggle('phoneLand',isPhoneLand());if(!isPhoneLand()&&document.body.classList.contains('bpPopOpen')&&typeof bpPop==='function')bpPop(false);$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize();bpLayout()})}
 function syncOpts(){for(const b of $('optBallCam').children)b.setAttribute('aria-pressed',String((b.dataset.v==='on')===(OPT.ballCam!==false)));for(const b of $('optCam').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.cam));for(const b of $('optTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const b of $('mTime').children)b.setAttribute('aria-pressed',String(b.dataset.v===OPT.time));for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']]){$(id).value=OPT[k];$(id+'V').textContent=OPT[k]}}
 for(const[id,k]of[['vMusic','music'],['vCrowd','crowd'],['vSfx','sfx']])$(id).addEventListener('input',e=>{OPT[k]=+e.target.value;$(id+'V').textContent=OPT[k];ensureAudio();applyVolumes();saveOpts()});
 function decideTime(){const n=OPT.time==='night'?true:OPT.time==='day'?false:Math.random()<.55;if(n!==S.night){S.night=n;if(FIELD)SIGNS=buildSigns()}if($('mLogoY'))refreshMenu()}
@@ -7130,7 +7140,7 @@ $('playGo').addEventListener('click',()=>{tsInfoOpen(false);if(parkFromBP){withL
  if(m==='playoffs'){tsFlush();openBracket(true);return}if(m==='online'){tsFlush();openOnline();return}
  if(m==='arcade'){tsFlush();openPregame();return}
  withLoading(()=>{tsFlush();if(m==='watch'){S.auto=true;syncAuto();startGame('full');return}if(m){S.auto=false;syncAuto();startGame(m)}if(typeof render==='function')render(performance.now())})});
-const setBP=k=>{S.bpPitch=k;document.body.classList.remove('bpPopOpen');for(const b of $('bpBar').querySelectorAll('.pbtn'))b.setAttribute('aria-pressed',String(b.dataset.k===k));updateHUD()};
+const setBP=k=>{S.bpPitch=k;bpPop(false);for(const b of $('bpBar').querySelectorAll('.pbtn'))b.setAttribute('aria-pressed',String(b.dataset.k===k));updateHUD()};
 $('bpBar').addEventListener('click',e=>{const b=e.target.closest('.pbtn');if(b){ensureAudio();setBP(b.dataset.k)}});
 $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;
  if(se&&se.done){S.series={len:se.len,w:0,l:0};drawOpp();withLoading(()=>{startGame('arcade');render(performance.now())});return}startGame(S.mode)});
@@ -7182,8 +7192,12 @@ function addCloseX(){for(const back of document.querySelectorAll('#title .card .
   x.addEventListener('click',e=>{e.stopPropagation();back.click()});card.prepend(x);card.classList.add('hasX');back.hidden=true}}
 
 // batting practice on a phone: the machine's pitch menu is a pop-up, opened from the pitcher box
-document.addEventListener('click',e=>{if(e.target.closest('#bpPickBtn')){e.stopPropagation();document.body.classList.toggle('bpPopOpen')}},true);
-document.getElementById('bpScrim').addEventListener('pointerdown',e=>{e.stopPropagation();document.body.classList.remove('bpPopOpen')});
+/* on a phone held sideways the menu lifts out of the scaled button bar onto the page, so it opens full size in the middle */
+function bpPop(open){const bar=document.getElementById('bpBar'),home=document.getElementById('actsBat');document.body.classList.toggle('bpPopOpen',open);
+ if(open&&document.querySelector('.app').classList.contains('phoneLand')){document.body.appendChild(bar);bar.classList.add('bpFloat')}
+ else if(bar.parentNode!==home){home.appendChild(bar);bar.classList.remove('bpFloat')}}
+document.addEventListener('click',e=>{if(e.target.closest('#bpPickBtn')){e.stopPropagation();bpPop(!document.body.classList.contains('bpPopOpen'))}},true);
+document.getElementById('bpScrim').addEventListener('pointerdown',e=>{e.stopPropagation();bpPop(false)});
 </script>
 <script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>
 </body></html>

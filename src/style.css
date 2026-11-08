@@ -939,3 +939,12 @@ body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{botto
 .app.deskApp>.acts.withBP .bpBar .pbtn{padding:6px 2px;font-size:10px}
 body.bpMode .app.deskApp .infoBtn,body.bpMode .app.deskApp .autoBtn{bottom:var(--bpA,178px)!important}
 body.bpMode .app.deskApp>.matchup,body.bpMode .app.deskApp>.matchup>.muPit{bottom:var(--bpM,224px)!important}
+/* phone on its side, batting practice: no pitch buttons beside Swing; tap "Throwing: FASTBALL ▾" for the pop-up menu, info boxes back at their usual height */
+.app.deskApp.phoneLand .acts .bpBar{display:none!important}
+.app.deskApp.phoneLand .bpPick{pointer-events:auto;background:rgba(0,0,0,.25);border:2px solid var(--edge);padding:1px 6px;margin-left:4px}.app.deskApp.phoneLand .bpPick i{display:inline}
+body.bpMode .app.deskApp.phoneLand .infoBtn,body.bpMode .app.deskApp.phoneLand .autoBtn{bottom:82px!important}
+body.bpMode .app.deskApp.phoneLand>.matchup,body.bpMode .app.deskApp.phoneLand>.matchup>.muPit{bottom:123px!important}
+body.bpPopOpen>.bpBar.bpFloat:not([hidden]){display:grid!important;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:41;width:min(420px,80vw);grid-template-columns:repeat(4,minmax(0,1fr));background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--panel-hi),6px 6px 0 rgba(0,0,0,.4);padding:12px;gap:8px;grid-auto-rows:auto}
+body.bpPopOpen>.bpBar.bpFloat .pbtn{padding:10px 4px;font-size:11px}
+body.bpPopOpen>.bpBar.bpFloat .k{display:block;font-size:12px;margin-bottom:2px}
+body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
