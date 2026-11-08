@@ -910,3 +910,19 @@ body.phOver .pauseBtn{display:none!important}
 .lfc,.lfIn,.lfF,.lfB{min-width:0}.lfc img{width:100%;max-width:100%}
 .lfPen{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (max-width:720px){.lfWrap{grid-template-columns:minmax(0,1fr)}.lfPen{grid-template-columns:repeat(5,minmax(0,1fr))}.lfSide,.lfField{min-width:0}}
+/* lineup v4: bigger names/positions; on phones a tall field where no cards overlap, bullpen as a scroll row */
+.lfc .lfNm{font-size:13px;line-height:1.2;padding:3px 2px;font-weight:700;letter-spacing:-.02em}
+.lfc .lfPos{font-size:12px;line-height:1.25;padding:1px 0}
+@media (max-width:720px){
+ .lfField,#scrLineup .lfField{aspect-ratio:100/150!important;max-width:100%!important;width:100%}
+ .lfField .lfc{width:72px}
+ .lfField .lfc img{aspect-ratio:4/3;object-fit:cover;object-position:50% 22%}
+ .lfField .lfc .lfNm{font-size:11px;padding:2px 1px;letter-spacing:-.04em}
+ .lfField .lfc .lfPos{font-size:10px}
+ .lfField .lfc .lfOvr{font-size:9px;top:-8px;left:-6px}.lfField .lfc .lfOrd{width:15px;height:15px;font-size:9px;top:-8px;right:-6px}
+ .lfPen{display:flex;gap:10px;overflow-x:auto;padding:10px 4px 6px}
+ .lfPen .lfc{flex:0 0 84px;width:84px}
+ .lfPen .lfc .lfNm{font-size:11px;letter-spacing:-.04em}.lfPen .lfc .lfPos{font-size:10px}
+ .lfTray .lfc .lfNm{font-size:12px;letter-spacing:-.03em}.lfTray .lfc .lfPos{font-size:11px}
+}
+@media (max-width:720px){.lfField{container-type:inline-size}.lfField .lfc{width:min(76px,20cqw)}.lfField .lfc .lfNm{font-size:min(11px,3.6cqw)}.lfField .lfc .lfPos{font-size:min(10px,3.3cqw)}}
