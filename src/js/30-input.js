@@ -61,7 +61,7 @@ $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;const se=S
  if(se&&se.done){S.series={len:se.len,w:0,l:0};drawOpp();withLoading(()=>{startGame('arcade');render(performance.now())});return}startGame(S.mode)});
 // ---- arcade game day: series length and the lineup, on the lineup screen, before the first pitch ----
 let pregame=false;
-function openPregame(){pregame=true;lnView='mine';lnSel=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=`vs ${o.city} ${o.name}`;
+function openPregame(){pregame=true;lnView='mine';lnSel=null;lfFlip=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=`vs ${o.city} ${o.name}`;
  const n=(S.series&&S.series.len)||1;for(const b of $('lnSeries').children)b.setAttribute('aria-pressed',String(+b.dataset.n===n));$('lnPre').hidden=false;showScreen('scrLineup')}
 $('lnSeries').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const c of $('lnSeries').children)c.setAttribute('aria-pressed',String(c===b))});
 $('lnPlay').addEventListener('click',()=>{const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;

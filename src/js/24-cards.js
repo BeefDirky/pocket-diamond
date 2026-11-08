@@ -14,7 +14,7 @@ function buildCardDB(){
  for(const c of buildBigLeague()){CARDS.push(c);CARD_BY[c.id]=c}
 }
 const ART={};
-function cardArt(c){if(ART[c.id])return ART[c.id];try{return ART[c.id]=cardArt2(c)}catch(e){}
+function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key];try{return ART[key]=cardArt2(c,tk)}catch(e){console.warn(e)}
  const T=c.T||TEAMS[c.k],ST2=c.set==='bl'?BL_PARK:STADIUMS[c.k],p=c.p,cv2=document.createElement('canvas');cv2.width=64;cv2.height=80;const g=cv2.getContext('2d');
  const rr=mulberry32(hash(c.id+'art'));
  // backdrop: crowd, wall, grass, dirt where he plays

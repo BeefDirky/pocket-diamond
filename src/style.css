@@ -862,3 +862,51 @@ body.phOver .pauseBtn{display:none!important}
  .lfc{width:60px}.lfc .lfNm,.lfc .lfPos{font-size:9px}.lfc .lfOvr,.lfc .lfOrd{font-size:9px}
  .lfTray .lfc{flex-basis:74px;width:74px}
 }
+/* lineup v3: flip cards, rarity frames in the tray (common gray, rare blue, epic purple, legend chrome rainbow), no selection glow */
+.lfc{perspective:600px;background:none;border:0;padding:0;box-shadow:none;transition:none}
+.lfc:hover{transform:none}
+.lfc.sel,.lfc.drop,.lfc.deck.ready{outline:0;box-shadow:none;animation:none;transform:none}
+.lfIn{position:relative;display:block;transition:transform .32s ease;transform-style:preserve-3d}
+.lfc.flip .lfIn{transform:rotateY(180deg)}
+.lfF,.lfB{display:flex;flex-direction:column;align-items:stretch;padding:3px 3px 2px;border:2px solid var(--rc);box-shadow:0 2px 0 rgba(0,0,0,.55);backface-visibility:hidden;-webkit-backface-visibility:hidden;
+ background:linear-gradient(170deg,var(--tj) 0 55%,var(--tc) 55% 100%)}
+.lfB{position:absolute;inset:0;transform:rotateY(180deg);background:#101a15;gap:2px;padding:4px 5px;justify-content:flex-start;text-align:left;overflow:hidden}
+.lfc.r0{--rc:#9aa2a9}.lfc.r1{--rc:#4f9fe0}.lfc.r2{--rc:#a46ef0}.lfc.r3{--rc:#e9e6ff}
+.lfc.deck .lfF{background:linear-gradient(170deg,#8d959c,#6c747b)}
+.lfc.deck.r1 .lfF{background:linear-gradient(170deg,#4f8fe0,#2a5fae)}
+.lfc.deck.r2 .lfF{background:linear-gradient(170deg,#9c66ea,#6436b0)}
+.lfc.deck.r3 .lfF,.lfc.deck.r3 .lfB{border-color:transparent;background-clip:padding-box}
+.lfc.deck.r3 .lfF{background:linear-gradient(125deg,#ffd1dc,#ffe9b8,#fff8c9,#d4f7d0,#c9ecff,#d9d2ff,#f6d0ff,#ffd1dc);background-size:300% 300%;animation:holo 6s linear infinite;
+ outline:2px solid #fff;outline-offset:-2px;box-shadow:0 2px 0 rgba(0,0,0,.55),0 0 10px rgba(220,215,255,.55)}
+.lfc.deck.r3 .lfF .lfNm,.lfc.deck.r3 .lfF .lfPos{background:rgba(20,24,40,.82)}
+.lfc img{border:1px solid rgba(8,20,14,.7)}
+.lfc .lfOvr{background:#0b1410;color:#fff;border:1px solid var(--rc)}
+.lfc .lfOrd{background:#fff;color:#0b0b0b;border:1px solid #0b0b0b}
+.lfc .lfPos{color:#fff;font-weight:700}
+.lfBNm{font-size:11px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.lfBSub{font-size:9px;color:var(--dim);letter-spacing:.06em}
+.lfBOvr{font-family:var(--f-px);font-size:16px;line-height:1.1;margin:2px 0}.lfBOvr small{font-size:7px;color:var(--dim);margin-left:3px}
+.lfSt{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:4px;font-size:9px}
+.lfSt i{font-style:normal;color:var(--dim)}.lfSt b{font-family:var(--f-px);font-size:9px;justify-self:end}
+.lfSt u{grid-column:1/3;height:3px;background:rgba(255,255,255,.12);display:block;text-decoration:none}.lfSt s{display:block;height:100%;text-decoration:none}
+.lfSign{margin-top:auto;background:#ffbf3c;color:#14181c;font-family:var(--f-px);font-size:9px;text-align:center;padding:4px 0}
+.lfc.used .lfF{opacity:.45;filter:grayscale(.6)}.lfc.used{opacity:1;filter:none}
+.lfActs{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.lfActs .mbtn[aria-pressed="true"]{border-color:#ffbf3c;color:#ffbf3c}
+.lfField .lfc{width:96px}
+.lfc .lfNm{font-size:12px}.lfc .lfPos{font-size:11px}
+.lfTray .lfc{flex:0 0 108px;width:108px}
+.lfTray .lfB .lfBNm{font-size:12px}.lfTray .lfSt,.lfTray .lfSt b{font-size:10px}
+.lfPen .lfc{width:100%}
+@media (max-width:720px){
+ .lfField .lfc{width:60px;padding:0;border:0}
+ .lfField .lfF{padding:1px;border-width:1px}
+ .lfField .lfc .lfNm{font-size:9px}
+ .lfField .lfB{padding:2px 3px;gap:1px}.lfField .lfBNm{font-size:8px}.lfField .lfBSub,.lfField .lfBOvr small{display:none}.lfField .lfBOvr{font-size:10px;margin:0}
+ .lfField .lfSt{font-size:7px;column-gap:2px}.lfField .lfSt b{font-size:7px}.lfField .lfSt u{height:2px}
+ .lfPen .lfB{padding:2px 3px}.lfPen .lfBSub{display:none}.lfPen .lfBNm{font-size:8px}.lfPen .lfBOvr{font-size:11px}.lfPen .lfSt,.lfPen .lfSt b{font-size:7px}
+ .lfTray .lfc{flex-basis:92px;width:92px}
+}
+.lfc,.lfIn,.lfF,.lfB{min-width:0}.lfc img{width:100%;max-width:100%}
+.lfPen{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:720px){.lfWrap{grid-template-columns:minmax(0,1fr)}.lfPen{grid-template-columns:repeat(5,minmax(0,1fr))}.lfSide,.lfField{min-width:0}}

@@ -2,20 +2,29 @@
 // Every player gets an original cartoon figure: pose from his ratings, face/hair/beard from a hash of his card id.
 function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;
  const m=v=>Math.max(0,Math.min(255,Math.round(f<0?v*(1+f):v+(255-v)*f)));return'#'+((1<<24)+(m(r)<<16)+(m(g)<<8)+m(b)).toString(16).slice(1)}
-function cardArt2(c){
+/* the plain kit every card wears until he's put in a lineup */
+const CARD_KIT={jersey:'#dfe3e8',cap:'#4b535c'};
+/* rarity backdrops: common gray, rare blue, epic purple, legend a soft chrome rainbow */
+function cardBack(g,r,G,GH,R,P){
+ if(r>=3){const band=['#ffd1dc','#ffe9b8','#fff8c9','#d4f7d0','#c9ecff','#d9d2ff','#f6d0ff'];
+  for(let y=0;y<GH;y++)for(let x=0;x<G;x++){const k=Math.floor(((x+y*.8)/6))%band.length;P(x,y,band[(k+band.length)%band.length])}
+  for(let y=0;y<GH;y++)for(let x=0;x<G;x++)if(((x+y)%9)===0)P(x,y,'rgba(255,255,255,.55)');
+  for(let y=0;y<GH;y++){g.fillStyle=`rgba(255,255,255,${(.32*(1-Math.abs(y-12)/16)).toFixed(3)})`;if(Math.abs(y-12)<16)g.fillRect(0,y,G,1)}
+ }else{const pal=[['#8d959c','#7b838a','#a3aab0'],['#3f7fd6','#3170c4','#5c97e6'],['#8b55d6','#7743c2','#a476e6']][r];
+  for(let y=0;y<GH;y++)R(0,y,G,1,(y>>2)&1?pal[0]:pal[1]);
+  for(let y=1;y<GH;y+=4)for(let x=(y>>2)&1?0:2;x<G;x+=4)P(x,y,pal[2])}
+ g.fillStyle='rgba(0,0,0,.22)';g.fillRect(8,35,16,2);g.fillRect(10,37,12,1)}
+function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in front of its park; none = a plain kit on his rarity colour */
  // chibi style: a 32x40 pixel sprite (big head, tiny body) blown up 4x, every pixel crisp
  const G=32,GH=40,L=document.createElement('canvas');L.width=G;L.height=GH;const g=L.getContext('2d');
  const F=document.createElement('canvas');F.width=G;F.height=GH;const f=F.getContext('2d');// the figure, outlined separately
- const p=c.p,T=c.T||TEAMS[c.k],bl=c.set==='bl',rr=mulberry32(hash(c.id+'chibi'));
+ const p=c.p,T=tk?TEAMS[tk]:CARD_KIT,bl=!!tk&&false,rr=mulberry32(hash(c.id+'chibi'));
  const R=(x,y,w,h,col,ctx)=>{(ctx||g).fillStyle=col;(ctx||g).fillRect(x|0,y|0,w|0,h|0)},P=(x,y,col,ctx)=>R(x,y,1,1,col,ctx);
  // ---- backdrop ----
- if(bl){R(0,0,G,17,'#141c44');R(0,0,G,5,'#0c1230');for(let k=0;k<8;k++)P(rr()*G,rr()*6,'#e9ecf7');
-  for(const lx of[4,27]){R(lx-2,1,5,2,'#e6e8f0');P(lx-1,1,'#fff6c8');P(lx+1,1,'#fff6c8')}
-  for(let y=7;y<17;y++)for(let x=(y&1);x<G;x+=2)if(rr()<.6)P(x,y,['#4f6aa8','#c94a3a','#e8e4dc','#7a86a6',T.jersey,T.cap][Math.floor(rr()*6)]);
- }else{const ST2=STADIUMS[c.k];R(0,0,G,17,ST2.seat[0]);for(let y=1;y<17;y++)for(let x=(y&1);x<G;x+=2)if(rr()<.55)P(x,y,['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f1ecdc',T.jersey,T.cap][Math.floor(rr()*7)])}
- const ST3=bl?BL_PARK:STADIUMS[c.k];R(0,17,G,2,ST3.pad);R(0,19,G,1,ST3.pad2);
- for(let y=20;y<GH;y++)R(0,y,G,1,ST3.grass[((y-20)>>2)&1]);
- if(c.pit){R(5,31,22,9,'#c48c56');R(8,30,16,1,'#c48c56');R(13,34,6,1,CREAM)}else{R(0,32,G,8,'#c48c56');R(2,34,1,6,CREAM);R(2,34,9,1,CREAM)}
+ if(tk){const ST2=STADIUMS[tk]||BL_PARK;R(0,0,G,17,ST2.seat[0]);for(let y=1;y<17;y++)for(let x=(y&1);x<G;x+=2)if(rr()<.55)P(x,y,['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f1ecdc',T.jersey,T.cap][Math.floor(rr()*7)]);
+  R(0,17,G,2,ST2.pad);R(0,19,G,1,ST2.pad2);for(let y=20;y<GH;y++)R(0,y,G,1,ST2.grass[((y-20)>>2)&1]);
+  if(c.pit){R(5,31,22,9,'#c48c56');R(8,30,16,1,'#c48c56');R(13,34,6,1,CREAM)}else{R(0,32,G,8,'#c48c56');R(2,34,1,6,CREAM);R(2,34,9,1,CREAM)}}
+ else cardBack(g,c.r,G,GH,R,P);
  g.fillStyle='rgba(8,20,14,.35)';g.fillRect(9,36,14,1);
  // ---- the chibi ----
  const lefty=p.hand==='L',hd=hash(c.id+'face'),sk=p.skin||skinOf(p.name),sk2=shade(sk,-.16);

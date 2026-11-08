@@ -875,6 +875,54 @@ body.phOver .pauseBtn{display:none!important}
  .lfc{width:60px}.lfc .lfNm,.lfc .lfPos{font-size:9px}.lfc .lfOvr,.lfc .lfOrd{font-size:9px}
  .lfTray .lfc{flex-basis:74px;width:74px}
 }
+/* lineup v3: flip cards, rarity frames in the tray (common gray, rare blue, epic purple, legend chrome rainbow), no selection glow */
+.lfc{perspective:600px;background:none;border:0;padding:0;box-shadow:none;transition:none}
+.lfc:hover{transform:none}
+.lfc.sel,.lfc.drop,.lfc.deck.ready{outline:0;box-shadow:none;animation:none;transform:none}
+.lfIn{position:relative;display:block;transition:transform .32s ease;transform-style:preserve-3d}
+.lfc.flip .lfIn{transform:rotateY(180deg)}
+.lfF,.lfB{display:flex;flex-direction:column;align-items:stretch;padding:3px 3px 2px;border:2px solid var(--rc);box-shadow:0 2px 0 rgba(0,0,0,.55);backface-visibility:hidden;-webkit-backface-visibility:hidden;
+ background:linear-gradient(170deg,var(--tj) 0 55%,var(--tc) 55% 100%)}
+.lfB{position:absolute;inset:0;transform:rotateY(180deg);background:#101a15;gap:2px;padding:4px 5px;justify-content:flex-start;text-align:left;overflow:hidden}
+.lfc.r0{--rc:#9aa2a9}.lfc.r1{--rc:#4f9fe0}.lfc.r2{--rc:#a46ef0}.lfc.r3{--rc:#e9e6ff}
+.lfc.deck .lfF{background:linear-gradient(170deg,#8d959c,#6c747b)}
+.lfc.deck.r1 .lfF{background:linear-gradient(170deg,#4f8fe0,#2a5fae)}
+.lfc.deck.r2 .lfF{background:linear-gradient(170deg,#9c66ea,#6436b0)}
+.lfc.deck.r3 .lfF,.lfc.deck.r3 .lfB{border-color:transparent;background-clip:padding-box}
+.lfc.deck.r3 .lfF{background:linear-gradient(125deg,#ffd1dc,#ffe9b8,#fff8c9,#d4f7d0,#c9ecff,#d9d2ff,#f6d0ff,#ffd1dc);background-size:300% 300%;animation:holo 6s linear infinite;
+ outline:2px solid #fff;outline-offset:-2px;box-shadow:0 2px 0 rgba(0,0,0,.55),0 0 10px rgba(220,215,255,.55)}
+.lfc.deck.r3 .lfF .lfNm,.lfc.deck.r3 .lfF .lfPos{background:rgba(20,24,40,.82)}
+.lfc img{border:1px solid rgba(8,20,14,.7)}
+.lfc .lfOvr{background:#0b1410;color:#fff;border:1px solid var(--rc)}
+.lfc .lfOrd{background:#fff;color:#0b0b0b;border:1px solid #0b0b0b}
+.lfc .lfPos{color:#fff;font-weight:700}
+.lfBNm{font-size:11px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.lfBSub{font-size:9px;color:var(--dim);letter-spacing:.06em}
+.lfBOvr{font-family:var(--f-px);font-size:16px;line-height:1.1;margin:2px 0}.lfBOvr small{font-size:7px;color:var(--dim);margin-left:3px}
+.lfSt{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:4px;font-size:9px}
+.lfSt i{font-style:normal;color:var(--dim)}.lfSt b{font-family:var(--f-px);font-size:9px;justify-self:end}
+.lfSt u{grid-column:1/3;height:3px;background:rgba(255,255,255,.12);display:block;text-decoration:none}.lfSt s{display:block;height:100%;text-decoration:none}
+.lfSign{margin-top:auto;background:#ffbf3c;color:#14181c;font-family:var(--f-px);font-size:9px;text-align:center;padding:4px 0}
+.lfc.used .lfF{opacity:.45;filter:grayscale(.6)}.lfc.used{opacity:1;filter:none}
+.lfActs{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.lfActs .mbtn[aria-pressed="true"]{border-color:#ffbf3c;color:#ffbf3c}
+.lfField .lfc{width:96px}
+.lfc .lfNm{font-size:12px}.lfc .lfPos{font-size:11px}
+.lfTray .lfc{flex:0 0 108px;width:108px}
+.lfTray .lfB .lfBNm{font-size:12px}.lfTray .lfSt,.lfTray .lfSt b{font-size:10px}
+.lfPen .lfc{width:100%}
+@media (max-width:720px){
+ .lfField .lfc{width:60px;padding:0;border:0}
+ .lfField .lfF{padding:1px;border-width:1px}
+ .lfField .lfc .lfNm{font-size:9px}
+ .lfField .lfB{padding:2px 3px;gap:1px}.lfField .lfBNm{font-size:8px}.lfField .lfBSub,.lfField .lfBOvr small{display:none}.lfField .lfBOvr{font-size:10px;margin:0}
+ .lfField .lfSt{font-size:7px;column-gap:2px}.lfField .lfSt b{font-size:7px}.lfField .lfSt u{height:2px}
+ .lfPen .lfB{padding:2px 3px}.lfPen .lfBSub{display:none}.lfPen .lfBNm{font-size:8px}.lfPen .lfBOvr{font-size:11px}.lfPen .lfSt,.lfPen .lfSt b{font-size:7px}
+ .lfTray .lfc{flex-basis:92px;width:92px}
+}
+.lfc,.lfIn,.lfF,.lfB{min-width:0}.lfc img{width:100%;max-width:100%}
+.lfPen{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:720px){.lfWrap{grid-template-columns:minmax(0,1fr)}.lfPen{grid-template-columns:repeat(5,minmax(0,1fr))}.lfSide,.lfField{min-width:0}}
 </style>
 
 <div class="app">
@@ -5132,12 +5180,12 @@ $('cards').addEventListener('click',e=>{
  else{const L=TEAMS[S.you].lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];lnSel=null;const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}updateHUD()}
  renderCards();
 });
-$('lnMine').addEventListener('click',()=>{lnView='mine';lnSel=null;renderCards()});
-$('lnOpp').addEventListener('click',()=>{lnView='opp';lnSel=null;renderCards()});
+$('lnMine').addEventListener('click',()=>{lnView='mine';lnSel=null;lfFlip=null;renderCards()});
+$('lnOpp').addEventListener('click',()=>{lnView='opp';lnSel=null;lfFlip=null;renderCards()});
 let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.fillStyle='#1b1f24';g.beginPath();g.arc(48,48,44,0,Math.PI*2);g.fill();g.strokeStyle='#3a4048';g.lineWidth=6;g.stroke();g.fillStyle='#ffbf3c';g.font='48px "Press Start 2P", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('?',50,52);return Q_URL=c.toDataURL()}
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
-function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>PICK YOUR CLUB</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds'])$(k).hidden=k!==id;if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>PICK YOUR CLUB</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds'])$(k).hidden=k!==id;if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
 {let lastDesk=null;addEventListener('resize',()=>{const d=isDesk();if(lastDesk===null||d!==lastDesk)applyWide();lastDesk=d})}
 function applyWide(){$('stage').classList.toggle('land',isWide());document.querySelector('.app').classList.toggle('wideApp',isWide()&&!isDesk());document.querySelector('.app').classList.toggle('deskApp',isDesk());requestAnimationFrame(()=>{resize()})}
@@ -5302,50 +5350,59 @@ function lfFieldArt(){if(lfField)return lfField;const W=115,H=100,c=document.cre
  const ins=4.5;g.fillStyle='#3c9a3c';g.beginPath();g.moveTo(hx,hy-ins*1.4);g.lineTo(B1[0]-ins,B1[1]);g.lineTo(B2[0],B2[1]+ins*1.4);g.lineTo(B3[0]+ins,B3[1]);g.closePath();g.fill();
  g.save();g.clip();g.fillStyle='#46aa44';for(let y=0;y<H;y+=8)g.fillRect(0,y,W,4);g.restore();
  g.fillStyle='#c48c56';g.beginPath();g.arc(hx,hy-d*.707,3.6,0,7);g.fill();g.beginPath();g.arc(hx,hy,6,0,7);g.fill();
- g.fillStyle='#f4f1e8';for(let k=0;k<64;k++){g.fillRect(Math.round(hx+k*.707),Math.round(hy-k*.707),1,1);g.fillRect(Math.round(hx-k*.707),Math.round(hy-k*.707),1,1)}
+ g.fillStyle='#f4f1e8';
  for(const[x,y]of[B1,B2,B3])g.fillRect(Math.round(x)-1,Math.round(y)-1,3,3);g.fillRect(Math.round(hx)-1,hy-1,3,2);g.fillRect(Math.round(hx)-1,Math.round(hy-d*.707),2,1);
  return lfField=c.toDataURL()}
 // the card for a roster player: his collectible card if there is one, else the club's portrait
 function lfCard(k,p){if(!CARDS.length)buildCardDB();if(p.signed&&CARD_BY[p.signed])return CARD_BY[p.signed];return CARDS.find(c=>c.k===k&&c.p===p)||CARDS.find(c=>c.k===k&&c.p.name===p.name)||null}
-function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c):portrait(T,p,k===S.you),o=ovr(p);
- return `<button type="button" class="lfc r${r}${opt.sel?' sel':''}${opt.drop?' drop':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}">
-  <span class="lfOvr" style="color:${rcol(o)}">${o}</span>${opt.order?`<span class="lfOrd">${opt.order}</span>`:''}
-  <img alt="" src="${art}"><span class="lfNm">${p.name}</span><span class="lfPos">${opt.pos}</span></button>`}
+/* the back of a card: his ratings as bars */
+function lfStats(p,pit){const rows=pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
+ return rows.map(([l,v])=>`<span class="lfSt"><i>${l}</i><b style="color:${rcol(v)}">${v}</b><u><s style="width:${v}%;background:${rcol(v)}"></s></u></span>`).join('')}
+function lfFace(art,o,nm,pos,order){return `<span class="lfF"><span class="lfOvr">${o}</span>${order?`<span class="lfOrd">${order}</span>`:''}<img alt="" src="${art}"><span class="lfNm">${nm}</span><span class="lfPos">${pos}</span></span>`}
+function lfBackFace(p,pit,o,pos,extra){return `<span class="lfB"><span class="lfBNm">${p.name}</span><span class="lfBSub">${pos} · ${p.hand||p.thr||'R'}</span><span class="lfBOvr" style="color:${rcol(o)}">${o}<small>OVR</small></span>${lfStats(p,pit)}${extra||''}</span>`}
+let lfFlip=null,lfMove=false;
+function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c,k):portrait(T,p,k===S.you),o=ovr(p),pit=opt.i<0,fk='f'+opt.i;
+ return `<button type="button" class="lfc r${r}${lfFlip===fk?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
+  ${lfFace(art,o,p.name,opt.pos,opt.order)}${lfBackFace(p,pit,o,opt.pos)}</span></button>`}
 function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
+ if(!mine)lfMove=false;
+ lnSel=lfFlip&&lfFlip[0]==='f'?+lfFlip.slice(1):null;
  const selPit=lnSel!=null&&lnSel<0,selBat=lnSel!=null&&lnSel>=0;
  let field='';
- T.lineup.forEach((p,i)=>{const pos=LF_POS[p.pos]?p.pos:'DH',[x,y]=LF_POS[pos];field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i,order:i+1,pos,sel:lnSel===i,drop:mine&&selBat&&lnSel!==i})}</div>`});
- {const p=T.staff[0],[x,y]=LF_POS.SP;if(p)field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i:-1,pos:'SP',sel:lnSel===-1})}</div>`}
- const pen=T.staff.slice(1).map((p,j)=>lfMini(T,key,p,{i:-2-j,pos:p.pos||'RP',sel:lnSel===-2-j})).join('');
- // the tray: the cards you own, hitters or pitchers, best first; a selected spot narrows it to cards that fit
+ T.lineup.forEach((p,i)=>{const pos=LF_POS[p.pos]?p.pos:'DH',[x,y]=LF_POS[pos];field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i,order:i+1,pos})}</div>`});
+ {const p=T.staff[0],[x,y]=LF_POS.SP;if(p)field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i:-1,pos:'SP'})}</div>`}
+ const pen=T.staff.slice(1).map((p,j)=>lfMini(T,key,p,{i:-2-j,pos:p.pos||'RP'})).join('');
  let tray='';
  if(mine){if(selPit)lfDeck='pit';else if(selBat)lfDeck='bat';
   if(!CARDS.length)buildCardDB();const used=usedCards(S.you);
   const own=CARDS.filter(c=>COL.owned[c.id]&&c.pit===(lfDeck==='pit')).sort((a,b)=>b.o-a.o);
-  tray=own.length?own.map(c=>{const q=c.p,T2=c.T||TEAMS[c.k],inUse=used.has(c.id);
-    return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lnSel!=null&&!inUse?' ready':''}" data-id="${c.id}" ${inUse?'disabled':''} style="--tj:${T2.jersey};--tc:${T2.cap}">
-     <span class="lfOvr" style="color:${rcol(c.o)}">${c.o}</span><img alt="" src="${cardArt(c)}"><span class="lfNm">${q.name}</span><span class="lfPos">${c.pit?(q.pos==='SP'?'SP':'RP'):q.pos}${inUse?' · IN':''}</span></button>`}).join('')
+  tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':'RP'):q.pos;
+    const can=lnSel!=null&&!inUse&&(lnSel<0)===c.pit;
+    return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlip===fk?' flip':''}" data-id="${c.id}"><span class="lfIn">
+     ${lfFace(cardArt(c),c.o,q.name,pos+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,can?`<span class="lfSign" data-sign="${c.id}">SIGN IN</span>`:'')}</span></button>`}).join('')
    :`<p class="lfEmpty">No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Card Collection to get players.</p>`}
  const sel=lnSel==null?null:lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];
- const hint=!mine?'Scouting report: their lineup in the field, their staff in the bullpen.':sel?(lnSel>=0?`<b>${sel.name}</b> (${sel.pos}) picked up. Tap a card below to sign it into his spot, or another player on the field to swap batting order.`:`<b>${sel.name}</b> picked up. Tap a pitcher card below to sign it into his spot.`):'Tap a player on the field to change him.';
+ const acts=mine&&sel?`${lnSel>=0?`<button type="button" class="mbtn lfMoveB" aria-pressed="${lfMove}">${lfMove?'Tap a hitter to swap with…':'⇅ Batting order'}</button>`:''}${sel.signed?`<button type="button" class="mbtn lfRestore">Restore original</button>`:''}`:'';
  $('cards').innerHTML=`<div class="lfWrap"><div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>
-  <div class="lfSide"><h4>BULLPEN</h4><div class="lfPen">${pen}</div>${mine&&sel&&sel.signed?`<button type="button" class="mbtn lfRestore">Restore original player</button>`:''}</div></div>
-  <p class="lfHint">${hint}</p>
+  <div class="lfSide"><h4>BULLPEN</h4><div class="lfPen">${pen}</div><div class="lfActs">${acts}</div></div></div>
   ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><div class="seg lfTabs"><button type="button" data-d="bat" aria-pressed="${lfDeck==='bat'}">Hitters</button><button type="button" data-d="pit" aria-pressed="${lfDeck==='pit'}">Pitchers</button></div></div><div class="lfTray">${tray}</div>`:''}`;
  $('lnHint').textContent='';}
 $('cards').addEventListener('click',e=>{
- const tab=e.target.closest('.lfTabs button');if(tab){lfDeck=tab.dataset.d;lnSel=null;lineupRender();return}
- if(lnView!=='mine')return;
- if(e.target.closest('.lfRestore')){const T=TEAMS[S.you],p=lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];if(p){const real=p.custom?T.benched||p:p;releasePlayer(S.you,real.signedFor||real.name,lnSel<0);applyDefense();updateHUD()}lnSel=null;lineupRender();return}
+ const tab=e.target.closest('.lfTabs button');if(tab){lfDeck=tab.dataset.d;lfFlip=null;lfMove=false;lineupRender();return}
+ const T=TEAMS[S.you];
+ if(lnView==='mine'){
+  if(e.target.closest('.lfRestore')){const p=lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];if(p){const real=p.custom?T.benched||p:p;releasePlayer(S.you,real.signedFor||real.name,lnSel<0);applyDefense();updateHUD()}lfFlip=null;lineupRender();return}
+  if(e.target.closest('.lfMoveB')){lfMove=!lfMove;lineupRender();return}
+  const sg=e.target.closest('[data-sign]');
+  if(sg&&lnSel!=null){const pit=lnSel<0,p=pit?T.staff[-1-lnSel]:T.lineup[lnSel],real=p.custom?T.benched||p:p;
+   if(signPlayer(S.you,real.signedFor||real.name,sg.dataset.sign,pit)){applyDefense();updateHUD();try{sfx('glove')}catch(_){}}lfFlip=null;lfMove=false;lineupRender();return}}
  const b=e.target.closest('.lfc');if(!b)return;
- if(b.classList.contains('deck')){if(b.disabled||lnSel==null){if(!b.disabled&&lnSel==null){b.classList.add('nudge');setTimeout(()=>b.classList.remove('nudge'),300)}return}
-  const T=TEAMS[S.you],pit=lnSel<0,p=pit?T.staff[-1-lnSel]:T.lineup[lnSel],real=p.custom?T.benched||p:p;
-  if(signPlayer(S.you,real.signedFor||real.name,b.dataset.id,pit)){applyDefense();updateHUD();try{sfx('glove')}catch(_){}}lnSel=null;lineupRender();return}
+ if(b.classList.contains('deck')){const fk='d'+b.dataset.id;
+  /* a tray card flips on its own, keeping the picked-up field player's card turned too */
+  b.classList.toggle('flip');document.querySelectorAll('.lfTray .lfc.flip').forEach(x=>{if(x!==b)x.classList.remove('flip')});return}
  const i=+b.dataset.i;
- if(lnSel===i){lnSel=null}
- else if(lnSel!=null&&lnSel>=0&&i>=0){const L=TEAMS[S.you].lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}applyDefense();updateHUD();lnSel=null}
- else lnSel=i;
- lineupRender()});
+ if(lnView==='mine'&&lfMove&&lnSel!=null&&lnSel>=0&&i>=0&&i!==lnSel){const L=T.lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}applyDefense();updateHUD();lfMove=false;lfFlip=null;lineupRender();return}
+ const fk='f'+i;lfFlip=lfFlip===fk?null:fk;lfMove=false;lineupRender()});
 // ---------- title picker ----------
 function buildPicker(){
  const mk=(id,key)=>{$(id).innerHTML=TS_ORDER.map(t=>`<button type="button" class="chip" data-t="${t}"><img alt="" src="${LOGO_URL[t]}"><span class="c">${TEAMS[t].city}</span><span class="n">${TEAMS[t].name}</span><span class="c kr">${TEAMS[t].kcity} ${TEAMS[t].kname}</span></button>`).join('');
@@ -5732,7 +5789,7 @@ function buildCardDB(){
  for(const c of buildBigLeague()){CARDS.push(c);CARD_BY[c.id]=c}
 }
 const ART={};
-function cardArt(c){if(ART[c.id])return ART[c.id];try{return ART[c.id]=cardArt2(c)}catch(e){}
+function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key];try{return ART[key]=cardArt2(c,tk)}catch(e){console.warn(e)}
  const T=c.T||TEAMS[c.k],ST2=c.set==='bl'?BL_PARK:STADIUMS[c.k],p=c.p,cv2=document.createElement('canvas');cv2.width=64;cv2.height=80;const g=cv2.getContext('2d');
  const rr=mulberry32(hash(c.id+'art'));
  // backdrop: crowd, wall, grass, dirt where he plays
@@ -5881,20 +5938,29 @@ function buildBigLeague(){const out=[];
 // Every player gets an original cartoon figure: pose from his ratings, face/hair/beard from a hash of his card id.
 function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;
  const m=v=>Math.max(0,Math.min(255,Math.round(f<0?v*(1+f):v+(255-v)*f)));return'#'+((1<<24)+(m(r)<<16)+(m(g)<<8)+m(b)).toString(16).slice(1)}
-function cardArt2(c){
+/* the plain kit every card wears until he's put in a lineup */
+const CARD_KIT={jersey:'#dfe3e8',cap:'#4b535c'};
+/* rarity backdrops: common gray, rare blue, epic purple, legend a soft chrome rainbow */
+function cardBack(g,r,G,GH,R,P){
+ if(r>=3){const band=['#ffd1dc','#ffe9b8','#fff8c9','#d4f7d0','#c9ecff','#d9d2ff','#f6d0ff'];
+  for(let y=0;y<GH;y++)for(let x=0;x<G;x++){const k=Math.floor(((x+y*.8)/6))%band.length;P(x,y,band[(k+band.length)%band.length])}
+  for(let y=0;y<GH;y++)for(let x=0;x<G;x++)if(((x+y)%9)===0)P(x,y,'rgba(255,255,255,.55)');
+  for(let y=0;y<GH;y++){g.fillStyle=`rgba(255,255,255,${(.32*(1-Math.abs(y-12)/16)).toFixed(3)})`;if(Math.abs(y-12)<16)g.fillRect(0,y,G,1)}
+ }else{const pal=[['#8d959c','#7b838a','#a3aab0'],['#3f7fd6','#3170c4','#5c97e6'],['#8b55d6','#7743c2','#a476e6']][r];
+  for(let y=0;y<GH;y++)R(0,y,G,1,(y>>2)&1?pal[0]:pal[1]);
+  for(let y=1;y<GH;y+=4)for(let x=(y>>2)&1?0:2;x<G;x+=4)P(x,y,pal[2])}
+ g.fillStyle='rgba(0,0,0,.22)';g.fillRect(8,35,16,2);g.fillRect(10,37,12,1)}
+function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in front of its park; none = a plain kit on his rarity colour */
  // chibi style: a 32x40 pixel sprite (big head, tiny body) blown up 4x, every pixel crisp
  const G=32,GH=40,L=document.createElement('canvas');L.width=G;L.height=GH;const g=L.getContext('2d');
  const F=document.createElement('canvas');F.width=G;F.height=GH;const f=F.getContext('2d');// the figure, outlined separately
- const p=c.p,T=c.T||TEAMS[c.k],bl=c.set==='bl',rr=mulberry32(hash(c.id+'chibi'));
+ const p=c.p,T=tk?TEAMS[tk]:CARD_KIT,bl=!!tk&&false,rr=mulberry32(hash(c.id+'chibi'));
  const R=(x,y,w,h,col,ctx)=>{(ctx||g).fillStyle=col;(ctx||g).fillRect(x|0,y|0,w|0,h|0)},P=(x,y,col,ctx)=>R(x,y,1,1,col,ctx);
  // ---- backdrop ----
- if(bl){R(0,0,G,17,'#141c44');R(0,0,G,5,'#0c1230');for(let k=0;k<8;k++)P(rr()*G,rr()*6,'#e9ecf7');
-  for(const lx of[4,27]){R(lx-2,1,5,2,'#e6e8f0');P(lx-1,1,'#fff6c8');P(lx+1,1,'#fff6c8')}
-  for(let y=7;y<17;y++)for(let x=(y&1);x<G;x+=2)if(rr()<.6)P(x,y,['#4f6aa8','#c94a3a','#e8e4dc','#7a86a6',T.jersey,T.cap][Math.floor(rr()*6)]);
- }else{const ST2=STADIUMS[c.k];R(0,0,G,17,ST2.seat[0]);for(let y=1;y<17;y++)for(let x=(y&1);x<G;x+=2)if(rr()<.55)P(x,y,['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f1ecdc',T.jersey,T.cap][Math.floor(rr()*7)])}
- const ST3=bl?BL_PARK:STADIUMS[c.k];R(0,17,G,2,ST3.pad);R(0,19,G,1,ST3.pad2);
- for(let y=20;y<GH;y++)R(0,y,G,1,ST3.grass[((y-20)>>2)&1]);
- if(c.pit){R(5,31,22,9,'#c48c56');R(8,30,16,1,'#c48c56');R(13,34,6,1,CREAM)}else{R(0,32,G,8,'#c48c56');R(2,34,1,6,CREAM);R(2,34,9,1,CREAM)}
+ if(tk){const ST2=STADIUMS[tk]||BL_PARK;R(0,0,G,17,ST2.seat[0]);for(let y=1;y<17;y++)for(let x=(y&1);x<G;x+=2)if(rr()<.55)P(x,y,['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f1ecdc',T.jersey,T.cap][Math.floor(rr()*7)]);
+  R(0,17,G,2,ST2.pad);R(0,19,G,1,ST2.pad2);for(let y=20;y<GH;y++)R(0,y,G,1,ST2.grass[((y-20)>>2)&1]);
+  if(c.pit){R(5,31,22,9,'#c48c56');R(8,30,16,1,'#c48c56');R(13,34,6,1,CREAM)}else{R(0,32,G,8,'#c48c56');R(2,34,1,6,CREAM);R(2,34,9,1,CREAM)}}
+ else cardBack(g,c.r,G,GH,R,P);
  g.fillStyle='rgba(8,20,14,.35)';g.fillRect(9,36,14,1);
  // ---- the chibi ----
  const lefty=p.hand==='L',hd=hash(c.id+'face'),sk=p.skin||skinOf(p.name),sk2=shade(sk,-.16);
@@ -7033,7 +7099,7 @@ $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;const se=S
  if(se&&se.done){S.series={len:se.len,w:0,l:0};drawOpp();withLoading(()=>{startGame('arcade');render(performance.now())});return}startGame(S.mode)});
 // ---- arcade game day: series length and the lineup, on the lineup screen, before the first pitch ----
 let pregame=false;
-function openPregame(){pregame=true;lnView='mine';lnSel=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=`vs ${o.city} ${o.name}`;
+function openPregame(){pregame=true;lnView='mine';lnSel=null;lfFlip=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=`vs ${o.city} ${o.name}`;
  const n=(S.series&&S.series.len)||1;for(const b of $('lnSeries').children)b.setAttribute('aria-pressed',String(+b.dataset.n===n));$('lnPre').hidden=false;showScreen('scrLineup')}
 $('lnSeries').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const c of $('lnSeries').children)c.setAttribute('aria-pressed',String(c===b))});
 $('lnPlay').addEventListener('click',()=>{const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
