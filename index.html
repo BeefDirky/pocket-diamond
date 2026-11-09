@@ -5,7 +5,7 @@
 <!-- Vercel Web Analytics (counts visits once Analytics is enabled for the project in the Vercel dashboard) -->
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 </head><body>
-<div id="splash" role="status" aria-label="Loading Pocket Diamond"><style>#splash{position:fixed;inset:0;z-index:2147483000;background:#0a0b0c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;transition:opacity .45s ease}#splash.gone{opacity:0;pointer-events:none}#splash img{width:180px;max-width:46vw;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}#splash span{font:400 13px Silkscreen,"Courier New",monospace;letter-spacing:.32em;color:#f4f1e8;opacity:.8;padding-left:.32em}</style><img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAVCAYAAADSM2daAAAAnUlEQVR42tWXsRKAIAxDTWbvXP3/r2Pljh1XFxXaBoTd5l3aQMVmOCWnugWd/TjR+w1nAlvrYRasx3GqgHvbXnKqrTqc7bBFj38CbtWFAvY+GpG1Hp2OFrFcaV88VAKrwOGFtQB59fBWwOuQKoxrOj1ipqNrU510hRlUJ13RPShnT5UVRodsxMZHxe2gXlGX3Kcx+8/F0k2OeEyi612GFoOFFqOcAgAAAABJRU5ErkJggg==" width="45" height="21"><span>AN IMUGI LABS GAME</span></div>
+<div id="splash" role="status" aria-label="Loading Pocket Diamond"><style>#splash{position:fixed;inset:0;z-index:2147483000;background:#0a0b0c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .6s ease}#splash.gone{opacity:0;pointer-events:none}#splash svg{width:150px;max-width:40vw;height:auto;display:block}#splash span{font:500 12px ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;letter-spacing:.34em;color:#f1f2f3;opacity:.72;padding-left:.34em}#splash svg,#splash span{opacity:0;animation:spIn .9s ease forwards}#splash span{animation-delay:.25s}@keyframes spIn{from{opacity:0;transform:translateY(6px)}to{opacity:var(--o,1);transform:none}}#splash span{--o:.72}</style><svg viewBox="0 0 362 173" aria-hidden="true"><path fill="#f1f2f3" fill-rule="evenodd" d="M0 86.5 L110 0 L251 0 L362 86.5 L251 173 L110 173Z M181.0 17.5 L181.6 21.0 L182.5 25.6 L184.0 32.2 L186.0 39.1 L189.0 46.9 L193.0 54.3 L198.0 60.6 L204.0 65.8 L211.0 70.0 L221.0 74.1 L233.0 77.3 L247.0 79.8 L263.0 81.7 L281.0 83.2 L301.0 84.4 L323.0 85.3 L343.0 86.0 L362.0 86.5 L343.0 87.0 L323.0 87.7 L301.0 88.6 L281.0 89.8 L263.0 91.3 L247.0 93.2 L233.0 95.7 L221.0 98.9 L211.0 103.0 L204.0 107.2 L198.0 112.4 L193.0 118.7 L189.0 126.1 L186.0 133.9 L184.0 140.8 L182.5 147.4 L181.6 152.0 L181.0 155.5 L180.4 152.0 L179.5 147.4 L178.0 140.8 L176.0 133.9 L173.0 126.1 L169.0 118.7 L164.0 112.4 L158.0 107.2 L151.0 103.0 L141.0 98.9 L129.0 95.7 L115.0 93.2 L99.0 91.3 L81.0 89.8 L61.0 88.6 L39.0 87.7 L19.0 87.0 L0.0 86.5 L19.0 86.0 L39.0 85.3 L61.0 84.4 L81.0 83.2 L99.0 81.7 L115.0 79.8 L129.0 77.3 L141.0 74.1 L151.0 70.0 L158.0 65.8 L164.0 60.6 L169.0 54.3 L173.0 46.9 L176.0 39.1 L178.0 32.2 L179.5 25.6 L180.4 21.0Z"/></svg><span>AN IMUGI LABS GAME</span></div>
 <title>Pocket Diamond</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -7314,9 +7314,11 @@ function bpPop(open){const bar=document.getElementById('bpBar'),home=document.ge
  else if(bar.parentNode!==home){home.appendChild(bar);bar.classList.remove('bpFloat')}}
 document.addEventListener('click',e=>{if(e.target.closest('#bpPickBtn')){e.stopPropagation();bpPop(!document.body.classList.contains('bpPopOpen'))}},true);
 document.getElementById('bpScrim').addEventListener('pointerdown',e=>{e.stopPropagation();bpPop(false)});
-// ---------- the Imugi Labs splash: it paints before anything else loads, and fades out once the game has drawn its first frame ----------
-{const sp=document.getElementById('splash');if(sp){const go=()=>{sp.classList.add('gone');setTimeout(()=>sp.remove(),600)};
- requestAnimationFrame(()=>requestAnimationFrame(go));setTimeout(go,8000)/* never stuck behind it */}}
+// ---------- the Imugi Labs splash: it paints before anything else loads, fades in, and fades out once the game has drawn
+// its first frame (held at least long enough for the fade-in to finish so it never just flickers) ----------
+{const sp=document.getElementById('splash');if(sp){const t0=performance.now();let done=false;
+ const go=()=>{if(done)return;done=true;sp.classList.add('gone');setTimeout(()=>sp.remove(),700)};
+ requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(go,Math.max(0,1100-(performance.now()-t0)))));setTimeout(go,8000)}}
 </script>
 <script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>
 </body></html>
