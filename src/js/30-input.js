@@ -36,7 +36,7 @@ const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTIN
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}
 function updateOppLine(){const o=TEAMS[S.opp];$('oppLine').innerHTML=pendingMode==='online'?'Your friend picks their own club when they join.':pendingMode==='playoffs'?'Seven other clubs are drawn into the bracket with you.':parkFromBP?'Pick a club: you hit in their park, with their hitters.':pendingMode==='bp'?'Batting practice: just you, the machine and an empty park.':`Opponent (random): <b>${o.city} ${o.name}</b>`}
 function chooseMode(m){ensureAudio();if(S.online&&!S.online.inGame){const o=S.online;if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null}pendingMode=m;if(S.opp===S.you||m!=='bp')drawOpp();updateOppLine();$('playGo').hidden=false;$('playGo').textContent=m==='online'?'TO THE LOBBY':m==='bp'?'START PRACTICE':m==='playoffs'?'TO THE BRACKET':m==='watch'?'WATCH':'PLAY BALL';
- document.querySelector('#scrTeams h1').innerHTML=`${MODE_NAME[m]}<small>PICK YOUR CLUB</small>`;showScreen('scrTeams')}
+ document.querySelector('#scrTeams h1').innerHTML=`${MODE_NAME[m]}<small>SELECT YOUR TEAM</small>`;showScreen('scrTeams')}
 $('go').addEventListener('click',()=>chooseMode('arcade'));
 $('goFull').addEventListener('click',()=>chooseMode('full'));
 $('goBP').addEventListener('click',()=>chooseMode('bp'));
@@ -101,9 +101,9 @@ document.addEventListener('pointerdown',e=>{if(!(S.phase==='windup'&&pitching()&
 requestAnimationFrame(frame);
 })();
 
-// every menu card closes from an X in its top-right corner instead of a Back button at the bottom of a long scroll
+// every menu card goes back from an arrow in its top-left corner instead of a Back button at the bottom of a long scroll
 function addCloseX(){for(const back of document.querySelectorAll('#title .card .mbtn.back')){const card=back.closest('.card');if(!card||card.querySelector(':scope>.xClose'))continue;
-  const x=document.createElement('button');x.type='button';x.className='xClose';x.setAttribute('aria-label',back.textContent.trim()||'Close');x.textContent='✕';
+  const x=document.createElement('button');x.type='button';x.className='xClose xBack';x.setAttribute('aria-label',back.textContent.trim()||'Back');x.innerHTML='<svg viewBox="0 0 8 8" aria-hidden="true"><path fill="currentColor" d="M3 1h1v1H3zM2 2h1v1H2zM1 3h6v2H1zM2 5h1v1H2zM3 6h1v1H3z"/></svg>';
   x.addEventListener('click',e=>{e.stopPropagation();back.click()});card.prepend(x);card.classList.add('hasX');back.hidden=true}}
 
 // batting practice on a phone: the machine's pitch menu is a pop-up, opened from the pitcher box

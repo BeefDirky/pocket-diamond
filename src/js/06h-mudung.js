@@ -21,7 +21,14 @@ const MC=(()=>{const h=hRGB;return{
  road:h('#55595e'),rk:h('#8e8a82'),rk2:h('#a9a59c'),rkD:h('#4c4944'),trail:h('#a8987a'),trail2:h('#988a6e'),step:h('#6a7a50')}})();
 H_TCOL.autumn=['#8a3418','#c4521e','#e4862e','#ffd070'];H_TCOL.autumnN=['#3a1a10','#4a2214','#5a2c18','#7a4a2a'];
 H_TCOL.maple=['#7a1c16','#a8281e','#d0442a','#ff9a6a'];H_TCOL.mapleN=['#34120e','#421812','#521e16','#703a2a'];
-function hAutumn(g,x,y,r,night,red){hTreeTop(g,x,y,r,H_TCOL[(red?'maple':'autumn')+(night?'N':'')])}
+function hAutumn(g,x,y,r,night,red){mCrown(g,x,y,r,H_TCOL[(red?'maple':'autumn')+(night?'N':'')])}
+// a tree from above as a lumpy cluster of leaf clumps (dark under, lit toward the upper left), its shadow down and right
+function mCrown(g,x,y,r,cols){const h=vHash(Math.round(x*3),Math.round(y*3)),[dk,md,lt,hi]=cols,b=(cx,cy,rr,c)=>{g.fillStyle=c;g.beginPath();g.arc(Math.round(cx),Math.round(cy),Math.max(1,rr),0,7);g.fill()};
+ g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.ellipse(x+r*.5,y+r*.55,r*1.05,r*.9,0,0,7);g.fill();
+ const n=5+(h&3);for(let k=0;k<n;k++){const a=k*6.283/n+(h>>>4&7)*.3,d=r*(.45+((h>>>(8+k))&1)*.15);b(x+Math.cos(a)*d,y+Math.sin(a)*d,r*.5,dk)}b(x,y,r*.7,dk);
+ for(let k=0;k<n;k++){const a=k*6.283/n+(h>>>4&7)*.3+.4,d=r*.36;b(x+Math.cos(a)*d-r*.12,y+Math.sin(a)*d-r*.12,r*.38,md)}
+ for(let k=0;k<3;k++){const a=3.6+k*.7,d=r*.34;b(x+Math.cos(a)*d,y+Math.sin(a)*d,r*.26,lt)}
+ g.fillStyle=hi;for(let k=0;k<4;k++){const a=((h>>>(12+k*3))&7)/8*6.283,d=r*(.2+((h>>>(24+k))&1)*.35);g.fillRect(Math.round(x-r*.2+Math.cos(a)*d),Math.round(y-r*.2+Math.sin(a)*d),1,1)}}
 H_PCOL.push(['#c0262a','#f4f1e8'],['#2a2a30','#f4f1e8']);// (5, 6): the Cats' red and charcoal umbrellas
 // ---- the bowl's facade: red brick between pale stone pilasters, glass bands a floor at a time, a red line and stone coping on top ----
 function mBrick(u,v){const ch=1.4,row=Math.floor(v/ch),off=(row&1)*1.4,fv=((v%ch)+ch)%ch,fu=(((u+off)%2.8)+2.8)%2.8;
@@ -33,7 +40,7 @@ function mFacade(k,T,sF){
  const SEC=46,m=((sF%SEC)+SEC)%SEC,v=k-2.4,fl=((v%5.2)+5.2)%5.2,band=Math.floor(v/5.2);
  if(m<6.5){if(m>5.8)return MC.sS;return mStone(sF,k,false)}// a pale stone pilaster, its shaded return
  if(fl<.9)return fl<.45?MC.cop:MC.st;// a stone string course and its steel band
- const wm=m-6.5;if(fl>1.3&&fl<4.4&&wm>1.4&&wm<SEC-6.5-1.4){if(((wm%3.4)+3.4)%3.4<.4)return MC.st;// glass, mullions every few feet
+ const wm=m-6.5,bw=((wm%8)+8)%8;if(fl>1.5&&fl<4&&bw>1.6&&bw<6.8&&wm<SEC-6.5-1){if(Math.abs(bw-4.2)<.25)return MC.st;if(bw<2)return MC.brD;// tall windows in brick bays, each with its recess and a mullion
   H_EMIS=H_NIGHT;if(H_NIGHT){const dim=(vHash(Math.floor(sF/SEC),band)&7)===0;const c=dim?hMul(MC.glN,.42):fl>3.9?MC.glNH:band&1?MC.glN2:MC.glN;return c}
   return fl<1.8||wm<2?MC.gl2:(sF*.09+fl*.25)%1<.13?MC.glR:MC.gl}
  return mBrick(sF,k)}
@@ -70,6 +77,8 @@ function mCols(u,v,v0,v1,sd,hm){
  // the recesses between the columns
  const lc=vHash(Math.floor(u/3)+sd,Math.floor(v/3));if(lc%13===0){if(H_NIGHT){H_EMIS=true;return MC.sAcc}return MC.sR2}
  return MC.sR}
+// the same, with shrubs and moss planted in the recesses
+function mColsP(u,v,v0,v1,sd,hm){const c=mCols(u,v,v0,v1,sd,hm);if(c!==MC.sR)return c;const pl=vHash(Math.floor(u/3.5)+sd,Math.floor(v/3.5)+7);return pl%5<2?((pl>>>4)&1?MC.hed2:MC.hed):pl%5===2?MC.fo2:MC.sR}
 // ---- left field: the Mudeungsan stone terrace, stepping up from the wall ----
 const M_T={plat:[2.4,14],r1:[14,24],t2:[24,34],r2:[34,44],t3:[44,56],big:56};
 function mPave(s,a,warm){const row=Math.floor(a/3),off=(row&1)*3,fu=(((s+off)%6)+6)%6;if((((a%3)+3)%3)<.28||fu<.28)return MC.pvJ;
@@ -79,14 +88,18 @@ function mTerr(a,s,wx,wy,th){
  const stair=((s%74)+74)%74<5.5;
  if(a<M_T.plat[1]){if(Math.abs(a-12.6)<.5&&((s%26)+26)%26<1){H_EMIS=H_NIGHT;return MC.sAcc}// lamp posts along the back
   if(a<3.2)return MC.st;const p=vPerson(wx,wy,18);if(p)return p;return mPave(s,a,false)}
- if(a<M_T.r1[1]){if(stair)return (Math.floor(a/1.1)&1)?MC.pv:MC.pvJ;const c=mCols(s,a,M_T.r1[0],M_T.r1[0]+6.5,11,1.4);if(c)return c}
- if(a<M_T.t2[1]){if(a>32.8){if(((s%26)+26)%26<1&&H_NIGHT){H_EMIS=true;return MC.sAcc}return MC.st}// a rail at the back of the path
+ if(a<M_T.r1[1]){if(stair)return (Math.floor(a/1.1)&1)?MC.pv:MC.pvJ;const c=mColsP(s,a,M_T.r1[0],M_T.r1[0]+6.5,11,1.4);if(c)return c}
+ if(a<M_T.t2[1]){if(a>29.6&&a<32.6){const v=vHash(Math.floor(wx/2),Math.floor(wy/2));if(a<30.2)return MC.sS2;return v%7===0?MC.au2:v&1?MC.hed2:MC.fo2}// a planted bed along the back
+  if(a>32.8){if(((s%26)+26)%26<1&&H_NIGHT){H_EMIS=true;return MC.sAcc}return MC.st}// a rail at the back of the path
   const p=vPerson(wx,wy,9);if(p)return p;return mPave(s,a,true)}
- if(a<M_T.r2[1]){if(((s+37)%74+74)%74<5.5)return (Math.floor(a/1.1)&1)?MC.pv:MC.pvJ;const c=mCols(s,a,M_T.r2[0],M_T.r2[0]+6.5,23,1.8);if(c)return c}
+ if(a<M_T.r2[1]){if(((s+37)%74+74)%74<5.5)return (Math.floor(a/1.1)&1)?MC.pv:MC.pvJ;const c=mColsP(s,a,M_T.r2[0],M_T.r2[0]+6.5,23,1.8);if(c)return c}
  if(a<M_T.t3[1]){if(a<44)return mPave(s,a,true);if(a<44.6)return MC.st;const p=vPerson(wx,wy,12);if(p)return p;return mPave(s,a,false)}
  // the big formation: rows of taller columns, a winding path climbing through it
  const pth=Math.abs(((s+(a-56)*1.1)%96+96)%96-48);if(pth<2.4)return pth<.5?MC.trail2:((Math.floor(a/1.3))&1)?MC.pvW:MC.pvW2;
- const c=mCols(s,a,M_T.big,M_T.big+39,37,2.6);if(c)return c;return MC.sR}
+ {const pm=((s%132)+132)%132;if(pm>70&&pm<92&&a>64&&a<77){const e=Math.min(pm-70,92-pm,a-64,77-a);if(e<.6)return MC.st;if(e<1.2)return MC.cop;const p=vPerson(wx,wy,22);if(p)return p;return mPave(s,a,true)}// a viewing platform out on the rocks
+  if(pm>69&&pm<93&&a>77&&a<78.4)return MC.sS2}
+ const c=mCols(s,a,M_T.big,M_T.big+39,37,2.6);if(c&&c!==MC.sR&&c!==MC.sR2)return c;if(c===MC.sR2)return c;
+ const pl=vHash(Math.floor(s/4)+9,Math.floor(a/4));return pl%5<2?((pl>>>4)&1?MC.hed2:MC.hed):pl%5===2?MC.fo2:MC.sR}// shrubs and moss planted in the gaps
 // ---- right field: the hospitality complex ----
 // buildings by angle: [from, to, front roof, front floors, where the front part ends, its roof, total floors at the back, back]
 // the front part is low (a glass pavilion, rooftop terraces over restaurants, a metal-roofed lounge); a taller block rises behind it
@@ -125,6 +138,11 @@ function mHosp(a,s,wx,wy,th,r){
    const v=a-5,fl=((v%2.4)+2.4)%2.4;if(fl>.9&&fl<1.9&&((Math.floor(v/2.4))&1)===0){H_EMIS=H_NIGHT;return H_NIGHT?hMul(MC.glN,.7):MC.gl2}return ((Math.floor(v/1.2))&1)?MC.brD:MC.brM}
   if(e>=wB+sw&&e<wB+sw+2*(a<aM?F1:F2)&&a>=5&&a<aE)shade=.6;// its shadow on the ground
   if(e>=0&&e<wB&&a>=aE&&a<aE+1.4*F2)shade=.6}
+ // the walks between the buildings: planters down the middle, café tables, lights strung across overhead
+ for(let bi=0;bi<M_RB.length-1;bi++){const gm=(M_RB[bi][1]+M_RB[bi+1][0])/2,eg=(th-gm)*RAD*r;if(Math.abs(eg)<5&&a>5&&a<Math.min(M_RB[bi][7],M_RB[bi+1][7])){
+  const am=((a%13)+13)%13;if(Math.abs(eg)<1.5&&am<4){if(Math.abs(eg)>1.1||am<.4||am>3.6)return hMul(MC.cop,shade);const v=vHash(Math.floor(wx/2),Math.floor(wy/2));return hMul(v&1?MC.hed2:MC.fo2,shade)}
+  if(((a%3)+3)%3<.3&&(Math.floor(eg*2)&1)){if(H_NIGHT){H_EMIS=true;return MC.sAcc}}
+  if(Math.abs(eg)>2.2&&am>6&&am<9&&Math.abs(Math.abs(eg)-3.4)<.8)return hMul(MC.cop,shade*.95)}}
  // the walks between and behind the buildings
  const p=vPerson(wx,wy,9);if(p)return shade<1?hMul(p,shade):p;const c=mPave(s,a,false);return shade<1?hMul(c,shade):c}
 // ---- the centre: a planted batter's eye, a stone ledge, then the board's terrace and the foot of the mountain ----
@@ -135,11 +153,17 @@ function mCentre(a,s,wx,wy){
   const p=vPerson(wx,wy,6);if(p)return p;return mPave(s,a,false)}
  return null}
 // ---- Mudeungsan: forest from above, autumn colour through it, terraces, trails and outcrops of columnar rock ----
-function mTree(wx,wy){const cs=15,i=Math.floor(wx/cs),j=Math.floor(wy/cs),h=vHash(i+501,j+77);const cx=(i+.5)*cs+((h&7)-3.5),cy=(j+.5)*cs+(((h>>>3)&7)-3.5),r=6+(h>>>6&3);
- const dx=wx-cx,dy=wy-cy,d2=dx*dx+dy*dy,au=(h>>>9)%14;if(d2<r*r){const l=dx+dy;
-  if(au===0)return l<-r*.5?MC.auR3:l>r*.6?MC.auR1:MC.auR2;if(au<2)return l<-r*.5?MC.au3:l>r*.6?MC.au1:MC.au2;
-  return l<-r*.5?MC.fo3:l>r*.6?MC.fo1:MC.fo2}
- const sx=dx-3,sy=dy-3;if(sx*sx+sy*sy<r*r)return hMul(MC.foG,.85);return MC.foG}
+function mTree(wx,wy){const cs=12,i0=Math.floor(wx/cs),j0=Math.floor(wy/cs);let best=-1e9,bh=0,bdx=0,bdy=0,br=1;
+ for(let di=-1;di<=1;di++)for(let dj=-1;dj<=1;dj++){const i=i0+di,j=j0+dj,h=vHash(i+501,j+77),r=4.5+((h>>>8)&3)+(((h>>>10)&3)===3?2.5:0),
+   cx=(i+.5)*cs+(((h&15)-7.5)*.75),cy=(j+.5)*cs+((((h>>>4)&15)-7.5)*.75),dx=wx-cx,dy=wy-cy,d2=dx*dx+dy*dy;
+  if(d2<r*r){const z=r-Math.sqrt(d2)*.55+((h>>>12)&3)*.4;if(z>best){best=z;bh=h;bdx=dx;bdy=dy;br=r}}}
+ if(best>-1e9){const l=(bdx+bdy)/br,d=Math.hypot(bdx,bdy)/br,grove=Math.sin(wx*.009+.7)*Math.sin(wy*.011-1.1)+.6*Math.sin(wx*.021-wy*.016),p=(bh>>>14)%100,
+   au=grove>1?(p<55?2:p<75?1:0):grove>.55?(p<18?2:p<28?1:0):(p<3?1:p<5?2:0);
+  const C=au===2?[MC.au3,MC.au2,MC.au1]:au===1?[MC.auR3,MC.auR2,MC.auR1]:[MC.fo3,MC.fo2,MC.fo1];
+  if(d>.86)return hMul(C[2],.86);// the crown's shaded rim
+  if(l<-.55&&((bh>>>20)&1)&&d<.5)return hMul(C[0],1.08);return l<-.35?C[0]:l>.45?C[2]:C[1]}
+ // the ground under the canopy: dark, with the crowns' shadows falling down and to the right
+ return (vHash(Math.floor((wx-3)/4),Math.floor((wy-3)/4))&3)?MC.foG:hMul(MC.foG,.8)}
 function mMtn(x,y,wx,wy,d){
  if(d<7){if(d<1.2)return MC.st;const p=vPerson(wx,wy,8);if(p)return p;return mPave(x+y,d,true)}// a path round the foot of the hill
  // terraces stepping up the slope: a low stone edge every so often along the contour
@@ -147,7 +171,10 @@ function mMtn(x,y,wx,wy,d){
  // trails switching back up the hill
  const tu=x+38*Math.sin(y*.016)+18*Math.sin(y*.041),tm=Math.abs(((tu%210)+210)%210-105);if(tm<2.2&&d>8)return tm<.6?MC.trail2:MC.trail;
  // outcrops of columnar rock, more of them higher up
- const n=Math.sin(x*.012+1.7)*Math.sin(y*.015-.4)+.55*Math.sin(x*.031+y*.022)+.3*Math.sin(x*.07-y*.05);if(n>1.32-clamp((d-160)/600,0,.14)){const c=mCols(x,y,-1e5,1e5,71,2.4);return c===MC.sT||c===MC.sTH?MC.rk2:c===MC.sT2?MC.rk:c===MC.sF||c===MC.sF2?hMul(MC.rk,.82):c===MC.sAcc?MC.sAcc:MC.rkD}
+ const n=Math.sin(x*.012+1.7)*Math.sin(y*.015-.4)+.55*Math.sin(x*.031+y*.022)+.3*Math.sin(x*.07-y*.05)+.16*Math.sin(x*.19+y*.13)*Math.sin(x*.11-y*.21),thr=1.22-clamp((d-160)/600,0,.14);
+ if(n>thr&&n<thr+.025)return MC.rkD;// the outcrop's broken edge in shadow
+ if(n>thr+.025&&n<thr+.07){const t=mTree(wx,wy);if(t!==MC.foG&&t[0]!==(MC.foG[0]*.8|0))return t}// trees crowding over it
+ if(n>thr){const c=mCols(x,y,-1e5,1e5,71,2.4);return c===MC.sT||c===MC.sTH?MC.rk2:c===MC.sT2?MC.rk:c===MC.sF||c===MC.sF2?hMul(MC.rk,.82):c===MC.sAcc?MC.sAcc:MC.rkD}
  const c=mTree(wx,wy);return band?hMul(c,.8):c}
 function mudungCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
  if(!fair||q<0){if(fair)return null;
@@ -161,9 +188,11 @@ function mudungCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
  const c=mCentre(a,s,wx,wy);if(c)return c;return mMtn(x,y,wx,wy,a-30)}
 function mRingD(x,y){const phi=Math.atan2(x-H_CC.x,y-H_CC.y)/RAD,f=phi+180,i=Math.floor(f)%360,j=(i+1)%360,R=B_OR[i]+(B_OR[j]-B_OR[i])*(f-Math.floor(f));return Math.max(0,Math.hypot(x-H_CC.x,y-H_CC.y)-R)}
 // ---- shapes past the wall: autumn trees on the terrace paths, concession huts, the terrace's sign, umbrellas on the rooftops ----
+function mClear(p,rad){const fx=(p.x-HX)*FT,fy=(HY-p.y)*FT;return![[0,0],[rad,0],[-rad,0],[0,rad],[0,-rad]].some(([dx,dy])=>{const X=fx+dx,Y=fy+dy,ph=hPhi(X,Y);return hD(ph)>8&&Math.hypot(X-H_CC.x,Y-H_CC.y)<hRout(ph)+4})}
 function mDecor(g){
- for(let th=-43;th<-11;th+=4.6){const p=oXY(th,28+((Math.round(th*3)&3)-1.5)*.8);hAutumn(g,p.x,p.y,7,false,(Math.round(th*7)%3)===0)}
- for(let th=-41;th<-12;th+=7.4){const p=oXY(th+2.2,51);hAutumn(g,p.x,p.y,8,false,(Math.round(th)%2)===0)}
+ for(let th=-43;th<-11;th+=5.2){const p=oXY(th,29+((Math.round(th*3)&3)-1.5)*.8);if(!mClear(p,14))continue;hAutumn(g,p.x,p.y,10,false,(Math.round(th*7)%3)===0);if(Math.round(th*3)%2===0)hGreenTree(g,p.x+9,p.y+5,6,false)}
+ for(let th=-41;th<-12;th+=7.4){const p=oXY(th+2.2,52);if(!mClear(p,14))continue;hAutumn(g,p.x,p.y,11,false,(Math.round(th)%2)===0)}
+ for(let th=-42;th<-12;th+=6.1){const p=oXY(th+1,86+((Math.round(th*5)&3)-1.5));if(!mClear(p,14))continue;hAutumn(g,p.x,p.y,9,false,true)}
  // concession huts on the upper promenade: a dark steel roof with a light ridge, a red awning over a lit counter
  for(const th of[-38.5,-27.8,-17.6]){const p=oXY(th,49);g.save();g.translate(p.x,p.y);g.rotate(th*RAD);
   g.fillStyle='rgba(0,0,0,.3)';g.fillRect(-9,-4,22,12);g.fillStyle='#3a3e45';g.fillRect(-11,-6,22,10);g.fillStyle='#6a707a';g.fillRect(-11,-2,22,1);g.fillStyle='#4e535b';g.fillRect(-11,-6,22,1);
@@ -173,7 +202,8 @@ function mDecor(g){
   g.fillStyle='#f4f1e8';g.font='bold 8px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('무등 STONE TERRACE',0,.5,68);g.restore()}
  // umbrellas on the rooftop terraces, trees along the walks behind the buildings
  for(const[t0,t1,k1,F1,aM,k2,F2,aE]of M_RB){let n=0;const um=(A0,A1)=>{for(let a=A0;a<A1;a+=8.5)for(let th=t0+1.6;th<t1-1;th+=2.6,n++){const p=oXY(th,a);hParasol(g,p.x,p.y,n&1?6:5,.5)}};if(k1==='terr')um(5+2.4*F1+5,aM-4);if(k2==='terr')um(aM+2.4*(F2-F1)+5,aE-4)}
- for(const th of[17,27.2,34])for(const a of[14,34,56]){const p=oXY(th,a);hGreenTree(g,p.x,p.y,5,false)}
+ 
+ for(const[t0,t1,k1,F1,aM,k2,F2,aE]of M_RB)for(let th=t0+1.5;th<t1;th+=3.1){for(let a=aE+9;a<B_LIM()-9;a+=11){const p=oXY(th+((Math.round(a)&1)?1:0),a);if(!mClear(p,14))continue;(Math.round(th*a)%4===0?hAutumn:(g2,x,y,r,n)=>mCrown(g2,x,y,r,H_TCOL.green))(g,p.x,p.y,8,false,true)}}
  // the lounge's name across the metal roof
  {const p=oXY(30.6,24);g.save();g.translate(p.x,p.y);g.rotate(30.6*RAD);g.fillStyle='#f4f1e8';g.font='bold 9px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('CATS',0,0);g.restore()}
  {const p=oXY(39.6,15.5);g.save();g.translate(p.x,p.y);g.rotate(39.6*RAD);g.fillStyle='#1d1d22';g.fillRect(-30,-5,60,10);g.fillStyle='#c0262a';g.fillRect(-30,-5,60,1);g.fillStyle='#f4f1e8';g.font='bold 7px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('LIGHT CITY CLUB',0,.5,56);g.restore()}}
@@ -189,6 +219,13 @@ function drawMudung(g,k,night,CW,CH,cx,cy,OL,e){
  R(gx-28,gy,56,118,PV[2]);for(let y=gy+4;y<gy+118;y+=8)R(gx-28,y,56,1,N('#d2cbbd','#423e3a'));
  for(const sd of[-1,1])for(let r2=0;r2<2;r2++)for(let k2=0;k2<4;k2++){const tx=gx+sd*(62+r2*48+k2*7),ty=gy+24+k2*24;R(tx-6,ty-5,12,10,N('#8a8478','#24221f'));R(tx-6,ty-5,12,1,N('#e4ded2','#3a3836'));hAutumn(g,tx,ty,7,night,(k2+r2)%3===0)}
  for(const sd of[-1,1])for(let k2=0;k2<4;k2++){const lx=gx+sd*40,ly=gy+18+k2*26;R(lx+1,ly+1,2,2,'rgba(0,0,0,.35)');R(lx-1,ly-1,3,3,'#1e2024');R(lx,ly,1,1,night?'#ffe7a8':'#d9d4c0')}
+ // the plaza's centrepiece: a cluster of stone columns, Mudeungsan in miniature, in a ring of dark stone with lights round it
+ {const fx=gx,fy=gy+66;g.fillStyle=N('#8c857a','#2a2826');g.beginPath();g.arc(fx,fy,17,0,7);g.fill();g.fillStyle=N('#a39b8c','#34312e');g.beginPath();g.arc(fx,fy,15,0,7);g.fill();
+  for(const[dx,dy,hh]of[[-6,2,4],[5,3,3],[0,-4,7],[-3,8,2],[8,-3,5],[-9,-5,3]]){const x=fx+dx,y=fy+dy;R(x-3,y-hh+3,7,hh,N('#8c857a','#3a3734'));R(x+3,y-hh+3,1,hh,N('#5a5650','#24221f'));R(x-3,y-hh,7,4,N('#ddd6c8','#5a5650'));R(x-3,y-hh,7,1,N('#ece6d9','#6a665e'))}
+  for(let k=0;k<10;k++){const a=k/10*6.283;R(fx+Math.cos(a)*16-1,fy+Math.sin(a)*16-1,2,2,night?'#ffe7a8':'#5a5650')}}
+ // ticket booths either side of the doors, flagpoles along the walk
+ for(const sd of[-1,1]){const bx=gx+sd*96-9,by=gy+4;R(bx+3,by+3,18,12,'rgba(0,0,0,.3)');R(bx,by,18,12,N('#2a2d33','#1a1c20'));R(bx,by,18,2,'#c0262a');R(bx+2,by+5,14,5,night?'#ffd48a':'#3a4a5c');R(bx+8.5,by+5,1,5,'#1a1c20')}
+ for(const sd of[-1,1])for(let k=0;k<5;k++){const px=gx+sd*24,py=gy+26+k*18;R(px+1,py+1,2,1,'rgba(0,0,0,.35)');R(px,py-6,1,7,'#9aa0a8');R(px+1,py-6,5,3,k&1?'#1d1d22':'#c0262a')}
  // the street across the front of the plaza, with a crosswalk to the doors and streetlights
  {const ry=gy+120;R(gx-260,ry,520,14,N('#55595e','#24262a'));R(gx-260,ry,520,1,N('#c9c5bb','#3a3a3a'));R(gx-260,ry+13,520,1,N('#c9c5bb','#3a3a3a'));for(let x=gx-256;x<gx+256;x+=10)R(x,ry+6.5,5,1,N('#e8d27a','#6a6040'));
   for(const cxw of[gx,gx-150,gx+150])for(let x=cxw-14;x<cxw+14;x+=4)R(x,ry+1,2,12,N('#ece9e0','#5a5a58'));

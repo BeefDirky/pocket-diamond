@@ -529,7 +529,9 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 .xClose{position:absolute;top:8px;right:8px;z-index:4;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);font-size:16px;line-height:1;cursor:pointer}
 .shHead .xClose{position:static}
 .xClose:hover{border-color:var(--amber);color:var(--amber)}
-.card.hasX>h1,.card.hasX>.ckTop,.card.hasX>.lnTop{padding-right:44px}
+.card.hasX>h1,.card.hasX>.ckTop,.card.hasX>.lnTop{padding-left:44px;padding-right:44px}
+.xClose.xBack{right:auto;left:8px}
+.xBack svg{width:16px;height:16px;display:block;shape-rendering:crispEdges}
 .mbtn.back[hidden]{display:none}
 
 /* card finishes: epic holo, legend gold foil, big-league frame */

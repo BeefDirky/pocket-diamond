@@ -26,7 +26,7 @@ const H_THEMES={
   pal:{pad1:'#123a2a',pad2:'#184832',pad3:'#e8f0e0',pad4:'#2f7a52',seam:'#071a10',led1:'#7fe0a8',led2:'#eafff2',led3:'#2fa86a',ledD:'#0a2418',wallY:'#e2b93a',
    fTop:'#8e9591',fTop2:'#838a86',mull:'#1d3a2c',glass:'#2e434a',glass2:'#26383f',glassN:'#ffc46a',glassN2:'#ffb04a',fEdge:'#141f19',par:'#22302a',gate:'#16201a',gateN:'#ffd08a',
    roof:'#b9bec3',roof2:'#aeb3b9',rib:'#959ba2',roofEdge:'#e2e5e8',gutter:'#5d646b',conc:'#2a332f',rail:'#b9c4bd',railD:'#3e4a44',wallCap:'#8f9893',wallCap2:'#666f6a'}},
- mudung:{dk:{L:[[56,0],[64,20],[82,58],[110,100],[148,140],[180,160]],R:[[46,0],[54,26],[74,70],[106,112],[148,150],[180,168]]},roof:[86,64,181],gates:[-140,140,-104,104],mudung:true,roofIn:.6,facT:1.5,
+ mudung:{dk:{L:[[56,0],[64,16],[82,48],[110,92],[148,138],[180,160]],R:[[46,0],[54,26],[74,70],[106,112],[148,150],[180,168]]},roof:[86,64,181],gates:[-140,140,-104,104],mudung:true,roofIn:.6,facT:1.5,
   seats:[['#2c2b31','#26252b'],['#d0312d','#bc2b28'],['#b52823','#a22320']],seatU:[[160,34,32],[142,30,29]],cheer:1,
   pal:{pad1:'#1d1d22',pad2:'#25252b',pad3:'#f4f1e8',pad4:'#c0262a',seam:'#0c0c0f',wallY:'#ff3a30',led1:'#ff5a48',led2:'#fff0e0',led3:'#d0312d',ledD:'#2a0a0a',
    fTop:'#cfc6b4',fTop2:'#c3baa7',mull:'#2a2224',glass:'#2c3a4a',glass2:'#24303e',glassN:'#ffc46a',glassN2:'#ffb04a',fEdge:'#1e1a1a',par:'#3a3436',gate:'#1e1a1c',gateN:'#ffd08a',
