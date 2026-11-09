@@ -51,12 +51,14 @@ function drawPlayerRaw(g,X,Y,T,o){
  o=o||{};const x=Math.round(X),y=Math.round(Y);
  const sk=o.skin||SKINS[1],pa=o.pants||'#eeeae0',f=o.flip?-1:1,fr=(((o.frame|0)%4)+4)%4;
  const legs=o.legs||'stand',arms=o.arms||'down';
- let u=0;if(legs==='ready'||legs==='stride'||legs==='drive'||legs==='follow')u=1;if(legs==='run'&&(fr===1||fr===3))u=-1;
+ let u=0;if(legs==='shuffle')u=(fr===2?0:1);if(legs==='ready'||legs==='stride'||legs==='drive'||legs==='follow')u=1;if(legs==='run'&&(fr===1||fr===3))u=-1;
  const SC=o.sc||1.2,sc=v=>Math.round(v*SC);
  const R=(c,dx,dy,w,h,up)=>{g.fillStyle=c;const yy=dy+(up?u:0),x0=sc(dx),x1=sc(dx+w),y0=sc(yy),y1=sc(yy+h);g.fillRect(f>0?x+x0:x-x1+1,y+y0,Math.max(1,x1-x0),Math.max(1,y1-y0))};
  g.fillStyle='rgba(6,18,10,.3)';g.fillRect(x-5,y,11,1);g.fillRect(x-4,y+1,9,1);
  // legs
  if(legs==='stand'){R(pa,-3,-6,2,5);R(pa,1,-6,2,5);R(T.cap,-3,-2,2,1);R(T.cap,1,-2,2,1);R(SHOE,-3,-1,3,1);R(SHOE,1,-1,3,1)}
+ else if(legs==='shuffle'){/* a lead-off side step: feet wide, the trail foot closes in, together, then out again */const w=[3,2,1,2][fr];
+  R(pa,-1-w,-5,2,4);R(pa,w-1,-5,2,4);R(T.cap,-1-w,-2,2,1);R(T.cap,w-1,-2,2,1);R(SHOE,-2-w,-1,3,1);R(SHOE,w-1,-1,3,1)}
  else if(legs==='ready'){R(pa,-4,-5,2,4);R(pa,2,-5,2,4);R(T.cap,-4,-2,2,1);R(T.cap,2,-2,2,1);R(SHOE,-5,-1,3,1);R(SHOE,2,-1,3,1)}
  else if(legs==='kick'){R(pa,1,-6,2,5);R(SHOE,1,-1,3,1);R(pa,-4,-9,4,2);R(pa,-4,-7,2,3);R(SHOE,-5,-5,3,1)}
  else if(legs==='stride'){R(pa,-5,-5,2,4);R(SHOE,-6,-1,3,1);R(pa,2,-5,2,4);R(SHOE,3,-1,2,1)}

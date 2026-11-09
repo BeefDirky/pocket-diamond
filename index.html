@@ -4976,11 +4976,18 @@ function buildSteal(now){
  const res={code:anyOut?'CS':'SB',steal:true,hit:false,outs:anyOut?1:0,runs:0,banner:anyOut?'CAUGHT STEALING':'STOLEN BASE!',tone:anyOut?'strike':'hit',sub:`${S.balls}-${S.strikes}`,desc};
  return finalize(play,runners,res)}
 
+/* lead-offs: after a beat on the bag the runner side-steps off at a walking pace (about 5 ft a second) until he has his full
+   lead, crouches there through the windup, takes a quick secondary lead on the pitch, and jogs back after it */
+const LEAD_WALK=5.2;
 function leadNow(k,ph,now){ // how far off the bag a runner on base k (1..3) is between pitches
- const full=LEADFT[k];if(ph==='windup'){const kk=S.pitch?S.pt/S.pitch.wind:0;return lerp(full*.55,full,clamp((kk-.2)/.5,0,1))}
+ const full=LEADFT[k];
+ if(ph==='ready'||ph==='choose'||ph==='windup')return Math.min(full,Math.max(0,(S.leadMs||0)/1000-.3)*LEAD_WALK);
  if(ph==='pitch'){const e=S.pitch?now-S.pitch.releaseAt:0;return full+Math.min(3,e/150)}
  if(ph==='call'){return Math.max(0,full+4-S.pt/60)}
- if(ph==='ready'||ph==='choose')return full*.55*clamp(S.pt/500,0,1);return 0}
+ return 0}
+function leadMoving(k,ph,now){const full=LEADFT[k];
+ if(ph==='ready'||ph==='choose'||ph==='windup'){const L=leadNow(k,ph,now);return L>0&&L<full}
+ if(ph==='pitch'){const e=S.pitch?now-S.pitch.releaseAt:0;return e<450}return false}
 function runnerPos(r,t){
  if(r.tagAt!=null&&t<r.start){
   const b=baseP(r.from),nx=baseP(Math.min(4,r.from+1)),Lf=r.L0!=null?r.L0:6/LEG,lead={x:lerp(b.x,nx.x,Lf),y:lerp(b.y,nx.y,Lf)};
@@ -5497,20 +5504,13 @@ $('cards').addEventListener('click',e=>{
  const fk='f'+i;lfFlip=lfFlip===fk?null:fk;lfMove=false;lineupRender()});
 /* rotating a phone or resizing across the phone breakpoint redraws the field to match */
 {let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}})}
-// ---------- the Imugi Labs mark on the main menu, re-drawn as pixel art: the vector mark is traced onto a tiny grid and every
-// cell is either fully on or fully off, then shown scaled up with crisp edges ----------
+// ---------- the Imugi Labs mark on the main menu with a pixel filter: the logo is sampled onto a small grid and shown scaled up with crisp edges ----------
 {const D="M0 86.5 L110 0 L251 0 L362 86.5 L251 173 L110 173Z M181.0 17.5 L181.6 21.0 L182.5 25.6 L184.0 32.2 L186.0 39.1 L189.0 46.9 L193.0 54.3 L198.0 60.6 L204.0 65.8 L211.0 70.0 L221.0 74.1 L233.0 77.3 L247.0 79.8 L263.0 81.7 L281.0 83.2 L301.0 84.4 L323.0 85.3 L343.0 86.0 L362.0 86.5 L343.0 87.0 L323.0 87.7 L301.0 88.6 L281.0 89.8 L263.0 91.3 L247.0 93.2 L233.0 95.7 L221.0 98.9 L211.0 103.0 L204.0 107.2 L198.0 112.4 L193.0 118.7 L189.0 126.1 L186.0 133.9 L184.0 140.8 L182.5 147.4 L181.6 152.0 L181.0 155.5 L180.4 152.0 L179.5 147.4 L178.0 140.8 L176.0 133.9 L173.0 126.1 L169.0 118.7 L164.0 112.4 L158.0 107.2 L151.0 103.0 L141.0 98.9 L129.0 95.7 L115.0 93.2 L99.0 91.3 L81.0 89.8 L61.0 88.6 L39.0 87.7 L19.0 87.0 L0.0 86.5 L19.0 86.0 L39.0 85.3 L61.0 84.4 L81.0 83.2 L99.0 81.7 L115.0 79.8 L129.0 77.3 L141.0 74.1 L151.0 70.0 L158.0 65.8 L164.0 60.6 L169.0 54.3 L173.0 46.9 L176.0 39.1 L178.0 32.2 L179.5 25.6 L180.4 21.0Z";
  const W=45,H=21,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
  g.scale(W/362,H/173);g.fillStyle='#fff';g.fill(new Path2D(D),'evenodd');
  const im=g.getImageData(0,0,W,H),o=document.createElement('canvas');o.width=W+1;o.height=H+1;const q=o.getContext('2d');
- const cx=(W-1)/2,cy=(H-1)/2,B=(cy-17.5/173*H)+.5;
- /* the outline comes from the vector mark; the star is drawn as a true four-point star (concave sides, an astroid) so its
-    needle points survive at pixel size: the long points run tip to tip and split the eye into two lids */
- const star=(x,y)=>{const u=Math.abs(x-cx)/(W/2),v=Math.abs(y-cy)/B;return y===cy||Math.pow(u,.48)+Math.pow(v,.48)<=1};
- const on=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&im.data[(y*W+x)*4+3]>110&&!star(x,y);
- const outer=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&im.data[(y*W+x)*4+3]>110;
- /* no drop shadow: the mark reads cleanest flat, like on the website */
- for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(on(x,y)){q.fillStyle='#f4f1e8';q.fillRect(x,y,1,1)}
+ /* a straight pixel filter: each cell is on if the logo covers at least half of it, nothing redrawn by hand */
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(im.data[(y*W+x)*4+3]>=128){q.fillStyle='#f4f1e8';q.fillRect(x,y,1,1)}
  const el=document.getElementById('ilMark');if(el)el.src=o.toDataURL()}
 // ---------- title picker ----------
 function buildPicker(){
@@ -6480,12 +6480,14 @@ function drawPlayerRaw(g,X,Y,T,o){
  o=o||{};const x=Math.round(X),y=Math.round(Y);
  const sk=o.skin||SKINS[1],pa=o.pants||'#eeeae0',f=o.flip?-1:1,fr=(((o.frame|0)%4)+4)%4;
  const legs=o.legs||'stand',arms=o.arms||'down';
- let u=0;if(legs==='ready'||legs==='stride'||legs==='drive'||legs==='follow')u=1;if(legs==='run'&&(fr===1||fr===3))u=-1;
+ let u=0;if(legs==='shuffle')u=(fr===2?0:1);if(legs==='ready'||legs==='stride'||legs==='drive'||legs==='follow')u=1;if(legs==='run'&&(fr===1||fr===3))u=-1;
  const SC=o.sc||1.2,sc=v=>Math.round(v*SC);
  const R=(c,dx,dy,w,h,up)=>{g.fillStyle=c;const yy=dy+(up?u:0),x0=sc(dx),x1=sc(dx+w),y0=sc(yy),y1=sc(yy+h);g.fillRect(f>0?x+x0:x-x1+1,y+y0,Math.max(1,x1-x0),Math.max(1,y1-y0))};
  g.fillStyle='rgba(6,18,10,.3)';g.fillRect(x-5,y,11,1);g.fillRect(x-4,y+1,9,1);
  // legs
  if(legs==='stand'){R(pa,-3,-6,2,5);R(pa,1,-6,2,5);R(T.cap,-3,-2,2,1);R(T.cap,1,-2,2,1);R(SHOE,-3,-1,3,1);R(SHOE,1,-1,3,1)}
+ else if(legs==='shuffle'){/* a lead-off side step: feet wide, the trail foot closes in, together, then out again */const w=[3,2,1,2][fr];
+  R(pa,-1-w,-5,2,4);R(pa,w-1,-5,2,4);R(T.cap,-1-w,-2,2,1);R(T.cap,w-1,-2,2,1);R(SHOE,-2-w,-1,3,1);R(SHOE,w-1,-1,3,1)}
  else if(legs==='ready'){R(pa,-4,-5,2,4);R(pa,2,-5,2,4);R(T.cap,-4,-2,2,1);R(T.cap,2,-2,2,1);R(SHOE,-5,-1,3,1);R(SHOE,2,-1,3,1)}
  else if(legs==='kick'){R(pa,1,-6,2,5);R(SHOE,1,-1,3,1);R(pa,-4,-9,4,2);R(pa,-4,-7,2,3);R(SHOE,-5,-5,3,1)}
  else if(legs==='stride'){R(pa,-5,-5,2,4);R(SHOE,-6,-1,3,1);R(pa,2,-5,2,4);R(SHOE,3,-1,2,1)}
@@ -6855,7 +6857,7 @@ function render(now){
      wg.strokeStyle='rgba(8,20,14,.8)';wg.lineWidth=1;wg.stroke();wg.restore();wg.globalAlpha=1})}
    if(going){add(q.y,()=>drawPlayer(wg,q.x,q.y,bat,{legs:'run',arms:'run',frame:Math.floor(now/70)+k,skin:runSkin(b),helmet:true,pants:batPants,flip:nb.x<bb.x}));return}
    S.runHit.push({x:q.x,y:q.y-9,who:b,k:k+1});
-   const off=Lf>0?0:7,back=ph==='call'&&Lf>0;add(q.y,()=>drawPlayer(wg,q.x+off,q.y,bat,{legs:back?'run':(live||Lf>0)?'ready':'stand',arms:back?'run':'down',frame:Math.floor(now/110)+k,skin:runSkin(b),helmet:true,pants:batPants,flip:back}))});
+   const off=Lf>0?0:7,back=ph==='call'&&Lf>0,shuf=!back&&Lf>0&&leadMoving(k+1,ph,now);add(q.y,()=>drawPlayer(wg,q.x+off,q.y,bat,{legs:back?'run':shuf?'shuffle':(live||Lf>0)?'ready':'stand',arms:back?'run':'down',frame:Math.floor(now/(shuf?150:110))+k,skin:runSkin(b),helmet:true,pants:batPants,flip:back}))});
  }
  // batter
  const cb=curBatter(),hand=effHand(cb);
@@ -7127,7 +7129,9 @@ function drawSplashes(c,vx0,vy0,scale,now){if(!SPLASH.length)return;SPLASH=SPLAS
   if(t<.6){const H=95*Math.sin(Math.min(1,t/.22)*Math.PI/2)*(1-Math.max(0,t-.35)/.25*.6);for(let y=0;y<H;y+=2){const w=y<H*.2?16:y<H*.5?10:6;c.fillStyle=y>H-6?W2:W1;c.fillRect(P2(s.x-w/2),P2(s.y-y),w,2)}}}
  c.restore()}
 // ---------- loop ----------
-function update(dt,now){
+function update(dt,now){/* lead-off clock: starts from the bag each time the runners settle in for a new pitch */
+ {const LP=['ready','choose','windup'];if(S.phase!==S.leadPh){if(LP.includes(S.phase)&&!LP.includes(S.leadPh))S.leadMs=0;S.leadPh=S.phase}
+  if(LP.includes(S.phase))S.leadMs=(S.leadMs||0)+dt}
  if(S.paused)return;
  if(S.online&&S.online.inGame)netTick(now);syncPickBar();
  S.pt+=dt;

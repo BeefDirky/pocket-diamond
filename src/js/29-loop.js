@@ -1,5 +1,7 @@
 // ---------- loop ----------
-function update(dt,now){
+function update(dt,now){/* lead-off clock: starts from the bag each time the runners settle in for a new pitch */
+ {const LP=['ready','choose','windup'];if(S.phase!==S.leadPh){if(LP.includes(S.phase)&&!LP.includes(S.leadPh))S.leadMs=0;S.leadPh=S.phase}
+  if(LP.includes(S.phase))S.leadMs=(S.leadMs||0)+dt}
  if(S.paused)return;
  if(S.online&&S.online.inGame)netTick(now);syncPickBar();
  S.pt+=dt;

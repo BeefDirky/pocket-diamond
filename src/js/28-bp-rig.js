@@ -253,7 +253,7 @@ function render(now){
      wg.strokeStyle='rgba(8,20,14,.8)';wg.lineWidth=1;wg.stroke();wg.restore();wg.globalAlpha=1})}
    if(going){add(q.y,()=>drawPlayer(wg,q.x,q.y,bat,{legs:'run',arms:'run',frame:Math.floor(now/70)+k,skin:runSkin(b),helmet:true,pants:batPants,flip:nb.x<bb.x}));return}
    S.runHit.push({x:q.x,y:q.y-9,who:b,k:k+1});
-   const off=Lf>0?0:7,back=ph==='call'&&Lf>0;add(q.y,()=>drawPlayer(wg,q.x+off,q.y,bat,{legs:back?'run':(live||Lf>0)?'ready':'stand',arms:back?'run':'down',frame:Math.floor(now/110)+k,skin:runSkin(b),helmet:true,pants:batPants,flip:back}))});
+   const off=Lf>0?0:7,back=ph==='call'&&Lf>0,shuf=!back&&Lf>0&&leadMoving(k+1,ph,now);add(q.y,()=>drawPlayer(wg,q.x+off,q.y,bat,{legs:back?'run':shuf?'shuffle':(live||Lf>0)?'ready':'stand',arms:back?'run':'down',frame:Math.floor(now/(shuf?150:110))+k,skin:runSkin(b),helmet:true,pants:batPants,flip:back}))});
  }
  // batter
  const cb=curBatter(),hand=effHand(cb);

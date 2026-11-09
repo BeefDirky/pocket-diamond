@@ -342,11 +342,18 @@ function buildSteal(now){
  const res={code:anyOut?'CS':'SB',steal:true,hit:false,outs:anyOut?1:0,runs:0,banner:anyOut?'CAUGHT STEALING':'STOLEN BASE!',tone:anyOut?'strike':'hit',sub:`${S.balls}-${S.strikes}`,desc};
  return finalize(play,runners,res)}
 
+/* lead-offs: after a beat on the bag the runner side-steps off at a walking pace (about 5 ft a second) until he has his full
+   lead, crouches there through the windup, takes a quick secondary lead on the pitch, and jogs back after it */
+const LEAD_WALK=5.2;
 function leadNow(k,ph,now){ // how far off the bag a runner on base k (1..3) is between pitches
- const full=LEADFT[k];if(ph==='windup'){const kk=S.pitch?S.pt/S.pitch.wind:0;return lerp(full*.55,full,clamp((kk-.2)/.5,0,1))}
+ const full=LEADFT[k];
+ if(ph==='ready'||ph==='choose'||ph==='windup')return Math.min(full,Math.max(0,(S.leadMs||0)/1000-.3)*LEAD_WALK);
  if(ph==='pitch'){const e=S.pitch?now-S.pitch.releaseAt:0;return full+Math.min(3,e/150)}
  if(ph==='call'){return Math.max(0,full+4-S.pt/60)}
- if(ph==='ready'||ph==='choose')return full*.55*clamp(S.pt/500,0,1);return 0}
+ return 0}
+function leadMoving(k,ph,now){const full=LEADFT[k];
+ if(ph==='ready'||ph==='choose'||ph==='windup'){const L=leadNow(k,ph,now);return L>0&&L<full}
+ if(ph==='pitch'){const e=S.pitch?now-S.pitch.releaseAt:0;return e<450}return false}
 function runnerPos(r,t){
  if(r.tagAt!=null&&t<r.start){
   const b=baseP(r.from),nx=baseP(Math.min(4,r.from+1)),Lf=r.L0!=null?r.L0:6/LEG,lead={x:lerp(b.x,nx.x,Lf),y:lerp(b.y,nx.y,Lf)};
