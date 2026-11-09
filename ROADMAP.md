@@ -54,7 +54,8 @@
 - [ ] PC menus are small in a normal window (Options, How to Play, About at 1400x900)
 - [ ] Card Collection: ~150 bits of text under 10px
 - [ ] Portrait PC monitor: the phone-layout HUD stays phone-sized and tiny at 1050x1780; scale it up
-- [ ] Older parks still on the original look: Seoul, Gwangju, Daegu, Daejeon, Jeju (Daegu and Jeju plainest)
+- [x] Gwangju rebuilt as Mudung Field: stone terrace in left, brick-and-glass hospitality block in right, board between stone towers, Mudeungsan forest behind
+- [ ] Older parks still on the original look: Seoul, Daegu, Daejeon, Jeju (Daegu and Jeju plainest)
 - [ ] Playoffs behind the new arcade flow: no lineup page, Menu button instead of the X, no series banner
 - [ ] Stadium leftovers: Busan plaza detail, Changwon entrance, Suwon tower size, Orbit Park reference image
 - [ ] claude.ai build is 7.9 MB (all audio inlined); slow on phones. Vercel build is 0.7 MB
