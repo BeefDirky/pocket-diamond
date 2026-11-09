@@ -964,3 +964,7 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
 /* online ready-up: your Ready button turns green once you're in; "Opponent is ready" glows */
 #olGo.isReady,#olNext.isReady{background:#3fae5a;border-color:#2b7d40;color:#fff}
 .oppLine.olReady{color:#7be38f}
+/* main menu footer: the Imugi Labs mark as chunky pixel art over the credit line */
+a.mmFoot{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;margin-top:4px}
+a.mmFoot{opacity:1}a.mmFoot span{opacity:.75}a.mmFoot:hover span{opacity:1}
+#ilMark{width:81px;height:39px;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
