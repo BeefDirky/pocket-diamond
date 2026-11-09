@@ -15,10 +15,10 @@ function tsPat(k,S2){const key=k+'|'+S2;if(TS_PAT[key])return TS_PAT[key];const 
  return TS_PAT[key]={pat:g.createPattern(c,'repeat'),sp}}
 function tsPaint(g,k,w,h,t,alpha){const T=TEAMS[k];g.globalAlpha=alpha;
  /* a club can name its own wall colors (tsBase/tsBand); otherwise the jersey with a cap-colored scarf band */
- const base=T.tsBase||T.jersey,dk=T.tsBase?[-.02,-.3]:[-.25,-.62];
+ const base=T.tsBase||T.jersey,dk=T.tsDk||(T.tsBase?[-.02,-.3]:[-.25,-.62]);
  const bg=g.createLinearGradient(0,0,w,h);bg.addColorStop(0,shade(base,dk[0]));bg.addColorStop(1,shade(base,dk[1]));g.fillStyle=bg;g.fillRect(0,0,w,h);
  // a band of the cap color running across, like a team scarf
- g.save();g.translate(w/2,h/2);g.rotate(-.26);g.fillStyle=T.tsBand?T.tsBand:shade(T.cap,-.2);g.globalAlpha=alpha*(T.tsBand?.9:.35);g.fillRect(-w*1.5,h*.18,w*3,h*.16);g.restore();
+ g.save();g.translate(w/2,h/2);g.rotate(-.26);g.fillStyle=T.tsBand?T.tsBand:shade(T.cap,-.2);g.globalAlpha=alpha*(T.tsBand?(T.tsBandA||.9):.35);g.fillRect(-w*1.5,h*.18,w*3,h*.16);g.restore();
  // the emblem wall: one pre-drawn repeating pattern, slid along each frame (a single fill, cheap on any device)
  const P=tsPat(k,Math.round(Math.max(110,Math.min(w,h)/6.5))),cyc=P.sp*1.5/.028,u=(t%cyc)/cyc;g.globalAlpha=alpha*.3;
  g.save();g.translate(w/2,h/2);g.rotate(-.26);// each loop slides exactly one step of the brick layout (1.5 across, 1 down), so it wraps with no jump

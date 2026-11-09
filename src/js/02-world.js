@@ -70,7 +70,7 @@ const TEAMS={
   pitcher:{name:'SHIN H.J.',hand:'R',slot:'over'},pen:[{name:'BAEK J.W.',hand:'L',slot:'side'},{name:'THOMPSON',hand:'R',slot:'over'}],
   lineup:[['JO M.H.','L'],['YOON S.B.','R'],['KIM H.R.','S'],['PEREZ','R'],['LEE D.G.','L'],['CHA S.W.','R'],['NAM K.Y.','R'],['HONG J.S.','L'],['MIN B.K.','R']]},
  jeju:{city:'JEJU',kcity:'제주',name:'TANGERINES',kname:'귤',script:'Tangerines',emblem:'tangerine',logo:'shield',
-  jersey:'#f1e9d2',cap:'#f28a1e',brim:'#2f7a3a',tsBase:'#f28a1e',tsBand:'#2f7a3a',mascot:'Gyuli',mdesc:'A round island tangerine. Rolls down the Halla hill after every home run.',
+  jersey:'#f1e9d2',cap:'#f28a1e',brim:'#2f7a3a',tsBase:'#ff8a14',tsDk:[.04,-.08],tsBand:'#2f8a3c',tsBandA:1,/* bright tangerine wall, a solid leaf-green stripe */mascot:'Gyuli',mdesc:'A round island tangerine. Rolls down the Halla hill after every home run.',
   pitcher:{name:'KO D.H.',hand:'L',slot:'over'},pen:[{name:'YANG J.M.',hand:'R',slot:'over'},{name:'BOO S.H.',hand:'R',slot:'side'}],
   lineup:[['KANG T.Y.','R'],['HYUN J.W.','L'],['MOON B.S.','R'],['SANTOS','L'],['KO S.M.','R'],['YANG H.J.','S'],['BOO D.Y.','R'],['KIM N.H.','L'],['JWA S.U.','R']]},
 };

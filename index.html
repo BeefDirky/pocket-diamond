@@ -1379,7 +1379,7 @@ const TEAMS={
   pitcher:{name:'SHIN H.J.',hand:'R',slot:'over'},pen:[{name:'BAEK J.W.',hand:'L',slot:'side'},{name:'THOMPSON',hand:'R',slot:'over'}],
   lineup:[['JO M.H.','L'],['YOON S.B.','R'],['KIM H.R.','S'],['PEREZ','R'],['LEE D.G.','L'],['CHA S.W.','R'],['NAM K.Y.','R'],['HONG J.S.','L'],['MIN B.K.','R']]},
  jeju:{city:'JEJU',kcity:'제주',name:'TANGERINES',kname:'귤',script:'Tangerines',emblem:'tangerine',logo:'shield',
-  jersey:'#f1e9d2',cap:'#f28a1e',brim:'#2f7a3a',tsBase:'#f28a1e',tsBand:'#2f7a3a',mascot:'Gyuli',mdesc:'A round island tangerine. Rolls down the Halla hill after every home run.',
+  jersey:'#f1e9d2',cap:'#f28a1e',brim:'#2f7a3a',tsBase:'#ff8a14',tsDk:[.04,-.08],tsBand:'#2f8a3c',tsBandA:1,/* bright tangerine wall, a solid leaf-green stripe */mascot:'Gyuli',mdesc:'A round island tangerine. Rolls down the Halla hill after every home run.',
   pitcher:{name:'KO D.H.',hand:'L',slot:'over'},pen:[{name:'YANG J.M.',hand:'R',slot:'over'},{name:'BOO S.H.',hand:'R',slot:'side'}],
   lineup:[['KANG T.Y.','R'],['HYUN J.W.','L'],['MOON B.S.','R'],['SANTOS','L'],['KO S.M.','R'],['YANG H.J.','S'],['BOO D.Y.','R'],['KIM N.H.','L'],['JWA S.U.','R']]},
 };
@@ -5547,10 +5547,10 @@ function tsPat(k,S2){const key=k+'|'+S2;if(TS_PAT[key])return TS_PAT[key];const 
  return TS_PAT[key]={pat:g.createPattern(c,'repeat'),sp}}
 function tsPaint(g,k,w,h,t,alpha){const T=TEAMS[k];g.globalAlpha=alpha;
  /* a club can name its own wall colors (tsBase/tsBand); otherwise the jersey with a cap-colored scarf band */
- const base=T.tsBase||T.jersey,dk=T.tsBase?[-.02,-.3]:[-.25,-.62];
+ const base=T.tsBase||T.jersey,dk=T.tsDk||(T.tsBase?[-.02,-.3]:[-.25,-.62]);
  const bg=g.createLinearGradient(0,0,w,h);bg.addColorStop(0,shade(base,dk[0]));bg.addColorStop(1,shade(base,dk[1]));g.fillStyle=bg;g.fillRect(0,0,w,h);
  // a band of the cap color running across, like a team scarf
- g.save();g.translate(w/2,h/2);g.rotate(-.26);g.fillStyle=T.tsBand?T.tsBand:shade(T.cap,-.2);g.globalAlpha=alpha*(T.tsBand?.9:.35);g.fillRect(-w*1.5,h*.18,w*3,h*.16);g.restore();
+ g.save();g.translate(w/2,h/2);g.rotate(-.26);g.fillStyle=T.tsBand?T.tsBand:shade(T.cap,-.2);g.globalAlpha=alpha*(T.tsBand?(T.tsBandA||.9):.35);g.fillRect(-w*1.5,h*.18,w*3,h*.16);g.restore();
  // the emblem wall: one pre-drawn repeating pattern, slid along each frame (a single fill, cheap on any device)
  const P=tsPat(k,Math.round(Math.max(110,Math.min(w,h)/6.5))),cyc=P.sp*1.5/.028,u=(t%cyc)/cyc;g.globalAlpha=alpha*.3;
  g.save();g.translate(w/2,h/2);g.rotate(-.26);// each loop slides exactly one step of the brick layout (1.5 across, 1 down), so it wraps with no jump
