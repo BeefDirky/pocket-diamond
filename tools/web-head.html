@@ -3,5 +3,9 @@
 <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#14241b"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>*,*::before,*::after{box-sizing:border-box}</style>
 <!-- Vercel Web Analytics (counts visits once Analytics is enabled for the project in the Vercel dashboard) -->
-<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};
+/* leave yourself out of the visitor counts: open the game once with #noanalytics on the end of the address (per browser,
+   per address); #analytics turns counting back on */
+try{if(location.hash==='#noanalytics')localStorage.setItem('va-disable','1');if(location.hash==='#analytics')localStorage.removeItem('va-disable')}catch(e){}
+window.va('beforeSend',function(ev){try{if(localStorage.getItem('va-disable'))return null}catch(e){}return ev});</script><script defer src="/_vercel/insights/script.js"></script>
 </head><body>
