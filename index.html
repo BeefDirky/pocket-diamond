@@ -4091,9 +4091,6 @@ function buildDecor(){
   g.fillStyle=CREAM;g.font='10px Jua, "Pixelify Sans", sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(`${T.kcity} ${T.kname} · ${T.city} ${T.name}`,0,13.5,148);
   g.restore();
  });
- {const c=cheerFrame();g.save();g.translate(c.x,c.y);g.rotate(-45*RAD);
-  g.fillStyle='#101418';g.fillRect(-44,-16,88,32);g.fillStyle=home.cap;g.fillRect(-41,-13,82,26);g.fillStyle=home.jersey;g.fillRect(-41,-13,82,3);g.fillRect(-41,10,82,3);
-  g.fillStyle='#596169';for(let k=-36;k<40;k+=8)g.fillRect(k,13,5,3);g.restore()}
  drawBanners(g);
  buildCrowd();
  return c;
@@ -6734,7 +6731,7 @@ function render(now){
  if(CROWD_A&&!bpv)drawCrowdLife(wg,now);
  if(SIGNS)wg.drawImage(SIGNS,0,0);
  if(DECOR)wg.drawImage(DECOR,0,0);
- if(!bpv)drawDugoutCrew(wg,now);wg.save();wg.scale(K,K);if(!bpv)drawCheer(wg,now);drawFlags(wg,now);wg.restore();
+ if(!bpv)drawDugoutCrew(wg,now);wg.save();wg.scale(K,K);drawFlags(wg,now);wg.restore();
  const ph=S.phase,play=S.play;
  const inPlay=!!play&&(ph==='play'||ph==='result');
  const t=play?(ph==='result'?play.end:play.t):0;

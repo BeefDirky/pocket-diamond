@@ -22,9 +22,6 @@ function buildDecor(){
   g.fillStyle=CREAM;g.font='10px Jua, "Pixelify Sans", sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(`${T.kcity} ${T.kname} · ${T.city} ${T.name}`,0,13.5,148);
   g.restore();
  });
- {const c=cheerFrame();g.save();g.translate(c.x,c.y);g.rotate(-45*RAD);
-  g.fillStyle='#101418';g.fillRect(-44,-16,88,32);g.fillStyle=home.cap;g.fillRect(-41,-13,82,26);g.fillStyle=home.jersey;g.fillRect(-41,-13,82,3);g.fillRect(-41,10,82,3);
-  g.fillStyle='#596169';for(let k=-36;k<40;k+=8)g.fillRect(k,13,5,3);g.restore()}
  drawBanners(g);
  buildCrowd();
  return c;
