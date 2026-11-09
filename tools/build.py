@@ -5,7 +5,7 @@
                                        and the single-file claude.ai version to dist/pocket-diamond.html
 
 Source layout
-  src/head.html, src/style.css, src/body.html, src/tail.html   page shell, styles, markup
+  src/splash.html, src/head.html, src/style.css, src/body.html, src/tail.html   page shell, styles, markup
   src/js/NN-*.js                                               game code, concatenated in file-name order
                                                                (all files share one scope; order matters)
   audio/*.mp3                                                  sound effects and music
@@ -17,7 +17,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 rd = lambda p: open(os.path.join(ROOT, p), encoding='utf-8').read()
 
 def page(js):
-    return (rd('src/head.html') + '<style>\n' + rd('src/style.css') + '</style>\n' + rd('src/body.html')
+    # the splash comes first so it paints before the fonts and the big stylesheet arrive
+    return (rd('src/splash.html') + rd('src/head.html') + '<style>\n' + rd('src/style.css') + '</style>\n' + rd('src/body.html')
             + '<script>\n' + js + '</script>\n' + rd('src/tail.html'))
 
 def source_js():
