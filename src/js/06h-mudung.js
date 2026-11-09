@@ -8,8 +8,8 @@
 // Every colour is a pure function of world position (mudungCol); trees, huts, umbrellas, signs and the entrance are shapes. ----------
 const M_ADS=[['광주 은행','#f4f1e8'],['CATS MART','#ff6a58'],['무등산','#f4f1e8'],['LIGHT CITY BANK','#ffd23f'],['송정 떡갈비','#f4f1e8'],['GWANGJU AIR','#ff6a58'],['양림 커피','#ffd23f'],['MUDEUNG WATER','#f4f1e8']];
 const MC=(()=>{const h=hRGB;return{
- sT:h('#c9c1b2'),sT2:h('#bcb4a4'),sTH:h('#ddd6c8'),sF:h('#948d82'),sF2:h('#878075'),sS:h('#5a5650'),sS2:h('#4a4742'),sR:h('#3a3632'),sR2:h('#46423c'),sAcc:h('#ffe7a0'),
- pv:h('#c9c1b2'),pv2:h('#bdb5a5'),pvJ:h('#a39b8c'),pvW:h('#b39a7c'),pvW2:h('#a68d70'),cop:h('#e2dccf'),
+ sT:h('#bfb5a3'),sT2:h('#b1a795'),sTH:h('#d2c8b6'),sF:h('#8c8477'),sF2:h('#7f776b'),sS:h('#5a5650'),sS2:h('#4a4742'),sR:h('#3a3632'),sR2:h('#46423c'),sAcc:h('#ffe7a0'),
+ pv:h('#c2b8a6'),pv2:h('#b5ab99'),pvJ:h('#9c9281'),pvW:h('#ad9374'),pvW2:h('#a08668'),cop:h('#dcd4c4'),
  red:h('#a8202a'),redL:h('#d8342f'),redB:h('#ff3a30'),
  br:h('#8e3a2c'),br2:h('#7f3327'),brL:h('#a8483a'),brD:h('#4a1e18'),brM:h('#7a4a36'),mort:h('#5e3a30'),
  st:h('#2a2d33'),stL:h('#4a4f58'),stD:h('#1a1c20'),
@@ -188,20 +188,20 @@ function mudungCol(x,y,wx,wy,r,th,ath,q,s,n,fair){
  const c=mCentre(a,s,wx,wy);if(c)return c;return mMtn(x,y,wx,wy,a-30)}
 function mRingD(x,y){const phi=Math.atan2(x-H_CC.x,y-H_CC.y)/RAD,f=phi+180,i=Math.floor(f)%360,j=(i+1)%360,R=B_OR[i]+(B_OR[j]-B_OR[i])*(f-Math.floor(f));return Math.max(0,Math.hypot(x-H_CC.x,y-H_CC.y)-R)}
 // ---- shapes past the wall: autumn trees on the terrace paths, concession huts, the terrace's sign, umbrellas on the rooftops ----
-function mClear(p,rad){const fx=(p.x-HX)*FT,fy=(HY-p.y)*FT;return![[0,0],[rad,0],[-rad,0],[0,rad],[0,-rad]].some(([dx,dy])=>{const X=fx+dx,Y=fy+dy,ph=hPhi(X,Y);return hD(ph)>8&&Math.hypot(X-H_CC.x,Y-H_CC.y)<hRout(ph)+4})}
+function mClear(p,rad){const fx=(p.x-HX)*FT,fy=(HY-p.y)*FT;if(!bInOL(fx,fy)||mRingD(fx,fy)>0)return false;{const phi=Math.atan2(fx-H_CC.x,fy-H_CC.y)/RAD,f=phi+180,i=Math.floor(f)%360,R=B_OR[i];if(Math.hypot(fx-H_CC.x,fy-H_CC.y)>R-rad)return false}return![[0,0],[rad,0],[-rad,0],[0,rad],[0,-rad]].some(([dx,dy])=>{const X=fx+dx,Y=fy+dy,ph=hPhi(X,Y);return hD(ph)>8&&Math.hypot(X-H_CC.x,Y-H_CC.y)<hRout(ph)+4})}
 function mDecor(g){
  for(let th=-43;th<-11;th+=5.2){const p=oXY(th,29+((Math.round(th*3)&3)-1.5)*.8);if(!mClear(p,14))continue;hAutumn(g,p.x,p.y,10,false,(Math.round(th*7)%3)===0);if(Math.round(th*3)%2===0)hGreenTree(g,p.x+9,p.y+5,6,false)}
  for(let th=-41;th<-12;th+=7.4){const p=oXY(th+2.2,52);if(!mClear(p,14))continue;hAutumn(g,p.x,p.y,11,false,(Math.round(th)%2)===0)}
  for(let th=-42;th<-12;th+=6.1){const p=oXY(th+1,86+((Math.round(th*5)&3)-1.5));if(!mClear(p,14))continue;hAutumn(g,p.x,p.y,9,false,true)}
  // concession huts on the upper promenade: a dark steel roof with a light ridge, a red awning over a lit counter
- for(const th of[-38.5,-27.8,-17.6]){const p=oXY(th,49);g.save();g.translate(p.x,p.y);g.rotate(th*RAD);
+ for(const th of[-38.5,-27.8,-17.6]){const p=oXY(th,49);if(!mClear(p,16))continue;g.save();g.translate(p.x,p.y);g.rotate(th*RAD);
   g.fillStyle='rgba(0,0,0,.3)';g.fillRect(-9,-4,22,12);g.fillStyle='#3a3e45';g.fillRect(-11,-6,22,10);g.fillStyle='#6a707a';g.fillRect(-11,-2,22,1);g.fillStyle='#4e535b';g.fillRect(-11,-6,22,1);
   for(let x=-11;x<11;x+=4){g.fillStyle='#c0262a';g.fillRect(x,4,2,3);g.fillStyle='#f4f1e8';g.fillRect(x+2,4,2,3)}g.fillStyle='#ffd48a';g.fillRect(-8,7,16,1);g.restore()}
  // the terrace's name on the platform's back rail
  {const p=oXY(-27,8.5);g.save();g.translate(p.x,p.y);g.rotate(-27*RAD);g.fillStyle='#1d1d22';g.fillRect(-36,-6,72,12);g.fillStyle='#c0262a';g.fillRect(-36,-6,72,1);g.fillRect(-36,5,72,1);
   g.fillStyle='#f4f1e8';g.font='bold 8px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('무등 STONE TERRACE',0,.5,68);g.restore()}
  // umbrellas on the rooftop terraces, trees along the walks behind the buildings
- for(const[t0,t1,k1,F1,aM,k2,F2,aE]of M_RB){let n=0;const um=(A0,A1)=>{for(let a=A0;a<A1;a+=8.5)for(let th=t0+1.6;th<t1-1;th+=2.6,n++){const p=oXY(th,a);hParasol(g,p.x,p.y,n&1?6:5,.5)}};if(k1==='terr')um(5+2.4*F1+5,aM-4);if(k2==='terr')um(aM+2.4*(F2-F1)+5,aE-4)}
+ for(const[t0,t1,k1,F1,aM,k2,F2,aE]of M_RB){let n=0;const um=(A0,A1)=>{for(let a=A0;a<A1;a+=8.5)for(let th=t0+1.6;th<t1-1;th+=2.6,n++){const p=oXY(th,a);if(!mClear(p,10))continue;hParasol(g,p.x,p.y,n&1?6:5,.5)}};if(k1==='terr')um(5+2.4*F1+5,aM-4);if(k2==='terr')um(aM+2.4*(F2-F1)+5,aE-4)}
  
  for(const[t0,t1,k1,F1,aM,k2,F2,aE]of M_RB)for(let th=t0+1.5;th<t1;th+=3.1){for(let a=aE+9;a<B_LIM()-9;a+=11){const p=oXY(th+((Math.round(a)&1)?1:0),a);if(!mClear(p,14))continue;(Math.round(th*a)%4===0?hAutumn:(g2,x,y,r,n)=>mCrown(g2,x,y,r,H_TCOL.green))(g,p.x,p.y,8,false,true)}}
  // the lounge's name across the metal roof
@@ -288,7 +288,7 @@ function drawMudungLights(c,vx0,vy0,scale,now){if(!ST||ST.bowl!=='mudung'||!S.ni
   for(let th=-44;th<-10;th+=2.4){for(const a of[13,33,50]){const p=oXY(th,a);glow(p.x,p.y,14,'255,200,110',.5)}}
   for(let th=-42;th<-12;th+=4){for(const a of[64,80]){const p=oXY(th+(a>70?2:0),a);glow(p.x,p.y,20,'255,214,140',.2)}}
   for(let th=11;th<44;th+=3){const p=oXY(th,3);glow(p.x,p.y,22,'255,196,110',.28)}
-  for(const[t0,t1,k1,F1,aM,k2,F2]of M_RB){for(let th=t0+1;th<t1;th+=2.2){const p=oXY(th,5+F1*1.2);glow(p.x,p.y,18+F1*3,'255,180,90',.42);const q=oXY(th,aM+(F2-F1)*1.2);glow(q.x,q.y,18,'255,180,90',.32)}if(k1==='glass')for(let th=t0+1;th<t1;th+=2)for(let a=10;a<aM;a+=6){const p=oXY(th,a);glow(p.x,p.y,14,'255,190,100',.3)}}
+  for(const[t0,t1,k1,F1,aM,k2,F2,aE]of M_RB){for(let th=t0+1;th<t1;th+=2.2){const p=oXY(th,5+F1*1.2);glow(p.x,p.y,18+F1*3,'255,180,90',.42);const q=oXY(th,aM+(F2-F1)*1.2);glow(q.x,q.y,18,'255,180,90',.32)}if(k1==='glass')for(let th=t0+1;th<t1;th+=2)for(let a=10;a<aM;a+=6){const p=oXY(th,a);glow(p.x,p.y,14,'255,190,100',.3)}const deck=(A0,A1)=>{for(let th=t0+1.4;th<t1-.8;th+=2.4)for(let a=A0;a<A1;a+=7){const p=oXY(th,a);if(mClear(p,8))glow(p.x,p.y,12,'255,206,120',.26)}};if(k1==='terr')deck(5+2.4*F1+4,aM-3);if(k2==='terr')deck(aM+2.4*(F2-F1)+4,aE-3)}// string lights over the rooftop terraces
   for(let th=10;th<45;th+=2){const p=oXY(th,1.5);glow(p.x,p.y,10,'255,60,48',.18)}// red accent lights along the restaurant rail
   for(const th of[-8.5,8.5]){const p=oXY(th,12);glow(p.x,p.y,30,'255,70,60',.22)}
   {const p=oXY(0,10);glow(p.x,p.y,80,'255,210,150',.24)}
