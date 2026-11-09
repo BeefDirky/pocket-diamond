@@ -1,5 +1,10 @@
-// ---------- the Imugi Labs splash: it paints before anything else loads, fades in, and fades out once the game has drawn
-// its first frame (held at least long enough for the fade-in to finish so it never just flickers) ----------
-{const sp=document.getElementById('splash');if(sp){const t0=performance.now();let done=false;
+// ---------- the Imugi Labs splash: it paints before anything else loads and the logo fades in. The name fades in only once
+// the game code has finished starting up (phones are too busy to animate before that) and its typeface has arrived, gets a
+// moment on screen, then the whole splash fades away ----------
+{const sp=document.getElementById('splash');if(sp){let done=false,namedAt=null;
  const go=()=>{if(done)return;done=true;sp.classList.add('gone');setTimeout(()=>sp.remove(),700)};
- requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(go,Math.max(0,1100-(performance.now()-t0)))));setTimeout(go,8000)}}
+ const tick=()=>{if(done)return;
+  if(namedAt==null){if(window.__spReady!=null){sp.classList.add('named');namedAt=performance.now()}}
+  else if(performance.now()-namedAt>1500)return go();
+  setTimeout(tick,60)};
+ requestAnimationFrame(()=>requestAnimationFrame(tick));setTimeout(go,9000)}}
