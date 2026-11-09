@@ -59,10 +59,19 @@ def main():
     open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf-8').write(html)
     files = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'] + [f'audio/{k}.mp3' for k in keys]
     ver = hashlib.sha1(html.encode()).hexdigest()[:10]
-    sw = (f"const C='pd-{ver}',F={json.dumps(files)};\n"
+    sw = (f"const C='pd-{ver}',RT='pd-rt',F={json.dumps(files)};\n"
+          "// offline: the game itself and its sounds are stored at install; fonts and the online library are kept in a cache that\n"
+          "// survives updates; the page comes from the network when it answers in time and from the store when it doesn't\n"
           "self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(F)).then(()=>self.skipWaiting())));\n"
-          "self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));\n"
-          "self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).then(r=>{const cp=r.clone();caches.open(C).then(c=>c.put(e.request,cp));return r}).catch(()=>caches.match(e.request)))});\n")
+          "self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C&&k!==RT).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));\n"
+          "const put=(n,q,r)=>{if(r&&(r.ok||r.type==='opaque')){const cp=r.clone();caches.open(n).then(c=>c.put(q,cp))}return r};\n"
+          "const home=()=>caches.match(new URL('index.html',self.registration.scope).href);\n"
+          "self.addEventListener('fetch',e=>{const q=e.request;if(q.method!=='GET')return;const u=new URL(q.url),same=u.origin===location.origin,cdn=/(^|\\.)(fonts\\.googleapis\\.com|fonts\\.gstatic\\.com|cdn\\.jsdelivr\\.net)$/.test(u.hostname);\n"
+          " if(!same&&!cdn)return;if(same&&u.pathname.includes('/_vercel/'))return;\n"
+          " if(q.mode==='navigate'||(same&&/(\\/|\\.html)$/.test(u.pathname))){e.respondWith(new Promise(res=>{let done=false;const fb=()=>caches.match(q).then(r=>r||home()).then(r=>{if(!done&&r){done=true;res(r)}});\n"
+          "  const t=setTimeout(fb,4000);fetch(q).then(r=>{clearTimeout(t);put(C,q,r);if(!done){done=true;res(r)}}).catch(()=>{clearTimeout(t);fb().then(()=>{if(!done){done=true;res(Response.error())}})})}));return}\n"
+          " if(cdn){e.respondWith(caches.match(q).then(h=>{const n=fetch(q).then(r=>put(RT,q,r)).catch(()=>h);return h||n}));return}\n"
+          " e.respondWith(caches.match(q).then(h=>h||fetch(q).then(r=>put(C,q,r))))});\n")
     open(os.path.join(ROOT, 'sw.js'), 'w').write(sw)
     print(f'built: index.html {len(html)//1024} KB, dist/pocket-diamond.html {len(art)//1024} KB, cache pd-{ver}')
 

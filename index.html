@@ -992,6 +992,15 @@ body.bpPopOpen:has(.app.phoneLand) .bpScrim{display:block}
 a.mmFoot{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;margin-top:4px}
 a.mmFoot{opacity:1}a.mmFoot span{opacity:.75}a.mmFoot:hover span{opacity:1}
 #ilMark{width:100px;height:48px;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+
+/* offline: a notice that slides down from the top, a chip on the main menu, multiplayer marked as needing a connection */
+.netToast{position:fixed;left:50%;top:max(12px,env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;max-width:min(92vw,520px);box-sizing:border-box;padding:10px 14px;background:#141a22;color:var(--chalk);border:2px solid var(--amber);box-shadow:0 4px 0 rgba(0,0,0,.55);font-family:var(--f-hud);font-size:12px;line-height:1.45;text-align:center;animation:ntIn .25s ease-out;pointer-events:none}
+.netToast.on{border-color:#5fd38a}.netToast.out{opacity:0;transition:opacity .35s}
+@keyframes ntIn{from{transform:translate(-50%,-14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.offChip{display:none;align-self:center;font-family:var(--f-hud);font-weight:400;font-size:10px;letter-spacing:.18em;color:var(--amber);background:rgba(8,12,16,.8);border:2px solid var(--amber);padding:3px 8px}
+body.isOffline .offChip{display:inline-block}
+body.isOffline #goMulti{opacity:.55}
+body.isOffline #goMulti::after{content:'NEEDS INTERNET';display:block;font-size:9px;letter-spacing:.16em;margin-top:4px;opacity:.8}
 </style>
 
 <div class="app">
@@ -1024,13 +1033,14 @@ a.mmFoot{opacity:1}a.mmFoot span{opacity:.75}a.mmFoot:hover span{opacity:1}
     <div class="pkBar" id="pkBar" hidden><span>PICKOFF</span><button type="button" id="pk1" data-b="1" hidden>1B <small>Q</small></button><button type="button" id="pk2" data-b="2" hidden>2B <small>W</small></button></div>
     <div class="penPanel" id="penPanel" hidden><div class="penHead"><b>BULLPEN</b><span id="penSub"></span><button type="button" id="penClose" aria-label="Close bullpen">✕</button></div><div class="penList" id="penList"></div></div>
     <div class="ballCam" id="ballCam" hidden><canvas id="ballCamCv"></canvas><span id="ballCamTxt"></span><i>BALL CAM</i></div>
+    <div class="netToast" id="netToast" role="status" aria-live="polite" hidden></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
 
     <div id="loadScr" hidden><div class="ldCard"><img id="loadLogo" alt=""><div id="loadClub"></div><div id="loadPark"></div><div class="ldBar"><i></i></div><div class="ldTxt">LOADING THE PARK<span>...</span></div></div></div>
     <div class="overlay" id="title">
       <canvas class="tsBg" id="tsBg" aria-hidden="true"></canvas>
       <div class="card menuMain" id="scrMain">
-        <div class="mmLogo"><h1>POCKET <span>DIAMOND</span></h1><small>KBO-STYLE PIXEL BASEBALL</small></div>
+        <div class="mmLogo"><h1>POCKET <span>DIAMOND</span></h1><small>KBO-STYLE PIXEL BASEBALL</small><b class="offChip" title="No internet: single player and batting practice still work">● OFFLINE</b></div>
         <nav class="mmBtns">
           <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
@@ -5667,6 +5677,13 @@ $('pLine').addEventListener('click',()=>{lineFromPause=true;showScreen('scrLineu
 $('pQuit').addEventListener('click',()=>{S.paused=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const toMenu=b.dataset.go==='scrMain'||b.dataset.go==='scrSingle';if(parkFromBP&&toMenu){backToCage();return}if(lineFromPause&&S.paused&&toMenu){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
+// on PC the pitch-type panel is taller than the swing buttons and would cover AUTO and INFO: while it shows, they move to its left
+{const pa=document.querySelector('.app>.pacts'),ib=$('infoBtn'),ab=$('autoBtn');
+ const clr=()=>{for(const e of[ib,ab])e.style.bottom=e.style.right=''};
+ const place=()=>{const app=document.querySelector('.app'),on=app&&app.classList.contains('deskApp')&&!document.body.classList.contains('bpMode')&&pa&&getComputedStyle(pa).display!=='none';
+  if(!on)return clr();const r=pa.getBoundingClientRect(),st=(ib.offsetParent||document.body).getBoundingClientRect();
+  const b=Math.round(st.bottom-r.bottom+4)+'px',ri=Math.round(st.right-r.left+10);ib.style.bottom=ab.style.bottom=b;ib.style.right=ri+'px';ab.style.right=(ri+ib.offsetWidth+8)+'px'};
+ if(pa&&window.ResizeObserver)new ResizeObserver(place).observe(pa);addEventListener('resize',place)}
 // ---------- signings: put any card you own into your club's lineup or staff ----------
 // A signed player takes over a lineup spot (keeping that spot's position) or a staff slot. Saved per club.
 // Online, each side sends its full roster spec in the lobby so both phones field identical teams.
@@ -5885,6 +5902,17 @@ $('cards').addEventListener('click',e=>{
  const W=P[0].length,H=P.length,o=document.createElement('canvas');o.width=W+1;o.height=H+1;const q=o.getContext('2d');q.fillStyle='#f4f1e8';
  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(P[y][x]==='#')q.fillRect(x,y,1,1);
  const el=document.getElementById('ilMark');if(el)el.src=o.toDataURL()}
+// ---------- offline: the game runs from the stored copy without a connection. Say so when the connection drops or comes back,
+// mark multiplayer as needing one, and push any account save once it's back ----------
+{const t=$('netToast');let tm=0,tm2=0;
+ const say=(msg,ms,good)=>{t.textContent=msg;t.classList.toggle('on',!!good);t.classList.remove('out');t.hidden=false;clearTimeout(tm);clearTimeout(tm2);
+  tm=setTimeout(()=>{t.classList.add('out');tm2=setTimeout(()=>t.hidden=true,400)},ms||5000)};
+ window.netSay=say;
+ const OFF="You're offline. Single player and batting practice still work; multiplayer and account sync need a connection.";
+ const sync=()=>document.body.classList.toggle('isOffline',!navigator.onLine);
+ addEventListener('offline',()=>{sync();say(S.online&&S.online.inGame?"You're offline. Trying to get back to the match…":OFF,6500)});
+ addEventListener('online',()=>{sync();say('Back online.',2500,true);try{if(typeof ACC!=='undefined'&&ACC.user)accPush()}catch(e){}});
+ sync();if(!navigator.onLine)setTimeout(()=>say(OFF,6500),1600)}
 // ---------- title picker ----------
 function buildPicker(){
  const mk=(id,key)=>{$(id).innerHTML=TS_ORDER.map(t=>`<button type="button" class="chip" data-t="${t}"><img alt="" src="${LOGO_URL[t]}"><span class="c">${TEAMS[t].city}</span><span class="n">${TEAMS[t].name}</span><span class="c kr">${TEAMS[t].kcity} ${TEAMS[t].kname}</span></button>`).join('');
@@ -7617,7 +7645,8 @@ $('goFull').addEventListener('click',()=>chooseMode('full'));
 $('goBP').addEventListener('click',()=>chooseMode('bp'));
 $('goPO').addEventListener('click',()=>chooseMode('playoffs'));
 $('goWatch').addEventListener('click',()=>chooseMode('watch'));
-$('goMulti').addEventListener('click',()=>{ensureAudio();openOnline()});
+$('goMulti').addEventListener('click',()=>{ensureAudio();if(!navigator.onLine){netSay('Multiplayer needs an internet connection. Single player and batting practice work offline.',4500);return}openOnline()});
+$('goAcct').addEventListener('click',()=>{if(!navigator.onLine)netSay('Offline: your progress is saved on this device and will sync when you reconnect.',4500)});
 // a loading screen while the park is built: shown first, painted, then the heavy work runs, then it fades once the
 // first frame of the new park has been drawn
 function withLoading(work){const L=$('loadScr');if(L.parentNode!==document.body)document.body.appendChild(L);/* above every stage layer */const k=S.you,T=TEAMS[k];$('loadLogo').src=LOGO_URL[k]||'';$('loadPark').textContent=(STADIUMS[k]&&STADIUMS[k].name)||'';$('loadClub').textContent=T?`${T.city} ${T.name}`:'';

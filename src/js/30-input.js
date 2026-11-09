@@ -42,7 +42,8 @@ $('goFull').addEventListener('click',()=>chooseMode('full'));
 $('goBP').addEventListener('click',()=>chooseMode('bp'));
 $('goPO').addEventListener('click',()=>chooseMode('playoffs'));
 $('goWatch').addEventListener('click',()=>chooseMode('watch'));
-$('goMulti').addEventListener('click',()=>{ensureAudio();openOnline()});
+$('goMulti').addEventListener('click',()=>{ensureAudio();if(!navigator.onLine){netSay('Multiplayer needs an internet connection. Single player and batting practice work offline.',4500);return}openOnline()});
+$('goAcct').addEventListener('click',()=>{if(!navigator.onLine)netSay('Offline: your progress is saved on this device and will sync when you reconnect.',4500)});
 // a loading screen while the park is built: shown first, painted, then the heavy work runs, then it fades once the
 // first frame of the new park has been drawn
 function withLoading(work){const L=$('loadScr');if(L.parentNode!==document.body)document.body.appendChild(L);/* above every stage layer */const k=S.you,T=TEAMS[k];$('loadLogo').src=LOGO_URL[k]||'';$('loadPark').textContent=(STADIUMS[k]&&STADIUMS[k].name)||'';$('loadClub').textContent=T?`${T.city} ${T.name}`:'';

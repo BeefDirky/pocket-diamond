@@ -90,3 +90,10 @@ $('pLine').addEventListener('click',()=>{lineFromPause=true;showScreen('scrLineu
 $('pQuit').addEventListener('click',()=>{S.paused=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const toMenu=b.dataset.go==='scrMain'||b.dataset.go==='scrSingle';if(parkFromBP&&toMenu){backToCage();return}if(lineFromPause&&S.paused&&toMenu){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
+// on PC the pitch-type panel is taller than the swing buttons and would cover AUTO and INFO: while it shows, they move to its left
+{const pa=document.querySelector('.app>.pacts'),ib=$('infoBtn'),ab=$('autoBtn');
+ const clr=()=>{for(const e of[ib,ab])e.style.bottom=e.style.right=''};
+ const place=()=>{const app=document.querySelector('.app'),on=app&&app.classList.contains('deskApp')&&!document.body.classList.contains('bpMode')&&pa&&getComputedStyle(pa).display!=='none';
+  if(!on)return clr();const r=pa.getBoundingClientRect(),st=(ib.offsetParent||document.body).getBoundingClientRect();
+  const b=Math.round(st.bottom-r.bottom+4)+'px',ri=Math.round(st.right-r.left+10);ib.style.bottom=ab.style.bottom=b;ib.style.right=ri+'px';ab.style.right=(ri+ib.offsetWidth+8)+'px'};
+ if(pa&&window.ResizeObserver)new ResizeObserver(place).observe(pa);addEventListener('resize',place)}
