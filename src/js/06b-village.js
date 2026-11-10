@@ -207,10 +207,6 @@ function villageCol(wx,wy){
  if(P.t==='veg'||P.t==='house'){const st=Math.floor(t/5);if(st&1){const n=(Math.floor(s/3)+st)&1;return n?VC.crop:VC.crop2}return (Math.floor(s/2)&1)?VC.soil:VC.soil2}
  const n=vHash(Math.floor(wx/3),Math.floor(wy/3))&7;return n===0?VC.pas2:VC.pas1}
 // a town plot's lot: the biggest centred rectangle whose corners stay clear of the streets around it
-const V_LOT=new Map();
-function vLot(P){let r=V_LOT.get(P);if(r)return r;const Y=vYard(P);let w=Y.R*2.6,h=Y.R*2.2;
- for(let k=0;k<14;k++){const ok=[[-1,-1],[1,-1],[-1,1],[1,1],[0,-1],[0,1],[-1,0],[1,0]].every(([a,b])=>{const n=vNear(P.x+a*w/2,P.y+b*h/2);return n.a===P&&n.e>12});if(ok)break;w*=.92;h*=.92}
- r={w,h,R:Y.R};V_LOT.set(P,r);return r}
 // a house plot's yard (world px, centred on its seed): it fits inside the plot's largest clear circle
 const V_YARD=new Map();
 function vYard(P){let r=V_YARD.get(P);if(r)return r;const i=Math.floor(P.x/VS),j=Math.floor(P.y/VS);let m=1e9;
@@ -324,14 +320,6 @@ function vSpots(P,n,minE,rr){const out=[];for(let k=0;k<n*6&&out.length<n;k++){c
   {const fx=(x-HX)*FT,fy=(HY-y)*FT,th=Math.atan2(fx,fy)/RAD;if(fy>-40&&Math.abs(th)<=48&&Math.hypot(fx,fy)<fenceDist(th)+30)continue}
   if(ST.openTop){const fx=(x-HX)*FT,fy=(HY-y)*FT,th=Math.atan2(fx,fy)/RAD;if(fy>0&&Math.abs(th)<ST.openTop&&(Math.hypot(fx,fy)-fenceDist(th)<96||Math.hypot(fx,fy-vPav().cy)-vPav().R<58))continue}
   out.push([x,y,q.e])}return out}
-function vBuilding(g,x,y,w,h,col,ht,rr,glows){// a flat-roofed low-rise: parapet, water tank, AC units, stair hut
- x=Math.round(x);y=Math.round(y);w=Math.round(w);h=Math.round(h);
- g.fillStyle='rgba(0,0,0,.26)';g.beginPath();g.moveTo(x+w,y);g.lineTo(x+w+ht*.7,y+ht*.45);g.lineTo(x+w+ht*.7,y+h+ht*.45);g.lineTo(x+ht*.7,y+h+ht*.45);g.lineTo(x,y+h);g.closePath();g.fill();
- g.fillStyle=shade(col,-.25);g.fillRect(x,y,w,h);g.fillStyle=col;g.fillRect(x+2,y+2,w-4,h-4);g.fillStyle=shade(col,.12);g.fillRect(x+2,y+2,w-4,2);
- if(w>14&&h>12){const tx=x+4+Math.floor(rr()*(w-14)),ty=y+4+Math.floor(rr()*(h-12));g.fillStyle='#2d5f9a';g.beginPath();g.arc(tx+3,ty+3,3.2,0,7);g.fill();g.fillStyle='#4f86c6';g.beginPath();g.arc(tx+2.4,ty+2.4,1.6,0,7);g.fill()}
- for(let k=0;k<1+((rr()*3)|0);k++){const ax=x+3+Math.floor(rr()*(w-8)),ay=y+3+Math.floor(rr()*(h-7));g.fillStyle='#8a9096';g.fillRect(ax,ay,4,3);g.fillStyle='#5f656b';g.fillRect(ax+1,ay+1,2,1)}
- if(w>20&&rr()<.6){const sx=x+w-9,sy=y+3;g.fillStyle=shade(col,-.12);g.fillRect(sx,sy,6,6);g.fillStyle='rgba(0,0,0,.2)';g.fillRect(sx+6,sy+1,2,6)}
- if(glows)for(let k=0;k<Math.max(1,w/14|0);k++)glows.push([x+4+rr()*(w-8),y+h+1])}
 function vTownDraw(g,glows){if(!V_OL)V_OL=parkOutlineClosed();
  for(const P of vTownPlots()){const K=vKind(P),rr=mulberry32(P.h^0x9e37);
   if(K==='block'){for(const[x,y]of vSpots(P,4,22,rr)){if(rr()<.5){g.fillStyle='#2d5f9a';g.beginPath();g.arc(x,y,3.2,0,7);g.fill();g.fillStyle='#4f86c6';g.beginPath();g.arc(x-.6,y-.6,1.6,0,7);g.fill()}

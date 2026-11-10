@@ -135,6 +135,13 @@ function nightPass(g,now){
 function dayPass(g){g.save();g.globalCompositeOperation='multiply';g.fillStyle='#fff7ea';g.fillRect(0,0,W,H);g.restore()}
 function render(now){
  if(!FIELD){ctx.fillStyle='#232f37';ctx.fillRect(0,0,cv.width,cv.height);return}
+ // The whole park is recomposed every frame (field, crowd, signs, decor, players, lighting): four or more full layers of
+ // a 1280x1360 buffer. The camera only ever shows part of it, so compose just that part. (The batting-practice ball cam
+ // and the debug snapshot read other parts of the buffer, so they get the whole thing.)
+ let WBC=null;if(!WB_FULL&&!(S.mode==='bp'&&S.bpCam)){const C0=clampCam(S.cam),[w0,h0]=viewWH(C0.z),x0=Math.max(0,Math.floor(C0.x-w0/2)-3),y0=Math.max(0,Math.floor(C0.y-h0/2)-3),x1=Math.min(W,Math.ceil(C0.x+w0/2)+3),y1=Math.min(H,Math.ceil(C0.y+h0/2)+3);
+  if(x1>x0&&y1>y0&&(x1-x0)*(y1-y0)<W*H*.94)WBC=[x0,y0,x1-x0,y1-y0]}
+ if(WBC){wg.save();wg.beginPath();wg.rect(WBC[0],WBC[1],WBC[2],WBC[3]);wg.clip()}
+ try{
  wg.drawImage(FIELD,0,0);
  const bpv=S.mode==='bp'&&S.phase!=='title'&&S.phase!=='over';
  if(CROWD_A&&!bpv){
@@ -386,6 +393,7 @@ function render(now){
   wg.restore()}
  else dayPass(wg);
  drawTowerLamps(wg,now);
+ }finally{if(WBC)wg.restore()}
  // to screen
  const C=clampCam(S.cam),[vw,vh]=viewWH(C.z),e=EXT();
  const vx0=C.x-vw/2,vy0=C.y-vh/2,scale=cv.height/vh;

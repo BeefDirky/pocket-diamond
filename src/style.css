@@ -979,3 +979,34 @@ a.mmFoot{opacity:1}a.mmFoot span{opacity:.75}a.mmFoot:hover span{opacity:1}
 body.isOffline .offChip{display:inline-block}
 body.isOffline #goMulti{opacity:.55}
 body.isOffline #goMulti::after{content:'NEEDS INTERNET';display:block;font-size:9px;letter-spacing:.16em;margin-top:4px;opacity:.8}
+/* a phone on its side: the menus are short and wide, so lay them out in two columns instead of making you scroll for the main button */
+@media (orientation:landscape) and (max-height:520px){
+ .card.menuMain{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:"logo btns" "acct btns" "foot btns";align-items:center;column-gap:28px;row-gap:8px;max-width:760px;padding:8px 16px}
+ .menuMain .mmLogo{grid-area:logo}.menuMain .mmBtns{grid-area:btns;gap:8px}.menuMain .mmAcct{grid-area:acct}.menuMain .mmFoot{grid-area:foot}
+ .menuMain .mmLogo h1{font-size:clamp(26px,11vh,44px)}
+ .menuMain .mmBtn{padding:12px 14px;font-size:clamp(14px,5vh,19px)}.menuMain .mmSm{padding:9px 8px;font-size:11px}.menuMain .mmPair{gap:8px}
+ .menuMain #ilMark{width:75px;height:36px}
+ .card.tsCard{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-areas:"hero head" "hero play" "hero opp" "dots map";align-items:center;column-gap:20px;row-gap:8px;max-width:800px;padding:6px 14px 6px 56px}
+ .tsCard>h1{grid-area:head;padding:0!important}.tsCard>.tsHero{grid-area:hero;margin-top:0}.tsCard>.tsDots{grid-area:dots}.tsCard>#playGo{grid-area:play;width:100%}.tsCard>.oppLine{grid-area:opp;margin:0}.tsCard>.tsMapBtn{grid-area:map;justify-self:center}
+ .tsCard>#oppPick,.tsCard>.tsMapSec,.tsCard>.mbtn.back{grid-column:1/-1}
+ #tsLogo{width:clamp(96px,38vh,170px)}
+ .tsCenter{gap:3px}.tsCenter #tsName{font-size:clamp(15px,5.4vh,22px)}
+ .tsArrow{width:44px;height:44px}
+ /* the lineup field was capped to a slice of the (short) screen and its cards shrank to nothing: let it take its column and scroll */
+ .lfField{max-height:none!important;width:100%!important;max-width:100%!important}
+}
+/* touch screens: AUTO / INFO and the volume sliders were under 30px tall, easy to miss with a thumb */
+@media (pointer:coarse){.infoBtn,.autoBtn{min-height:34px;padding-top:8px;padding-bottom:8px}input[type=range]{min-height:32px}}
+/* the full-screen layouts float the player cards, timing bar and swing buttons over the park: on the FINAL screen they sat on top of the result card and covered its buttons */
+body:has(#over:not([hidden])) .app.deskApp>:is(.matchup,.meter,.acts,.pacts,.skipBtn){display:none!important}
+/* batting practice on an upright phone: "Throwing: FASTBALL" ran off the side of the card, so the label sits on its own line above the pitch button */
+.app:not(.deskApp) #pName:has(.bpPick){display:block;white-space:normal;overflow:visible}
+.app:not(.deskApp) #pName .bpThrow{display:block;font-size:.68em;letter-spacing:.06em;margin:0 0 3px}
+.app:not(.deskApp) #pName .bpPick{max-width:100%;font-size:.92em;padding:3px 6px;min-height:30px}
+/* narrow phones: the longest names (HWANG M.U.) were cut off in the at-bat card */
+@media (max-width:380px){.mu .v{font-size:13px;gap:4px}.mu .v .muNm{letter-spacing:-.03em}}
+/* PC: the pitch names were 11px in buttons 140px wide */
+.app.deskApp:not(.phoneLand)>.pacts .pbtn{font-size:14px;gap:8px}.app.deskApp:not(.phoneLand)>.pacts .pbtn small{font-size:13px}
+/* phones: "PITCHING [R] [SIDEARM]" ran a few pixels past the card's edge */
+@media (max-width:430px){.mu .k{gap:5px;letter-spacing:.08em;padding-left:7px;padding-right:6px}.muPos.side{margin-left:0;letter-spacing:0}}
+@media (max-width:380px){.mode small{white-space:normal;overflow-wrap:anywhere}}

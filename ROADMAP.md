@@ -42,6 +42,9 @@
 - [ ] Too many home runs, too few singles: ~15% of fair balls leave the park; perfect contact is a HR 37% of the time
 - [ ] Scoring runs high: bot games average ~8.5 runs a team (KBO ~5); finals like 13-7, 14-11, 15-1
 - [ ] Watch mode takes 22-26 minutes for 9 innings
+- [ ] Playtest, 10 Nov: a full game you bat and pitch runs past 30 minutes; each home run trot is 18 s unless skipped
+- [ ] Playtest, 10 Nov: a careless release on the pitching meter throws a lot of wild pitches (9 in the first 3 innings)
+- [ ] Playtest, 10 Nov: a bot timing within ~25 ms hit 5 home runs in 6 innings; within ~30 ms won a 3-inning arcade game on 3 homers in 8 pitches
 - [ ] Team + player rating pass with bot sims
 - [ ] Pitcher fatigue and bullpen use
 - [ ] Online timing window tuned for network delay
@@ -65,5 +68,11 @@
 - [ ] Stat tracking / records
 - [ ] Ranked or matchmaking
 
+## Speed (playtest, 10 Nov)
+- [ ] Building a park freezes the page for 1-2.5 s on a PC (Ulsan slowest), longer on phones; move it off the main thread or cache it
+- [ ] Night games cost ~5 ms a frame more than day games on PC (two full-screen light layers)
+- [ ] Field, crowd, signs and decor are four full layers recomposed every frame; merge the static ones
+- [ ] Leaving mid-playoffs and reopening the game lands on the bracket, not the main menu
+
 ## Bugs found while playing
-<!-- add them here -->
+- See PLAYTEST.md for the 10 Nov session (all fixed)

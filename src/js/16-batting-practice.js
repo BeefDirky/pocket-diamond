@@ -397,8 +397,8 @@ function finishPlay(){
  if(r.code==='FOUL'&&S.play.bunt&&S.strikes>=2){
   S.outs++;S.jumbo={kBig:true,look:false,text:'STRIKEOUT',until:performance.now()+2800};if(batKey()===S.you){S.ks++;(S.kLook=S.kLook||[]).push(false);crowdSad()}else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
  }else if(r.code==='FOUL'){
-  if(S.strikes<2)S.strikes++;
-  banner(S.play.bunt?'FOUL BUNT':'FOUL BALL',S.strikes<2?`${S.balls}-${S.strikes}`:'Still two strikes');
+  const had2=S.strikes>=2;if(!had2)S.strikes++;
+  banner(S.play.bunt?'FOUL BUNT':'FOUL BALL',had2?'Still two strikes':`${S.balls}-${S.strikes}`);// (a foul that made it strike two used to say "still two strikes")
  }else{
   const outsAfter=S.outs+r.outs;const runs=outsAfter>=3?0:r.runs;
   S.outs=Math.min(3,outsAfter);addRuns(runs);

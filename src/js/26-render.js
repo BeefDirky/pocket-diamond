@@ -1,10 +1,13 @@
 // ---------- render ----------
 const cv=$('cv'),ctx=cv.getContext('2d');
-const wb=document.createElement('canvas');wb.width=W;wb.height=H;const wg=wb.getContext('2d');
+const wb=document.createElement('canvas');wb.width=W;wb.height=H;const wg=wb.getContext('2d');let WB_FULL=false;
 let TOWERS=[];
 let FIELD=null,DECOR=null,SIGNS=null,CROWD_A=null,CROWD_B=null,FANS=[],CONC=[],AISLES=[],RAIL=[],FLAGFANS=[];
-function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,3);cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
-new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},gbPlay:(s,EV,b1)=>{S.bases=[b1?curBatter():null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());S.play=pl;S.phase='play';const th=pl.segs.filter(g=>g.thr).map(g=>[g.t0.toFixed(2),g.from.x|0,g.from.y|0]);return{end:pl.end,th,sl:pl.runners.filter(r=>r.slide).map(r=>({t0:r.slide.t0,t1:r.slide.t1,b:r.slide.b,head:r.slide.head,out:!!r.out}))}},setT:t=>{S.play.t=t},fpos:(pl,i,t)=>fpos(pl,i,t),splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
+// The canvas is drawn at the screen's pixel density, but with a budget: a big retina/4K window at 2x would be 8-15 million
+// pixels, repainted several layers deep every frame. Past ~4.2 million the density steps down (never below 1x); phones are far under it.
+const CV_MAXPX=4.2e6;
+function resize(){const r=cv.getBoundingClientRect();const dpr=Math.max(1,Math.min(window.devicePixelRatio||1,3,Math.sqrt(CV_MAXPX/Math.max(1,r.width*r.height))));cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
+new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,cs:()=>[JC.size,PSPR.size],gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},gbPlay:(s,EV,b1)=>{S.bases=[b1?curBatter():null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());S.play=pl;S.phase='play';const th=pl.segs.filter(g=>g.thr).map(g=>[g.t0.toFixed(2),g.from.x|0,g.from.y|0]);return{end:pl.end,th,sl:pl.runners.filter(r=>r.slide).map(r=>({t0:r.slide.t0,t1:r.slide.t1,b:r.slide.b,head:r.slide.head,out:!!r.out}))}},setT:t=>{S.play.t=t},fpos:(pl,i,t)=>fpos(pl,i,t),splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{WB_FULL=true;render(now);WB_FULL=false;const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 // Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
 // Suwon's board is built into the fortress: a stone bastion around it, a purple frame, a tiled pavilion roof above
@@ -111,19 +114,6 @@ function drawDugoutCrew(g,now){
    out.push({p:at(lx,2),hop,legs,arms,frame:Math.floor(now/230)+j,flip:vel*sd<0,skin:skinFor(5+j)})}
   out.sort((u,v)=>u.p.y-v.p.y).forEach(o=>drawPlayer(g,o.p.x,o.p.y-o.hop,T,{legs:o.legs,arms:o.arms,frame:o.frame,skin:o.skin,pants,flip:o.flip,sc:1.02}));
  })}
-function drawCheer(g,now){
- const T=TEAMS[S.you],c=cheerFrame(),hype=now<S.cheerUntil;
- g.save();g.translate(c.x,c.y);g.rotate(-45*RAD);
- for(let j=0;j<4;j++){
-  const x=-27+j*18,lead=j===3,beat=Math.floor(now/(hype?110:240)+j)%2,y=-3-(hype&&beat?2:0);
-  const sk=SKINS[(j*2+1)%SKINS.length];
-  g.fillStyle=lead?'#f4f1e8':T.jersey;g.fillRect(x-3,y,6,6);g.fillStyle=lead?T.cap:CREAM;g.fillRect(x-3,y+4,6,2);
-  g.fillStyle=sk;g.fillRect(x-1,y-3,3,3);g.fillStyle=lead?T.cap:'#2a1d14';g.fillRect(x-1,y-4,3,1);
-  if(lead){g.fillStyle='#e8e1cf';g.fillRect(x+3,y-2+(beat?-1:0),3,2)}
-  else{const py=beat?y-6:y+1;g.fillStyle=CREAM;g.fillRect(x-6,py,3,3);g.fillStyle=T.jersey;g.fillRect(x+4,beat?y+1:y-6,3,3)}
- }
- g.restore();
-}
 function drawFlags(g,now){
  const xs=[298,320,342,364,596,618,640,662];
  ORDER.forEach((k,n)=>{const T=TEAMS[k],x=xs[n],y=3;
@@ -177,10 +167,6 @@ function drawCrowdLife(g,now){
  const T=TEAMS[S.you],cols=[T.jersey,T.cap,'#f4f1e8'];
  for(let k=0;k<CONC.length;k+=5){const c=CONC[k];const o=Math.round(Math.sin(now/300+k*.4));
   g.fillStyle=cols[(k/5|0)%3];for(let r=0;r<6;r++){const w=Math.max(1,5-r);g.fillRect(Math.round(c.x)-2+((5-w)>>1)+(r>2?o:0),Math.round(c.y)+r,w,1)}}
- // visitor fans post a K card for every strikeout
- if(0)for(let k=0;k<Math.min(S.ks,12);k++){const th=-41+k*2.3;// (the K cards moved to the scoreboard)const r=fenceDist(th)+5;const p=toPx(r*Math.sin(th*RAD),r*Math.cos(th*RAD));
-  const x=Math.round(p.x)-3,y=Math.round(p.y)-5;g.fillStyle='#f4f1e8';g.fillRect(x,y,7,9);g.fillStyle='#c7262e';
-  KMAP.forEach((row,ry)=>{for(let rx=0;rx<4;rx++)if(row[rx]==='1')g.fillRect(x+2+rx,y+2+ry,1,1)})}
  // vendors climbing the aisles
  if(S.vendors)for(const v of S.vendors){
   const ph=now/1000*v.sp+v.ph;const u=(Math.sin(ph)+1)/2;const r=lerp(v.r0,v.r1,u);

@@ -1001,6 +1001,37 @@ a.mmFoot{opacity:1}a.mmFoot span{opacity:.75}a.mmFoot:hover span{opacity:1}
 body.isOffline .offChip{display:inline-block}
 body.isOffline #goMulti{opacity:.55}
 body.isOffline #goMulti::after{content:'NEEDS INTERNET';display:block;font-size:9px;letter-spacing:.16em;margin-top:4px;opacity:.8}
+/* a phone on its side: the menus are short and wide, so lay them out in two columns instead of making you scroll for the main button */
+@media (orientation:landscape) and (max-height:520px){
+ .card.menuMain{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:"logo btns" "acct btns" "foot btns";align-items:center;column-gap:28px;row-gap:8px;max-width:760px;padding:8px 16px}
+ .menuMain .mmLogo{grid-area:logo}.menuMain .mmBtns{grid-area:btns;gap:8px}.menuMain .mmAcct{grid-area:acct}.menuMain .mmFoot{grid-area:foot}
+ .menuMain .mmLogo h1{font-size:clamp(26px,11vh,44px)}
+ .menuMain .mmBtn{padding:12px 14px;font-size:clamp(14px,5vh,19px)}.menuMain .mmSm{padding:9px 8px;font-size:11px}.menuMain .mmPair{gap:8px}
+ .menuMain #ilMark{width:75px;height:36px}
+ .card.tsCard{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-areas:"hero head" "hero play" "hero opp" "dots map";align-items:center;column-gap:20px;row-gap:8px;max-width:800px;padding:6px 14px 6px 56px}
+ .tsCard>h1{grid-area:head;padding:0!important}.tsCard>.tsHero{grid-area:hero;margin-top:0}.tsCard>.tsDots{grid-area:dots}.tsCard>#playGo{grid-area:play;width:100%}.tsCard>.oppLine{grid-area:opp;margin:0}.tsCard>.tsMapBtn{grid-area:map;justify-self:center}
+ .tsCard>#oppPick,.tsCard>.tsMapSec,.tsCard>.mbtn.back{grid-column:1/-1}
+ #tsLogo{width:clamp(96px,38vh,170px)}
+ .tsCenter{gap:3px}.tsCenter #tsName{font-size:clamp(15px,5.4vh,22px)}
+ .tsArrow{width:44px;height:44px}
+ /* the lineup field was capped to a slice of the (short) screen and its cards shrank to nothing: let it take its column and scroll */
+ .lfField{max-height:none!important;width:100%!important;max-width:100%!important}
+}
+/* touch screens: AUTO / INFO and the volume sliders were under 30px tall, easy to miss with a thumb */
+@media (pointer:coarse){.infoBtn,.autoBtn{min-height:34px;padding-top:8px;padding-bottom:8px}input[type=range]{min-height:32px}}
+/* the full-screen layouts float the player cards, timing bar and swing buttons over the park: on the FINAL screen they sat on top of the result card and covered its buttons */
+body:has(#over:not([hidden])) .app.deskApp>:is(.matchup,.meter,.acts,.pacts,.skipBtn){display:none!important}
+/* batting practice on an upright phone: "Throwing: FASTBALL" ran off the side of the card, so the label sits on its own line above the pitch button */
+.app:not(.deskApp) #pName:has(.bpPick){display:block;white-space:normal;overflow:visible}
+.app:not(.deskApp) #pName .bpThrow{display:block;font-size:.68em;letter-spacing:.06em;margin:0 0 3px}
+.app:not(.deskApp) #pName .bpPick{max-width:100%;font-size:.92em;padding:3px 6px;min-height:30px}
+/* narrow phones: the longest names (HWANG M.U.) were cut off in the at-bat card */
+@media (max-width:380px){.mu .v{font-size:13px;gap:4px}.mu .v .muNm{letter-spacing:-.03em}}
+/* PC: the pitch names were 11px in buttons 140px wide */
+.app.deskApp:not(.phoneLand)>.pacts .pbtn{font-size:14px;gap:8px}.app.deskApp:not(.phoneLand)>.pacts .pbtn small{font-size:13px}
+/* phones: "PITCHING [R] [SIDEARM]" ran a few pixels past the card's edge */
+@media (max-width:430px){.mu .k{gap:5px;letter-spacing:.08em;padding-left:7px;padding-right:6px}.muPos.side{margin-left:0;letter-spacing:0}}
+@media (max-width:380px){.mode small{white-space:normal;overflow-wrap:anywhere}}
 </style>
 
 <div class="app">
@@ -1102,7 +1133,7 @@ body.isOffline #goMulti::after{content:'NEEDS INTERNET';display:block;font-size:
       <div class="card" id="scrAds" hidden>
         <h1><span>SPONSORS</span><small>SAMPLE SIGNS · PREVIEW ONLY</small></h1>
         <div class="adsWrap" id="adsWrap"></div>
-        <button class="big" type="button" data-go="scrMain">BACK</button>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="card" id="scrAbout" hidden>
         <h1><span>ABOUT</span></h1>
@@ -1914,7 +1945,7 @@ function parkOutlineClosed(){if(ST&&ST.bowl)return hOutline();return outlineFrom
 // The outline keeps its shape (it still decides where the park buffer shows), but the stretch across the outfield is
 // flagged open: no outer wall, plaza or roof lights there. Both layers paint the same countryside, so it reads as one.
 function parkOutline(){if(ST&&ST.bowl)return hOutline();const B=parkOutlineClosed(),cut=ST&&ST.openTop;if(!cut)return B;
- const ang=q=>Math.atan2(q.x-HX,HY-q.y)/RAD,isOpen=ST.harbor?q=>{const x=(q.x-HX)*FT,y=(HY-q.y)*FT,th=Math.atan2(x,y)/RAD;return hOwn(x,y,th,Math.hypot(x,y),y>0?fenceDist(th):0)>0}:q=>q.y<HY&&Math.abs(ang(q))<cut;
+ const ang=q=>Math.atan2(q.x-HX,HY-q.y)/RAD,isOpen=q=>q.y<HY&&Math.abs(ang(q))<cut;
  const out=[];for(let i=0;i<B.length;i++){const a=B[i],b=B[(i+1)%B.length];a.open=isOpen(a);out.push(a);
   if(isOpen(a)!==isOpen(b)){let lo=0,hi=1;for(let k=0;k<30;k++){const m=(lo+hi)/2,q={x:a.x+(b.x-a.x)*m,y:a.y+(b.y-a.y)*m};if(isOpen(q)===isOpen(a))lo=m;else hi=m}
    out.push({x:a.x+(b.x-a.x)*lo,y:a.y+(b.y-a.y)*lo,open:false})}}
@@ -2339,10 +2370,6 @@ function villageCol(wx,wy){
  if(P.t==='veg'||P.t==='house'){const st=Math.floor(t/5);if(st&1){const n=(Math.floor(s/3)+st)&1;return n?VC.crop:VC.crop2}return (Math.floor(s/2)&1)?VC.soil:VC.soil2}
  const n=vHash(Math.floor(wx/3),Math.floor(wy/3))&7;return n===0?VC.pas2:VC.pas1}
 // a town plot's lot: the biggest centred rectangle whose corners stay clear of the streets around it
-const V_LOT=new Map();
-function vLot(P){let r=V_LOT.get(P);if(r)return r;const Y=vYard(P);let w=Y.R*2.6,h=Y.R*2.2;
- for(let k=0;k<14;k++){const ok=[[-1,-1],[1,-1],[-1,1],[1,1],[0,-1],[0,1],[-1,0],[1,0]].every(([a,b])=>{const n=vNear(P.x+a*w/2,P.y+b*h/2);return n.a===P&&n.e>12});if(ok)break;w*=.92;h*=.92}
- r={w,h,R:Y.R};V_LOT.set(P,r);return r}
 // a house plot's yard (world px, centred on its seed): it fits inside the plot's largest clear circle
 const V_YARD=new Map();
 function vYard(P){let r=V_YARD.get(P);if(r)return r;const i=Math.floor(P.x/VS),j=Math.floor(P.y/VS);let m=1e9;
@@ -2456,14 +2483,6 @@ function vSpots(P,n,minE,rr){const out=[];for(let k=0;k<n*6&&out.length<n;k++){c
   {const fx=(x-HX)*FT,fy=(HY-y)*FT,th=Math.atan2(fx,fy)/RAD;if(fy>-40&&Math.abs(th)<=48&&Math.hypot(fx,fy)<fenceDist(th)+30)continue}
   if(ST.openTop){const fx=(x-HX)*FT,fy=(HY-y)*FT,th=Math.atan2(fx,fy)/RAD;if(fy>0&&Math.abs(th)<ST.openTop&&(Math.hypot(fx,fy)-fenceDist(th)<96||Math.hypot(fx,fy-vPav().cy)-vPav().R<58))continue}
   out.push([x,y,q.e])}return out}
-function vBuilding(g,x,y,w,h,col,ht,rr,glows){// a flat-roofed low-rise: parapet, water tank, AC units, stair hut
- x=Math.round(x);y=Math.round(y);w=Math.round(w);h=Math.round(h);
- g.fillStyle='rgba(0,0,0,.26)';g.beginPath();g.moveTo(x+w,y);g.lineTo(x+w+ht*.7,y+ht*.45);g.lineTo(x+w+ht*.7,y+h+ht*.45);g.lineTo(x+ht*.7,y+h+ht*.45);g.lineTo(x,y+h);g.closePath();g.fill();
- g.fillStyle=shade(col,-.25);g.fillRect(x,y,w,h);g.fillStyle=col;g.fillRect(x+2,y+2,w-4,h-4);g.fillStyle=shade(col,.12);g.fillRect(x+2,y+2,w-4,2);
- if(w>14&&h>12){const tx=x+4+Math.floor(rr()*(w-14)),ty=y+4+Math.floor(rr()*(h-12));g.fillStyle='#2d5f9a';g.beginPath();g.arc(tx+3,ty+3,3.2,0,7);g.fill();g.fillStyle='#4f86c6';g.beginPath();g.arc(tx+2.4,ty+2.4,1.6,0,7);g.fill()}
- for(let k=0;k<1+((rr()*3)|0);k++){const ax=x+3+Math.floor(rr()*(w-8)),ay=y+3+Math.floor(rr()*(h-7));g.fillStyle='#8a9096';g.fillRect(ax,ay,4,3);g.fillStyle='#5f656b';g.fillRect(ax+1,ay+1,2,1)}
- if(w>20&&rr()<.6){const sx=x+w-9,sy=y+3;g.fillStyle=shade(col,-.12);g.fillRect(sx,sy,6,6);g.fillStyle='rgba(0,0,0,.2)';g.fillRect(sx+6,sy+1,2,6)}
- if(glows)for(let k=0;k<Math.max(1,w/14|0);k++)glows.push([x+4+rr()*(w-8),y+h+1])}
 function vTownDraw(g,glows){if(!V_OL)V_OL=parkOutlineClosed();
  for(const P of vTownPlots()){const K=vKind(P),rr=mulberry32(P.h^0x9e37);
   if(K==='block'){for(const[x,y]of vSpots(P,4,22,rr)){if(rr()<.5){g.fillStyle='#2d5f9a';g.beginPath();g.arc(x,y,3.2,0,7);g.fill();g.fillStyle='#4f86c6';g.beginPath();g.arc(x-.6,y-.6,1.6,0,7);g.fill()}
@@ -3487,7 +3506,6 @@ function drawBrick(g,k,night,CW,CH,cx,cy,OL,e){
  // banners on the wing piers, people at the doors
  for(const sd of[-1,1]){const bx=gx+sd*(CW2+14)-4;R(bx+2,FY-FH+2,8,16,'rgba(0,0,0,.3)');R(bx,FY-FH,8,15,'#13254a');R(bx,FY-FH,8,2,'#e8642a');R(bx+2,FY-FH+6,4,4,'#e8eef5')}
  const pc=['#e8642a','#13254a','#e8eef5','#f2c230','#3a6ab0','#c94a3a'];for(let i=0;i<34;i++){const h=vHash(i,404),px=gx-60+(h%120),py=FY+6+((h>>8)%60);if(Math.abs(px-gx)>30&&((h>>4)&1))continue;R(px,py,1,2,pc[h%pc.length]);R(px,py-1,1,1,night?'#6a5040':'#e8c8a8')}}
-function drawBrickLights(){}
 // ---- the board (K units): navy steel frame on braced legs, flags along the top, Gwangan bridge in white line under the score ----
 function drawJumboBrick(g,now){const cx=HX/K,x0=cx-95,y0=-18,w=190,h=66,night=!!S.night,fy=(HY-fenceDist(0)/FT)/K,yb=fy-8,ex=16,yt=y0+h+ex+2,legs=[x0+26,x0+w-26];
  g.fillStyle='rgba(0,0,0,.26)';g.fillRect(x0+10,yb+1,w-4,10);
@@ -4319,52 +4337,6 @@ function buildSigns(){
 }
 
 // ---------- city mural: a giant billboard in the left-field upper deck showing the home city's landmark ----------
-function drawLandmark(g,night){const I=CLUB_INFO[S.you];if(!I||!I.landmark)return;const T=TEAMS[S.you];
- const X=22,Y=6,Wd=150,Ht=74;g.save();
- g.fillStyle='rgba(0,0,0,.35)';g.fillRect(X+4,Y+4,Wd,Ht);                        // shadow on the seats
- g.fillStyle='#3a4148';g.fillRect(X+20,Y+Ht,4,10);g.fillRect(X+Wd-24,Y+Ht,4,10);  // legs
- g.fillStyle='#14181c';g.fillRect(X-3,Y-3,Wd+6,Ht+6);
- const sky=g.createLinearGradient(0,Y,0,Y+Ht);
- if(night){sky.addColorStop(0,'#24357a');sky.addColorStop(1,'#7a6aa8')}else{sky.addColorStop(0,'#6fb7ec');sky.addColorStop(1,'#cfe9f7')}
- g.fillStyle=sky;g.fillRect(X,Y,Wd,Ht);
- g.beginPath();g.rect(X,Y,Wd,Ht);g.clip();
- const gnd=Y+Ht-12,sil=night?'#0b0f1e':'#3b4a5c',R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(X+x,y,w,h)};
- if(night)for(let i=0;i<14;i++){const h=hash('st'+i);R(h%Wd,Y+2+(h>>5)%30,1,1,'#e9ecf7')}
- const lit=night?'#ffd86b':'#c9d4de';
- const skyline=(x0,x1,c)=>{for(let x=x0;x<x1;x+=7){const h=12+hash('b'+x+S.you)%22;R(x,gnd-h,6,h,c);if(night)for(let yy=gnd-h+3;yy<gnd-2;yy+=4)if(hash('w'+x+yy)%3)R(x+2,yy,1,1,lit)}};
- const water=c=>{R(0,gnd,Wd,12,c);g.globalAlpha=.4;for(let i=0;i<10;i++)R((i*17+5)%Wd,gnd+3+(i%3)*3,6,1,'#e8f4ff');g.globalAlpha=1};
- switch(I.landmark){
-  case'tower':{R(0,gnd-6,Wd,6,sil);g.fillStyle=night?'#1d2a3f':'#4f7a4a';g.beginPath();g.moveTo(X+60,gnd);g.quadraticCurveTo(X+100,gnd-30,X+140,gnd);g.fill();
-   R(99,gnd-60,3,40,'#e8e4dc');R(95,gnd-50,11,5,'#d24a3a');R(97,gnd-54,7,4,'#e8e4dc');R(100,gnd-68,1,9,'#e8e4dc');skyline(0,70,sil);water(night?'#1b2d55':'#5aa0d8');break}
-  case'bridge':{water(night?'#132a52':'#3f8fd0');R(0,gnd-4,Wd,2,night?'#59618a':'#e7e2d6');
-   for(const px of[45,105]){R(px,gnd-40,3,38,night?'#9aa3c8':'#f0ece4');R(px,gnd-40,3,2,'#c94a3a')}
-   g.strokeStyle=night?'#c9a6ff':'#f4f1e8';g.lineWidth=.8;g.beginPath();g.moveTo(X,gnd-12);g.quadraticCurveTo(X+46,gnd-46,X+46,gnd-39);g.quadraticCurveTo(X+76,gnd-8,X+106,gnd-39);g.quadraticCurveTo(X+150,gnd-20,X+Wd,gnd-12);g.stroke();
-   if(night){g.globalAlpha=.5;for(let x=0;x<Wd;x+=4)R(x,gnd-4,2,1,['#ff6fb5','#6fc9ff','#ffe36b'][x/4%3]);g.globalAlpha=1}break}
-  case'cranes':{water(night?'#1b2d55':'#4c8fc4');for(const cx of[18,62,108]){const c='#d24a3a';R(cx,gnd-34,3,34,c);R(cx+18,gnd-34,3,34,c);R(cx-6,gnd-36,38,3,c);R(cx-10,gnd-42,5,8,c)}
-   R(70,Y+12,22,3,'#e8e4dc');R(78,Y+9,3,9,'#e8e4dc');R(88,Y+10,3,3,'#e8e4dc');break}
-  case'mountain':{g.fillStyle=night?'#0f1528':'#5b7d63';g.beginPath();g.moveTo(X,gnd);g.lineTo(X+40,gnd-30);g.lineTo(X+70,gnd-44);g.lineTo(X+96,gnd-38);g.lineTo(X+130,gnd-26);g.lineTo(X+Wd,gnd-16);g.lineTo(X+Wd,gnd);g.fill();
-   for(const px of[64,70,76,84])R(px,gnd-46-(px%3)*2,4,8,night?'#3a4566':'#9aa49c');R(0,gnd,Wd,12,night?'#10182a':'#3d6a3d');skyline(4,50,sil);break}
-  case'sun':{g.fillStyle=night?'#f2e6c2':'#ffb43a';g.beginPath();g.arc(X+112,Y+24,14,0,Math.PI*2);g.fill();
-   if(!night){g.globalAlpha=.35;for(let i=0;i<4;i++)R(10+i*28,gnd-30+(i%2)*4,22,1,'#fff6d0');g.globalAlpha=1}
-   R(0,gnd,Wd,12,night?'#1b2a1a':'#5f8a3c');for(const tx of[14,40,66,92,124]){g.fillStyle=night?'#22351f':'#3f7d34';g.beginPath();g.arc(X+tx,gnd-8,8,0,Math.PI*2);g.fill();for(let k=0;k<3;k++)R(tx-5+k*4,gnd-11+(k%2)*4,2,2,'#d63a2e')}break}
-  case'expo':{skyline(0,Wd,sil);R(70,gnd-56,5,56,'#d8dde2');g.fillStyle='#d8dde2';g.beginPath();g.moveTo(X+72.5,gnd-70);g.lineTo(X+68,gnd-56);g.lineTo(X+77,gnd-56);g.fill();
-   g.fillStyle=night?'#6fd0ff':'#3f8fd0';g.beginPath();g.arc(X+72.5,gnd-44,5,0,Math.PI*2);g.fill();R(0,gnd,Wd,12,night?'#14223a':'#4b8a58');break}
-  case'gate':{R(0,gnd,Wd,12,night?'#1d2418':'#6b8a4a');const wall=night?'#5a5448':'#b8ab92';R(0,gnd-12,Wd,12,wall);for(let x=0;x<Wd;x+=8)R(x,gnd-15,5,3,wall);
-   R(52,gnd-34,46,22,night?'#6a5f50':'#c9bba0');R(68,gnd-24,14,12,'#1a1410');g.fillStyle=night?'#2a2a33':'#3a4a5a';g.beginPath();g.moveTo(X+44,gnd-32);g.quadraticCurveTo(X+75,gnd-42,X+106,gnd-32);g.lineTo(X+100,gnd-38);g.quadraticCurveTo(X+75,gnd-48,X+50,gnd-38);g.fill();
-   R(52,gnd-34,46,2,'#2f7a5a');break}
-  case'blossom':{R(0,gnd,Wd,12,night?'#1d2418':'#6b9a4a');R(0,gnd+5,Wd,3,night?'#2a2a33':'#8a8f96');for(const tx of[10,34,58,82,106,130]){R(tx-1,gnd-12,3,12,'#5a3a2a');g.fillStyle=night?'#c48aa8':'#f7b6d2';g.beginPath();g.arc(X+tx,gnd-16,10,0,Math.PI*2);g.fill();g.fillStyle=night?'#e0a9c4':'#ffd5e6';g.beginPath();g.arc(X+tx-3,gnd-19,5,0,Math.PI*2);g.fill()}
-   if(!night)for(let i=0;i<16;i++){const h=hash('pt'+i);R(h%Wd,Y+10+(h>>4)%40,2,1,'#ffc7dc')}break}
-  case'whale':{water(night?'#14305a':'#2f7fc0');g.fillStyle=night?'#2a4a7a':'#1f4f8a';g.beginPath();g.moveTo(X+70,gnd+2);g.quadraticCurveTo(X+74,gnd-16,X+62,gnd-24);g.lineTo(X+74,gnd-20);g.lineTo(X+86,gnd-26);g.quadraticCurveTo(X+76,gnd-14,X+80,gnd+2);g.fill();
-   R(104,gnd-14,34,8,night?'#3a3f4a':'#d24a3a');R(110,gnd-24,4,10,'#e8e4dc');R(120,gnd-20,12,6,'#e8e4dc');skyline(0,40,sil);break}
-  case'halla':{g.fillStyle=night?'#0f1528':'#5d6f86';g.beginPath();g.moveTo(X,gnd);g.quadraticCurveTo(X+75,gnd-60,X+Wd,gnd);g.fill();R(66,gnd-30,18,3,night?'#cfd6e6':'#f4f6f8');
-   R(0,gnd,Wd,12,night?'#18241a':'#3f6e34');for(const tx of[16,42,108,132]){g.fillStyle=night?'#22351f':'#2f6b2c';g.beginPath();g.arc(X+tx,gnd-6,7,0,Math.PI*2);g.fill();for(let k=0;k<3;k++)R(tx-4+k*3,gnd-9+(k%2)*4,2,2,'#f28a1e')}
-   R(70,gnd-12,8,12,'#4a4a4e');R(71,gnd-15,6,4,'#5a5a5e');R(71,gnd-8,6,1,'#2e2e32');break}
- }
- g.restore();
- // the club's name across the bottom of the board
- g.fillStyle=T.cap;g.fillRect(X,Y+Ht-9,Wd,9);g.fillStyle=T.jersey;g.fillRect(X,Y+Ht-9,Wd,1);
- g.fillStyle=CREAM;g.font='8px Jua, "Pixelify Sans", sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(`${T.kcity} · ${T.city} · ${(I.nick||'').toUpperCase()}`,X+Wd/2,Y+Ht-4.2,Wd-8);
-}
 // ---------- crowd: seated and on-their-feet versions, dressed for the matchup ----------
 function drawFan(g,f,L,up){
  const x=f.x,y=f.y-(up?2:0),kid=L.kid,sw=kid?4:6,sh=kid?3:4,sx=x-(sw>>1);
@@ -4464,13 +4436,6 @@ function buildDecor(){
 }
 
 // ---------- sprites ----------
-function drawGuy(g,x,y,T,o){
- o=o||{};const px=Math.round(x)-3,py=Math.round(y)-11;
- g.fillStyle='rgba(6,18,10,.32)';g.fillRect(px,Math.round(y)+1,7,1);g.fillRect(px+1,Math.round(y)+2,5,1);
- const map=o.map||(o.run?(o.frame?RUNB:RUNA):BODY);
- const yOff=map.length===9?3:0;
- blit(g,map,{c:T.cap,b:T.brim,s:o.skin||SKINS[1],j:T.jersey,p:o.pants||'#eeeae0',k:'#1a1a1a',m:'#2b2b2e',g:'#3a3a40'},px,py+yOff);
-}
 function drawMascot(g,key,x,y,lift){
  const M=MASCOTS[key];const w=M.m[0].length,h=M.m.length;
  const px=Math.round(x)-Math.floor(w/2),py=Math.round(y)-h+1-Math.round(lift);
@@ -4487,12 +4452,6 @@ function drawBall(g,x,y,h,spin,big){
  if(sz>=5){g.fillStyle='#d4402f';g.fillRect(bx+1,by+2,1,sz-4);g.fillRect(bx+sz-2,by+2,1,sz-4)}
  if(spin!=null){g.fillStyle='#d4402f';const o=[[0,-1],[1,0],[0,1],[-1,0]][spin%4];g.fillRect(sx+ox+o[0],sy-oy+o[1],1,1)}
 }
-function drawBat(g,bx,by,ang,hand,col){
- col=col||'#d9b07a';
- const hx=bx+(hand==='R'?1:-1),hy=by-6;
- for(let k=1;k<=10;k++){const x=Math.round(hx+Math.cos(ang)*k),y=Math.round(hy+Math.sin(ang)*k*.8);g.fillStyle=k<3?'#6b4426':'#d9b07a';g.fillRect(x,y,1,1);if(k>5)g.fillRect(x,y+1,1,1)}
-}
-
 // ---------- audio ----------
 const SND_B64={sad:1,homer:1,charge:1,klost:1,bpthrow:1,fworks:1,chant:1,csingle:1,boo:1,slide:1,ramp:1,fence1:1,clang:1,grass:1,horn:1,echo1:1,echo2:1,echo3:1,amb:1,woosh:1,weak:1,drop:1,mitt:1,cheer:1,crowd:1,bat:1,organ:1,roar:1};
 let AC=null,muted=false,MASTER=null,organSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
@@ -5394,8 +5353,8 @@ function finishPlay(){
  if(r.code==='FOUL'&&S.play.bunt&&S.strikes>=2){
   S.outs++;S.jumbo={kBig:true,look:false,text:'STRIKEOUT',until:performance.now()+2800};if(batKey()===S.you){S.ks++;(S.kLook=S.kLook||[]).push(false);crowdSad()}else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
  }else if(r.code==='FOUL'){
-  if(S.strikes<2)S.strikes++;
-  banner(S.play.bunt?'FOUL BUNT':'FOUL BALL',S.strikes<2?`${S.balls}-${S.strikes}`:'Still two strikes');
+  const had2=S.strikes>=2;if(!had2)S.strikes++;
+  banner(S.play.bunt?'FOUL BUNT':'FOUL BALL',had2?'Still two strikes':`${S.balls}-${S.strikes}`);// (a foul that made it strike two used to say "still two strikes")
  }else{
   const outsAfter=S.outs+r.outs;const runs=outsAfter>=3?0:r.runs;
   S.outs=Math.min(3,outsAfter);addRuns(runs);
@@ -5567,7 +5526,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  for(let k=1;k<=3;k++)if(!S.baseChase)$('d'+k).classList.toggle('on',!hrTrot&&!!S.bases[k-1]);
  const b=curBatter(),p=pitcher();
  $('abTeam').textContent='AT BAT';$('pTeam').textContent=S.mode==='bp'&&S.phase!=='title'?'PITCHING MACHINE':`PITCHING${pitching()?' (YOU)':''}`;
- const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;if(pit){const A=arsOf(pitcher());for(const pb of document.querySelectorAll('#actsPitch .pbtn[data-k]')){const i=A.indexOf(pb.dataset.k);pb.hidden=i<0;if(i>=0)pb.querySelector('small').textContent=i+1}
+ const pit=pitching();$('actsBat').hidden=pit;$('actsPitch').hidden=!pit;if(pit){const A=arsOf(pitcher());for(const pb of document.querySelectorAll('#actsPitch .pbtn[data-k]')){const i=A.indexOf(pb.dataset.k);pb.hidden=i<0;if(i>=0){pb.querySelector('small').textContent=i+1;pb.style.order=i}}/* laid out in key order: 1 2 3 4, not the fixed order of the markup */
   $('actsPitch').style.gridTemplateColumns=isWide()?'':`repeat(${A.length},1fr)`}$('muPit').classList.toggle('canPen',canPen());document.querySelector('.meter').hidden=pit;
  for(const pb of document.querySelectorAll('#actsPitch .pbtn'))pb.disabled=S.phase!=='choose';
  {const bg=document.querySelector('.bug'),pb=document.querySelector('.pcBox');if(bg&&pb){pb.style.top=(bg.offsetTop+bg.offsetHeight)+'px';pb.style.width=bg.offsetWidth+'px';pb.style.boxSizing='border-box'}}
@@ -5855,7 +5814,9 @@ function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=
  $('cards').innerHTML=`<div class="lfWrap"><div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>
   <div class="lfSide"><h4>BULLPEN</h4><div class="lfPen">${pen}</div><div class="lfActs">${acts}</div></div></div>
   ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><div class="seg lfTabs"><button type="button" data-d="bat" aria-pressed="${lfDeck==='bat'}">Hitters</button><button type="button" data-d="pit" aria-pressed="${lfDeck==='pit'}">Pitchers</button></div></div><div class="lfTray">${tray}</div>`:''}`;
- $('lnHint').textContent='';}
+ $('lnHint').textContent='';lfFit()}
+/* a long name (HWANG M.U.) on a narrow card was cut to HWANG M...: step the type down until the whole name fits */
+function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.style.fontSize='';let fs=parseFloat(getComputedStyle(e).fontSize),n=0;while(e.scrollWidth>e.clientWidth+.5&&fs>7.5&&n++<8){fs-=.75;e.style.fontSize=fs+'px'}}}
 $('cards').addEventListener('click',e=>{
  const tab=e.target.closest('.lfTabs button');if(tab){lfDeck=tab.dataset.d;lfFlip=null;lfMove=false;lineupRender();return}
  const T=TEAMS[S.you];
@@ -5873,7 +5834,7 @@ $('cards').addEventListener('click',e=>{
  if(lnView==='mine'&&lfMove&&lnSel!=null&&lnSel>=0&&i>=0&&i!==lnSel){const L=T.lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}applyDefense();updateHUD();lfMove=false;lfFlip=null;lineupRender();return}
  const fk='f'+i;lfFlip=lfFlip===fk?null:fk;lfMove=false;lineupRender()});
 /* rotating a phone or resizing across the phone breakpoint redraws the field to match */
-{let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}})}
+{let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}else if(!$('scrLineup').hidden)lfFit()})}
 // ---------- the Imugi Labs mark on the main menu: a fixed pixel bitmap (the logo put through a pixel filter at 49x23, with the
 // middle line one pixel longer at each end), so it looks the same on every device. Each '#' is one lit pixel ----------
 {const P=['..............#####################..............',
@@ -6596,11 +6557,14 @@ function syncPicker(){
 
 // ---------- render ----------
 const cv=$('cv'),ctx=cv.getContext('2d');
-const wb=document.createElement('canvas');wb.width=W;wb.height=H;const wg=wb.getContext('2d');
+const wb=document.createElement('canvas');wb.width=W;wb.height=H;const wg=wb.getContext('2d');let WB_FULL=false;
 let TOWERS=[];
 let FIELD=null,DECOR=null,SIGNS=null,CROWD_A=null,CROWD_B=null,FANS=[],CONC=[],AISLES=[],RAIL=[],FLAGFANS=[];
-function resize(){const r=cv.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,3);cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
-new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},gbPlay:(s,EV,b1)=>{S.bases=[b1?curBatter():null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());S.play=pl;S.phase='play';const th=pl.segs.filter(g=>g.thr).map(g=>[g.t0.toFixed(2),g.from.x|0,g.from.y|0]);return{end:pl.end,th,sl:pl.runners.filter(r=>r.slide).map(r=>({t0:r.slide.t0,t1:r.slide.t1,b:r.slide.b,head:r.slide.head,out:!!r.out}))}},setT:t=>{S.play.t=t},fpos:(pl,i,t)=>fpos(pl,i,t),splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{render(now);const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
+// The canvas is drawn at the screen's pixel density, but with a budget: a big retina/4K window at 2x would be 8-15 million
+// pixels, repainted several layers deep every frame. Past ~4.2 million the density steps down (never below 1x); phones are far under it.
+const CV_MAXPX=4.2e6;
+function resize(){const r=cv.getBoundingClientRect();const dpr=Math.max(1,Math.min(window.devicePixelRatio||1,3,Math.sqrt(CV_MAXPX/Math.max(1,r.width*r.height))));cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
+new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,cs:()=>[JC.size,PSPR.size],gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},gbPlay:(s,EV,b1)=>{S.bases=[b1?curBatter():null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());S.play=pl;S.phase='play';const th=pl.segs.filter(g=>g.thr).map(g=>[g.t0.toFixed(2),g.from.x|0,g.from.y|0]);return{end:pl.end,th,sl:pl.runners.filter(r=>r.slide).map(r=>({t0:r.slide.t0,t1:r.slide.t1,b:r.slide.b,head:r.slide.head,out:!!r.out}))}},setT:t=>{S.play.t=t},fpos:(pl,i,t)=>fpos(pl,i,t),splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{WB_FULL=true;render(now);WB_FULL=false;const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 // Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
 // Suwon's board is built into the fortress: a stone bastion around it, a purple frame, a tiled pavilion roof above
@@ -6707,19 +6671,6 @@ function drawDugoutCrew(g,now){
    out.push({p:at(lx,2),hop,legs,arms,frame:Math.floor(now/230)+j,flip:vel*sd<0,skin:skinFor(5+j)})}
   out.sort((u,v)=>u.p.y-v.p.y).forEach(o=>drawPlayer(g,o.p.x,o.p.y-o.hop,T,{legs:o.legs,arms:o.arms,frame:o.frame,skin:o.skin,pants,flip:o.flip,sc:1.02}));
  })}
-function drawCheer(g,now){
- const T=TEAMS[S.you],c=cheerFrame(),hype=now<S.cheerUntil;
- g.save();g.translate(c.x,c.y);g.rotate(-45*RAD);
- for(let j=0;j<4;j++){
-  const x=-27+j*18,lead=j===3,beat=Math.floor(now/(hype?110:240)+j)%2,y=-3-(hype&&beat?2:0);
-  const sk=SKINS[(j*2+1)%SKINS.length];
-  g.fillStyle=lead?'#f4f1e8':T.jersey;g.fillRect(x-3,y,6,6);g.fillStyle=lead?T.cap:CREAM;g.fillRect(x-3,y+4,6,2);
-  g.fillStyle=sk;g.fillRect(x-1,y-3,3,3);g.fillStyle=lead?T.cap:'#2a1d14';g.fillRect(x-1,y-4,3,1);
-  if(lead){g.fillStyle='#e8e1cf';g.fillRect(x+3,y-2+(beat?-1:0),3,2)}
-  else{const py=beat?y-6:y+1;g.fillStyle=CREAM;g.fillRect(x-6,py,3,3);g.fillStyle=T.jersey;g.fillRect(x+4,beat?y+1:y-6,3,3)}
- }
- g.restore();
-}
 function drawFlags(g,now){
  const xs=[298,320,342,364,596,618,640,662];
  ORDER.forEach((k,n)=>{const T=TEAMS[k],x=xs[n],y=3;
@@ -6773,10 +6724,6 @@ function drawCrowdLife(g,now){
  const T=TEAMS[S.you],cols=[T.jersey,T.cap,'#f4f1e8'];
  for(let k=0;k<CONC.length;k+=5){const c=CONC[k];const o=Math.round(Math.sin(now/300+k*.4));
   g.fillStyle=cols[(k/5|0)%3];for(let r=0;r<6;r++){const w=Math.max(1,5-r);g.fillRect(Math.round(c.x)-2+((5-w)>>1)+(r>2?o:0),Math.round(c.y)+r,w,1)}}
- // visitor fans post a K card for every strikeout
- if(0)for(let k=0;k<Math.min(S.ks,12);k++){const th=-41+k*2.3;// (the K cards moved to the scoreboard)const r=fenceDist(th)+5;const p=toPx(r*Math.sin(th*RAD),r*Math.cos(th*RAD));
-  const x=Math.round(p.x)-3,y=Math.round(p.y)-5;g.fillStyle='#f4f1e8';g.fillRect(x,y,7,9);g.fillStyle='#c7262e';
-  KMAP.forEach((row,ry)=>{for(let rx=0;rx<4;rx++)if(row[rx]==='1')g.fillRect(x+2+rx,y+2+ry,1,1)})}
  // vendors climbing the aisles
  if(S.vendors)for(const v of S.vendors){
   const ph=now/1000*v.sp+v.ph;const u=(Math.sin(ph)+1)/2;const r=lerp(v.r0,v.r1,u);
@@ -7142,6 +7089,13 @@ function nightPass(g,now){
 function dayPass(g){g.save();g.globalCompositeOperation='multiply';g.fillStyle='#fff7ea';g.fillRect(0,0,W,H);g.restore()}
 function render(now){
  if(!FIELD){ctx.fillStyle='#232f37';ctx.fillRect(0,0,cv.width,cv.height);return}
+ // The whole park is recomposed every frame (field, crowd, signs, decor, players, lighting): four or more full layers of
+ // a 1280x1360 buffer. The camera only ever shows part of it, so compose just that part. (The batting-practice ball cam
+ // and the debug snapshot read other parts of the buffer, so they get the whole thing.)
+ let WBC=null;if(!WB_FULL&&!(S.mode==='bp'&&S.bpCam)){const C0=clampCam(S.cam),[w0,h0]=viewWH(C0.z),x0=Math.max(0,Math.floor(C0.x-w0/2)-3),y0=Math.max(0,Math.floor(C0.y-h0/2)-3),x1=Math.min(W,Math.ceil(C0.x+w0/2)+3),y1=Math.min(H,Math.ceil(C0.y+h0/2)+3);
+  if(x1>x0&&y1>y0&&(x1-x0)*(y1-y0)<W*H*.94)WBC=[x0,y0,x1-x0,y1-y0]}
+ if(WBC){wg.save();wg.beginPath();wg.rect(WBC[0],WBC[1],WBC[2],WBC[3]);wg.clip()}
+ try{
  wg.drawImage(FIELD,0,0);
  const bpv=S.mode==='bp'&&S.phase!=='title'&&S.phase!=='over';
  if(CROWD_A&&!bpv){
@@ -7393,6 +7347,7 @@ function render(now){
   wg.restore()}
  else dayPass(wg);
  drawTowerLamps(wg,now);
+ }finally{if(WBC)wg.restore()}
  // to screen
  const C=clampCam(S.cam),[vw,vh]=viewWH(C.z),e=EXT();
  const vx0=C.x-vw/2,vy0=C.y-vh/2,scale=cv.height/vh;
@@ -7625,11 +7580,10 @@ addEventListener('keydown',e=>{
  if((e.key==='p'||e.key==='P'||e.key==='Escape')&&!e.repeat){if(S.paused&&!$('scrPause').hidden){e.preventDefault();resumeGame();return}if(canPause()){e.preventDefault();pauseGame();return}}
  if(overlayOpen())return;
  if(e.code==='Space'||e.key===' '||(e.key==='Enter'&&document.activeElement===document.body)){e.preventDefault();if(!e.repeat)swing()}
- else if((e.key==='b'||e.key==='B')&&!e.repeat)bunt();
+ else if((e.key==='b'||e.key==='B')&&!e.repeat){if(canPen())togglePen();else bunt()}// B bunts at the plate and opens the bullpen on the mound
  else if((e.key==='s'||e.key==='S')&&!e.repeat){if(canSteal(2))toggleSteal(2);else toggleSteal(1)}
  else if(/^[1-7]$/.test(e.key)&&!e.repeat&&S.mode==='bp'){setBP(['FB','SL','CH','SP','CB','KN','RND'][+e.key-1])}
  else if(/^[1-5]$/.test(e.key)&&!e.repeat){const kk=arsOf(pitcher())[+e.key-1];if(kk)choosePitch(kk)}
- else if((e.key==='b'||e.key==='B')&&!e.repeat&&canPen())togglePen()
  else if((e.key==='q'||e.key==='Q')&&!e.repeat)doPickoff(1)
  else if((e.key==='w'||e.key==='W')&&!e.repeat)doPickoff(2)
 });

@@ -205,7 +205,6 @@ function drawBrick(g,k,night,CW,CH,cx,cy,OL,e){
  // banners on the wing piers, people at the doors
  for(const sd of[-1,1]){const bx=gx+sd*(CW2+14)-4;R(bx+2,FY-FH+2,8,16,'rgba(0,0,0,.3)');R(bx,FY-FH,8,15,'#13254a');R(bx,FY-FH,8,2,'#e8642a');R(bx+2,FY-FH+6,4,4,'#e8eef5')}
  const pc=['#e8642a','#13254a','#e8eef5','#f2c230','#3a6ab0','#c94a3a'];for(let i=0;i<34;i++){const h=vHash(i,404),px=gx-60+(h%120),py=FY+6+((h>>8)%60);if(Math.abs(px-gx)>30&&((h>>4)&1))continue;R(px,py,1,2,pc[h%pc.length]);R(px,py-1,1,1,night?'#6a5040':'#e8c8a8')}}
-function drawBrickLights(){}
 // ---- the board (K units): navy steel frame on braced legs, flags along the top, Gwangan bridge in white line under the score ----
 function drawJumboBrick(g,now){const cx=HX/K,x0=cx-95,y0=-18,w=190,h=66,night=!!S.night,fy=(HY-fenceDist(0)/FT)/K,yb=fy-8,ex=16,yt=y0+h+ex+2,legs=[x0+26,x0+w-26];
  g.fillStyle='rgba(0,0,0,.26)';g.fillRect(x0+10,yb+1,w-4,10);

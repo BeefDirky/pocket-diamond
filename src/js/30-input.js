@@ -22,11 +22,10 @@ addEventListener('keydown',e=>{
  if((e.key==='p'||e.key==='P'||e.key==='Escape')&&!e.repeat){if(S.paused&&!$('scrPause').hidden){e.preventDefault();resumeGame();return}if(canPause()){e.preventDefault();pauseGame();return}}
  if(overlayOpen())return;
  if(e.code==='Space'||e.key===' '||(e.key==='Enter'&&document.activeElement===document.body)){e.preventDefault();if(!e.repeat)swing()}
- else if((e.key==='b'||e.key==='B')&&!e.repeat)bunt();
+ else if((e.key==='b'||e.key==='B')&&!e.repeat){if(canPen())togglePen();else bunt()}// B bunts at the plate and opens the bullpen on the mound
  else if((e.key==='s'||e.key==='S')&&!e.repeat){if(canSteal(2))toggleSteal(2);else toggleSteal(1)}
  else if(/^[1-7]$/.test(e.key)&&!e.repeat&&S.mode==='bp'){setBP(['FB','SL','CH','SP','CB','KN','RND'][+e.key-1])}
  else if(/^[1-5]$/.test(e.key)&&!e.repeat){const kk=arsOf(pitcher())[+e.key-1];if(kk)choosePitch(kk)}
- else if((e.key==='b'||e.key==='B')&&!e.repeat&&canPen())togglePen()
  else if((e.key==='q'||e.key==='Q')&&!e.repeat)doPickoff(1)
  else if((e.key==='w'||e.key==='W')&&!e.repeat)doPickoff(2)
 });
