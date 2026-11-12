@@ -46,12 +46,12 @@ function buildFoul(P,dir){
  play.end=play.segs[play.segs.length-1].t1+.2;return play;
 }
 function hitAdvance(runners,tp,Pp,delay,ex){
- const ballAt=k=>{const d=dist(Pp,baseP(k));return tp+.7+(ex||0)+d/(THROW*(d>200?.86:1))};
+ const ballAt=k=>{const d=dist(Pp,baseP(k));return tp+(tp>1.5?OF_REL:.7)+(ex||0)+d/(THROW*(d>200?.86:1))};// an outfielder gathers, crow-hops and throws
  let cap=4;
  for(const r of runners){
   r.start=r.batter?.65:r.L0!=null?0:delay;r.speed=spdFt(r.who);
   let d=r.from;const minD=r.batter?1:r.from;
-  while(d+1<=cap){const arr=r.start+(d+1-r.from-(r.L0||0))*LEG/r.speed;if(d+1<=minD||arr+.3<ballAt(d+1))d++;else break}
+  while(d+1<=cap){const arr=r.start+(d+1-r.from-(r.L0||0))*LEG/r.speed;if(d+1<=minD||arr+.1<ballAt(d+1))d++;else break}
   r.dest=d;cap=d===4?4:d-1;
  }
  let trail=null;
@@ -64,38 +64,23 @@ function hitAdvance(runners,tp,Pp,delay,ex){
 function outfieldHit(play,it,P,runners,delay,errBy){
  // retrieval time: an outfielder who had to run it down, dig it off the wall or chase a carom in the corner needs longer to get rid of it
  const rp=Math.hypot(it.p.x,it.p.y),ath=Math.abs(Math.atan2(it.p.x,it.p.y)/RAD),gap=ath>12&&ath<34,corner=ath>=36;let ex;
- ex=it.i>=6?((dist(POS[it.i],it.p)>40?1.3:.3)+(rp>275?.75:0)+(rp>205&&gap?1.7:0)+(rp>210&&corner?1.6:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
+ // no scripted retrieval: the ball rolls on its own path and the outfielder ran straight at it a step under sprint speed
+ // (OF_CHASE in intercept), so where and when he picks it up is real. All that's added is the pickup itself, and a moment
+ // to dig it off the wall when it got there
+ const kw=keepIn({x:it.p.x*1.04,y:it.p.y*1.04}),atWall=it.i>=6&&Math.hypot(kw.x-it.p.x*1.04,kw.y-it.p.y*1.04)>.5;
+ ex=it.i>=6?(atWall?.35:0):0;
  hitAdvance(runners,it.t,it.p,delay,ex);
- /* instead of the outfielder standing over the ball for that extra time, the time goes into the chase: the ball keeps on
-    its own roll past where he'd have cut it off, out to the wall (kicking back off it), and he runs it down at full speed,
-    taking a bad angle or bobbling it if he'd otherwise get there too soon, then scoops it and comes up throwing */
- const last=play.segs[play.segs.length-1];
- if(it.i>=6&&ex>.45&&last&&last.fn&&Math.abs(last.t1-it.t)<.05){
-  const tPick=it.t+.65+ex-.42,F=POS[it.i],ball=t=>last.fn(t);
-  let tStop=it.t;{let pr=ball(it.t);for(let t=it.t+.05;t<tPick;t+=.05){const q=ball(t);if(Math.hypot(q.x-pr.x,q.y-pr.y)>.04)tStop=t;pr=q}}
-  const rest0=ball(tStop),r0=Math.max(1,Math.hypot(rest0.x,rest0.y)),kw=keepIn({x:rest0.x*1.03,y:rest0.y*1.03}),atWall=Math.hypot(kw.x-rest0.x*1.03,kw.y-rest0.y*1.03)>.5;
-  /* off the wall it comes back a few feet towards the infield */
-  const kick=atWall?rand(6,11):0,kx=-rest0.x/r0*kick,ky=-rest0.y/r0*kick,tK=Math.min(tPick-.2,tStop+.55);
-  const pos=t=>{if(t<=tStop||!kick)return ball(Math.min(t,tStop));const u=clamp((t-tStop)/Math.max(.1,tK-tStop),0,1),e=1-(1-u)*(1-u);return{x:rest0.x+kx*e,y:rest0.y+ky*e,h:Math.abs(Math.sin(u*5))*2*(1-u)}};
-  const rest=pos(tPick),rs=fnSeg(it.t,tPick,pos);rs.snd=true;last.t1=it.t;play.segs.push(rs);
-  /* his run: full speed after a read; if that's too quick, a rounder route out and a bobble at the end soak up the rest */
-  const re=Math.min(F.re,.4),d=dist(F,rest),sp=F.sp*.97,avail=tPick-re;let ks;
-  if(d/sp>=avail-.05)ks=[{t:0,x:F.x,y:F.y},{t:re,x:F.x,y:F.y},{t:tPick,x:rest.x,y:rest.y}];
-  else{let spare=avail-d/sp;const bob=Math.min(.7,spare*.35);spare-=bob;
-   const L=Math.min(d*1.35,d+spare*sp),h=Math.sqrt(Math.max(0,(L/2)**2-(d/2)**2)),mx=(F.x+rest.x)/2,my=(F.y+rest.y)/2,nx=-(rest.y-F.y)/Math.max(1,d),ny=(rest.x-F.x)/Math.max(1,d),sg=(mx*nx+my*ny)>0?-1:1;
-   const W={x:mx+nx*h*sg,y:my+ny*h*sg},tArr=tPick-bob,tRun=re+Math.max(.2,tArr-re-L/sp);
-   ks=[{t:0,x:F.x,y:F.y},{t:tRun,x:F.x,y:F.y},{t:tRun+(tArr-tRun)*dist(F,W)/Math.max(1,L),x:W.x,y:W.y},{t:tArr,x:rest.x,y:rest.y}];
-   if(bob>.15){/* it squirts off the glove a couple of steps and he picks it up again */const bx=rest.x+rand(-3,3),by=rest.y+rand(-3,3);ks.push({t:tPick,x:bx,y:by});
-    const b0=tArr,pre=pos;play.segs[play.segs.length-1]=fnSeg(it.t,tPick,t=>t<b0?pre(t):{x:lerp(rest.x,bx,(t-b0)/(tPick-b0)),y:lerp(rest.y,by,(t-b0)/(tPick-b0)),h:Math.sin((t-b0)/(tPick-b0)*Math.PI)*2});play.segs[play.segs.length-1].snd=true}}
-  play.fk[it.i]=ks;const fin=ks[ks.length-1];
-  it={...it,t:tPick,p:{x:fin.x,y:fin.y}};ex=.42-.65}
  const bd=runners.find(r=>r.batter).dest;runners.find(r=>r.batter).round=true;
- // on a single, the runner from second tries to score on speed: 70+ scores, 50-69 is a play at the plate, under 50 holds at third
+ // on a single, a runner from second with any speed (50+) is sent home; whether he makes it is the race with the throw
  let sendHome=null;
- if(bd===1&&errBy==null){const r2=runners.find(r=>r.from===2&&!r.batter);if(r2&&r2.dest===3&&(r2.who.spd||60)>=50){r2.dest=4;sendHome=r2;
-  const sp=r2.who.spd||60;if(sp<70){r2.closeHome=true;if(Math.random()<.2+(70-sp)*.02)r2.out=true}}}
+ if(bd===1&&errBy==null){const r2=runners.find(r=>r.from===2&&!r.batter);if(r2&&r2.dest===3&&(r2.who.spd||60)>=50){r2.dest=4;sendHome=r2}}
  const tgt=sendHome?4:bd>=3?4:bd+1,tb=baseP(tgt);
- const t0=it.t+.65+ex;
+ // walk-off: once the winning run is sure to score nobody throws. The fielder picks it up, and that's the ballgame
+ const need=S.target+1-S.runs,sure=runners.filter(r=>r.dest===4&&r!==sendHome).map(r=>r.start+(4-r.from-(r.L0||0))*LEG/r.speed).sort((a,b)=>a-b);
+ const wo=errBy==null&&S.mode!=='bp'&&(S.mode==='arcade'||(S.half==='bot'&&S.inning>=(S.schedInn||9)))&&need>0&&sure.length>=need;
+ if(wo){if(sendHome)sendHome.out=false;play.segs.push(holdSeg(play,it.t,it.t+2,it.i))}
+ else{
+ const t0=it.t+(it.i>=6?OF_REL-.05:.65)+ex;
  let cov=tgt===4?1:tgt===3?4:(it.p.x<0?3:5);
  let tArr,rcv=null,cutMan=null;
  if(it.i>=6&&Math.hypot(it.p.x,it.p.y)>200){
@@ -115,9 +100,9 @@ function outfieldHit(play,it,P,runners,delay,errBy){
     the cutoff man can't also be the one covering, so the other middle infielder takes it */
  if(rcv==null){if(cov===cutMan||cov===it.i)cov=cov===3?5:cov===5?3:cov;
   if(cov!==it.i&&cov!==cutMan&&!play.fk[cov])play.fk[cov]=cover(cov,tb,tArr)}
- if(sendHome){const r2=sendHome,tR=r2.start+2*LEG/r2.speed;
-  if(r2.out){if(tR<tArr+.12)r2.speed=2*LEG/Math.max(.5,tArr+.15-r2.start);r2.outAt=tArr+.05}
-  else if(tR>tArr-.1)r2.speed=2*LEG/Math.max(.5,tArr-(r2.closeHome?.1:.4)-r2.start)}
+ if(sendHome){const r2=sendHome,tR=r2.start+2*LEG/r2.speed+.1;// the race is real: his own speed against the throw (plus a slide)
+  r2.out=tR>tArr+rand(-.12,.12);r2.closeHome=Math.abs(tR-tArr)<.45;if(r2.out)r2.outAt=Math.max(tArr+.05,tR-.2)}
+ }
  let bu=null,bdist=1e9;for(const i of[6,7,8])if(i!==it.i&&!play.fk[i]){const dd=dist(POS[i],it.p);if(dd<bdist){bdist=dd;bu=i}}
  if(bu!==null&&it.i>=6){const f=POS[bu];play.fk[bu]=chase(bu,{x:lerp(f.x,it.p.x,.55),y:lerp(f.y,it.p.y,.55)},it.t)}
  const code={1:'1B',2:'2B',3:'3B',4:'IPHR'}[bd];
@@ -126,9 +111,11 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  const ban={1:'SINGLE!',2:'DOUBLE!',3:'TRIPLE!',4:'INSIDE-THE-PARK HR!'}[bd];
  if(errBy!=null)return finalize(play,runners,{code:'E',hit:false,outs:0,banner:'ERROR!',tone:'',sub:'Dropped it!',desc:`Dropped fly ball, E${errBy+1}${runsTxt(runs)}`});
  const dl=P.line||Math.abs(P.s)>=41?' down the line':'';
- return finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} ${dl?dl.trim()+' in '+fieldName(P.s):'to '+fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
+ const fin=finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} ${dl?dl.trim()+' in '+fieldName(P.s):'to '+fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
+ if(wo)fin.end=Math.min(fin.end,Math.max(it.t+.4,sure[need-1])+.9);// over when the ball is picked up and the run is in
+ return fin;
 }
-let GB_RANGE=.4,OF_AIR=.8;
+let GB_RANGE=.4,OF_AIR=.8,OF_CHASE=.76,OF_REL=1.15,ROLL_LD=.6,ROLL_FB=.3;// OF_CHASE: an outfielder running down a ball on the ground, a step under his sprint
 function buildGrounder(P,dir,b){
  const C={x:0,y:2};
  const vf=.72*(1-Math.max(0,-P.L)/75);
@@ -149,7 +136,7 @@ function buildGrounder(P,dir,b){
 }
 function groundOut(play,it,P,runners){
  const i=it.i,outsBefore=S.outs;let tf=it.t,Pp=it.p;
- const xf=.6+(play.dive&&play.dive.i===i?.9:0);
+ const xf=.52+(play.dive&&play.dive.i===i?.9:0);
  const occ=[!!S.bases[0],!!S.bases[1],!!S.bases[2]];
  const forced=k=>k===1?true:occ.slice(0,k-1).every(Boolean);
  const batR=runners.find(r=>r.batter),r1=runners.find(r=>r.from===1);
@@ -297,7 +284,8 @@ function buildAir(P,dir,b){
   if(dbl)return finalize(play,runners,{code:'LDP',hit:false,outs:2,runs:0,banner:'DOUBLE PLAY',tone:'',sub:`Doubled off ${dbl.from===1?'first':'second'}`,desc:`Lineout ${kind}${best+1}, runner doubled off ${dbl.from===1?'first':'second'}`});
   return finalize(play,runners,{code,hit:false,outs:1,runs,banner:ban,tone:'',desc:`${word} ${kind}${best+1}${diving?', diving':''}${runsTxt(runs)}`});
  }
- const vr=drop?14:P.L<22?44:30,Rr=drop?7:(P.L<22?.2:.09)*D,Tr=Math.max(.3,2*Rr/vr),room=Math.max(0,fd-10-D);
+ // after it lands: a liner skips on hot and rolls a long way (that's a gap double), a fly ball checks up sooner
+ const vr=drop?14:P.L<22?.55*P.EV*1.467:.38*P.EV*1.467,Rr=drop?7:(P.L<22?ROLL_LD:ROLL_FB)*D,Tr=Math.max(.3,2*Rr/vr),room=Math.max(0,fd-10-D);
  const rollPos=t=>{if(t<T){const u=t/T;return{x:lerp(C.x,land.x,u),y:lerp(C.y,land.y,u),h:4*Hh*u*(1-u)}}
   const tau=clamp(t-T,0,Tr);const d=wallD(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
  const it=intercept(rollPos,T,T+Tr+12,[2,3,4,5,6,7,8]);

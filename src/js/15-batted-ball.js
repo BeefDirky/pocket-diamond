@@ -42,7 +42,7 @@ function intercept(gfn,t0,t1,cands,extra,rk){
  for(let t=t0;t<=t1;t+=.04){
   const p=gfn(t);let best=null,bd=1e9;
   for(const i of cands){const f=POS[i];const dd=dist(f,p);if(rk<1&&i<=5&&Math.hypot(p.x,p.y)>Math.hypot(f.x,f.y)+(i<2?6:14))continue;// once a grounder is past him, an infielder doesn't run it down
-  const need=f.re+extra+(rk<1&&i===0?.2:0)/* falling off the mound */+Math.max(0,dd-f.reach)/(f.sp*(i<=5?rk:1));if(need<=t&&dd<bd){bd=dd;best=i}}
+  const need=f.re+extra+(rk<1&&i===0?.2:0)/* falling off the mound */+Math.max(0,dd-f.reach)/(f.sp*(i<=5?rk:OF_CHASE));if(need<=t&&dd<bd){bd=dd;best=i}}
   if(best!==null)return{i:best,t,p:{x:p.x,y:p.y}};
  }
  const p=gfn(t1);let bi=7,bd=1e9;for(const i of[6,7,8]){const dd=dist(POS[i],p);if(dd<bd){bd=dd;bi=i}}

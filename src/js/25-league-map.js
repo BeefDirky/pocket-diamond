@@ -54,6 +54,7 @@ function syncPicker(){
  for(const c of $('pickOpp').children){c.setAttribute('aria-pressed',c.dataset.t===S.opp);c.disabled=c.dataset.t===S.you}
  const T=TEAMS[S.you];const mc=$('mascCv').getContext('2d');mc.clearRect(0,0,11,17);blit(mc,MASCOTS[S.you].m,MASCOTS[S.you].c,0,17-MASCOTS[S.you].m.length);
  $('mascTxt').innerHTML=`<b>${T.mascot.toUpperCase()}</b>${T.mdesc}`;
+ if($('teamRate'))$('teamRate').innerHTML=trHTML(S.you);
  {const I=CLUB_INFO[S.you],ST=STADIUMS[S.you];if(I)$('clubInfo').innerHTML=`<div class="ciTop"><b>${T.city} ${T.name}</b><span>${T.kcity} ${T.kname} · EST. ${I.est} · ${I.nick.toUpperCase()}</span></div>
   <dl><dt>City</dt><dd>${I.city}</dd><dt>Ballpark</dt><dd>${ST.name} (${ST.kname}) · ${ST.dims[0]}-${ST.dims[2]}-${ST.dims[4]} ft${ST.wallFt>8?` · ${ST.wallFt} ft wall`:''}</dd></dl>
   <ul>${I.facts.map(f=>`<li>${f}</li>`).join('')}</ul>`}

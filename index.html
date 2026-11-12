@@ -1043,6 +1043,21 @@ body:has(#over:not([hidden])) .app.deskApp>:is(.matchup,.meter,.acts,.pacts,.ski
 :is(.app:not(.deskApp),.app.phoneLand) .olNet{left:6px;top:42px;transform:none;font-size:8px;letter-spacing:.08em;gap:4px;padding:2px 5px;border-width:1px}
 :is(.app:not(.deskApp),.app.phoneLand) .olNet i{width:5px;height:5px;box-shadow:0 0 3px currentColor}
 .app.phoneLand .olNet{left:6px;top:42px}
+/* team rating in the club ABOUT panel */
+.teamRate{background:var(--edge);border:2px solid var(--panel-hi);padding:10px 12px;display:flex;flex-direction:column;gap:10px;font-size:12px}
+.trTop{display:flex;gap:12px;align-items:center}
+.trOvr{flex:none;width:58px;height:58px;border:3px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.25)}
+.trOvr b{font-family:var(--f-hud);font-weight:400;font-size:24px;line-height:1}.trOvr span{font-size:9px;letter-spacing:.18em;color:var(--dim);margin-top:3px}
+.trSum{display:flex;flex-direction:column;gap:3px;min-width:0;color:var(--dim)}
+.trSum .up{color:#7fe08a}.trSum .dn{color:#ff8a70}
+.trBars{display:grid;gap:5px}
+.trRow{display:grid;grid-template-columns:64px 1fr 26px 12px;gap:8px;align-items:center;color:var(--dim)}
+.trRow .trK{font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.trRow .trBar{height:7px;background:rgba(0,0,0,.4);box-shadow:0 0 0 1px rgba(255,255,255,.08)}.trRow .trBar i{display:block;height:100%}
+.trRow b{font-family:var(--f-hud);font-weight:400;text-align:right}
+.trRow em{font-style:normal;font-size:10px}.trRow.up em{color:#7fe08a}.trRow.dn em{color:#ff8a70}
+.trRow.up .trK{color:#bdf0c2}.trRow.dn .trK{color:#ffc2b5}
+.tsOvr{display:inline-block;margin-top:4px;font-family:var(--f-hud);font-size:12px;letter-spacing:.1em;padding:2px 7px;border:2px solid;background:rgba(8,20,14,.6)}
 </style>
 
 <div class="app">
@@ -1166,7 +1181,7 @@ body:has(#over:not([hidden])) .app.deskApp>:is(.matchup,.meter,.acts,.pacts,.ski
           <button type="button" class="tsArrow" id="tsPrev" aria-label="Previous club (left arrow)">◀</button>
           <div class="tsCenter">
             <img id="tsLogo" alt="">
-            <b id="tsName"></b><small id="tsSub"></small>
+            <b id="tsName"></b><small id="tsSub"></small><span class="tsOvr" id="tsOvr"></span>
             <button type="button" class="tsAbout" id="tsAbout" aria-label="About this club"><i>i</i>ABOUT</button>
           </div>
           <button type="button" class="tsArrow" id="tsNext" aria-label="Next club (right arrow)">▶</button>
@@ -1184,6 +1199,7 @@ body:has(#over:not([hidden])) .app.deskApp>:is(.matchup,.meter,.acts,.pacts,.ski
           <div class="tsInfoCard">
             <button type="button" class="xClose" id="tsInfoX" aria-label="Close">✕</button>
             <div class="masc"><canvas id="mascCv" width="11" height="17"></canvas><div id="mascTxt"></div></div>
+            <div class="teamRate" id="teamRate"></div>
             <div class="clubInfo" id="clubInfo"></div>
           </div>
         </div>
@@ -4917,7 +4933,7 @@ function intercept(gfn,t0,t1,cands,extra,rk){
  for(let t=t0;t<=t1;t+=.04){
   const p=gfn(t);let best=null,bd=1e9;
   for(const i of cands){const f=POS[i];const dd=dist(f,p);if(rk<1&&i<=5&&Math.hypot(p.x,p.y)>Math.hypot(f.x,f.y)+(i<2?6:14))continue;// once a grounder is past him, an infielder doesn't run it down
-  const need=f.re+extra+(rk<1&&i===0?.2:0)/* falling off the mound */+Math.max(0,dd-f.reach)/(f.sp*(i<=5?rk:1));if(need<=t&&dd<bd){bd=dd;best=i}}
+  const need=f.re+extra+(rk<1&&i===0?.2:0)/* falling off the mound */+Math.max(0,dd-f.reach)/(f.sp*(i<=5?rk:OF_CHASE));if(need<=t&&dd<bd){bd=dd;best=i}}
   if(best!==null)return{i:best,t,p:{x:p.x,y:p.y}};
  }
  const p=gfn(t1);let bi=7,bd=1e9;for(const i of[6,7,8]){const dd=dist(POS[i],p);if(dd<bd){bd=dd;bi=i}}
@@ -5063,12 +5079,12 @@ function buildFoul(P,dir){
  play.end=play.segs[play.segs.length-1].t1+.2;return play;
 }
 function hitAdvance(runners,tp,Pp,delay,ex){
- const ballAt=k=>{const d=dist(Pp,baseP(k));return tp+.7+(ex||0)+d/(THROW*(d>200?.86:1))};
+ const ballAt=k=>{const d=dist(Pp,baseP(k));return tp+(tp>1.5?OF_REL:.7)+(ex||0)+d/(THROW*(d>200?.86:1))};// an outfielder gathers, crow-hops and throws
  let cap=4;
  for(const r of runners){
   r.start=r.batter?.65:r.L0!=null?0:delay;r.speed=spdFt(r.who);
   let d=r.from;const minD=r.batter?1:r.from;
-  while(d+1<=cap){const arr=r.start+(d+1-r.from-(r.L0||0))*LEG/r.speed;if(d+1<=minD||arr+.3<ballAt(d+1))d++;else break}
+  while(d+1<=cap){const arr=r.start+(d+1-r.from-(r.L0||0))*LEG/r.speed;if(d+1<=minD||arr+.1<ballAt(d+1))d++;else break}
   r.dest=d;cap=d===4?4:d-1;
  }
  let trail=null;
@@ -5081,38 +5097,23 @@ function hitAdvance(runners,tp,Pp,delay,ex){
 function outfieldHit(play,it,P,runners,delay,errBy){
  // retrieval time: an outfielder who had to run it down, dig it off the wall or chase a carom in the corner needs longer to get rid of it
  const rp=Math.hypot(it.p.x,it.p.y),ath=Math.abs(Math.atan2(it.p.x,it.p.y)/RAD),gap=ath>12&&ath<34,corner=ath>=36;let ex;
- ex=it.i>=6?((dist(POS[it.i],it.p)>40?1.3:.3)+(rp>275?.75:0)+(rp>205&&gap?1.7:0)+(rp>210&&corner?1.6:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
+ // no scripted retrieval: the ball rolls on its own path and the outfielder ran straight at it a step under sprint speed
+ // (OF_CHASE in intercept), so where and when he picks it up is real. All that's added is the pickup itself, and a moment
+ // to dig it off the wall when it got there
+ const kw=keepIn({x:it.p.x*1.04,y:it.p.y*1.04}),atWall=it.i>=6&&Math.hypot(kw.x-it.p.x*1.04,kw.y-it.p.y*1.04)>.5;
+ ex=it.i>=6?(atWall?.35:0):0;
  hitAdvance(runners,it.t,it.p,delay,ex);
- /* instead of the outfielder standing over the ball for that extra time, the time goes into the chase: the ball keeps on
-    its own roll past where he'd have cut it off, out to the wall (kicking back off it), and he runs it down at full speed,
-    taking a bad angle or bobbling it if he'd otherwise get there too soon, then scoops it and comes up throwing */
- const last=play.segs[play.segs.length-1];
- if(it.i>=6&&ex>.45&&last&&last.fn&&Math.abs(last.t1-it.t)<.05){
-  const tPick=it.t+.65+ex-.42,F=POS[it.i],ball=t=>last.fn(t);
-  let tStop=it.t;{let pr=ball(it.t);for(let t=it.t+.05;t<tPick;t+=.05){const q=ball(t);if(Math.hypot(q.x-pr.x,q.y-pr.y)>.04)tStop=t;pr=q}}
-  const rest0=ball(tStop),r0=Math.max(1,Math.hypot(rest0.x,rest0.y)),kw=keepIn({x:rest0.x*1.03,y:rest0.y*1.03}),atWall=Math.hypot(kw.x-rest0.x*1.03,kw.y-rest0.y*1.03)>.5;
-  /* off the wall it comes back a few feet towards the infield */
-  const kick=atWall?rand(6,11):0,kx=-rest0.x/r0*kick,ky=-rest0.y/r0*kick,tK=Math.min(tPick-.2,tStop+.55);
-  const pos=t=>{if(t<=tStop||!kick)return ball(Math.min(t,tStop));const u=clamp((t-tStop)/Math.max(.1,tK-tStop),0,1),e=1-(1-u)*(1-u);return{x:rest0.x+kx*e,y:rest0.y+ky*e,h:Math.abs(Math.sin(u*5))*2*(1-u)}};
-  const rest=pos(tPick),rs=fnSeg(it.t,tPick,pos);rs.snd=true;last.t1=it.t;play.segs.push(rs);
-  /* his run: full speed after a read; if that's too quick, a rounder route out and a bobble at the end soak up the rest */
-  const re=Math.min(F.re,.4),d=dist(F,rest),sp=F.sp*.97,avail=tPick-re;let ks;
-  if(d/sp>=avail-.05)ks=[{t:0,x:F.x,y:F.y},{t:re,x:F.x,y:F.y},{t:tPick,x:rest.x,y:rest.y}];
-  else{let spare=avail-d/sp;const bob=Math.min(.7,spare*.35);spare-=bob;
-   const L=Math.min(d*1.35,d+spare*sp),h=Math.sqrt(Math.max(0,(L/2)**2-(d/2)**2)),mx=(F.x+rest.x)/2,my=(F.y+rest.y)/2,nx=-(rest.y-F.y)/Math.max(1,d),ny=(rest.x-F.x)/Math.max(1,d),sg=(mx*nx+my*ny)>0?-1:1;
-   const W={x:mx+nx*h*sg,y:my+ny*h*sg},tArr=tPick-bob,tRun=re+Math.max(.2,tArr-re-L/sp);
-   ks=[{t:0,x:F.x,y:F.y},{t:tRun,x:F.x,y:F.y},{t:tRun+(tArr-tRun)*dist(F,W)/Math.max(1,L),x:W.x,y:W.y},{t:tArr,x:rest.x,y:rest.y}];
-   if(bob>.15){/* it squirts off the glove a couple of steps and he picks it up again */const bx=rest.x+rand(-3,3),by=rest.y+rand(-3,3);ks.push({t:tPick,x:bx,y:by});
-    const b0=tArr,pre=pos;play.segs[play.segs.length-1]=fnSeg(it.t,tPick,t=>t<b0?pre(t):{x:lerp(rest.x,bx,(t-b0)/(tPick-b0)),y:lerp(rest.y,by,(t-b0)/(tPick-b0)),h:Math.sin((t-b0)/(tPick-b0)*Math.PI)*2});play.segs[play.segs.length-1].snd=true}}
-  play.fk[it.i]=ks;const fin=ks[ks.length-1];
-  it={...it,t:tPick,p:{x:fin.x,y:fin.y}};ex=.42-.65}
  const bd=runners.find(r=>r.batter).dest;runners.find(r=>r.batter).round=true;
- // on a single, the runner from second tries to score on speed: 70+ scores, 50-69 is a play at the plate, under 50 holds at third
+ // on a single, a runner from second with any speed (50+) is sent home; whether he makes it is the race with the throw
  let sendHome=null;
- if(bd===1&&errBy==null){const r2=runners.find(r=>r.from===2&&!r.batter);if(r2&&r2.dest===3&&(r2.who.spd||60)>=50){r2.dest=4;sendHome=r2;
-  const sp=r2.who.spd||60;if(sp<70){r2.closeHome=true;if(Math.random()<.2+(70-sp)*.02)r2.out=true}}}
+ if(bd===1&&errBy==null){const r2=runners.find(r=>r.from===2&&!r.batter);if(r2&&r2.dest===3&&(r2.who.spd||60)>=50){r2.dest=4;sendHome=r2}}
  const tgt=sendHome?4:bd>=3?4:bd+1,tb=baseP(tgt);
- const t0=it.t+.65+ex;
+ // walk-off: once the winning run is sure to score nobody throws. The fielder picks it up, and that's the ballgame
+ const need=S.target+1-S.runs,sure=runners.filter(r=>r.dest===4&&r!==sendHome).map(r=>r.start+(4-r.from-(r.L0||0))*LEG/r.speed).sort((a,b)=>a-b);
+ const wo=errBy==null&&S.mode!=='bp'&&(S.mode==='arcade'||(S.half==='bot'&&S.inning>=(S.schedInn||9)))&&need>0&&sure.length>=need;
+ if(wo){if(sendHome)sendHome.out=false;play.segs.push(holdSeg(play,it.t,it.t+2,it.i))}
+ else{
+ const t0=it.t+(it.i>=6?OF_REL-.05:.65)+ex;
  let cov=tgt===4?1:tgt===3?4:(it.p.x<0?3:5);
  let tArr,rcv=null,cutMan=null;
  if(it.i>=6&&Math.hypot(it.p.x,it.p.y)>200){
@@ -5132,9 +5133,9 @@ function outfieldHit(play,it,P,runners,delay,errBy){
     the cutoff man can't also be the one covering, so the other middle infielder takes it */
  if(rcv==null){if(cov===cutMan||cov===it.i)cov=cov===3?5:cov===5?3:cov;
   if(cov!==it.i&&cov!==cutMan&&!play.fk[cov])play.fk[cov]=cover(cov,tb,tArr)}
- if(sendHome){const r2=sendHome,tR=r2.start+2*LEG/r2.speed;
-  if(r2.out){if(tR<tArr+.12)r2.speed=2*LEG/Math.max(.5,tArr+.15-r2.start);r2.outAt=tArr+.05}
-  else if(tR>tArr-.1)r2.speed=2*LEG/Math.max(.5,tArr-(r2.closeHome?.1:.4)-r2.start)}
+ if(sendHome){const r2=sendHome,tR=r2.start+2*LEG/r2.speed+.1;// the race is real: his own speed against the throw (plus a slide)
+  r2.out=tR>tArr+rand(-.12,.12);r2.closeHome=Math.abs(tR-tArr)<.45;if(r2.out)r2.outAt=Math.max(tArr+.05,tR-.2)}
+ }
  let bu=null,bdist=1e9;for(const i of[6,7,8])if(i!==it.i&&!play.fk[i]){const dd=dist(POS[i],it.p);if(dd<bdist){bdist=dd;bu=i}}
  if(bu!==null&&it.i>=6){const f=POS[bu];play.fk[bu]=chase(bu,{x:lerp(f.x,it.p.x,.55),y:lerp(f.y,it.p.y,.55)},it.t)}
  const code={1:'1B',2:'2B',3:'3B',4:'IPHR'}[bd];
@@ -5143,9 +5144,11 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  const ban={1:'SINGLE!',2:'DOUBLE!',3:'TRIPLE!',4:'INSIDE-THE-PARK HR!'}[bd];
  if(errBy!=null)return finalize(play,runners,{code:'E',hit:false,outs:0,banner:'ERROR!',tone:'',sub:'Dropped it!',desc:`Dropped fly ball, E${errBy+1}${runsTxt(runs)}`});
  const dl=P.line||Math.abs(P.s)>=41?' down the line':'';
- return finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} ${dl?dl.trim()+' in '+fieldName(P.s):'to '+fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
+ const fin=finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} ${dl?dl.trim()+' in '+fieldName(P.s):'to '+fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
+ if(wo)fin.end=Math.min(fin.end,Math.max(it.t+.4,sure[need-1])+.9);// over when the ball is picked up and the run is in
+ return fin;
 }
-let GB_RANGE=.4,OF_AIR=.8;
+let GB_RANGE=.4,OF_AIR=.8,OF_CHASE=.76,OF_REL=1.15,ROLL_LD=.6,ROLL_FB=.3;// OF_CHASE: an outfielder running down a ball on the ground, a step under his sprint
 function buildGrounder(P,dir,b){
  const C={x:0,y:2};
  const vf=.72*(1-Math.max(0,-P.L)/75);
@@ -5166,7 +5169,7 @@ function buildGrounder(P,dir,b){
 }
 function groundOut(play,it,P,runners){
  const i=it.i,outsBefore=S.outs;let tf=it.t,Pp=it.p;
- const xf=.6+(play.dive&&play.dive.i===i?.9:0);
+ const xf=.52+(play.dive&&play.dive.i===i?.9:0);
  const occ=[!!S.bases[0],!!S.bases[1],!!S.bases[2]];
  const forced=k=>k===1?true:occ.slice(0,k-1).every(Boolean);
  const batR=runners.find(r=>r.batter),r1=runners.find(r=>r.from===1);
@@ -5314,7 +5317,8 @@ function buildAir(P,dir,b){
   if(dbl)return finalize(play,runners,{code:'LDP',hit:false,outs:2,runs:0,banner:'DOUBLE PLAY',tone:'',sub:`Doubled off ${dbl.from===1?'first':'second'}`,desc:`Lineout ${kind}${best+1}, runner doubled off ${dbl.from===1?'first':'second'}`});
   return finalize(play,runners,{code,hit:false,outs:1,runs,banner:ban,tone:'',desc:`${word} ${kind}${best+1}${diving?', diving':''}${runsTxt(runs)}`});
  }
- const vr=drop?14:P.L<22?44:30,Rr=drop?7:(P.L<22?.2:.09)*D,Tr=Math.max(.3,2*Rr/vr),room=Math.max(0,fd-10-D);
+ // after it lands: a liner skips on hot and rolls a long way (that's a gap double), a fly ball checks up sooner
+ const vr=drop?14:P.L<22?.55*P.EV*1.467:.38*P.EV*1.467,Rr=drop?7:(P.L<22?ROLL_LD:ROLL_FB)*D,Tr=Math.max(.3,2*Rr/vr),room=Math.max(0,fd-10-D);
  const rollPos=t=>{if(t<T){const u=t/T;return{x:lerp(C.x,land.x,u),y:lerp(C.y,land.y,u),h:4*Hh*u*(1-u)}}
   const tau=clamp(t-T,0,Tr);const d=wallD(vr*tau-.5*(vr/Tr)*tau*tau,room);return{x:land.x+dir.x*d,y:land.y+dir.y*d,h:Math.abs(Math.sin(tau*7))*4*Math.max(0,1-tau/Tr)}};
  const it=intercept(rollPos,T,T+Tr+12,[2,3,4,5,6,7,8]);
@@ -5987,7 +5991,7 @@ function tsLoop(){TS.raf=0;const cv=$('tsBg');if(!cv||$('title').hidden||$('scrT
 function tsStart(){if(!TS.raf)TS.raf=requestAnimationFrame(tsLoop)}
 function tsRender(){if(!$('tsLogo'))return;const k=S.you,T=TEAMS[k],ST2=STADIUMS[k];
  if(TS.cur!==k){if(TS.cur){TS.prev=TS.cur;TS.t0=performance.now();const im=$('tsLogo');im.classList.remove('pop');void im.offsetWidth;im.classList.add('pop')}TS.cur=k}
- $('tsLogo').src=LOGO_URL[k];$('tsLogo').alt=`${T.city} ${T.name}`;$('tsName').textContent=`${T.city} ${T.name}`;$('tsSub').textContent=`${T.kcity} ${T.kname} · ${ST2?ST2.name:''}`;
+ $('tsLogo').src=LOGO_URL[k];$('tsLogo').alt=`${T.city} ${T.name}`;$('tsName').textContent=`${T.city} ${T.name}`;$('tsSub').textContent=`${T.kcity} ${T.kname} · ${ST2?ST2.name:''}`;{const o=teamRating(k).ovr,el=$('tsOvr');el.textContent=`OVR ${o}`;el.style.color=el.style.borderColor=rcol(o)}
  $('tsDots').innerHTML=TS_ORDER.map(t=>`<i class="${t===k?'on':''}"></i>`).join('');tsStart()}
 function tsGo(d){const i=TS_ORDER.indexOf(S.you),k=TS_ORDER[(i+d+TS_ORDER.length)%TS_ORDER.length];if(k===S.opp)S.opp=S.you;S.you=k;clubSave();
  syncPicker();applyCustom();updateHUD();
@@ -6009,6 +6013,33 @@ addEventListener('keydown',e=>{if($('title').hidden||$('scrTeams').hidden)return
 new MutationObserver(()=>{if(typeof applyVolumes==='function')applyVolumes();if(!$('scrTeams').hidden&&!$('title').hidden){tsRender();tsStart()}else tsInfoOpen(false)}).observe($('scrTeams'),{attributes:true,attributeFilter:['hidden']});
 
 new MutationObserver(()=>{if(typeof applyVolumes==='function')applyVolumes()}).observe($('title'),{attributes:true,attributeFilter:['hidden']});
+// ---------- team ratings: an overall (the average of every rating on the club) and its strengths and weaknesses ----------
+// six parts: the lineup's CON / POW / SPD / DEF, the starter (VEL, MOV, CTL) and the bullpen. A part is a strength or a
+// weakness by how it sits against the rest of the league, so a club with no glaring hole can still show its best side.
+const TR_PARTS=[['con','Contact'],['pow','Power'],['spd','Speed'],['def','Defense'],['sp','Starter'],['pen','Bullpen']];
+const trAvg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
+function teamRating(k){const T=TEAMS[k],L=T.lineup||[],st=T.staff||[T.pitcher],sp=st[0],pen=st.slice(1);
+ const arm=p=>trAvg([p.vel,p.mov,p.ctl]);
+ const parts={con:trAvg(L.map(p=>p.con)),pow:trAvg(L.map(p=>p.pow)),spd:trAvg(L.map(p=>p.spd)),def:trAvg(L.filter(p=>p.pos!=='DH').map(p=>p.def)),sp:arm(sp),pen:pen.length?trAvg(pen.map(arm)):arm(sp)};
+ // the overall: every hitter's four ratings and every pitcher's three, all averaged together
+ const all=[...L.flatMap(p=>[p.con,p.pow,p.spd,p.def]),...st.flatMap(p=>[p.vel,p.mov,p.ctl])];
+ return{ovr:Math.round(trAvg(all)),parts}}
+let TR_LEAGUE=null;
+function trLeague(){if(TR_LEAGUE)return TR_LEAGUE;const R=ORDER.map(teamRating),o={};
+ for(const[k]of TR_PARTS){const v=R.map(r=>r.parts[k]),m=trAvg(v),sd=Math.sqrt(trAvg(v.map(x=>(x-m)**2)))||1;o[k]={m,sd}}
+ const ov=R.map(r=>r.ovr);o.ovr={m:trAvg(ov),rank:ov.slice().sort((a,b)=>b-a)};return TR_LEAGUE=o}
+function trHTML(k){const r=teamRating(k),Lg=trLeague();
+ const z=TR_PARTS.map(([p,n])=>({p,n,v:Math.round(r.parts[p]),z:(r.parts[p]-Lg[p].m)/Lg[p].sd}));
+ // the clear standouts (half a spread from the league), up to two each way; every club gets at least its best and worst part
+ const by=z.slice().sort((a,b)=>b.z-a.z),rv=by.slice().reverse();let str=by.filter(x=>x.z>=.5).slice(0,2),wk=rv.filter(x=>x.z<=-.5).slice(0,2);
+ if(!str.length)str=[by[0]];if(!wk.length)wk=[rv[0]];
+ const tag=x=>str.includes(x)?'up':wk.includes(x)?'dn':'';
+ const rank=Lg.ovr.rank.indexOf(r.ovr)+1,tied=Lg.ovr.rank.filter(v=>v===r.ovr).length>1;
+ const bars=z.map(x=>`<div class="trRow ${tag(x)}"><span class="trK">${x.n}</span><span class="trBar"><i style="width:${clamp((x.v-40)/55,0,1)*100}%;background:${rcol(x.v)}"></i></span><b style="color:${rcol(x.v)}">${x.v}</b><em>${tag(x)==='up'?'▲':tag(x)==='dn'?'▼':''}</em></div>`).join('');
+ const list=(a,none)=>a.length?a.map(x=>x.n).join(', '):none;
+ return `<div class="trTop"><div class="trOvr" style="border-color:${rcol(r.ovr)}"><b style="color:${rcol(r.ovr)}">${r.ovr}</b><span>OVR</span></div>
+  <div class="trSum"><span>${tied?'T-':''}${ord(rank)} of ${ORDER.length} in the league</span><span class="up">▲ Strengths: ${list(str,'')}</span><span class="dn">▼ Weaknesses: ${list(wk,'')}</span></div></div>
+  <div class="trBars">${bars}</div>`}
 // ---------- pick a hitter: tap the at-bat panel ----------
 function openPicker(){
  if(S.phase==='title'||S.phase==='over'||pitching()||onlineGame())return;
@@ -6615,6 +6646,7 @@ function syncPicker(){
  for(const c of $('pickOpp').children){c.setAttribute('aria-pressed',c.dataset.t===S.opp);c.disabled=c.dataset.t===S.you}
  const T=TEAMS[S.you];const mc=$('mascCv').getContext('2d');mc.clearRect(0,0,11,17);blit(mc,MASCOTS[S.you].m,MASCOTS[S.you].c,0,17-MASCOTS[S.you].m.length);
  $('mascTxt').innerHTML=`<b>${T.mascot.toUpperCase()}</b>${T.mdesc}`;
+ if($('teamRate'))$('teamRate').innerHTML=trHTML(S.you);
  {const I=CLUB_INFO[S.you],ST=STADIUMS[S.you];if(I)$('clubInfo').innerHTML=`<div class="ciTop"><b>${T.city} ${T.name}</b><span>${T.kcity} ${T.kname} · EST. ${I.est} · ${I.nick.toUpperCase()}</span></div>
   <dl><dt>City</dt><dd>${I.city}</dd><dt>Ballpark</dt><dd>${ST.name} (${ST.kname}) · ${ST.dims[0]}-${ST.dims[2]}-${ST.dims[4]} ft${ST.wallFt>8?` · ${ST.wallFt} ft wall`:''}</dd></dl>
   <ul>${I.facts.map(f=>`<li>${f}</li>`).join('')}</ul>`}

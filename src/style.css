@@ -1021,3 +1021,18 @@ body:has(#over:not([hidden])) .app.deskApp>:is(.matchup,.meter,.acts,.pacts,.ski
 :is(.app:not(.deskApp),.app.phoneLand) .olNet{left:6px;top:42px;transform:none;font-size:8px;letter-spacing:.08em;gap:4px;padding:2px 5px;border-width:1px}
 :is(.app:not(.deskApp),.app.phoneLand) .olNet i{width:5px;height:5px;box-shadow:0 0 3px currentColor}
 .app.phoneLand .olNet{left:6px;top:42px}
+/* team rating in the club ABOUT panel */
+.teamRate{background:var(--edge);border:2px solid var(--panel-hi);padding:10px 12px;display:flex;flex-direction:column;gap:10px;font-size:12px}
+.trTop{display:flex;gap:12px;align-items:center}
+.trOvr{flex:none;width:58px;height:58px;border:3px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.25)}
+.trOvr b{font-family:var(--f-hud);font-weight:400;font-size:24px;line-height:1}.trOvr span{font-size:9px;letter-spacing:.18em;color:var(--dim);margin-top:3px}
+.trSum{display:flex;flex-direction:column;gap:3px;min-width:0;color:var(--dim)}
+.trSum .up{color:#7fe08a}.trSum .dn{color:#ff8a70}
+.trBars{display:grid;gap:5px}
+.trRow{display:grid;grid-template-columns:64px 1fr 26px 12px;gap:8px;align-items:center;color:var(--dim)}
+.trRow .trK{font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.trRow .trBar{height:7px;background:rgba(0,0,0,.4);box-shadow:0 0 0 1px rgba(255,255,255,.08)}.trRow .trBar i{display:block;height:100%}
+.trRow b{font-family:var(--f-hud);font-weight:400;text-align:right}
+.trRow em{font-style:normal;font-size:10px}.trRow.up em{color:#7fe08a}.trRow.dn em{color:#ff8a70}
+.trRow.up .trK{color:#bdf0c2}.trRow.dn .trK{color:#ffc2b5}
+.tsOvr{display:inline-block;margin-top:4px;font-family:var(--f-hud);font-size:12px;letter-spacing:.1em;padding:2px 7px;border:2px solid;background:rgba(8,20,14,.6)}
