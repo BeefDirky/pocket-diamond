@@ -84,7 +84,8 @@ function netTick(now){const o=S.online,opp=o.opp;
  else if(!$('clkS').hidden)$('clkS').hidden=true;if(o.lostAt&&o.lostBan&&$('banner').hidden){$('bt').textContent='CONNECTION LOST';$('bs').textContent='Waiting for your opponent to come back…';$('banner').dataset.tone='';$('banner').hidden=false}if(!opp)return;
  if(!pitching()&&S.phase==='ready'&&S.pt>2600&&!o.waitMsg){o.waitMsg=true;banner('THEIR PITCH','Waiting for the pitcher…')}
  if(!pitching()){const pt=opp.pt;if(pt&&pt.id){
-   if(pt.st==='k'){if(o.seenW!==pt.id&&(S.phase==='ready'||S.phase==='choose')&&S.pt>250){o.seenW=pt.id;o.waitMsg=false;hideBanner();applySnap(pt.z);runPickoff(pt.b,o.gid+'|'+pt.id)}}
+   if(pt.st==='i'){if(o.seenW!==pt.id&&(S.phase==='ready'||S.phase==='choose')&&S.pt>250){o.seenW=pt.id;o.waitMsg=false;hideBanner();applySnap(pt.z);runIBB()}}
+   else if(pt.st==='k'){if(o.seenW!==pt.id&&(S.phase==='ready'||S.phase==='choose')&&S.pt>250){o.seenW=pt.id;o.waitMsg=false;hideBanner();applySnap(pt.z);runPickoff(pt.b,o.gid+'|'+pt.id)}}
    else if(o.seenW!==pt.id&&(S.phase==='ready'||S.phase==='choose')&&S.pt>250)applyWindup(pt);
    if(o.seenW===pt.id&&pt.st==='r'&&o.seenR!==pt.id&&S.pitch&&S.pitch.pid===pt.id)applyRelease(pt)}}
  else{const dc=opp.dc;if(dc&&S.phase==='pitch'&&S.pitch&&dc.id===S.pitch.pid)applyDecision(dc);

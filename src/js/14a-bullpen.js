@@ -42,6 +42,20 @@ function doPickoff(k){if(!canPick(k))return;ensureAudio();
  runPickoff(k)}
 function syncPickBar(){const on=pitching()&&S.phase==='choose'&&!S.auto&&S.mode!=='bp';
  for(const k of[1,2]){const b=$('pk'+k);const ok=on&&canPick(k);if(b.hidden===ok)b.hidden=!ok}
- $('pkBar').hidden=$('pk1').hidden&&$('pk2').hidden}
+ const pkOff=$('pk1').hidden&&$('pk2').hidden;if($('pkLbl').hidden!==pkOff)$('pkLbl').hidden=pkOff;
+ const ib=on&&canIBB();if($('ibbBtn').hidden===ib)$('ibbBtn').hidden=!ib;
+ $('pkBar').hidden=pkOff&&!ib}
+// ---------- intentional walk: the manager signals four wide and the batter takes first, no pitches thrown (as in MLB) ----------
+function canIBB(){return pitching()&&S.phase==='choose'&&!S.auto&&(S.mode==='full'||onlineGame())&&!!curBatter()}
+function runIBB(){const b=curBatter(),nb=[...S.bases];let runs=0;
+ if(nb[0]){if(nb[1]){if(nb[2])runs++;nb[2]=nb[1]}nb[1]=nb[0]}nb[0]=b;S.bases=nb;addRuns(runs);S.steal=null;closePen();hideBanner();
+ logPA(b,'Intentional walk, IBB'+(runs?' · 1 run scores':''),!!runs);
+ banner('INTENTIONAL WALK',runs?'Forces in a run':`${b.name} takes first`,'ball');if(batKey()===S.you)crowdReach();
+ nextBatter();setPhase('call');updateHUD()}
+function doIBB(){if(!canIBB())return;ensureAudio();
+ if(onlineGame()){const o=S.online;o.n=(o.n||0)+1;const id=o.role[0]+o.n;o.clkEnd=0;netPresence({ck:null,pt:{id,st:'i',z:snapState()}})}
+ runIBB()}
+$('ibbBtn').addEventListener('pointerdown',e=>e.stopPropagation());
+$('ibbBtn').addEventListener('click',e=>{e.stopPropagation();doIBB()});
 $('pkBar').addEventListener('pointerdown',e=>e.stopPropagation());
 $('pkBar').addEventListener('click',e=>{const b=e.target.closest('button');if(b){e.stopPropagation();doPickoff(+b.dataset.b)}});

@@ -312,6 +312,7 @@ function buildPickoff(k){
  for(let j=1;j<=3;j++)if(S.bases[j-1])runners.push({from:j,who:S.bases[j-1],dest:j,start:0,speed:spdFt(S.bases[j-1]),out:false});
  const r=runners.find(x=>x.from===k),P0={x:POS[0].x,y:POS[0].y-2},bag={x:BASES[k].x-(k===1?2:0),y:BASES[k].y-(k===2?2:0)},t0=.32,fl=dist(P0,bag)/(THROW*1.05),ta=t0+fl;
  const out=Math.random()<(hot?.32:.05);
+ if(S.mode!=='bp'){const f=fldKey();S.stamOf=S.stamOf||{};S.stamOf[f]=Math.max(0,stamOf(f)-.3);stamHUD()}// a throw over costs a little stamina
  play.segs.push(fnSeg(0,t0,()=>({x:P0.x,y:P0.y,h:5})),throwSeg(t0,P0,bag),holdSeg(play,ta,ta+.45,k===1?2:5),throwSeg(ta+.45,bag,P0));
  const cov=k===1?2:5;play.fk[cov]=cover(cov,bag,ta);pushKey(play,cov,{t:ta+.9,x:bag.x,y:bag.y});
  r.slide={t0:.12,t1:Math.max(.45,ta-.06),head:true,b:k,back:true};
