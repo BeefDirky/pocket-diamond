@@ -219,7 +219,7 @@ function render(now){
   if(i===1&&!moving){let reach=null,held=false;const ck=ph==='pitch'&&S.pitch&&S.pitch.releaseAt&&!S.pitch.wild&&S.mode!=='bp'?catchPt(S.pitch):null;
    if(ck){const el=now-S.pitch.releaseAt,k=ease(clamp((el/S.pitch.travel-.5)/.45,0,1)),G=ck.scr;reach={x:lerp(-.5,(G.x-q.x)/1.2,k),y:lerp(-9.5,(G.y-q.y)/1.2,k)};held=el>=S.pitch.travel*CATCH_U}
    add(q.y,()=>drawCatcher(wg,q.x,q.y,fld,{skin,pants:fldPants,target:ph==='windup'||ph==='pitch',reach,held}))}
-  else add(q.y,()=>{if(i===0&&now<S.wildUntil){wg.fillStyle='#1b1f24';wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-38,5,11);wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-25,5,5);wg.fillStyle='#ff4a3d';wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-37,3,9);wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-24,3,3)}if(pT!=null)drawPitcher(wg,q.x,q.y,fld,{skin,pants:fldPants,flip,side:pitcher().slot==='side'},pT);else drawPlayer(wg,q.x,q.y+lean,fld,{legs,arms,frame:fr+i,skin,pants:fldPants,flip,glove:true,...(armO||{})})});
+  else add(q.y,()=>{if(i===0&&now<S.wildUntil){wg.fillStyle='#1b1f24';wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-38,5,11);wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-25,5,5);wg.fillStyle='#ff4a3d';wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-37,3,9);wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-24,3,3)}if(pT!=null)drawPitcher(wg,q.x,q.y,fld,{skin,pants:fldPants,flip,side:pitcher().slot==='side'},pT);else drawPlayer(wg,q.x,q.y+lean,fld,{legs,arms,frame:fr+i,skin,pants:fldPants,flip,glove:true,...(armO||{})});if(i===0&&!inPlay)drawSweat(wg,q.x,q.y,now)});
  }
  // runners
  const runSkin=w=>skinOf(w.name);

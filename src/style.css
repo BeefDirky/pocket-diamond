@@ -1010,3 +1010,10 @@ body:has(#over:not([hidden])) .app.deskApp>:is(.matchup,.meter,.acts,.pacts,.ski
 /* phones: "PITCHING [R] [SIDEARM]" ran a few pixels past the card's edge */
 @media (max-width:430px){.mu .k{gap:5px;letter-spacing:.08em;padding-left:7px;padding-right:6px}.muPos.side{margin-left:0;letter-spacing:0}}
 @media (max-width:380px){.mode small{white-space:normal;overflow-wrap:anywhere}}
+/* pitcher stamina bar in the pitching box */
+.stam{position:relative;height:5px;margin-top:5px;background:rgba(0,0,0,.45);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+.stam i{display:block;height:100%;width:100%;background:#5fc25a;transition:width .35s steps(6)}
+.stam.mid i{background:#e6b93a}.stam.low i{background:#e2603a}
+.stam.out{animation:stamOut 1s steps(2) infinite}.stam.out::after{content:"GASSED";position:absolute;right:0;top:-12px;font-size:8px;letter-spacing:.12em;color:#ff7a5c}
+@keyframes stamOut{50%{box-shadow:0 0 0 1px #ff5a3c}}
+@media (prefers-reduced-motion:reduce){.stam.out{animation:none;box-shadow:0 0 0 1px #ff5a3c}}

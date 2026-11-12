@@ -15,7 +15,7 @@ function renderPen(){const k=fldKey(),st=staffOf(k),cur=S.pIdxOf[k]||0,pc=S.pcOf
   return `<button type="button" class="penRow" data-i="${i}" ${now?'aria-current="true"':''} ${now||used?'disabled':''}>
 <span class="no">#${p.no}</span><span class="nm"><b>${p.name}</b><small>${role} · ${p.hand}HP${p.slot==='side'?' · sidearm':''}</small></span>${tag}<span class="ln2"><span class="rt">VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}</span><span class="ars">${arsOf(p).map(a=>`<i>${PITCHES[a].name}</i>`).join('')}</span></span></button>`}).join('')}
 function changePitcher(k,i,quiet){const cur=S.pIdxOf[k]||0;if(i===cur)return;usedOf(k).push(cur);
- S.pIdxOf[k]=i;S.penHint=false;S.pRunsOf[k]=0;S.pBFOf[k]=0;S.pcOf[k]=0;applyDefense();const np=pitcher();
+ S.pIdxOf[k]=i;S.penHint=false;S.pRunsOf[k]=0;S.pBFOf[k]=0;S.pcOf[k]=0;applyDefense();stamReset(k);const np=pitcher();
  if(!quiet){banner('PITCHING CHANGE',`#${np.no} ${np.name} in from the pen · ${arsOf(np).map(a=>PITCHES[a].name.toLowerCase()).join(', ')}`);
   S.jumbo={text:'NEW PITCHER',kr:'투수 교체',until:performance.now()+3200}}
  updateHUD()}

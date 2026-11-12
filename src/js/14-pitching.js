@@ -11,7 +11,7 @@ function startWindup(kf){closePen();unduckMusic();
  if(dmn&&k==='FB')mph+=rand(1.5,3.5);
  if(dmn&&k==='SL')mph+=rand(5,8);
  if(knk&&k==='FB')mph-=6;
- mph-=Math.max(0,(S.pcOf[fldKey()]||0)-40)*.07;
+ mph-=tiredness()*4;// a tiring arm loses a few ticks
  mph=Math.round(clamp(mph,62,dmn?104:102));
  const travel=520*Math.pow(95/mph,2.2)*(k==='FB'?1:1.08);
  WIN=winOf(curBatter())*Math.pow(95/mph,1.3);
@@ -19,17 +19,17 @@ function startWindup(kf){closePen();unduckMusic();
  const side=pitcher().hand==='R'?1:-1;
  S.pitch={k,name:P.name,mph,travel,side,slot:pt.slot||'over',h0:sideArm?3.9:6.2,relX:-(sideArm?4.4:2.2)*side,plateX:rand(-.7,.7),mov:.7+pt.mov*.006,inZone:bpm?Math.random()<.92:k==='SP'?Math.random()<.2:Math.random()<P.zone*(.72+pt.ctl*.003),kn:[rand(9,15),rand(0,6.3),rand(17,24),rand(0,6.3),rand(8,13),rand(0,6.3)],wind:pitching()?rand(1600,2000):rand(1000,1500),releaseAt:0,trail:[]};
  if(bpm){S.pitch.relX=0;S.pitch.h0=4.2;S.pitch.wind=1400;S.pitch.side=1}
- else if(!S.pitch.inZone&&Math.random()<.0045+clamp(((S.pcOf[fldKey()]||0)-30)/70,0,1)*.006&&k!=='KN')/* fresh arms rarely plunk anyone; tired ones lose the handle */{S.pitch.hbp=true;S.pitch.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
+ else if(!S.pitch.inZone&&Math.random()<.0045+tiredness()*.006&&k!=='KN')/* fresh arms rarely plunk anyone; tired ones lose the handle */{S.pitch.hbp=true;S.pitch.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
  if(!bpm&&!S.pitch.inZone&&!S.pitch.hbp)S.pitch.plateX=(Math.random()<.5?-1:1)*rand(1.05,1.6);// a ball misses the plate, so you can read it
  S.swing=null;setPhase('windup');
  if(S.online&&S.online.inGame&&pitching())netWindup();
- if(pitching()&&!S.auto){S.pitch.q=null;S.meterT0=performance.now();const pz=.05+pt.ctl*.0006;$('rmP').style.left=$('rmP').style.right=`${(.5-pz)*100}%`;$('rmTxt').textContent='TAP TO RELEASE';$('relMeter').hidden=false}
+ if(pitching()&&!S.auto){S.pitch.q=null;S.meterT0=performance.now();const z=meterZones(),gh=goodHalf(z);$('rmP').hidden=z.pz<=0;$('rmP').style.left=$('rmP').style.right=`${(.5-z.pz)*100}%`;$('rmG').style.left=$('rmG').style.right=`${(.5-gh)*100}%`;$('rmTxt').textContent=z.pz<=0?'GASSED · TAP TO RELEASE':'TAP TO RELEASE';$('relMeter').hidden=false}
 }
 const meterPos=now=>(Math.sin((now-S.meterT0)/1000*Math.PI*1.7-Math.PI/2)+1)/2;
 function releaseTap(){
  if(S.phase!=='windup'||!pitching()||S.pitch.q!=null)return;
- const m=meterPos(performance.now()),pz=.05+pitcher().ctl*.0006,d=Math.abs(m-.5);
- const q=d<=pz?1:clamp(1-(d-pz)/.45,0,1)*.85;S.pitch.q=q;S.pitch.mFreeze=m;
+ const m=meterPos(performance.now()),{pz,gw}=meterZones(),d=Math.abs(m-.5);
+ const q=pz>0&&d<=pz?1:clamp(1-(d-pz)/gw,0,1)*.85;// gassed: no PERFECT, and GOOD is much narrowerS.pitch.q=q;S.pitch.mFreeze=m;
  $('rmTxt').textContent=q>=1?'PAINTED THE CORNER!':q>.55?'GOOD LOCATION':q>.3?'OVER THE PLATE':'MISSED HIS SPOT';
 }
 function choosePitch(k){if(S.phase!=='choose'||!arsOf(pitcher()).includes(k))return;closePen();hideBanner();startWindup(k);updateHUD()}
@@ -41,7 +41,7 @@ function cpuDecide(){
  let sw=p.inZone?.58+(b.con-50)*.004-(q>=1?.05:0):.3+((p.k==='SL'||p.k==='SP'||p.k==='KN'||p.k==='CB')?.1:0)-(b.con-50)*.003;
  if(S.strikes===2)sw+=p.inZone?.2:.14;else if(S.balls+S.strikes===0)sw-=.08;if(S.balls===3&&S.strikes===0)sw-=.1;
  if(Math.random()>sw)return;
- const whiff=clamp(.095+{FB:0,SL:.12,CH:.08,SP:.45,KN:.22,CB:.16}[p.k]+q*.1+(p.mph-92)*.012-(b.con-50)*.004+(p.inZone?0:.2),.03,.9);
+ const whiff=clamp(.14+{FB:0,SL:.12,CH:.08,SP:.45,KN:.22,CB:.16}[p.k]+q*.1+(p.mph-92)*.012-(b.con-50)*.004+(p.inZone?0:.2),.03,.9);
  if(Math.random()<whiff){const at=arr+rand(-90,90);S.swing={at:at-60,err:at-arr,miss:true,cpu:true};return}
  const err=clamp(randn()*WIN*.36*(1.3-b.con/150)*(1+q*.6)*(p.inZone?1:1.5),-WIN*1.1,WIN*1.1);
  S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)};
@@ -56,7 +56,8 @@ function release(now){S.pitch.releaseAt=now;setPhase('pitch');const _rel=()=>{if
   const sg=Math.random()<.5?-1:1;p.plateX=p.inZone?(edge?sg*rand(.5,.68):rand(-.35,.35)):edge&&p.q>=.3?sg*rand(.82,1.05):sg*rand(1.2,1.8);
   setTimeout(()=>{$('relMeter').hidden=true},700)}
  else if(pitching())$('relMeter').hidden=true;// AUTO switched on mid-windup
- if(S.pitch.remote){}else S.pitch.wild=S.mode!=='bp'&&Math.random()<(.0032+clamp(((S.pcOf[fldKey()]||0)-60)/50,0,1)*.003+(pitching()&&!S.auto&&S.pitch.q<.15?.035:0));
+ stamSpend(S.pitch);
+ if(S.pitch.remote){}else S.pitch.wild=S.mode!=='bp'&&Math.random()<(.0032+tiredness()*.003+(gassed()?.002:0)+(pitching()&&!S.auto&&S.pitch.q<.15?.035:0));
  if(S.pitch.wild)S.wildUntil=now+1700;
  if(!onlineGame()&&(pitching()||(S.auto&&S.mode!=='bp')))cpuDecide();else if(S.auto&&S.mode==='bp'&&Math.random()<.85){const arr=S.pitch.releaseAt+S.pitch.travel,err=randn()*WIN*.3;S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)}}
  if(S.mode==='bp'&&BUF.bpthrow&&!muted)playSample('bpthrow',.8,.97+Math.random()*.06);// the machine's own thunk-and-whir

@@ -114,7 +114,7 @@ function simulateContact(err,hand,b){
  // exit velocity and launch angle, shaped on 2025 MLB batted balls (avg ~89 mph, ~13 deg; 42% grounders, 24% liners):
  // timing raises the exit velocity and tightens the angle, but even a perfect swing can be topped or got under
  const pf=S.pitch&&(S.pitch.k==='SL'||S.pitch.k==='CB')?-2:0;
- let EV=sweet?clamp(100+(b.pow-50)*.22+randn()*3,94,116):clamp(64.5+30*Math.pow(q,1.4)+(b.pow-50)*.25+pf+randn()*(11-5*q),40,118);
+ let EV=sweet?clamp(100+(b.pow-50)*.22+randn()*3,94,116):clamp(63.5+30*Math.pow(q,1.4)+(b.pow-50)*.25+pf+randn()*(11-5*q),40,118);
  let L;
  const perf=Math.abs(err)<=WIN*PERFK;// right on the PERFECT mark: squared up, a line drive more often than not
  if(sweet)L=rand(19,31);
@@ -132,8 +132,9 @@ function simulateContact(err,hand,b){
  const dir={x:Math.sin(s*RAD),y:Math.cos(s*RAD)};
  const P={err,q,EV,L,s};
  if(S.mode==='bp')return buildBP(P,dir,b);
- // 2025 MLB: about half of all contact goes foul (18.1% of pitches foul, 17.5% in play); late or early contact fouls off more
- if(!sweet&&Math.random()<.32+.38*(1-q)+(S.strikes===2?.06:0)){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
+ // fouls: fewer than MLB's ~half of contact, which made at-bats drag. Late or early contact fouls off more;
+ // a PERFECT swing almost always stays fair
+ if(!sweet&&Math.random()<(perf?.05:.2+.4*(1-q)+(S.strikes===2?.04:0))){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
  if(Math.abs(s)>45)return buildFoul(P,dir);
  if(L<10)return buildGrounder(P,dir,b);
  return buildAir(P,dir,b);

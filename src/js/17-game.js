@@ -1,14 +1,14 @@
 // ---------- game flow ----------
 function startGame(mode){S.gameNo=(S.gameNo||0)+1;tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
- S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.kLook=[];S.wildUntil=0;
+ S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.stamOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.kLook=[];S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();
  S.inning=1;S.errs=0;S.outs=0;S.balls=0;S.strikes=0;S.runs=0;S.hits=0;S.hr=0;S.ks=0;
  S.bases=[null,null,null];S.play=null;S.swing=null;S.pitch=null;S.jumbo=null;
  if(S.mode==='full'){
   S.totalInn=9;S.schedInn=9;S.target=0;S.oppLine=Array(9).fill(0);S.youLine=Array(9).fill(0);S.oppHits=0;
  }else{
-  S.totalInn=INNINGS;{const edge=(typeof teamStr==='function')?teamStr(S.opp)-teamStr(S.you):0;let k=0;{const W=[42,20,15,9,6,3,2,2,1];let u=Math.random()*100;while(k<8&&u>=W[k]){u-=W[k];k++}}// three innings of CPU-vs-CPU scoring (tests/balance.js): 0 most often, ~1.5 on average
+  S.totalInn=INNINGS;{const edge=(typeof teamStr==='function')?teamStr(S.opp)-teamStr(S.you):0;let k=0;{const W=[37,23,17,10,6,3,2,1,1];let u=Math.random()*100;while(k<8&&u>=W[k]){u-=W[k];k++}}// three innings of CPU-vs-CPU scoring (tests/balance.js): 0 most often, ~1.5 on average
    if(edge>3&&Math.random()<.4)k++;if(edge<-3&&Math.random()<.4)k--;S.target=clamp(k,0,9)}
   const line=[0,0,0];for(let k=0;k<S.target;k++)line[Math.floor(Math.random()*3)]++;
   S.oppLine=line;S.oppHits=S.target+1+Math.floor(Math.random()*4);S.youLine=[0,0,0];

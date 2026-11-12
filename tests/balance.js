@@ -28,12 +28,12 @@ window.__bal=function(n,o){
  const rn=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
  const keep={sfx,banner,logPA,crowdReach,crowdSad,organCue,playSample,showTiming};
  S.you=o.you||'busan';S.opp=o.opp||'seoul';
- startGame('full');S.auto=o.mode==='cpu';
+ startGame('full');S.auto=o.mode==='cpu';out.pulls=0;
  // humans: o.mode 'you' bats in the bottom half; 'pitch' pitches the top half
  const side=o.mode==='pitch'?'top':o.mode==='you'?'bot':null;
  let half=0;
  const newHalf=()=>{half++;S.half=side||(half%2?'top':'bot');setSides();S.outs=0;S.bases=[null,null,null];S.balls=0;S.strikes=0;
-  const f=fldKey();if((S.pcOf[f]||0)>=95)S.pcOf[f]=0;S.steal=null};
+  const f=fldKey();if(stamOf(f)<=12){S.pcOf[f]=0;stamReset(f)}S.steal=null};
  newHalf();
  const bg=buildGrounder,ba=buildAir;let lastP=null;buildGrounder=(P,d,b)=>{lastP=P;return bg(P,d,b)};buildAir=(P,d,b)=>{lastP=P;return ba(P,d,b)};
  out.evs=0;out.las=0;out.nP=0;out.gb=0;out.ld=0;out.fb=0;out.pu=0;

@@ -9,6 +9,41 @@ come from Baseball Savant's league page.
 
 Measure with `node tests/balance.js` (instructions are at the top of the file).
 
+## 12 Nov update: fewer fouls, pitcher stamina
+**Fouls.** About a third fewer fouls, because MLB's rate (about half of all contact) made at-bats drag.
+- A PERFECT swing now goes foul only 5% of the time.
+- To keep the results MLB-like, CPU batters swing and miss a little more and contact is a touch softer.
+
+CPU vs CPU now (6,000 PA, against MLB 2025):
+
+| Stat | Game | MLB 2025 |
+|---|---|---|
+| AVG / OBP / SLG | .261 / .326 / .423 | .245 / .315 / .404 |
+| Home runs per PA | 3.0% | 3.1% |
+| Walks / strikeouts | 8.0% / 18.6% | 8.4% / 22.2% |
+| Runs per 9 innings | 4.50 | 4.45 |
+| Pitches per PA | 3.3 | 3.6 before this update |
+| Fouls per pitch | 12.2% | 18.1% |
+
+Strikeouts sit a bit under MLB, the price of fewer two-strike fouls. The tables below are from the 10 Nov pass.
+
+**Stamina** replaces the pitch-count fatigue. A starter has 100 and a reliever 45. Each pitch costs:
+
+    0.8 x pitch type x release timing
+
+- **Pitch type:** fastball 1.0, changeup 1.2, slider 1.45, curveball 1.7, knuckleball 1.95, splitter 2.2.
+- **Release timing:** PERFECT 0.5x, sliding smoothly up to about 1.9x for a missed or late release. A CPU arm gets a timing value from his control.
+
+What stamina does:
+- **Tiring:** below half, velocity drops (up to 4 mph) and wild pitches and hit batters creep up.
+- **Gassed (empty):** the PERFECT window on the release meter is gone and the GOOD window is about half as wide.
+- **Bullpen:** in a full game the CPU makes a change at 12% left; you get a hint at 25%.
+- **On screen:** a bar in the pitching box goes green, then amber, then red, then GASSED. The pitcher sweats on the mound under a third of his tank, and more when gassed.
+
+How long a starter lasts:
+- An average CPU starter lasts about 90 pitches.
+- A human throwing PERFECT fastballs lasts much longer, and sliders and splitters on sloppy releases burn him out in about 50.
+
 ## CPU vs CPU (12,000 plate appearances, 10 Nov build + balance pass)
 
 | Per plate appearance | Game | MLB 2025 |

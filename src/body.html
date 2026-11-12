@@ -25,7 +25,7 @@
     <button class="autoBtn" id="autoBtn" type="button" aria-pressed="false" title="Let the game play itself">AUTO <b>OFF</b></button>
     <button class="infoBtn" id="infoBtn" type="button" aria-pressed="true" title="Show or hide hit info">INFO <b>ON</b></button>
     <div class="pcBox" aria-label="Inning and pitch count"><span id="bugInn"></span><span>PITCHES <b id="pcV">0</b></span><span id="clkS" hidden>CLOCK <b id="clkV">15</b></span></div>
-    <div class="relMeter" id="relMeter" hidden><div class="rmBar"><i class="rmG"></i><i class="rmP" id="rmP"></i><b id="rmMk"></b></div><span id="rmTxt">TAP TO RELEASE</span></div>
+    <div class="relMeter" id="relMeter" hidden><div class="rmBar"><i class="rmG" id="rmG"></i><i class="rmP" id="rmP"></i><b id="rmMk"></b></div><span id="rmTxt">TAP TO RELEASE</span></div>
     <div class="pkBar" id="pkBar" hidden><span>PICKOFF</span><button type="button" id="pk1" data-b="1" hidden>1B <small>Q</small></button><button type="button" id="pk2" data-b="2" hidden>2B <small>W</small></button></div>
     <div class="penPanel" id="penPanel" hidden><div class="penHead"><b>BULLPEN</b><span id="penSub"></span><button type="button" id="penClose" aria-label="Close bullpen">✕</button></div><div class="penList" id="penList"></div></div>
     <div class="ballCam" id="ballCam" hidden><canvas id="ballCamCv"></canvas><span id="ballCamTxt"></span><i>BALL CAM</i></div>
@@ -278,7 +278,7 @@
 
   <div class="matchup">
     <div class="mu muBat" id="muBat" role="button" tabindex="0" title="Pick a hitter"><div class="k" id="abTeam">AT BAT</div><div class="v" id="abName">—</div><div class="h" id="abHand"></div></div>
-    <div class="mu muPit" id="muPit" role="button" tabindex="0" title="Open the bullpen"><div class="k" id="pTeam">PITCHING</div><div class="v" id="pName">—</div><div class="h" id="pHand"></div></div>
+    <div class="mu muPit" id="muPit" role="button" tabindex="0" title="Open the bullpen"><div class="k" id="pTeam">PITCHING</div><div class="v" id="pName">—</div><div class="h" id="pHand"></div><div class="stam" id="pStam" hidden><i></i></div></div>
   </div>
 
   <div class="meter" aria-live="polite">

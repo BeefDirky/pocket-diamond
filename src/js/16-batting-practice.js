@@ -441,11 +441,12 @@ function afterPA(){
   S.inning++;S.outs=0;S.bases=[null,null,null];S.balls=0;S.strikes=0;
   setPhase('inning');updateHUD();return;
  }
- const fk=fldKey(),st=TEAMS[fk].staff||[],lim=S.mode==='full'?95:55;
+ const fk=fldKey(),st=TEAMS[fk].staff||[],lim=S.mode==='full'?95:55,sf=stamOf(fk)/stamMax(staffOf(fk)[S.pIdxOf[fk]||0]);
+ const spent=S.mode==='full'?sf<=.12:(S.pcOf[fk]||0)>=lim||sf<=.12;// stamina runs the hook in a full game
  const humanPen=onlineGame()||(S.mode==='full'&&fk===S.you&&!S.auto);// a human manager makes their own calls
  const nxt=st.findIndex((p,i)=>i>(S.pIdxOf[fk]||0)&&!usedOf(fk).includes(i));
- if(humanPen&&nxt>=0&&((S.pRunsOf[fk]||0)>=4||(S.pcOf[fk]||0)>=lim)&&!S.penHint){S.penHint=true;setTimeout(()=>{if(pitching()&&S.phase==='choose')banner('YOUR PITCHER IS TIRING',`${S.pcOf[fk]||0} pitches. Tap BULLPEN (or press B) to make a change.`)},900)}
- if(!humanPen&&nxt>=0&&((S.pRunsOf[fk]||0)>=4||(S.pcOf[fk]||0)>=lim)){
+ if(humanPen&&nxt>=0&&((S.pRunsOf[fk]||0)>=4||sf<=.25)&&!S.penHint){S.penHint=true;setTimeout(()=>{if(pitching()&&S.phase==='choose')banner(sf<=0?'YOUR PITCHER IS GASSED':'YOUR PITCHER IS TIRING',`Stamina ${Math.round(Math.max(0,sf)*100)}%, ${S.pcOf[fk]||0} pitches. Tap BULLPEN (or press B) to make a change.`)},900)}
+ if(!humanPen&&nxt>=0&&((S.pRunsOf[fk]||0)>=4||spent)){
   changePitcher(fk,nxt,true);const np=pitcher();
   banner('PITCHING CHANGE',`${fk===S.you?'Your bullpen: ':''}#${np.no} ${np.name}, ${np.slot==='side'?'sidearm ':''}${np.hand}HP, in from the pen`);
   S.jumbo={text:'NEW PITCHER',kr:'투수 교체',until:performance.now()+3200};$('tag').hidden=true;setPhase('inning');updateHUD();return;
