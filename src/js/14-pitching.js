@@ -29,7 +29,7 @@ const meterPos=now=>(Math.sin((now-S.meterT0)/1000*Math.PI*1.7-Math.PI/2)+1)/2;
 function releaseTap(){
  if(S.phase!=='windup'||!pitching()||S.pitch.q!=null)return;
  const m=meterPos(performance.now()),{pz,gw}=meterZones(),d=Math.abs(m-.5);
- const q=pz>0&&d<=pz?1:clamp(1-(d-pz)/gw,0,1)*.85;// gassed: no PERFECT, and GOOD is much narrowerS.pitch.q=q;S.pitch.mFreeze=m;
+ const q=pz>0&&d<=pz?1:clamp(1-(d-pz)/gw,0,1)*.85;S.pitch.q=q;S.pitch.mFreeze=m;// gassed: no PERFECT, and GOOD is much narrower
  $('rmTxt').textContent=q>=1?'PAINTED THE CORNER!':q>.55?'GOOD LOCATION':q>.3?'OVER THE PLATE':'MISSED HIS SPOT';
 }
 function choosePitch(k){if(S.phase!=='choose'||!arsOf(pitcher()).includes(k))return;closePen();hideBanner();startWindup(k);updateHUD()}
