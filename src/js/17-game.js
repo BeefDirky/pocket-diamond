@@ -8,10 +8,10 @@ function startGame(mode){S.gameNo=(S.gameNo||0)+1;tsFlush();unduckMusic();if(mod
  if(S.mode==='full'){
   S.totalInn=9;S.schedInn=9;S.target=0;S.oppLine=Array(9).fill(0);S.youLine=Array(9).fill(0);S.oppHits=0;
  }else{
-  S.totalInn=INNINGS;{const edge=(typeof teamStr==='function')?teamStr(S.opp)-teamStr(S.you):0;let k=1;{const W=[8,20,28,23,14,7];let u=Math.random()*100;while(k<6&&u>=W[k-1]){u-=W[k-1];k++}}// 1-6 runs, mostly 2-4
-   if(edge>3&&Math.random()<.4)k++;if(edge<-3&&Math.random()<.4)k--;S.target=clamp(k,1,6)}
+  S.totalInn=INNINGS;{const edge=(typeof teamStr==='function')?teamStr(S.opp)-teamStr(S.you):0;let k=0;{const W=[42,20,15,9,6,3,2,2,1];let u=Math.random()*100;while(k<8&&u>=W[k]){u-=W[k];k++}}// three innings of CPU-vs-CPU scoring (tests/balance.js): 0 most often, ~1.5 on average
+   if(edge>3&&Math.random()<.4)k++;if(edge<-3&&Math.random()<.4)k--;S.target=clamp(k,0,9)}
   const line=[0,0,0];for(let k=0;k<S.target;k++)line[Math.floor(Math.random()*3)]++;
-  S.oppLine=line;S.oppHits=S.target+2+Math.floor(Math.random()*4);S.youLine=[0,0,0];
+  S.oppLine=line;S.oppHits=S.target+1+Math.floor(Math.random()*4);S.youLine=[0,0,0];
  }
  $('log').innerHTML='';$('mk').hidden=true;$('tRead').textContent='Timing shows here after a swing';
  document.documentElement.style.setProperty('--team',TEAMS[S.you].jersey);

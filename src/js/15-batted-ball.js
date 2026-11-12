@@ -15,7 +15,8 @@ function applyDefense(){
  const T=TEAMS[fldKey()];S.fpl=POSCODE.map((c,i)=>i===0?pitcher():T.lineup.find(p=>p.pos===c));
  S.fpl.forEach((pl,i)=>{const b=BASEPOS[i],d=pl.def;POS[i]={...b,sp:b.sp*.92*(.88+d*.0025),re:b.re*(1.2-d*.004),reach:b.reach*(.9+d*.002)}});
 }
-const errChance=(i,base)=>base*(S.fpl?(1.6-S.fpl[i].def/100*1.2):1);
+// 2025 MLB: batters reached on an error in 0.56% of plate appearances (1,018 times), under 1% of balls in play
+const errChance=(i,base)=>base*.2*(S.fpl?(1.6-S.fpl[i].def/100*1.2):1);
 function keepIn(p){
  const r=Math.hypot(p.x,p.y);if(r<1)return p;const th=Math.atan2(p.x,p.y)/RAD;
  if(Math.abs(th)<=45&&p.y>0){const m=fenceDist(th)-(ST?ST.wallFt+3:11);if(r>m)return{x:p.x*m/r,y:p.y*m/r}}
@@ -36,11 +37,12 @@ function fpos0(play,i,t){
  for(let k=1;k<ks.length;k++)if(t<=ks[k].t){const a=ks[k-1],b=ks[k];const u=b.t>a.t?(t-a.t)/(b.t-a.t):1;return{x:lerp(a.x,b.x,u),y:lerp(a.y,b.y,u)}}
  return ks[ks.length-1];
 }
-function intercept(gfn,t0,t1,cands,extra){
- extra=extra||0;
+function intercept(gfn,t0,t1,cands,extra,rk){
+ extra=extra||0;rk=rk||1;
  for(let t=t0;t<=t1;t+=.04){
   const p=gfn(t);let best=null,bd=1e9;
-  for(const i of cands){const f=POS[i];const dd=dist(f,p);const need=f.re+extra+Math.max(0,dd-f.reach)/f.sp;if(need<=t&&dd<bd){bd=dd;best=i}}
+  for(const i of cands){const f=POS[i];const dd=dist(f,p);if(rk<1&&i<=5&&Math.hypot(p.x,p.y)>Math.hypot(f.x,f.y)+(i<2?6:14))continue;// once a grounder is past him, an infielder doesn't run it down
+  const need=f.re+extra+(rk<1&&i===0?.2:0)/* falling off the mound */+Math.max(0,dd-f.reach)/(f.sp*(i<=5?rk:1));if(need<=t&&dd<bd){bd=dd;best=i}}
   if(best!==null)return{i:best,t,p:{x:p.x,y:p.y}};
  }
  const p=gfn(t1);let bi=7,bd=1e9;for(const i of[6,7,8]){const dd=dist(POS[i],p);if(dd<bd){bd=dd;bi=i}}
@@ -109,20 +111,29 @@ function simulateContact(err,hand,b){
  // and drives it the other way (never shown on the timing bar)
  const sweet=S.pitch&&S.pitch.k==='CB'&&Math.abs(err-WIN*GOODK)<=WIN*.045;
  let q=q0;if(sweet)q=Math.max(q,.94);
- const EV=sweet?clamp(100+(b.pow-50)*.22+randn()*3,94,116):clamp(60+50*q+(b.pow-50)*.32+randn()*4,45,118);
+ // exit velocity and launch angle, shaped on 2025 MLB batted balls (avg ~89 mph, ~13 deg; 42% grounders, 24% liners):
+ // timing raises the exit velocity and tightens the angle, but even a perfect swing can be topped or got under
+ const pf=S.pitch&&(S.pitch.k==='SL'||S.pitch.k==='CB')?-2:0;
+ let EV=sweet?clamp(100+(b.pow-50)*.22+randn()*3,94,116):clamp(64.5+30*Math.pow(q,1.4)+(b.pow-50)*.25+pf+randn()*(11-5*q),40,118);
  let L;
+ const perf=Math.abs(err)<=WIN*PERFK;// right on the PERFECT mark: squared up, a line drive more often than not
  if(sweet)L=rand(19,31);
- else if(q>.78)L=rand(10,34);
- else if(q>.48)L=Math.random()<.5?rand(-12,12):rand(12,40);
- else L=Math.random()<.55?rand(-25,6):rand(40,70);
+ else if(perf)L=clamp(16+randn()*10,-20,55);
+ else L=clamp(14*q+randn()*(36-12*q*q),-50,75);// square contact lifts it on a line; mistimed contact is topped or got under
  L+=(b.pow-50)*.06;
+ // a barrel: hard and in the air at the right angle (2025 MLB ~8% of batted balls, most of the home runs). Better timing and
+ // more power barrel it more often; a swing right on the PERFECT mark doubles the chance
+ const bar=!sweet&&Math.random()<(.01+.12*Math.pow(q,4)*(.55+b.pow/110))*(perf?2:1);
+ if(bar){EV=Math.max(EV,clamp(99+(b.pow-50)*.2+randn()*4,95,117));L=rand(21,34)}
+ else if(perf){EV+=5}
  const pull=hand==='R'?-1:1;
  const tm=Math.min(1.25,Math.abs(err)/WIN);
  const s=pull*(Math.sign(-err)*Math.pow(tm,.75)*50+3)+randn()*6;
  const dir={x:Math.sin(s*RAD),y:Math.cos(s*RAD)};
  const P={err,q,EV,L,s};
  if(S.mode==='bp')return buildBP(P,dir,b);
- if(!sweet&&q<.62&&Math.random()<.3){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
+ // 2025 MLB: about half of all contact goes foul (18.1% of pitches foul, 17.5% in play); late or early contact fouls off more
+ if(!sweet&&Math.random()<.32+.38*(1-q)+(S.strikes===2?.06:0)){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
  if(Math.abs(s)>45)return buildFoul(P,dir);
  if(L<10)return buildGrounder(P,dir,b);
  return buildAir(P,dir,b);

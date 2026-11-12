@@ -64,7 +64,7 @@ function hitAdvance(runners,tp,Pp,delay,ex){
 function outfieldHit(play,it,P,runners,delay,errBy){
  // retrieval time: an outfielder who had to run it down, dig it off the wall or chase a carom in the corner needs longer to get rid of it
  const rp=Math.hypot(it.p.x,it.p.y),ath=Math.abs(Math.atan2(it.p.x,it.p.y)/RAD),gap=ath>12&&ath<34,corner=ath>=36;let ex;
- ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(rp>285?.75:0)+(rp>275&&gap?1.7:0)+(rp>265&&corner?1.9:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
+ ex=it.i>=6?((dist(POS[it.i],it.p)>40?1.3:.3)+(rp>275?.75:0)+(rp>205&&gap?1.7:0)+(rp>210&&corner?1.6:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
  hitAdvance(runners,it.t,it.p,delay,ex);
  /* instead of the outfielder standing over the ball for that extra time, the time goes into the chase: the ball keeps on
     its own roll past where he'd have cut it off, out to the wall (kicking back off it), and he runs it down at full speed,
@@ -128,6 +128,7 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  const dl=P.line||Math.abs(P.s)>=41?' down the line':'';
  return finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} ${dl?dl.trim()+' in '+fieldName(P.s):'to '+fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
 }
+let GB_RANGE=.4,OF_AIR=.8;
 function buildGrounder(P,dir,b){
  const C={x:0,y:2};
  const vf=.72*(1-Math.max(0,-P.L)/75);
@@ -135,7 +136,8 @@ function buildGrounder(P,dir,b){
  const gpos=t=>{const tt=Math.min(t,ts);const d=wallD(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
  // a scorcher right down the line gets past the corner infielder most of the time and rattles into the corner
  const lineShot=!P.bunt&&Math.abs(P.s)>=40.5&&P.EV>=86&&Math.random()<.7;
- const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8].filter(i=>!(lineShot&&i===(P.s>0?2:4))),P.bunt?.35:0);
+ // an infielder's range on a grounder is a few steps and a dive, not a full sprint: hard ones get through (2025 MLB grounders hit ~.24)
+ const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8].filter(i=>!(lineShot&&i===(P.s>0?2:4))),P.bunt?.35:0,P.bunt?1:GB_RANGE+(1-GB_RANGE)*clamp((82-P.EV)/22,0,1));// a slow roller he charges at full speed
  if(lineShot)P.line=true;
  const play=newPlay();
  const gs=fnSeg(0,it.t,gpos);gs.snd=true;play.segs.push(gs);
@@ -164,8 +166,9 @@ function groundOut(play,it,P,runners){
   r1.dest=2;r1.out=true;r1.outAt=t2;outs++;
   play.segs.push(holdSeg(play,tf,tf+xf,i),throwSeg(tf+xf,fromF(play,i,tf+xf),BASES[2]));
   play.fk[cov2]=cover(cov2,BASES[2],t2);
-  const t1=t2+.35+dist(BASES[2],BASES[1])/THROW;
-  play.segs.push(fnSeg(t2,t2+.35,()=>({x:BASES[2].x,y:BASES[2].y,h:3})),throwSeg(t2+.35,BASES[2],BASES[1]));
+  const PV=.75;// the pivot: catch, clear the runner, throw (2025 MLB: 3,122 GIDP, 1.7% of plate appearances)
+  const t1=t2+PV+dist(BASES[2],BASES[1])/THROW;
+  play.segs.push(fnSeg(t2,t2+PV,()=>({x:BASES[2].x,y:BASES[2].y,h:3})),throwSeg(t2+PV,BASES[2],BASES[1]));
   if(!play.fk[cov1])play.fk[cov1]=cover(cov1,BASES[1],t1);
   batR.dest=1;
   if(t1<batArr1){batR.out=true;batR.outAt=t1;outs++;code='DP';note=`${i+1}-${cov2+1}-${cov1+1}`}
@@ -178,7 +181,7 @@ function groundOut(play,it,P,runners){
    t1=t0+.08+dist(from,BASES[1])/(POS[2].sp*.95);pushKey(play,2,{t:t0,x:from.x,y:from.y});pushKey(play,2,{t:t1,x:BASES[1].x,y:BASES[1].y});
    play.segs.push(holdSeg(play,tf,t1,2));note='3U';
   }else{
-   t1=tf+xf+dist(Pp,BASES[1])/THROW;
+   t1=tf+xf+dist(Pp,BASES[1])/(THROW*1.35);// an infielder's throw across the diamond is a hard one (2025 MLB: infield hits ~1.5% of PA)
    play.segs.push(holdSeg(play,tf,tf+xf,i),throwSeg(tf+xf,fromF(play,i,tf+xf),BASES[1]));
    if(!play.fk[cov1])play.fk[cov1]=cover(cov1,BASES[1],t1);
    note=`${i+1}-${cov1+1}`;
@@ -230,8 +233,9 @@ function clangFor(D,fd,s,T,hr){const as=Math.abs(s),dd=D-fd;
  if(dd>-14&&Math.random()<.3)return{t:T,k:'edge'};return null}
 function buildAir(P,dir,b){
  const C={x:0,y:2},Lr=P.L*RAD;
- let D=Math.max(30,Math.min(475,(P.EV-40)*5.9*(.82+b.pow*.0035)*Math.pow(Math.sin(2*Lr),P.L>45?1:.6)));
- {const need=b.pow>=85?.62:b.pow>=72?.7:.78;if(b.pow<60||P.q<need){const fdd=fenceDist(P.s);if(D>fdd-8)D=fdd-8-rand(0,22)}}
+ // carry peaks near 30 degrees and dies off above 40: a towering popup doesn't leave the park
+ let D=Math.max(30,Math.min(475,(P.EV-40)*5.9*(.82+b.pow*.0035)*Math.pow(Math.sin(2*Lr),P.L>45?1:.6)*(P.L>36?Math.max(.45,1-(P.L-36)*.025):1)));
+ {const need=b.pow>=85?.55:b.pow>=72?.62:b.pow>=55?.7:.8;if(b.pow<40||P.q<need){/* singles hitters still run into one now and then */const fdd=fenceDist(P.s);if(D>fdd-8)D=fdd-8-rand(0,22)}}
  const vy=P.EV*1.467*Math.sin(Lr);
  const T=Math.max(.7,vy/16*.82);
  const Hh=Math.max(8,vy*vy/64*.55);
@@ -250,9 +254,10 @@ function buildAir(P,dir,b){
    banner:runs===4?'GRAND SLAM!':'HOME RUN!',tone:'hr',sub:`${Math.round(D)} ft to ${fieldName(P.s)}`,desc:`Home run to ${fieldName(P.s)}, ${Math.round(D)} ft${runsTxt(runs)}`});
  }
  const cands=[2,3,4,5,6,7,8];if(D<60)cands.push(0);if(D<70)cands.push(1);
- let best=7,bn=1e9;for(const i of cands){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/f.sp;if(need<bn){bn=need;best=i}}
+ // OF_AIR: the jump and the route on a ball in the air (a straight-line sprint caught nearly every liner in the gaps)
+ let best=7,bn=1e9;for(const i of cands){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/(f.sp*(i>=6?OF_AIR:1));if(need<bn){bn=need;best=i}}
  // outfielders have priority: on anything hit past the infield dirt, an outfielder who can get there calls the infielder off
- if(best<6&&D>=128){let ob=-1,on=1e9;for(const i of[6,7,8]){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/f.sp;if(need<on){on=need;ob=i}}
+ if(best<6&&D>=128){let ob=-1,on=1e9;for(const i of[6,7,8]){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/(f.sp*OF_AIR);if(need<on){on=need;ob=i}}
   if(ob>=0&&on<=T+.02){best=ob;bn=on}}
  const drop=bn<=T+.05&&P.L<45&&Math.random()<errChance(best,bn>T-.12?.2:.05);// diving catches pop out of the glove far more often
  if(bn<=T+.05&&!drop){

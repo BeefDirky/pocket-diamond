@@ -4623,13 +4623,13 @@ function startWindup(kf){closePen();unduckMusic();
  WIN=winOf(curBatter())*Math.pow(95/mph,1.3);
  const sideArm=pt.slot==='side'&&!bpm;
  const side=pitcher().hand==='R'?1:-1;
- S.pitch={k,name:P.name,mph,travel,side,slot:pt.slot||'over',h0:sideArm?3.9:6.2,relX:-(sideArm?4.4:2.2)*side,plateX:rand(-.7,.7),mov:.7+pt.mov*.006,inZone:bpm?Math.random()<.92:k==='SP'?Math.random()<.2:Math.random()<P.zone*(.82+pt.ctl*.0035),kn:[rand(9,15),rand(0,6.3),rand(17,24),rand(0,6.3),rand(8,13),rand(0,6.3)],wind:pitching()?rand(1600,2000):rand(1000,1500),releaseAt:0,trail:[]};
+ S.pitch={k,name:P.name,mph,travel,side,slot:pt.slot||'over',h0:sideArm?3.9:6.2,relX:-(sideArm?4.4:2.2)*side,plateX:rand(-.7,.7),mov:.7+pt.mov*.006,inZone:bpm?Math.random()<.92:k==='SP'?Math.random()<.2:Math.random()<P.zone*(.72+pt.ctl*.003),kn:[rand(9,15),rand(0,6.3),rand(17,24),rand(0,6.3),rand(8,13),rand(0,6.3)],wind:pitching()?rand(1600,2000):rand(1000,1500),releaseAt:0,trail:[]};
  if(bpm){S.pitch.relX=0;S.pitch.h0=4.2;S.pitch.wind=1400;S.pitch.side=1}
- else if(!S.pitch.inZone&&Math.random()<.007+clamp(((S.pcOf[fldKey()]||0)-30)/70,0,1)*.026&&k!=='KN')/* fresh arms rarely plunk anyone; tired ones lose the handle */{S.pitch.hbp=true;S.pitch.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
+ else if(!S.pitch.inZone&&Math.random()<.0045+clamp(((S.pcOf[fldKey()]||0)-30)/70,0,1)*.006&&k!=='KN')/* fresh arms rarely plunk anyone; tired ones lose the handle */{S.pitch.hbp=true;S.pitch.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
+ if(!bpm&&!S.pitch.inZone&&!S.pitch.hbp)S.pitch.plateX=(Math.random()<.5?-1:1)*rand(1.05,1.6);// a ball misses the plate, so you can read it
  S.swing=null;setPhase('windup');
  if(S.online&&S.online.inGame&&pitching())netWindup();
- if(pitching()&&S.auto){S.pitch.q=clamp(rand(.3,1.08),0,1)}
- else if(pitching()){S.pitch.q=null;S.meterT0=performance.now();const pz=.05+pt.ctl*.0006;$('rmP').style.left=$('rmP').style.right=`${(.5-pz)*100}%`;$('rmTxt').textContent='TAP TO RELEASE';$('relMeter').hidden=false}
+ if(pitching()&&!S.auto){S.pitch.q=null;S.meterT0=performance.now();const pz=.05+pt.ctl*.0006;$('rmP').style.left=$('rmP').style.right=`${(.5-pz)*100}%`;$('rmTxt').textContent='TAP TO RELEASE';$('relMeter').hidden=false}
 }
 const meterPos=now=>(Math.sin((now-S.meterT0)/1000*Math.PI*1.7-Math.PI/2)+1)/2;
 function releaseTap(){
@@ -4644,21 +4644,25 @@ function cpuDecide(){
  // sets it, which turned every auto swing into NaN timing (no bat animation, always a miss). Give those a quality from
  // the pitcher's control.
  const b=curBatter(),p=S.pitch,q=p.q!=null?p.q:clamp(.3+pitcher().ctl*.004+randn()*.15,0,1),arr=p.releaseAt+p.travel;if(p.hbp)return;
- let sw=p.inZone?.64+(b.con-50)*.004-(q>=1?.12:0):.2+((p.k==='SL'||p.k==='SP'||p.k==='KN'||p.k==='CB')?.18:0)-(b.con-50)*.003;
- if(S.strikes===2)sw+=.15;if(S.balls===3&&!p.inZone)sw-=.1;
+ let sw=p.inZone?.58+(b.con-50)*.004-(q>=1?.05:0):.3+((p.k==='SL'||p.k==='SP'||p.k==='KN'||p.k==='CB')?.1:0)-(b.con-50)*.003;
+ if(S.strikes===2)sw+=p.inZone?.2:.14;else if(S.balls+S.strikes===0)sw-=.08;if(S.balls===3&&S.strikes===0)sw-=.1;
  if(Math.random()>sw)return;
- const whiff=clamp(.1+{FB:0,SL:.12,CH:.08,SP:.45,KN:.22,CB:.16}[p.k]+q*.16+(p.mph-92)*.012-(b.con-50)*.004+(p.inZone?0:.2),.03,.9);
+ const whiff=clamp(.095+{FB:0,SL:.12,CH:.08,SP:.45,KN:.22,CB:.16}[p.k]+q*.1+(p.mph-92)*.012-(b.con-50)*.004+(p.inZone?0:.2),.03,.9);
  if(Math.random()<whiff){const at=arr+rand(-90,90);S.swing={at:at-60,err:at-arr,miss:true,cpu:true};return}
  const err=clamp(randn()*WIN*.36*(1.3-b.con/150)*(1+q*.6)*(p.inZone?1:1.5),-WIN*1.1,WIN*1.1);
  S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)};
 }
 function release(now){S.pitch.releaseAt=now;setPhase('pitch');const _rel=()=>{if(S.online&&S.online.inGame&&pitching())netRelease()};setTimeout(_rel,0);
  {const f=fldKey();S.pcOf[f]=(S.pcOf[f]||0)+1}
- if(pitching()){const p=S.pitch;if(p.q==null){p.q=.22;$('rmTxt').textContent='LATE RELEASE'}
-  p.inZone=p.q>=.3&&(p.k!=='SP'||Math.random()<(p.q>=1?.3:.15));// a splitter dives out of the zone 80% of the time
-const sg=Math.random()<.5?-1:1;p.plateX=p.inZone?(p.q>=1?sg*.65:rand(-.35,.35)):sg*rand(1.2,1.8);
+ if(pitching()&&!S.auto){const p=S.pitch;if(p.q==null){p.q=.22;$('rmTxt').textContent='LATE RELEASE'}
+  // where it ends up: a pitch on the corner is right on the black (some called strikes, some just off), a good one mostly
+  // catches the edge, one left over the plate is a strike but hittable, a missed spot is a ball (2025 MLB: ~48% in the zone)
+  const edge=p.q>=1||p.q>.55,inP=p.q>=1?.55:p.q>.55?.66:p.q>=.3?.95:0;
+  p.inZone=Math.random()<inP&&(p.k!=='SP'||Math.random()<(p.q>=1?.3:.15));// a splitter dives out of the zone 80% of the time
+  const sg=Math.random()<.5?-1:1;p.plateX=p.inZone?(edge?sg*rand(.5,.68):rand(-.35,.35)):edge&&p.q>=.3?sg*rand(.82,1.05):sg*rand(1.2,1.8);
   setTimeout(()=>{$('relMeter').hidden=true},700)}
- if(S.pitch.remote){}else S.pitch.wild=S.mode!=='bp'&&Math.random()<(.004+Math.max(0,(S.pcOf[fldKey()]||0)-25)*.0011+(S.pitch.q!=null&&S.pitch.q<.15?.12:0));
+ else if(pitching())$('relMeter').hidden=true;// AUTO switched on mid-windup
+ if(S.pitch.remote){}else S.pitch.wild=S.mode!=='bp'&&Math.random()<(.0032+clamp(((S.pcOf[fldKey()]||0)-60)/50,0,1)*.003+(pitching()&&!S.auto&&S.pitch.q<.15?.035:0));
  if(S.pitch.wild)S.wildUntil=now+1700;
  if(!onlineGame()&&(pitching()||(S.auto&&S.mode!=='bp')))cpuDecide();else if(S.auto&&S.mode==='bp'&&Math.random()<.85){const arr=S.pitch.releaseAt+S.pitch.travel,err=randn()*WIN*.3;S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)}}
  if(S.mode==='bp'&&BUF.bpthrow&&!muted)playSample('bpthrow',.8,.97+Math.random()*.06);// the machine's own thunk-and-whir
@@ -4692,7 +4696,8 @@ function swing0(){
  S.swing={at:now,err};
  if(S.pitch.k==='SP'){S.swing.miss=true;showTiming(err);sfx('whiff');return}
  if(Math.abs(err)<=WIN){
-  const bb=curBatter(),wp=Math.max(0,58-bb.con)*.006+(S.pitch.k==='SL'?.1:S.pitch.k==='CH'?.04:S.pitch.k==='KN'?.14:S.pitch.k==='CB'?.08:0);
+  // the further off the timing, the likelier the bat just misses it (a perfect swing still finds the ball)
+  const bb=curBatter(),wp=Math.max(0,58-bb.con)*.006+(S.pitch.k==='SL'?.1:S.pitch.k==='CH'?.04:S.pitch.k==='KN'?.14:S.pitch.k==='CB'?.08:0)+.3*Math.pow(Math.abs(err)/WIN,2);
   if(Math.random()<wp){S.swing.miss=true;showTiming(err);sfx('whiff');return}
   if(err<0)S.swing.contactAt=S.pitch.releaseAt+S.pitch.travel;else doContact()}
  else{S.swing.miss=true;showTiming(err);sfx('whiff')}
@@ -4841,7 +4846,8 @@ function applyDefense(){
  const T=TEAMS[fldKey()];S.fpl=POSCODE.map((c,i)=>i===0?pitcher():T.lineup.find(p=>p.pos===c));
  S.fpl.forEach((pl,i)=>{const b=BASEPOS[i],d=pl.def;POS[i]={...b,sp:b.sp*.92*(.88+d*.0025),re:b.re*(1.2-d*.004),reach:b.reach*(.9+d*.002)}});
 }
-const errChance=(i,base)=>base*(S.fpl?(1.6-S.fpl[i].def/100*1.2):1);
+// 2025 MLB: batters reached on an error in 0.56% of plate appearances (1,018 times), under 1% of balls in play
+const errChance=(i,base)=>base*.2*(S.fpl?(1.6-S.fpl[i].def/100*1.2):1);
 function keepIn(p){
  const r=Math.hypot(p.x,p.y);if(r<1)return p;const th=Math.atan2(p.x,p.y)/RAD;
  if(Math.abs(th)<=45&&p.y>0){const m=fenceDist(th)-(ST?ST.wallFt+3:11);if(r>m)return{x:p.x*m/r,y:p.y*m/r}}
@@ -4862,11 +4868,12 @@ function fpos0(play,i,t){
  for(let k=1;k<ks.length;k++)if(t<=ks[k].t){const a=ks[k-1],b=ks[k];const u=b.t>a.t?(t-a.t)/(b.t-a.t):1;return{x:lerp(a.x,b.x,u),y:lerp(a.y,b.y,u)}}
  return ks[ks.length-1];
 }
-function intercept(gfn,t0,t1,cands,extra){
- extra=extra||0;
+function intercept(gfn,t0,t1,cands,extra,rk){
+ extra=extra||0;rk=rk||1;
  for(let t=t0;t<=t1;t+=.04){
   const p=gfn(t);let best=null,bd=1e9;
-  for(const i of cands){const f=POS[i];const dd=dist(f,p);const need=f.re+extra+Math.max(0,dd-f.reach)/f.sp;if(need<=t&&dd<bd){bd=dd;best=i}}
+  for(const i of cands){const f=POS[i];const dd=dist(f,p);if(rk<1&&i<=5&&Math.hypot(p.x,p.y)>Math.hypot(f.x,f.y)+(i<2?6:14))continue;// once a grounder is past him, an infielder doesn't run it down
+  const need=f.re+extra+(rk<1&&i===0?.2:0)/* falling off the mound */+Math.max(0,dd-f.reach)/(f.sp*(i<=5?rk:1));if(need<=t&&dd<bd){bd=dd;best=i}}
   if(best!==null)return{i:best,t,p:{x:p.x,y:p.y}};
  }
  const p=gfn(t1);let bi=7,bd=1e9;for(const i of[6,7,8]){const dd=dist(POS[i],p);if(dd<bd){bd=dd;bi=i}}
@@ -4935,20 +4942,29 @@ function simulateContact(err,hand,b){
  // and drives it the other way (never shown on the timing bar)
  const sweet=S.pitch&&S.pitch.k==='CB'&&Math.abs(err-WIN*GOODK)<=WIN*.045;
  let q=q0;if(sweet)q=Math.max(q,.94);
- const EV=sweet?clamp(100+(b.pow-50)*.22+randn()*3,94,116):clamp(60+50*q+(b.pow-50)*.32+randn()*4,45,118);
+ // exit velocity and launch angle, shaped on 2025 MLB batted balls (avg ~89 mph, ~13 deg; 42% grounders, 24% liners):
+ // timing raises the exit velocity and tightens the angle, but even a perfect swing can be topped or got under
+ const pf=S.pitch&&(S.pitch.k==='SL'||S.pitch.k==='CB')?-2:0;
+ let EV=sweet?clamp(100+(b.pow-50)*.22+randn()*3,94,116):clamp(64.5+30*Math.pow(q,1.4)+(b.pow-50)*.25+pf+randn()*(11-5*q),40,118);
  let L;
+ const perf=Math.abs(err)<=WIN*PERFK;// right on the PERFECT mark: squared up, a line drive more often than not
  if(sweet)L=rand(19,31);
- else if(q>.78)L=rand(10,34);
- else if(q>.48)L=Math.random()<.5?rand(-12,12):rand(12,40);
- else L=Math.random()<.55?rand(-25,6):rand(40,70);
+ else if(perf)L=clamp(16+randn()*10,-20,55);
+ else L=clamp(14*q+randn()*(36-12*q*q),-50,75);// square contact lifts it on a line; mistimed contact is topped or got under
  L+=(b.pow-50)*.06;
+ // a barrel: hard and in the air at the right angle (2025 MLB ~8% of batted balls, most of the home runs). Better timing and
+ // more power barrel it more often; a swing right on the PERFECT mark doubles the chance
+ const bar=!sweet&&Math.random()<(.01+.12*Math.pow(q,4)*(.55+b.pow/110))*(perf?2:1);
+ if(bar){EV=Math.max(EV,clamp(99+(b.pow-50)*.2+randn()*4,95,117));L=rand(21,34)}
+ else if(perf){EV+=5}
  const pull=hand==='R'?-1:1;
  const tm=Math.min(1.25,Math.abs(err)/WIN);
  const s=pull*(Math.sign(-err)*Math.pow(tm,.75)*50+3)+randn()*6;
  const dir={x:Math.sin(s*RAD),y:Math.cos(s*RAD)};
  const P={err,q,EV,L,s};
  if(S.mode==='bp')return buildBP(P,dir,b);
- if(!sweet&&q<.62&&Math.random()<.3){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
+ // 2025 MLB: about half of all contact goes foul (18.1% of pitches foul, 17.5% in play); late or early contact fouls off more
+ if(!sweet&&Math.random()<.32+.38*(1-q)+(S.strikes===2?.06:0)){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
  if(Math.abs(s)>45)return buildFoul(P,dir);
  if(L<10)return buildGrounder(P,dir,b);
  return buildAir(P,dir,b);
@@ -5020,7 +5036,7 @@ function hitAdvance(runners,tp,Pp,delay,ex){
 function outfieldHit(play,it,P,runners,delay,errBy){
  // retrieval time: an outfielder who had to run it down, dig it off the wall or chase a carom in the corner needs longer to get rid of it
  const rp=Math.hypot(it.p.x,it.p.y),ath=Math.abs(Math.atan2(it.p.x,it.p.y)/RAD),gap=ath>12&&ath<34,corner=ath>=36;let ex;
- ex=it.i>=6?((dist(POS[it.i],it.p)>55?1.05:.3)+(rp>285?.75:0)+(rp>275&&gap?1.7:0)+(rp>265&&corner?1.9:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
+ ex=it.i>=6?((dist(POS[it.i],it.p)>40?1.3:.3)+(rp>275?.75:0)+(rp>205&&gap?1.7:0)+(rp>210&&corner?1.6:0)+(P.line?.9:0)):0;// a ball rolling to the wall in a gap or kicking around the corner takes a while to dig out: that's where triples come from
  hitAdvance(runners,it.t,it.p,delay,ex);
  /* instead of the outfielder standing over the ball for that extra time, the time goes into the chase: the ball keeps on
     its own roll past where he'd have cut it off, out to the wall (kicking back off it), and he runs it down at full speed,
@@ -5084,6 +5100,7 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  const dl=P.line||Math.abs(P.s)>=41?' down the line':'';
  return finalize(play,runners,{code,hit:true,outs:homeOut?1:0,banner:ban,tone:bd===4?'hr':'hit',sub:homeOut?`${sendHome.who.name} thrown out at the plate`:sendHome&&sendHome.closeHome?`${sendHome.who.name} slides in safe!`:undefined,desc:`${word} ${dl?dl.trim()+' in '+fieldName(P.s):'to '+fieldName(P.s)}${runsTxt(runs)}${homeOut?`, ${sendHome.who.name} out at home`:''}`});
 }
+let GB_RANGE=.4,OF_AIR=.8;
 function buildGrounder(P,dir,b){
  const C={x:0,y:2};
  const vf=.72*(1-Math.max(0,-P.L)/75);
@@ -5091,7 +5108,8 @@ function buildGrounder(P,dir,b){
  const gpos=t=>{const tt=Math.min(t,ts);const d=wallD(v0*tt-.5*A*tt*tt,dmax);return{x:C.x+dir.x*d,y:C.y+dir.y*d,h:Math.abs(Math.sin(t*8))*3*Math.max(0,1-t/ts)}};
  // a scorcher right down the line gets past the corner infielder most of the time and rattles into the corner
  const lineShot=!P.bunt&&Math.abs(P.s)>=40.5&&P.EV>=86&&Math.random()<.7;
- const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8].filter(i=>!(lineShot&&i===(P.s>0?2:4))),P.bunt?.35:0);
+ // an infielder's range on a grounder is a few steps and a dive, not a full sprint: hard ones get through (2025 MLB grounders hit ~.24)
+ const it=intercept(gpos,.12,ts+10,[0,1,2,3,4,5,6,7,8].filter(i=>!(lineShot&&i===(P.s>0?2:4))),P.bunt?.35:0,P.bunt?1:GB_RANGE+(1-GB_RANGE)*clamp((82-P.EV)/22,0,1));// a slow roller he charges at full speed
  if(lineShot)P.line=true;
  const play=newPlay();
  const gs=fnSeg(0,it.t,gpos);gs.snd=true;play.segs.push(gs);
@@ -5120,8 +5138,9 @@ function groundOut(play,it,P,runners){
   r1.dest=2;r1.out=true;r1.outAt=t2;outs++;
   play.segs.push(holdSeg(play,tf,tf+xf,i),throwSeg(tf+xf,fromF(play,i,tf+xf),BASES[2]));
   play.fk[cov2]=cover(cov2,BASES[2],t2);
-  const t1=t2+.35+dist(BASES[2],BASES[1])/THROW;
-  play.segs.push(fnSeg(t2,t2+.35,()=>({x:BASES[2].x,y:BASES[2].y,h:3})),throwSeg(t2+.35,BASES[2],BASES[1]));
+  const PV=.75;// the pivot: catch, clear the runner, throw (2025 MLB: 3,122 GIDP, 1.7% of plate appearances)
+  const t1=t2+PV+dist(BASES[2],BASES[1])/THROW;
+  play.segs.push(fnSeg(t2,t2+PV,()=>({x:BASES[2].x,y:BASES[2].y,h:3})),throwSeg(t2+PV,BASES[2],BASES[1]));
   if(!play.fk[cov1])play.fk[cov1]=cover(cov1,BASES[1],t1);
   batR.dest=1;
   if(t1<batArr1){batR.out=true;batR.outAt=t1;outs++;code='DP';note=`${i+1}-${cov2+1}-${cov1+1}`}
@@ -5134,7 +5153,7 @@ function groundOut(play,it,P,runners){
    t1=t0+.08+dist(from,BASES[1])/(POS[2].sp*.95);pushKey(play,2,{t:t0,x:from.x,y:from.y});pushKey(play,2,{t:t1,x:BASES[1].x,y:BASES[1].y});
    play.segs.push(holdSeg(play,tf,t1,2));note='3U';
   }else{
-   t1=tf+xf+dist(Pp,BASES[1])/THROW;
+   t1=tf+xf+dist(Pp,BASES[1])/(THROW*1.35);// an infielder's throw across the diamond is a hard one (2025 MLB: infield hits ~1.5% of PA)
    play.segs.push(holdSeg(play,tf,tf+xf,i),throwSeg(tf+xf,fromF(play,i,tf+xf),BASES[1]));
    if(!play.fk[cov1])play.fk[cov1]=cover(cov1,BASES[1],t1);
    note=`${i+1}-${cov1+1}`;
@@ -5186,8 +5205,9 @@ function clangFor(D,fd,s,T,hr){const as=Math.abs(s),dd=D-fd;
  if(dd>-14&&Math.random()<.3)return{t:T,k:'edge'};return null}
 function buildAir(P,dir,b){
  const C={x:0,y:2},Lr=P.L*RAD;
- let D=Math.max(30,Math.min(475,(P.EV-40)*5.9*(.82+b.pow*.0035)*Math.pow(Math.sin(2*Lr),P.L>45?1:.6)));
- {const need=b.pow>=85?.62:b.pow>=72?.7:.78;if(b.pow<60||P.q<need){const fdd=fenceDist(P.s);if(D>fdd-8)D=fdd-8-rand(0,22)}}
+ // carry peaks near 30 degrees and dies off above 40: a towering popup doesn't leave the park
+ let D=Math.max(30,Math.min(475,(P.EV-40)*5.9*(.82+b.pow*.0035)*Math.pow(Math.sin(2*Lr),P.L>45?1:.6)*(P.L>36?Math.max(.45,1-(P.L-36)*.025):1)));
+ {const need=b.pow>=85?.55:b.pow>=72?.62:b.pow>=55?.7:.8;if(b.pow<40||P.q<need){/* singles hitters still run into one now and then */const fdd=fenceDist(P.s);if(D>fdd-8)D=fdd-8-rand(0,22)}}
  const vy=P.EV*1.467*Math.sin(Lr);
  const T=Math.max(.7,vy/16*.82);
  const Hh=Math.max(8,vy*vy/64*.55);
@@ -5206,9 +5226,10 @@ function buildAir(P,dir,b){
    banner:runs===4?'GRAND SLAM!':'HOME RUN!',tone:'hr',sub:`${Math.round(D)} ft to ${fieldName(P.s)}`,desc:`Home run to ${fieldName(P.s)}, ${Math.round(D)} ft${runsTxt(runs)}`});
  }
  const cands=[2,3,4,5,6,7,8];if(D<60)cands.push(0);if(D<70)cands.push(1);
- let best=7,bn=1e9;for(const i of cands){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/f.sp;if(need<bn){bn=need;best=i}}
+ // OF_AIR: the jump and the route on a ball in the air (a straight-line sprint caught nearly every liner in the gaps)
+ let best=7,bn=1e9;for(const i of cands){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/(f.sp*(i>=6?OF_AIR:1));if(need<bn){bn=need;best=i}}
  // outfielders have priority: on anything hit past the infield dirt, an outfielder who can get there calls the infielder off
- if(best<6&&D>=128){let ob=-1,on=1e9;for(const i of[6,7,8]){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/f.sp;if(need<on){on=need;ob=i}}
+ if(best<6&&D>=128){let ob=-1,on=1e9;for(const i of[6,7,8]){const f=POS[i];const need=f.re+Math.max(0,dist(f,land)-f.reach)/(f.sp*OF_AIR);if(need<on){on=need;ob=i}}
   if(ob>=0&&on<=T+.02){best=ob;bn=on}}
  const drop=bn<=T+.05&&P.L<45&&Math.random()<errChance(best,bn>T-.12?.2:.05);// diving catches pop out of the glove far more often
  if(bn<=T+.05&&!drop){
@@ -5430,10 +5451,10 @@ function startGame(mode){S.gameNo=(S.gameNo||0)+1;tsFlush();unduckMusic();if(mod
  if(S.mode==='full'){
   S.totalInn=9;S.schedInn=9;S.target=0;S.oppLine=Array(9).fill(0);S.youLine=Array(9).fill(0);S.oppHits=0;
  }else{
-  S.totalInn=INNINGS;{const edge=(typeof teamStr==='function')?teamStr(S.opp)-teamStr(S.you):0;let k=1;{const W=[8,20,28,23,14,7];let u=Math.random()*100;while(k<6&&u>=W[k-1]){u-=W[k-1];k++}}// 1-6 runs, mostly 2-4
-   if(edge>3&&Math.random()<.4)k++;if(edge<-3&&Math.random()<.4)k--;S.target=clamp(k,1,6)}
+  S.totalInn=INNINGS;{const edge=(typeof teamStr==='function')?teamStr(S.opp)-teamStr(S.you):0;let k=0;{const W=[42,20,15,9,6,3,2,2,1];let u=Math.random()*100;while(k<8&&u>=W[k]){u-=W[k];k++}}// three innings of CPU-vs-CPU scoring (tests/balance.js): 0 most often, ~1.5 on average
+   if(edge>3&&Math.random()<.4)k++;if(edge<-3&&Math.random()<.4)k--;S.target=clamp(k,0,9)}
   const line=[0,0,0];for(let k=0;k<S.target;k++)line[Math.floor(Math.random()*3)]++;
-  S.oppLine=line;S.oppHits=S.target+2+Math.floor(Math.random()*4);S.youLine=[0,0,0];
+  S.oppLine=line;S.oppHits=S.target+1+Math.floor(Math.random()*4);S.youLine=[0,0,0];
  }
  $('log').innerHTML='';$('mk').hidden=true;$('tRead').textContent='Timing shows here after a swing';
  document.documentElement.style.setProperty('--team',TEAMS[S.you].jersey);

@@ -38,13 +38,15 @@
 - [ ] Version lock: both players must be on the same build
 
 ## Balance (audit, Nov 2026: 15k simulated swings, 13 full bot games)
-- [ ] Perfect timing should be the best timing: right now a perfect swing hits .51 with 47% outs, a slightly-off swing hits .60
-- [ ] Too many home runs, too few singles: ~15% of fair balls leave the park; perfect contact is a HR 37% of the time
-- [ ] Scoring runs high: bot games average ~8.5 runs a team (KBO ~5); finals like 13-7, 14-11, 15-1
+- [x] Perfect timing should be the best timing: a PERFECT swing now hits ~.46 with a home run 13% of the time (BALANCE.md)
+- [x] Too many home runs, too few singles: tuned to 2025 MLB (HR 3% of PA, 4.4% of balls in play); see BALANCE.md
+- [x] Scoring runs high: CPU teams now score ~4.5 a game (2025 MLB 4.45)
 - [ ] Watch mode takes 22-26 minutes for 9 innings
 - [ ] Playtest, 10 Nov: a full game you bat and pitch runs past 30 minutes; each home run trot is 18 s unless skipped
-- [ ] Playtest, 10 Nov: a careless release on the pitching meter throws a lot of wild pitches (9 in the first 3 innings)
-- [ ] Playtest, 10 Nov: a bot timing within ~25 ms hit 5 home runs in 6 innings; within ~30 ms won a 3-inning arcade game on 3 homers in 8 pitches
+- [x] Playtest, 10 Nov: a careless release on the pitching meter throws a lot of wild pitches: now ~0.25 a game (MLB 0.29), a careless release adds a small risk
+- [x] Playtest, 10 Nov: a bot timing within ~25 ms hit 5 home runs in 6 innings: an expert (25 ms) now homers in ~6% of PA
+- [x] Arcade targets vs the new scoring: the posted score now follows 3-inning game scoring (0 most often); casual ~51% wins, expert ~62%
+- [ ] At-bats are longer now (3.6 pitches vs 2.3), so games take longer: pair with "faster time between pitches"
 - [ ] Team + player rating pass with bot sims
 - [ ] Pitcher fatigue and bullpen use
 - [ ] Online timing window tuned for network delay
