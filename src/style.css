@@ -1017,3 +1017,7 @@ body:has(#over:not([hidden])) .app.deskApp>:is(.matchup,.meter,.acts,.pacts,.ski
 .stam.out{animation:stamOut 1s steps(2) infinite}.stam.out::after{content:"GASSED";position:absolute;right:0;top:-12px;font-size:8px;letter-spacing:.12em;color:#ff7a5c}
 @keyframes stamOut{50%{box-shadow:0 0 0 1px #ff5a3c}}
 @media (prefers-reduced-motion:reduce){.stam.out{animation:none;box-shadow:0 0 0 1px #ff5a3c}}
+/* phones: the ONLINE pill sat top-centre under the scorebug; make it a small tag tucked under the pause button */
+:is(.app:not(.deskApp),.app.phoneLand) .olNet{left:6px;top:42px;transform:none;font-size:8px;letter-spacing:.08em;gap:4px;padding:2px 5px;border-width:1px}
+:is(.app:not(.deskApp),.app.phoneLand) .olNet i{width:5px;height:5px;box-shadow:0 0 3px currentColor}
+.app.phoneLand .olNet{left:6px;top:42px}
