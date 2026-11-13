@@ -164,6 +164,7 @@ function pitchEnd(){
  }else if(!S.pitch.popped)sfx('pop');
  if(S.pitch.hbp&&!S.swing){const nb=[...S.bases];let runs=0;
   {const hp=pitchPos(S.pitch,S.pitch.travel*.97),sg=hp.x<0?-1:1;S.hbpFx={at:performance.now(),x0:hp.x,y0:hp.y,h0:Math.max(2.5,hp.h),dx:sg*rand(7,13),dy:rand(5,11),who:b,hand:effHand(b),T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5'}}
+  bbWalkStart(b,750);// he shakes it off first
   if(nb[0]){if(nb[1]){if(nb[2])runs++;nb[2]=nb[1]}nb[1]=nb[0]}nb[0]=b;S.bases=nb;addRuns(runs);S.steal=null;
   logPA(b,'Hit by pitch, HBP'+(runs?' · 1 run scores':''),!!runs);mlDone('HBP',runs);banner('HIT BY PITCH',runs?'Forces in a run':'Take your base','ball');
   noise(.07,'lowpass',380,.6);crowdReach();crowdSad();nextBatter();setPhase('call');updateHUD();return}
@@ -185,12 +186,21 @@ function strike(swinging,b,buntMiss){
 function ball(b){
  S.balls++;
  if(S.balls>=4){
-  const nb=[...S.bases];let runs=0;
+  const nb=[...S.bases];let runs=0;bbWalkStart(b,0);
   if(nb[0]){if(nb[1]){if(nb[2])runs++;nb[2]=nb[1]}nb[1]=nb[0]}nb[0]=b;
   S.bases=nb;addRuns(runs);
   logPA(b,'Walk, BB'+(runs?' · 1 run scores':''),!!runs);mlDone('BB',runs);
   banner('BALL FOUR',runs?'Bases-loaded walk forces in a run':'Take your base','ball');crowdReach();nextBatter();
  }else banner('BALL',`${S.balls}-${S.strikes}`,'ball');
 }
+// a walk, an intentional walk or a hit batsman: the batter drops his bat and jogs to first while every forced runner
+// moves up one base (a runner forced home crosses the plate and heads for the dugout); the next hitter walks up at the
+// same time. Drawn by the rig (28-bp-rig.js); the 'call' pause lasts until everyone is standing on his new base.
+const BB_JOG=1900;
+function bbWalkStart(b,delay){if(S.mode==='bp')return;const B=S.bases,mv=[{who:b,f:0,t:1,box:true,d:delay|0}];
+ if(B[0]){mv.push({who:B[0],f:1,t:2,d:0});if(B[1]){mv.push({who:B[1],f:2,t:3,d:0});if(B[2])mv.push({who:B[2],f:3,t:4,d:0})}}
+ // a runner who was leading off starts the jog from where he stands
+ for(const m of mv)if(!m.box){let L=0;try{L=clamp(leadNow(m.f,S.phase,performance.now())/LEG,0,.9)}catch(e){}m.L=L}
+ S.bbWalk={at:performance.now(),mv,hand:effHand(b),bat:b.bat,hold:(delay|0)+BB_JOG}}
 function nextBatter(){const f=fldKey(),b=batKey();S.pBFOf[f]=(S.pBFOf[f]||0)+1;S.orderOf[b]=((S.orderOf[b]||0)+1)%9;S.balls=0;S.strikes=0}
 

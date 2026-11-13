@@ -47,7 +47,7 @@ function syncPickBar(){const on=pitching()&&S.phase==='choose'&&!S.auto&&S.mode!
  $('pkBar').hidden=pkOff&&!ib}
 // ---------- intentional walk: the manager signals four wide and the batter takes first, no pitches thrown (as in MLB) ----------
 function canIBB(){return pitching()&&S.phase==='choose'&&!S.auto&&(S.mode==='full'||onlineGame())&&!!curBatter()}
-function runIBB(){const b=curBatter(),nb=[...S.bases];let runs=0;
+function runIBB(){const b=curBatter(),nb=[...S.bases];let runs=0;bbWalkStart(b,0);
  if(nb[0]){if(nb[1]){if(nb[2])runs++;nb[2]=nb[1]}nb[1]=nb[0]}nb[0]=b;S.bases=nb;addRuns(runs);S.steal=null;closePen();hideBanner();
  logPA(b,'Intentional walk, IBB'+(runs?' · 1 run scores':''),!!runs);mlDone('IBB',runs);
  banner('INTENTIONAL WALK',runs?'Forces in a run':`${b.name} takes first`,'ball');if(batKey()===S.you)crowdReach();

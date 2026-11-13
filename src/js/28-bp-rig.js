@@ -250,7 +250,24 @@ function render(now){
   }
  }else if(ph!=='title'){
   S.stealHit=[];S.runHit=[];
-  S.bases.forEach((b,k)=>{if(!b)return;const bb=BASES[k+1],nb=BASES[(k+2)%4],going=S.steal&&S.steal[k+1]&&ph==='pitch'&&S.pitch&&S.pitch.releaseAt;
+  // a walk in progress: the batter and the forced runners jog to their new bases
+  const W=S.bbWalk&&ph!=='title'?S.bbWalk:null,wjog=new Set();
+  if(W){let live=false;const sdD=batKey()===S.you?1:-1;
+   for(const m of W.mv){const u=(now-W.at-m.d)/BB_JOG;
+    if(m.t<4&&u<1)wjog.add(m.who);
+    const a0=BASES[m.f],a1=BASES[m.t%4],from=m.box?{x:W.hand==='R'?-3.2:3.2,y:0}:{x:lerp(a0.x,a1.x,m.L||0),y:lerp(a0.y,a1.y,m.L||0)},ox0=m.box||m.L>0?0:7;
+    if(u<0){live=true;if(!m.box){const q=toPx(from.x,from.y);add(q.y,()=>drawPlayer(wg,q.x+ox0,q.y,bat,{legs:'stand',arms:'down',skin:runSkin(m.who),helmet:true,pants:batPants}))}continue}// (the hit batsman is drawn by his wince until then)
+    // ease in, jog, ease out (speed 1/.88 through the middle)
+    const k=clamp(u,0,1),sp=1/.88,e=k<.12?sp*k*k/.24:k>.88?1-sp*(1-k)*(1-k)/.24:sp*.06+sp*(k-.12),to=a1;
+    let px=toPx(lerp(from.x,to.x,e),lerp(from.y,to.y,e)),ox=lerp(ox0,m.t===4?0:7,e),running=k<1,fl=to.x<from.x;
+    if(m.t===4&&u>=1){// across the plate and off toward the dugout
+     const v=(u-1)*BB_JOG/1500;if(v>=1)continue;const D=toPx(sdD*84,14),P0=toPx(0,0),ev=ease(clamp(v,0,1));px={x:lerp(P0.x,D.x,ev),y:lerp(P0.y,D.y,ev)};ox=0;running=true;fl=D.x<P0.x}
+    else if(u>=1)continue;
+    live=true;const q=px;add(q.y,()=>drawPlayer(wg,q.x+ox,q.y,bat,{legs:running?'run':'stand',arms:running?'run':'down',frame:Math.floor(now/150)+(hash(m.who.name)&3),skin:runSkin(m.who),helmet:true,pants:batPants,flip:fl}))}
+   // the dropped bat lies by the plate until the next hitter is in the box
+   {const u=(now-W.at)/(W.hold+400);if(u<1){const st=toPx(W.hand==='R'?-6:6,3);add(st.y-1,()=>{wg.globalAlpha=u>.8?(1-u)*5:1;drawBatFree(wg,st.x,st.y,(W.hand==='R'?-20:200)*RAD,W.bat||'#d9b07a',1);wg.globalAlpha=1})}else if(!live)S.bbWalk=null}
+  }
+  S.bases.forEach((b,k)=>{if(!b||wjog.has(b))return;const bb=BASES[k+1],nb=BASES[(k+2)%4],going=S.steal&&S.steal[k+1]&&ph==='pitch'&&S.pitch&&S.pitch.releaseAt;
    let Lf=leadNow(k+1,ph,now)/LEG;if(going){const sp=stealProg(k+1,now);Lf=Math.min(.97,sp.L+sp.run)}
    const q=toPx(lerp(bb.x,nb.x,Lf),lerp(bb.y,nb.y,Lf));
    if(canSteal(k+1)&&['ready','windup','choose'].includes(ph)){const on=S.steal&&S.steal[k+1],dx=nb.x-bb.x,dy=nb.y-bb.y,dl=Math.hypot(dx,dy),ux=dx/dl,uy=dy/dl,ap=toPx(q&&lerp(bb.x,nb.x,Lf)+ux*7,lerp(bb.y,nb.y,Lf)+uy*7);

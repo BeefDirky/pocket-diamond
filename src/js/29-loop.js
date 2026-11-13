@@ -49,7 +49,7 @@ function update(dt,now){/* lead-off clock: starts from the bag each time the run
    if(S.play.t>=S.play.end){S.play.t=S.play.end;finishPlay()}break}
   case'result':if(S.pt>(S.mode==='bp'?420:1450)){hideBanner();setPhase('reset');setCam('pitch')}break;
   case'reset':if(S.pt>(S.mode==='bp'?200:540)&&!(S.mode==='bp'&&bpBallLive(now))){S.play=null;afterPA()}break;
-  case'call':if(S.pt>(S.koWalk&&now-S.koWalk.at<1800?1750:850))afterPA();break;
+  case'call':if(S.pt>(S.bbWalk&&now-S.bbWalk.at<S.bbWalk.hold?S.bbWalk.hold+60:S.koWalk&&now-S.koWalk.at<1800?1750:850))afterPA();break;
   case'inning':if(S.pt>1900){hideBanner();$('tag').hidden=true;setPhase('ready');updateHUD()}break;
  }
 }
