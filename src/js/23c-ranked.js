@@ -68,6 +68,7 @@ function rkStop(){clearInterval(RK.pingT);clearTimeout(RK.pollT);clearTimeout(RK
 // the final screen's ranked line
 function rkShow(t,tone){const el=$('rkRes');el.hidden=!t;el.textContent=t||'';el.dataset.tone=tone||''}
 function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=null?info.rating_after-info.rating_before:null;
+ if(['final','forfeit','disputed','abandoned'].includes(info.status)&&rkResult.sent!==info.match_id){rkResult.sent=info.match_id;track('ranked_result',{status:info.status,won:info.winner_side===info.me,rating_after:info.rating_after,dispute:info.dispute||undefined})}
  if(info.status==='final'||info.status==='forfeit'){const won=info.winner_side===info.me;
   rkShow(`RANKED ${won?'WIN':'LOSS'}${info.status==='forfeit'?' (FORFEIT)':''} · RATING ${info.rating_after!=null?info.rating_after:'?'}${d!=null?` (${d>=0?'+':''}${d})`:''}`,won?'win':'loss');return true}
  if(info.status==='disputed'){rkShow(`NOT COUNTED · ${info.dispute||'the two phones did not agree'}`,'bad');return true}
@@ -104,7 +105,7 @@ function rkClaimLoop(o){clearTimeout(RK.claimT);const t0=Date.now();
 const Q={on:false,t0:0,tick:0,gen:0};
 const fmtClock=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 function qSay(status,info){$('qStatus').textContent=status;if(info!=null)$('qInfo').textContent=info}
-async function qStart(){const gen=++Q.gen;Q.on=true;Q.t0=Date.now();qSay('FINDING AN OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
+async function qStart(){const gen=++Q.gen;Q.on=true;Q.t0=Date.now();track('queue_joined',{club:S.you});qSay('FINDING AN OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
  showScreen('scrQueue');clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000)},250);$('qTime').textContent='0:00';
  rpc('my_rating').then(r=>{if(Q.gen===gen&&r)$('qRate').textContent=`YOUR RATING ${r.rating}${r.games?` · ${r.wins}-${r.losses}`:''}`}).catch(()=>{});
  try{let r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});
@@ -114,10 +115,10 @@ async function qStart(){const gen=++Q.gen;Q.on=true;Q.t0=Date.now();qSay('FINDIN
    await new Promise(res=>setTimeout(res,2000));if(!Q.on||Q.gen!==gen)return;r=await rpc('queue_poll')}}
  catch(e){if(Q.gen!==gen)return;Q.on=false;clearInterval(Q.tick);qSay('COULDN\u2019T JOIN THE QUEUE',rkErr(e))}}
 function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick)}
-$('qCancel').addEventListener('click',()=>{const was=Q.on;qStop();if(was)rpc('queue_leave').catch(()=>{});
+$('qCancel').addEventListener('click',()=>{const was=Q.on;if(was)track('queue_cancelled',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});qStop();if(was)rpc('queue_leave').catch(()=>{});
  const o=S.online;if(o&&o.queued){if(o.nr)o.nr.leave().catch(()=>{});S.online=null}mpOpen()});
 // paired: meet the opponent in the match's room
-async function qMatched(info,gen){Q.on=false;const opp=info.me==='home'?info.away_name:info.home_name,mine=info.me==='home'?info.home_club:info.away_club;
+async function qMatched(info,gen){Q.on=false;track('queue_matched',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});const opp=info.me==='home'?info.away_name:info.home_name,mine=info.me==='home'?info.home_club:info.away_club;
  qSay(`OPPONENT FOUND: ${String(opp||'?').toUpperCase()}`,`You play as ${TEAMS[mine]?TEAMS[mine].city+' '+TEAMS[mine].name:mine} · connecting…`);
  S.online={mine:{},opp:null,mode:'ranked'};
  await joinRoom('rk-'+info.match_id,info.me==='home'?'host':'guest');

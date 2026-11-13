@@ -30,7 +30,7 @@ addEventListener('keydown',e=>{
  else if((e.key==='w'||e.key==='W')&&!e.repeat)doPickoff(2)
  else if((e.key==='i'||e.key==='I')&&!e.repeat)doIBB()
 });
-const toTitle=()=>{S.series=null;rkStop();if(S.online&&S.online.inGame)resumeClear();$('clkS').hidden=true;unduckMusic();S.celebr=null;restoreNetRosters();if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
+const toTitle=()=>{phGameLeft('menu');S.series=null;rkStop();if(S.online&&S.online.inGame)resumeClear();$('clkS').hidden=true;unduckMusic();S.celebr=null;restoreNetRosters();if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
 let pendingMode=null;
 const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTING PRACTICE',playoffs:'PLAYOFFS',watch:'WATCH A GAME'};
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}
@@ -76,12 +76,12 @@ const zoomBy=d=>{const lo=zFit()/(isWide()?W*VA/820:CAM_PITCH.z);S.zoom=clamp(S.
 $('zIn').addEventListener('click',()=>zoomBy(1));$('zOut').addEventListener('click',()=>zoomBy(-1));
 cv.addEventListener('wheel',e=>{if(overlayOpen())return;e.preventDefault();zoomBy(e.deltaY<0?1:-1)},{passive:false});
 const syncAuto=()=>{const on=!!S.auto;$('autoBtn').setAttribute('aria-pressed',String(on));$('autoBtn').innerHTML=`AUTO <b>${on?'ON':'OFF'}</b>`;document.body.classList.toggle('autoOn',on);if(on&&S.phase==='choose'&&pitching()){hideBanner();startWindup()}if(on&&S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null){S.pitch.q=clamp(rand(.3,1.08),0,1);$('relMeter').hidden=true}};
-$('autoBtn').addEventListener('click',e=>{e.stopPropagation();if(onlineGame())return;S.auto=!S.auto;syncAuto()});$('autoBtn').addEventListener('pointerdown',e=>e.stopPropagation());
+$('autoBtn').addEventListener('click',e=>{e.stopPropagation();if(onlineGame())return;S.auto=!S.auto;syncAuto();track('auto_toggled',{on:S.auto,side:pitching()?'pitch':'bat',inning:S.inning})});$('autoBtn').addEventListener('pointerdown',e=>e.stopPropagation());
 const syncInfo=()=>{const on=OPT.info!==false;$('infoBtn').setAttribute('aria-pressed',String(on));$('infoBtn').innerHTML=`INFO <b>${on?'ON':'OFF'}</b>`};
 $('infoBtn').addEventListener('click',e=>{e.stopPropagation();OPT.info=OPT.info===false;saveOpts();syncInfo();if(OPT.info===false)hideBanner()});
 $('infoBtn').addEventListener('pointerdown',e=>e.stopPropagation());syncInfo();
 // skipping the home-run trot: online, only the hitter's side may skip, and it tells the other phone so both move on together
-function skipTrot(){if(!(S.phase==='play'&&S.play&&S.play.hrFired))return;if(S.online&&S.online.inGame){if(pitching())return;netPresence({sk:S.pitch&&S.pitch.pid})}S.play.t=S.play.end}
+function skipTrot(){if(!(S.phase==='play'&&S.play&&S.play.hrFired))return;track('hr_trot_skipped');if(S.online&&S.online.inGame){if(pitching())return;netPresence({sk:S.pitch&&S.pitch.pid})}S.play.t=S.play.end}
 $('skipBtn').addEventListener('click',skipTrot);
 $('snd').addEventListener('click',()=>{muted=!muted;ensureAudio();applyVolumes();$('snd').textContent=muted?'Sound off':'Sound on';$('snd').setAttribute('aria-pressed',String(!muted))});
 

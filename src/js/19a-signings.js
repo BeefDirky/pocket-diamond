@@ -12,7 +12,7 @@ function slotOf(T,orig,pit){const arr=pit?T.staff:T.lineup;return arr.findIndex(
 function signPlayer(k,origName,cardId,pit,save){const T=TEAMS[k],arr=pit?T.staff:T.lineup,orig=(pit?T.orig.P:T.orig.L).find(p=>p.name===origName),c=CARD_BY[cardId];
  if(!orig||!c||c.pit!==pit)return false;const i=slotOf(T,orig,pit);if(i<0)return false;
  const q=signClone(c,orig);q.signedFor=orig.name;if(arr[i].custom){T.benched=q}else arr[i]=q;
- if(save!==false){(SIGN[k]=SIGN[k]||{})[(pit?'P:':'L:')+origName]=cardId;saveSign()}return true}
+ if(save!==false){(SIGN[k]=SIGN[k]||{})[(pit?'P:':'L:')+origName]=cardId;saveSign();track('card_signed',{card_set:c.set,rarity:c.r,club:k,pitcher:!!pit})}return true}
 function releasePlayer(k,origName,pit){const T=TEAMS[k],arr=pit?T.staff:T.lineup,orig=(pit?T.orig.P:T.orig.L).find(p=>p.name===origName);if(!orig)return;
  const i=slotOf(T,orig,pit);if(i>=0){if(arr[i].custom)T.benched=orig;else arr[i]=orig}
  if(SIGN[k]){delete SIGN[k][(pit?'P:':'L:')+origName];saveSign()}}

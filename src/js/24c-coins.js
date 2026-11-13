@@ -9,7 +9,7 @@ const saveWal=()=>{try{localStorage.setItem('pd-wallet',JSON.stringify(WAL))}cat
 const coinFmt=n=>n.toLocaleString('en-US');
 const coinMode=()=>S.mode==='full'?'full':S.mode==='arcade'?'arcade':null;
 function coinUI(){const el=$('coinBal');if(el)el.querySelector('b').textContent=coinFmt(WAL.coins)}
-function coinAdd(n,why){if(!(n>0))return;WAL.coins+=n;WAL.earned+=n;saveWal();coinUI();S.coinGame=S.coinGame||{};S.coinGame[why]=(S.coinGame[why]||0)+n}
+function coinAdd(n,why){if(!(n>0))return;track('coins_earned',{amount:n,why,mode:S.mode});WAL.coins+=n;WAL.earned+=n;saveWal();coinUI();S.coinGame=S.coinGame||{};S.coinGame[why]=(S.coinGame[why]||0)+n}
 function coinPop(txt){const el=$('coinPop');if(!el)return;el.textContent=txt;el.hidden=false;el.classList.remove('go');void el.offsetWidth;el.classList.add('go');
  clearTimeout(coinPop.t);coinPop.t=setTimeout(()=>{el.hidden=true},1700)}
 function coinHR(){const m=coinMode();if(!m||S.auto)return;const n=COIN.hr[m];coinAdd(n,'hr');coinPop(`+${n} COINS`)}

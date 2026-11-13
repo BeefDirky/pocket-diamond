@@ -152,7 +152,7 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
  if(S.online&&S.online.nr)try{await S.online.nr.leave()}catch(e){}
  if(joinRoom.busy)return;joinRoom.busy=true;note('Connecting…');
  let nr;try{nr=await ROOM.join('pd-'+code)}catch(e){joinRoom.busy=false;note('Could not reach the room ('+(e&&e.code||'error')+'). Check your connection and try again.');return}
- joinRoom.busy=false;note(role==='host'?'Room open. Send your friend the code.':'Joined room '+code.toUpperCase()+'.');
+ joinRoom.busy=false;if(!resume&&!/^rk-/.test(code))track(role==='host'?'room_created':'room_joined');note(role==='host'?'Room open. Send your friend the code.':'Joined room '+code.toUpperCase()+'.');
  const md=(S.online&&S.online.mode)||'custom';// Ranked or Custom 1v1, as picked on the Multiplayer page
  const o=S.online={code,role,me:role==='host'?'home':'away',nr,mine:{},opp:null,inGame:false,mode:md};
  if(resume){o.gid=resume.gid;o.resume=resume}
@@ -168,10 +168,10 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
   if(o.queued&&role==='host'&&o.opp&&!o.inGame&&!o.qStarted)qStartGame(o);
   if(o.opp&&role==='guest'&&o.opp.rkm&&!o.inGame&&o.rkJoining!==o.opp.rkm&&rkReady())rkGuestJoin(o,o.opp.rkm);
   if(o.opp&&role==='guest'&&o.opp.start&&o.opp.start.gid!==o.gid&&!o.inGame&&rkStartOK(o,o.opp.start))startOnline(o.opp.start);
-  if(o.inGame&&prev&&!o.opp&&!o.lostAt){o.lostAt=Date.now();o.lostBan=true;$('bt').textContent='CONNECTION LOST';$('bs').textContent='Waiting for your opponent to come back…';$('banner').dataset.tone='';$('banner').hidden=false;
+  if(o.inGame&&prev&&!o.opp&&!o.lostAt){o.lostAt=Date.now();track('connection_lost',{phase:S.phase,inning:S.inning,ranked:!!o.ranked});o.lostBan=true;$('bt').textContent='CONNECTION LOST';$('bs').textContent='Waiting for your opponent to come back…';$('banner').dataset.tone='';$('banner').hidden=false;
    clearTimeout(o.lostT);o.lostT=setTimeout(()=>{if(S.online!==o||o.opp||!o.inGame)return;if(rkOppGone(o))return;banner('OPPONENT LEFT','They did not come back. Back to the room.');o.inGame=false;setTimeout(()=>{if(S.online!==o||o.inGame)return;toTitle();openOnline()},2500)},45000)}
   if(o.inGame&&o.opp){if(o.opp.ing===o.gid)o.sawIng=true;else if(o.sawIng){o.sawIng=false;clearTimeout(o.lostT);o.lostAt=0;o.lostBan=false;if(rkOppGone(o))return;banner('OPPONENT LEFT','They quit the game. Back to the room.');o.inGame=false;setTimeout(()=>{if(S.online!==o||o.inGame)return;toTitle();openOnline()},2500)}}
-  if(o.inGame&&o.opp&&o.lostAt){o.lostAt=0;clearTimeout(o.lostT);if(o.lostBan){o.lostBan=false;hideBanner()}}
+  if(o.inGame&&o.opp&&o.lostAt){track('connection_recovered',{seconds:Math.round((Date.now()-o.lostAt)/1000),ranked:!!o.ranked});o.lostAt=0;clearTimeout(o.lostT);if(o.lostBan){o.lostBan=false;hideBanner()}}
   if(!o.opp&&prev&&!o.inGame&&o.mine.rdy)netPresence({rdy:null});
   lobbyRender();if(!o.inGame)nextRender()});
  netPresence({v:1,role,team:S.you,ros:rosterSpec(S.you),rdy:null,acct:rkReady()?ACC.name:null,...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}

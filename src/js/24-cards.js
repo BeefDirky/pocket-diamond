@@ -81,6 +81,7 @@ function openPack(set,paid){set=set||'fa';
  if(!paid)COL.packs--;const got=[];for(let i=0;i<5;i++)got.push(rollCard(i===4&&!got.some(c=>c.r>=1)?1:0,set));
  got.sort((a,b)=>a.r-b.r);
  const fresh=got.map(c=>{const n=!COL.owned[c.id];COL.owned[c.id]=(COL.owned[c.id]|0)+1;return n});saveCol();
+ track('pack_opened',{set,paid:!!paid,rarities:got.map(c=>c.r),new_cards:fresh.filter(Boolean).length});
  const pk=$(set==='bl'?'shopCvB':'shopCvK');if(pk)pk.classList.add('shake');sfx('woosh');updatePackBadge();
  setTimeout(()=>{if(pk)pk.classList.remove('shake');
   $('rvTitle').textContent=got.some(c=>c.r===3)?'LEGEND PULL!':got.some(c=>c.r===2)?'EPIC PULL!':'PACK OPENED';

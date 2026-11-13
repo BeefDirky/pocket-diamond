@@ -104,3 +104,19 @@ At about 40 plate appearances per 9 innings and a 20% sample, that's about 8 eve
    - ranked pitch detail from the Postgres warehouse link.
 6. **Economy:** coins in vs spent, packs per player, level-ups.
 7. **Multiplayer:** rooms per day, connection loss, dispute rate.
+
+## Wired up (13 Nov, `src/js/23d-analytics.js`)
+
+Sent once `posthog_key` is in `tools/config.json` (website build only):
+- `$pageview`, `$pageleave`
+- `screen_viewed`
+- `account_created`, `signed_in`, `username_set`
+- `game_started`, `game_ended`, `game_abandoned` (reason `menu` or `closed`), `practice_started`
+- `pa_ended` (sampled)
+- `coins_earned`, `pack_bought`, `pack_opened`, `card_levelled`, `card_signed`
+- `room_created`, `room_joined`, `queue_joined`, `queue_matched`, `queue_cancelled`
+- `connection_lost`, `connection_recovered`, `ranked_result`
+- `auto_toggled`, `hr_trot_skipped`
+- `$exception`
+
+Options → "Share gameplay stats" turns it off.

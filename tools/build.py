@@ -45,6 +45,8 @@ def build_web(js, cfg):
     js = js.replace(old2, "if(k==='amb'&&!ambSrc)ambSrc=loopOn('amb',BUS.amb)},()=>{})).catch(()=>{})}}")
     assert js.count('__SUPA_URL__') == 1 and js.count('__SUPA_KEY__') == 1
     js = js.replace('__SUPA_URL__', cfg['supabase_url']).replace('__SUPA_KEY__', cfg['supabase_key'])
+    # analytics (website only): PostHog project key and host; the claude.ai build keeps the placeholders, so it sends nothing
+    js = js.replace('__PH_KEY__', cfg.get('posthog_key', '')).replace('__PH_HOST__', cfg.get('posthog_host', 'https://us.i.posthog.com'))
     html = rd('tools/web-head.html') + page(js)
     html += '<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>\n</body></html>\n'
     return html, keys

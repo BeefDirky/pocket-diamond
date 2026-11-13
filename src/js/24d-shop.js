@@ -12,7 +12,7 @@ const lvN=id=>Object.values(lvOf(id)).reduce((a,b)=>a+(b|0),0);
 function cardEff(c,lv){lv=lv||lvOf(c.id);const b=c.b||c.p,o={};for(const k in b){if(b[k]==null)continue;o[k]=Math.min(99,b[k]+(lv[k]|0))}return o}
 // spend one duplicate on +1 to a rating
 function levelUp(id,key){const c=CARD_BY[id],own=COL.owned[id]|0;if(!c||own<2)return false;const b=(c.b||c.p)[key];if(b==null)return false;
- const lv=COL.lv[id]=COL.lv[id]||{};if(b+(lv[key]|0)>=99)return false;lv[key]=(lv[key]|0)+1;COL.owned[id]=own-1;saveCol();applyLevels();return true}
+ const lv=COL.lv[id]=COL.lv[id]||{};if(b+(lv[key]|0)>=99)return false;lv[key]=(lv[key]|0)+1;COL.owned[id]=own-1;saveCol();track('card_levelled',{card_set:c.set,rarity:c.r,stat:key,level:lvN(id)});applyLevels();return true}
 // the club's own players take their card's levels in place (only for your club; everyone else plays at their base ratings)
 function applyLevels(){if(!CARDS.length)return;const you=S.you;
  // signed players carry their levels with them
@@ -37,7 +37,7 @@ function shopMsg(t){$('shopMsg').textContent=t;clearTimeout(shopMsg.t);shopMsg.t
 function shopOpen(from){$('shopBack').dataset.go=from||'scrMain';shopRender();showScreen('scrShop')}
 function invOpen(from){$('invBack').dataset.go=from||'scrMain';showScreen('scrCards')}
 for(const b of document.querySelectorAll('.shopBuy'))b.addEventListener('click',()=>{ensureAudio();const cost=PACK_COST[b.dataset.set];if(WAL.coins<cost){shopMsg(`You need ${coinFmt(cost-WAL.coins)} more coins.`);return}
- WAL.coins-=cost;saveWal();coinUI();shopRender();shopMsg(`Bought a ${b.dataset.set==='bl'?'Big League':'Free Agent'} pack for ${coinFmt(cost)} coins.`);openPack(b.dataset.set,true)});
+ WAL.coins-=cost;saveWal();track('pack_bought',{set:b.dataset.set,cost,balance_after:WAL.coins});coinUI();shopRender();shopMsg(`Bought a ${b.dataset.set==='bl'?'Big League':'Free Agent'} pack for ${coinFmt(cost)} coins.`);openPack(b.dataset.set,true)});
 $('shopOpenOwn').addEventListener('click',()=>{ensureAudio();openPack('fa',false);shopRender()});
 $('shopToInv').addEventListener('click',()=>invOpen('scrShop'));
 $('goShop').addEventListener('click',()=>{ensureAudio();shopOpen('scrMain')});

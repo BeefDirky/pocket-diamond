@@ -54,13 +54,13 @@ async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=a
   if(kind==='forgot'){const {error}=await c.auth.resetPasswordForEmail(email,{redirectTo:back});if(error)throw error;ACC.msg='Check your email for a link to set a new password.'}
   else if(kind==='up'){const un=$('acUser').value.trim(),bad=nameBad(un);if(bad)throw{message:bad};
    const free=await nameFree(un);if(free===false)throw{message:`${un} is taken. Try another username.`};
-   const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:back,data:{username:un}}});if(error)throw error;
+   const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:back,data:{username:un}}});if(error)throw error;track('account_created');
    ACC.msg=data.session?'':'Almost there: open the confirmation link we just emailed you, then sign in.'}
   else{const {error}=await c.auth.signInWithPassword({email,password});if(error)throw error;ACC.msg=''}
  }catch(e){ACC.msg=(e&&e.message)||'Something went wrong. Try again.'}
  ACC.busy=false;acRender()}
 async function accWatch(){if(!supaOK())return;const c=await supaClient();
- c.auth.onAuthStateChange((ev,session)=>{const u=session&&session.user||null,was=ACC.user&&ACC.user.id;ACC.user=u;
+ c.auth.onAuthStateChange((ev,session)=>{const u=session&&session.user||null,was=ACC.user&&ACC.user.id;ACC.user=u;if((u&&u.id)!==was){phIdent();if(ev==='SIGNED_IN'&&u)track('signed_in')}
   if(ev==='PASSWORD_RECOVERY'){const np=prompt('Choose a new password (6+ characters):');if(np&&np.length>=6)c.auth.updateUser({password:np}).then(({error})=>{ACC.msg=error?error.message:'Password updated.';acRender()})}
   if(u&&u.id!==was){accSync().catch(()=>{});accProfile().catch(()=>{})}if(!u){ACC.state='out';ACC.name='';ACC.pick=false}acRender()})}
 $('acSignIn').addEventListener('click',()=>acDo('in'));$('acSignUp').addEventListener('click',()=>acDo('up'));$('acForgot').addEventListener('click',()=>acDo('forgot'));
@@ -83,7 +83,7 @@ const noProfiles=e=>/profiles|relation|schema cache/i.test((e&&e.message)||'');
 async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.from('profiles').select('user_id').eq('uname_lc',n.toLowerCase()).limit(1);if(error)return null;
  return!data.length||!!(ACC.user&&data[0].user_id===ACC.user.id)}catch(e){return null}}
 async function nameClaim(n){const c=await supaClient(),{error}=await c.from('profiles').upsert({user_id:ACC.user.id,username:n});
- if(!error){ACC.name=n;const m=accMeta();m.name=n;accSetMeta(m);return''}
+ if(!error){track('username_set',{first:!ACC.name});ACC.name=n;const m=accMeta();m.name=n;accSetMeta(m);return''}
  if(error.code==='23505'||/duplicate|unique/i.test(error.message||''))return`${n} is taken. Try another username.`;
  if(noProfiles(error))return'Usernames are not set up on the server yet.';return error.message||'Could not save your username. Try again.'}
 // after sign-in: load the username; a new account claims the one it signed up with, or picks one

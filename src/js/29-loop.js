@@ -58,7 +58,7 @@ function updateRelMeter(now){if(S.phase==='windup'&&pitching()&&S.pitch){const m
 /* error guard: the next frame is booked first and each stage runs on its own, so one bad frame can't stop the game for good;
    a stage that keeps throwing is reported once in the console, and a play that keeps throwing is ended so the game moves on */
 let frameErrs=0,lastErrMsg='';
-function guard(name,fn){try{fn();if(name==='update')frameErrs=0}catch(e){const m=name+': '+(e&&e.message);if(m!==lastErrMsg){lastErrMsg=m;console.error('[Pocket Diamond] '+m,e)}
+function guard(name,fn){try{fn();if(name==='update')frameErrs=0}catch(e){phError(name,e);const m=name+': '+(e&&e.message);if(m!==lastErrMsg){lastErrMsg=m;console.error('[Pocket Diamond] '+m,e)}
  if(name==='update'&&++frameErrs>30&&(S.phase==='play'||S.phase==='result')){frameErrs=0;try{hideBanner();setPhase('reset');setCam('pitch')}catch(_){}}}}
 /* batting practice: the machine waits until the last ball hit has stopped and the ball cam has had its look at it */
 const BP_CAM_HOLD=900;
