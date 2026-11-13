@@ -18,3 +18,5 @@ G=$($P -tA -d pd_test -c "select games from public.ratings where user_id='333333
 [ "$G" = "1" ] && echo "ok  8 simultaneous finalize calls counted once" || { echo "FAIL: race counted $G times"; exit 1; }
 # migration 002: the ranked flow, on real game records
 $P -tA -d pd_test -f supabase/tests/ranked_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"
+# migration 003: the queue and the flat rating
+$P -tA -d pd_test -f supabase/tests/queue_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"

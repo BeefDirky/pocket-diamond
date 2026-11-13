@@ -147,7 +147,8 @@ function nextRender(){const o=S.online,se=o&&o.series,b=$('olNext');if(!se||se.b
  $('olSeries').textContent=`${se.tally||''} · ${meR&&thR?'Both ready. Starting…':meR?'Waiting for opponent…':thR?'Opponent is ready.':'Press Ready for the next game.'}`;readyCheck()}
 async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.textContent=t;n.style.color='var(--amber)';n.scrollIntoView({block:'nearest'})};
  if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on play.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
- code=code.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4);if(code.length<4){note('Room codes are 4 letters.');return}
+ // (a ranked match from the queue meets in a room named after its match id; friends use 4-letter codes)
+ if(!/^rk-[0-9a-f-]{36}$/.test(code)){code=code.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4);if(code.length<4){note('Room codes are 4 letters.');return}}
  if(S.online&&S.online.nr)try{await S.online.nr.leave()}catch(e){}
  if(joinRoom.busy)return;joinRoom.busy=true;note('Connecting…');
  let nr;try{nr=await ROOM.join('pd-'+code)}catch(e){joinRoom.busy=false;note('Could not reach the room ('+(e&&e.code||'error')+'). Check your connection and try again.');return}
@@ -164,6 +165,7 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
    if(o.opp.ing===R0.gid){// they're still in the game: put it back together from whichever snapshot is newer
     startOnline(R0.start);const z=o.opp.sz&&o.opp.sz.gid===R0.gid&&o.opp.sz.t>R0.t?o.opp.sz.z:R0.z;applySnap(z);o.n=1000+(Date.now()%9000);setPhase('ready');S.pt=0;updateHUD();banner('RECONNECTED','Back in the game.')}
    else{resumeClear();o.gid=null}}
+  if(o.queued&&role==='host'&&o.opp&&!o.inGame&&!o.qStarted)qStartGame(o);
   if(o.opp&&role==='guest'&&o.opp.rkm&&!o.inGame&&o.rkJoining!==o.opp.rkm&&rkReady())rkGuestJoin(o,o.opp.rkm);
   if(o.opp&&role==='guest'&&o.opp.start&&o.opp.start.gid!==o.gid&&!o.inGame&&rkStartOK(o,o.opp.start))startOnline(o.opp.start);
   if(o.inGame&&prev&&!o.opp&&!o.lostAt){o.lostAt=Date.now();o.lostBan=true;$('bt').textContent='CONNECTION LOST';$('bs').textContent='Waiting for your opponent to come back…';$('banner').dataset.tone='';$('banner').hidden=false;
@@ -194,7 +196,7 @@ function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o
 $('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp||o.inGame)return;netPresence({rdy:o.mine.rdy==='L'?null:'L'});lobbyRender()});
 $('olNext').addEventListener('click',()=>{const o=S.online,se=o&&o.series;if(!se||se.done||o.inGame)return;const tok='N'+se.gn;netPresence({rdy:o.mine.rdy===tok?null:tok});nextRender()});
 $('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}const md=o&&o.mode;S.online=null;openOnline(md)});
-$('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
+$('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o&&o.queued){qDone(o);return}if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
 
 // the connection pill: shown during an online game; green when live, amber while it reconnects (tap to retry now)
 function netPill(){const o=S.online,el=$('olNet');const on=!!(o&&o.nr&&o.inGame);el.hidden=!on;if(!on)return;

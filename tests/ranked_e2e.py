@@ -29,7 +29,8 @@ def rpc(fn, args, user):
             c.execute('begin'); c.execute('set local role authenticated'); c.execute("select set_config('request.jwt.claim.sub', %s, true)", (user,))
             names = list(args.keys())
             sql = f"select public.{fn}(" + ','.join(f'{k} => %s' for k in names) + ")"
-            vals = [json.dumps(v) if isinstance(v, (dict, list)) else v for v in args.values()]
+            # (Supabase turns a JSON list into a Postgres array for text[] parameters like p_clubs; jsonb ones stay JSON)
+            vals = [v if k == 'p_clubs' else json.dumps(v) if isinstance(v, (dict, list)) else v for k, v in args.items()]
             c.execute(sql, vals); r = c.fetchone()[0]; c.execute('commit'); return {'data': r}
         except Exception as e:
             c.execute('rollback'); return {'error': {'message': str(e).split('\n')[0]}}
@@ -72,14 +73,12 @@ with sync_playwright() as p:
     def play(label, cheat=False):
         global ok
         setup()
-        PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#olCreate'); PA.wait_for_timeout(700); PA.click('#olPick [data-t=seoul]')
-        code = PA.inner_text('#olCodeShow')
-        PB.click('#goMulti'); PB.click('#goRanked'); PB.fill('#olCode', code); PB.click('#olJoin'); PB.wait_for_timeout(900); PB.click('#olPick [data-t=busan]'); PB.wait_for_timeout(600)
-        PA.click('#olInn [data-v="3"]'); PA.wait_for_timeout(800)
-        print(label, '| A lobby:', PA.inner_text('#olRkNote'), '|', PA.inner_text('#olStatus'))
         if cheat:  # the guest's phone lies: one extra run for itself (away) in every snapshot it sends while pitching
             PB.evaluate("__x(\"const _ss=snapState;snapState=()=>{const z=_ss();if(pitching())z.t+=1;return z}\")")
-        PA.click('#olGo'); PB.click('#olGo'); PA.wait_for_timeout(4000)
+        # both press Ranked: the queue pairs them (A waited longer, so A hosts)
+        PA.click('#goMulti'); PA.click('#goRanked'); PA.wait_for_timeout(2500)
+        print(label, '| A queue:', PA.inner_text('#qStatus'), PA.inner_text('#qRate'))
+        PB.click('#goMulti'); PB.click('#goRanked'); PB.wait_for_timeout(6000)
         if not (PA.evaluate("__x('onlineGame()')") and PB.evaluate("__x('onlineGame()')")):
             print('  ranked game did not start:', PA.inner_text('#olStatus'), '|', PB.inner_text('#olStatus')); ok = False; return None
         mid = PA.evaluate("__x('S.online.rk.m')"); print('  match', mid, 'started; ranked on both:', PA.evaluate("__x('S.online.ranked')"), PB.evaluate("__x('S.online.ranked')"))

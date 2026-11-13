@@ -46,9 +46,9 @@ select pg_temp.ok((select (games, wins, pa, ab, h, b2, hr, bb, so, rbi, bf, outs
 select pg_temp.ok((select count(*) = 2 from public.player_stats where user_id = :A and mode = 'ranked_stock'), 'season + career rows');
 select pg_temp.ok((select (losses, runs_allowed, hr_allowed, bb_allowed, outs_pitched) = (1, 2, 1, 1, 3)
                    from public.player_stats where user_id = :B and mode = 'ranked_stock' and season_id = 0), 'B career line adds up');
-select pg_temp.ok((select (rating, games, wins) = (1020, 1, 1) from public.ratings where user_id = :A and season_id = 1), 'winner +20 (K 40, even match)');
-select pg_temp.ok((select rating = 980 from public.ratings where user_id = :B and season_id = 1), 'loser -20');
-select pg_temp.ok((select (rating_before, rating_after) = (1000, 1020) from public.match_participants
+select pg_temp.ok((select (rating, games, wins) = (1100, 1, 1) from public.ratings where user_id = :A and season_id = 1), 'winner +100');
+select pg_temp.ok((select rating = 900 from public.ratings where user_id = :B and season_id = 1), 'loser -100');
+select pg_temp.ok((select (rating_before, rating_after) = (1000, 1100) from public.match_participants
                    where match_id = 'aaaaaaaa-0000-0000-0000-000000000001' and side = 'home'), 'participant row shows the rating change');
 
 -- ---------------------------------------------------------------- the same pair farming wins: the 4th of the day earns nothing

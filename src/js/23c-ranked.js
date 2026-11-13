@@ -39,7 +39,7 @@ function mpOpen(){const ok=supaOK();$('goRanked').disabled=!ok;$('mpNote').hidde
  if(!ok)$('mpNote').textContent='Ranked is played on imugilabs.com/pocket-diamond (it needs the game server).';showScreen('scrMulti')}
 $('goRanked').addEventListener('click',()=>{ensureAudio();if(!rkReady()){$('mpNote').hidden=false;
   $('mpNote').textContent=ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account so your rating can be saved. Sign in on the Account screen (main menu).';return}
- openOnline('ranked')});
+ qStart()});
 $('goCustom').addEventListener('click',()=>{ensureAudio();openOnline('custom')});
 // host: open the match on the server, wait for the guest to join it, then start with the server's seed
 async function rkHostStart(inn){const o=S.online;if(o.rkBusy)return;o.rkBusy=true;
@@ -74,7 +74,7 @@ function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=nul
  if(info.status==='abandoned'){rkShow('NOT COUNTED · the match timed out','bad');return true}
  return false}
 // game over: ranked submits the match record; everything else reports your own line (if you're signed in)
-async function rkGameOver(){const o=S.online,m=ML&&ML.fin?ML:null;if(!m||RK.done)return;RK.done=true;
+async function rkGameOver(){const o=S.online,m=ML&&ML.fin?ML:null;$('toLobby').textContent=o&&o.queued?'BACK TO MULTIPLAYER':'BACK TO THE ROOM';if(!m||RK.done)return;RK.done=true;
  if(o&&o.ranked&&o.rk){clearInterval(RK.pingT);rkShow('RANKED · sending the result…');
   try{const h=await mlHash(m);let info=await rpc('ranked_submit',{p_match:o.rk.m,p_hash:h,p_log:mlWire(m),p_flags:o.flags||[],p_version:PD_VER});
    if(rkResult(info))return;rkShow('RANKED · waiting for your opponent’s result…');
@@ -97,3 +97,39 @@ function rkClaimLoop(o){clearTimeout(RK.claimT);const t0=Date.now();
     setTimeout(()=>{if(S.online!==o)return;toTitle();openOnline()},5000);return}}catch(e){}
   if(Date.now()-t0<15*60000)RK.claimT=setTimeout(go,20000)};
  RK.claimT=setTimeout(go,20000)}
+
+// ---- the ranked queue: Ranked on the Multiplayer page finds you an opponent ----
+// You wait on the server (queue_poll every 2 s). When it pairs you, both phones meet in a room named after the match,
+// the player who waited longer hosts (home) and starts the game with the server's seed: 3 innings, bat and pitch.
+const Q={on:false,t0:0,tick:0,gen:0};
+const fmtClock=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+function qSay(status,info){$('qStatus').textContent=status;if(info!=null)$('qInfo').textContent=info}
+async function qStart(){const gen=++Q.gen;Q.on=true;Q.t0=Date.now();qSay('FINDING AN OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
+ showScreen('scrQueue');clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000)},250);$('qTime').textContent='0:00';
+ rpc('my_rating').then(r=>{if(Q.gen===gen&&r)$('qRate').textContent=`YOUR RATING ${r.rating}${r.games?` · ${r.wins}-${r.losses}`:''}`}).catch(()=>{});
+ try{let r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});
+  while(Q.on&&Q.gen===gen){if(r&&r.queue==='matched'){qMatched(r.info,gen);return}
+   if(r&&r.queue==='gone'){r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});continue}
+   if(r&&r.waiting>1)qSay('FINDING AN OPPONENT',`3 innings · you bat and pitch · ${r.waiting} in the queue`);
+   await new Promise(res=>setTimeout(res,2000));if(!Q.on||Q.gen!==gen)return;r=await rpc('queue_poll')}}
+ catch(e){if(Q.gen!==gen)return;Q.on=false;clearInterval(Q.tick);qSay('COULDN\u2019T JOIN THE QUEUE',rkErr(e))}}
+function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick)}
+$('qCancel').addEventListener('click',()=>{const was=Q.on;qStop();if(was)rpc('queue_leave').catch(()=>{});
+ const o=S.online;if(o&&o.queued){if(o.nr)o.nr.leave().catch(()=>{});S.online=null}mpOpen()});
+// paired: meet the opponent in the match's room
+async function qMatched(info,gen){Q.on=false;const opp=info.me==='home'?info.away_name:info.home_name,mine=info.me==='home'?info.home_club:info.away_club;
+ qSay(`OPPONENT FOUND: ${String(opp||'?').toUpperCase()}`,`You play as ${TEAMS[mine]?TEAMS[mine].city+' '+TEAMS[mine].name:mine} · connecting…`);
+ S.online={mine:{},opp:null,mode:'ranked'};
+ await joinRoom('rk-'+info.match_id,info.me==='home'?'host':'guest');
+ const o=S.online;if(!o||!o.nr||Q.gen!==gen){qSay('COULDN\u2019T CONNECT','Check your connection and try again.');clearInterval(Q.tick);return}
+ o.queued=true;o.qInfo=info;o.rkGid=info.match_id+':'+info.seed;
+ // (whatever the other phone already said before this one finished joining)
+ if(o.opp){if(o.role==='host'){if(!o.qStarted)qStartGame(o)}else if(o.opp.start&&!o.inGame&&rkStartOK(o,o.opp.start))startOnline(o.opp.start)}
+ // nobody showed up: back to the queue (the empty match is cleaned up by the server)
+ setTimeout(()=>{if(S.online===o&&!o.inGame&&Q.gen===gen){o.nr.leave().catch(()=>{});S.online=null;qSay('OPPONENT DIDN\u2019T CONNECT','Back in the queue…');setTimeout(()=>{if(Q.gen===gen)qStart()},1200)}},25000)}
+// host: the guest is here: start with the match the server set up
+function qStartGame(o){const i=o.qInfo;if(!i)return;o.qStarted=true;clearInterval(Q.tick);
+ const st={gid:o.rkGid,home:i.home_club,away:i.away_club,inn:3,night:Math.random()<.55,bo:1,sid:i.match_id,gn:1,sw:[0,0],rk:{m:i.match_id,home:i.home_name,away:i.away_name}};
+ netPresence({start:st});startOnline(st)}
+// after the game: leave the match room and go back to the Multiplayer page
+function qDone(o){resumeClear();if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;mpOpen()}
