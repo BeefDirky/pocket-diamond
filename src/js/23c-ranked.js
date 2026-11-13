@@ -5,7 +5,9 @@
 // match record. The server counts the result only when the two records agree, neither phone's checks failed, and
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
-const PD_VER='__PD_VER__';
+// the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
+const APP_VERSION='2.0.3',PD_BUILD='__PD_VER__',PD_VER=APP_VERSION+'+'+PD_BUILD;
+$('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
 const rkErr=e=>((e&&e.message)||'Could not reach the server').replace(/^.*?exception:\s*/,'');
