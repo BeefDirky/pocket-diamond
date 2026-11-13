@@ -9,13 +9,20 @@ const accMeta=()=>{try{return JSON.parse(localStorage.getItem('pd-acct')||'{}')}
 const accSetMeta=m=>{try{RAW_SET('pd-acct',JSON.stringify(m))}catch(e){}};
 const RAW_SI=Storage.prototype.setItem,RAW_SET=(k,v)=>RAW_SI.call(localStorage,k,v);
 // every progress write marks the save as changed and schedules an upload
-try{Storage.prototype.setItem=function(k,v){RAW_SI.call(this,k,v);if(this===localStorage&&SAVE_KEYS.includes(k))accDirty()}}catch(e){}
+// (only a real change counts: the game re-writes some keys with the same value as it starts)
+try{Storage.prototype.setItem=function(k,v){const watch=this===localStorage&&SAVE_KEYS.includes(k),old=watch?this.getItem(k):null;RAW_SI.call(this,k,v);if(watch&&old!==String(v))accDirty()}}catch(e){}
 function localBlob(){const o={};for(const k of SAVE_KEYS){const v=localStorage.getItem(k);if(v!=null)o[k]=v}return o}
-const hasProgress=o=>!!(o['pd-cards']||o['pd-signings']||o['pd-playoffs']||o['pd-custom']||o['pd-wallet']);
+// the same moment written two ways ('…Z' from the browser, '…+00:00' from the server) is the same moment
+const sameT=(a,b)=>!!a&&!!b&&new Date(a).getTime()===new Date(b).getTime();
+// two saves with the same progress (options aside) don't need a choice
+// (an empty value, like the {} the game writes for 'no signings yet', is the same as nothing)
+const saveVal=v=>v==null||/^\s*(\{\s*\}|\[\s*\]|null|)\s*$/.test(String(v))?null:String(v);
+const sameSave=(a,b)=>SAVE_KEYS.filter(k=>k!=='pd-opts2').every(k=>saveVal(a[k])===saveVal(b[k]));
+const hasProgress=o=>['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-wallet'].some(k=>saveVal(o[k])!=null);
 function accDirty(){const m=accMeta();m.localAt=Date.now();accSetMeta(m);if(ACC.user){clearTimeout(ACC.pushT);ACC.pushT=setTimeout(accPush,4000)}}
 async function accPush(){if(!ACC.user||ACC.state==='conflict')return;try{const c=await supaClient(),at=new Date().toISOString();
-  const {error}=await c.from('saves').upsert({user_id:ACC.user.id,data:localBlob(),updated_at:at});if(error)throw error;
-  const m=accMeta();m.uid=ACC.user.id;m.syncedAt=at;m.pushedAt=Date.now();accSetMeta(m);ACC.msg='';acRender()}
+  const {data:saved,error}=await c.from('saves').upsert({user_id:ACC.user.id,data:localBlob(),updated_at:at}).select('updated_at').maybeSingle();if(error)throw error;
+  const m=accMeta();m.uid=ACC.user.id;m.syncedAt=(saved&&saved.updated_at)||at;m.pushedAt=Date.now();accSetMeta(m);ACC.msg='';acRender()}
  catch(e){ACC.msg=/relation|saves/.test(e.message||'')?'Cloud saves are not set up on the server yet.':'Could not reach the cloud; your progress is safe on this device and will upload later.';acRender()}}
 function accApply(data){for(const k of SAVE_KEYS){if(data[k]!=null)RAW_SET(k,data[k]);else localStorage.removeItem(k)}}
 // after sign-in (or a remembered session on load): line the device up with the account's save
@@ -24,8 +31,10 @@ async function accSync(){const c=await supaClient(),u=ACC.user;if(!u)return;
  if(error){ACC.msg=/relation|saves/.test(error.message||'')?'Cloud saves are not set up on the server yet.':'Could not reach the cloud.';acRender();return}
  const m=accMeta(),local=localBlob(),unsynced=!m.pushedAt||(m.localAt||0)>m.pushedAt;
  if(!row){await accPush();return}
- if(m.uid===u.id&&!unsynced){if(row.updated_at!==m.syncedAt){accApply(row.data);m.syncedAt=row.updated_at;m.pushedAt=Date.now();m.localAt=m.pushedAt;accSetMeta(m);location.reload()}return}
- if(m.uid===u.id&&row.updated_at===m.syncedAt){await accPush();return}
+ // nothing to decide when both hold the same progress: just line the device up with the account
+ if(sameSave(local,row.data||{})){const mm={...m,uid:u.id,syncedAt:row.updated_at,pushedAt:Date.now()};mm.localAt=mm.pushedAt;accSetMeta(mm);return}
+ if(m.uid===u.id&&!unsynced){if(!sameT(row.updated_at,m.syncedAt)){accApply(row.data);m.syncedAt=row.updated_at;m.pushedAt=Date.now();m.localAt=m.pushedAt;accSetMeta(m);location.reload()}return}
+ if(m.uid===u.id&&sameT(row.updated_at,m.syncedAt)){await accPush();return}
  if(!hasProgress(local)){accApply(row.data);const mm={uid:u.id,syncedAt:row.updated_at,pushedAt:Date.now()};mm.localAt=mm.pushedAt;accSetMeta(mm);location.reload();return}
  // both this device and the account have progress that the other hasn't seen: the player decides
  ACC.cloud=row;ACC.state='conflict';acRender();showScreen('scrAcct')}
@@ -58,7 +67,7 @@ $('acSignIn').addEventListener('click',()=>acDo('in'));$('acSignUp').addEventLis
 for(const id of['acEmail','acPass','acUser'])$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')acDo('in')});
 $('acSaveNow').addEventListener('click',()=>{ACC.msg='Saving…';acRender();accPush()});
 $('acSignOut').addEventListener('click',async()=>{clearTimeout(ACC.pushT);if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut();ACC.user=null;ACC.name='';ACC.pick=false;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
-$('acUseCloud').addEventListener('click',()=>{const r=ACC.cloud;accApply(r.data);accSetMeta({uid:ACC.user.id,syncedAt:r.updated_at,pushedAt:Date.now(),localAt:Date.now()});location.reload()});
+$('acUseCloud').addEventListener('click',()=>{const r=ACC.cloud;accApply(r.data);accSetMeta({...accMeta(),uid:ACC.user.id,syncedAt:r.updated_at,pushedAt:Date.now(),localAt:Date.now()});location.reload()});
 $('acUseLocal').addEventListener('click',()=>{ACC.state='in';ACC.cloud=null;accPush()});
 // leaving the page: get the last changes up if we can
 addEventListener('visibilitychange',()=>{if(document.hidden&&ACC.user&&(accMeta().localAt||0)>(accMeta().pushedAt||0))accPush()});
