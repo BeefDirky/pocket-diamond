@@ -11,7 +11,7 @@ function phLoad(){if(PH.ready||PH.loading||!phOn())return;PH.loading=true;
  const s=document.createElement('script');s.async=true;s.src='https://us-assets.i.posthog.com/static/array.full.js';s.crossOrigin='anonymous';
  s.onload=()=>{try{window.posthog.init(PH.key,{api_host:PH.host,person_profiles:'always',autocapture:false,capture_pageview:true,capture_pageleave:true,
    disable_session_recording:true,persistence:'localStorage',ip:false,property_denylist:['$ip'],
-   loaded:ph=>{PH.ready=true;ph.register({build:PD_VER,layout:document.body.classList.contains('phone')||innerWidth<innerHeight?'phone':'pc',sampled:PH.sample});
+   loaded:ph=>{PH.ready=true;ph.register({$geoip_disable:true,/* no city, postal code or coordinates from the IP */build:PD_VER,layout:document.body.classList.contains('phone')||innerWidth<innerHeight?'phone':'pc',sampled:PH.sample});
     phIdent();for(const [n,p] of PH.q.splice(0))ph.capture(n,p)}})}catch(e){}};
  s.onerror=()=>{PH.loading=false};document.head.appendChild(s)}
 // record an event (queued until PostHog has loaded; dropped if stats are off)

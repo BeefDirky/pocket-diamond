@@ -7157,7 +7157,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='a605135de9',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='d0c58f5bb3',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7298,7 +7298,7 @@ function phLoad(){if(PH.ready||PH.loading||!phOn())return;PH.loading=true;
  const s=document.createElement('script');s.async=true;s.src='https://us-assets.i.posthog.com/static/array.full.js';s.crossOrigin='anonymous';
  s.onload=()=>{try{window.posthog.init(PH.key,{api_host:PH.host,person_profiles:'always',autocapture:false,capture_pageview:true,capture_pageleave:true,
    disable_session_recording:true,persistence:'localStorage',ip:false,property_denylist:['$ip'],
-   loaded:ph=>{PH.ready=true;ph.register({build:PD_VER,layout:document.body.classList.contains('phone')||innerWidth<innerHeight?'phone':'pc',sampled:PH.sample});
+   loaded:ph=>{PH.ready=true;ph.register({$geoip_disable:true,/* no city, postal code or coordinates from the IP */build:PD_VER,layout:document.body.classList.contains('phone')||innerWidth<innerHeight?'phone':'pc',sampled:PH.sample});
     phIdent();for(const [n,p] of PH.q.splice(0))ph.capture(n,p)}})}catch(e){}};
  s.onerror=()=>{PH.loading=false};document.head.appendChild(s)}
 // record an event (queued until PostHog has loaded; dropped if stats are off)
