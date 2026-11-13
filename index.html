@@ -7290,7 +7290,7 @@ function qDone(o){resumeClear();if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCust
 // build has none). Players are known by their account's UUID only: no email, no username, and the PostHog project
 // discards IPs. Options → "Share gameplay stats" turns it all off. The authoritative baseball record (ranked results)
 // lives in Supabase; this is for how people play: sessions, retention, funnels, popularity, balance samples, errors.
-const PH={key:'',host:'https://us.i.posthog.com',ready:false,q:[],sample:false};
+const PH={key:'phc_z8oJnqc58NLReHVy6FjvNeF7xryp7DuyitZjpXyxo664',host:'https://us.i.posthog.com',ready:false,q:[],sample:false};
 const phOn=()=>/^phc_/.test(PH.key)&&OPT.stats!==false&&typeof window.claude==='undefined';
 // one in five sessions also sends a line per plate appearance (keeps the free tier's 1M events a month far away)
 try{let v=sessionStorage.getItem('pd-sample');if(v==null){v=Math.random()<.2?'1':'0';sessionStorage.setItem('pd-sample',v)}PH.sample=v==='1'}catch(e){}

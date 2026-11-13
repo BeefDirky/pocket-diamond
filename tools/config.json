@@ -1,4 +1,6 @@
 {
   "supabase_url": "https://waikmdodbrirekjmqvug.supabase.co",
-  "supabase_key": "sb_publishable_iZ3XpRVvPInDsCRI3wxlBQ_jMKzDieT"
+  "supabase_key": "sb_publishable_iZ3XpRVvPInDsCRI3wxlBQ_jMKzDieT",
+  "posthog_key": "phc_z8oJnqc58NLReHVy6FjvNeF7xryp7DuyitZjpXyxo664",
+  "posthog_host": "https://us.i.posthog.com"
 }
