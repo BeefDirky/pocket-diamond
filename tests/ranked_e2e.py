@@ -56,20 +56,22 @@ with sync_playwright() as p:
     ctx.route('**/index.html', inject)
     PA = ctx.new_page(); PB = ctx.new_page(); errs = []
     for n, pg in (('A', PA), ('B', PB)): pg.on('pageerror', lambda e, n=n: errs.append(n + ' ' + str(e)))
-    for pg, uid, name in ((PA, A, 'BeefDirky'), (PB, B, 'Rival')):
-        pg.goto('http://localhost:8766/index.html'); pg.wait_for_timeout(3000)
-        pg.evaluate(f"window.__uid='{uid}';__x(\"ACC.user={{id:'{uid}',email:'x@x.co'}};ACC.name='{name}';acRender()\")")
-    # the bots: the pitcher picks a pitch and releases the meter at a random moment; the batter swings at most pitches
-    bot = """()=>{let last=null,rel=null;setInterval(()=>{const S=__x('S');if(!S.online||!S.online.inGame)return;
+    def setup():
+      for pg, uid, name in ((PA, A, 'BeefDirky'), (PB, B, 'Rival')):
+          pg.goto('http://localhost:8766/index.html'); pg.wait_for_timeout(3000)
+          pg.evaluate(f"window.__uid='{uid}';__x(\"ACC.user={{id:'{uid}',email:'x@x.co'}};ACC.name='{name}';acRender()\")")
+      # the bots: the pitcher picks a pitch and releases the meter at a random moment; the batter swings at most pitches
+      bot = """()=>{let last=null,rel=null;setInterval(()=>{const S=__x('S');if(!S.online||!S.online.inGame)return;
       const key=(k,c)=>document.dispatchEvent(new KeyboardEvent('keydown',{key:k,code:c||k,bubbles:true}));
       if(S.phase==='choose'&&Math.random()<.05)key(String(1+Math.floor(Math.random()*3)));
       if(S.phase==='windup'&&__x('pitching()')&&S.pitch&&S.pitch.q==null&&rel!==S.pitch){rel=S.pitch;setTimeout(()=>key(' ','Space'),200+Math.random()*900)}
       if(S.pitch&&S.pitch!==last&&S.pitch.releaseAt&&S.pitch.remote){last=S.pitch;if(Math.random()<.8)setTimeout(()=>key(' ','Space'),(S.pitch.travel+(Math.random()*60-30)-(performance.now()-S.pitch.releaseAt))/3)}
       const sk=document.getElementById('skipBtn');if(!sk.hidden)sk.click()},20)}"""
-    PA.evaluate(bot); PB.evaluate(bot)
+      PA.evaluate(bot); PB.evaluate(bot)
 
     def play(label, cheat=False):
         global ok
+        setup()
         PA.click('#goMulti'); PA.click('#olCreate'); PA.wait_for_timeout(700); PA.click('#olPick [data-t=seoul]')
         code = PA.inner_text('#olCodeShow')
         PB.click('#goMulti'); PB.fill('#olCode', code); PB.click('#olJoin'); PB.wait_for_timeout(900); PB.click('#olPick [data-t=busan]'); PB.wait_for_timeout(600)
@@ -93,15 +95,12 @@ with sync_playwright() as p:
             c.execute('select status, verified, home_score, away_score, winner_side, dispute_reason from public.matches where id=%s', (mid,)); m = c.fetchone()
             c.execute('select count(*) n from public.plate_appearances where match_id=%s', (mid,)); npa = c.fetchone()['n']
         print('  server:', dict(m), '| plate appearances stored:', npa)
-        for pg in (PA, PB): pg.evaluate("__x(\"$('over').hidden=true;toTitle();\")"); pg.click('#olLeave') if pg.is_visible('#olLeave') else None
-        PA.wait_for_timeout(1500)
         return m, npa
     r1 = play('GAME 1 (honest)')
     if not r1 or r1[0]['status'] != 'final' or not r1[0]['verified'] or r1[1] < 10: ok = False; print('FAIL: honest ranked game was not settled')
     with con.cursor() as c:
         c.execute("select username, rating, wins, losses from public.leaderboard_ranked order by rank"); print('  leaderboard:', c.fetchall())
         c.execute("select user_id::text, pa, h, hr, so, outs_pitched from public.player_stats where mode='ranked_stock' and season_id=0 order by user_id"); print('  ranked lines:', c.fetchall())
-    for pg in (PA, PB): pg.evaluate("__x('location.reload()')") if False else None
     r2 = play('GAME 2 (guest cheats)', cheat=True)
     if not r2 or r2[0]['status'] != 'disputed': ok = False; print('FAIL: a doctored game was not disputed')
     if errs: ok = False; print('page errors:', errs[:5])
