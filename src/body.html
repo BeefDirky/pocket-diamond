@@ -11,6 +11,7 @@
     <button type="button" class="pauseBtn" id="pauseBtn" aria-label="Pause (P)"><i></i><i></i></button>
     <button type="button" class="parkBtn" id="parkBtn" hidden>PARK ▾</button>
     <div class="zoomCtl"><button type="button" id="zIn" aria-label="Zoom in">+</button><button type="button" id="zOut" aria-label="Zoom out">−</button></div>
+    <div class="coinPop" id="coinPop" hidden aria-live="polite"></div>
     <div class="tag" id="tag" hidden><span id="tagTxt"></span><canvas id="flame" width="72" height="26" hidden></canvas></div>
     <div class="bug" aria-label="Score, count, outs and runners">
       <div class="bugSc"><div id="bsA"><i></i><span></span><b></b></div><div id="bsH"><i></i><span></span><b></b></div></div>
@@ -44,6 +45,7 @@
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button>
         </nav>
+        <div class="coinBal" id="coinBal" title="Coins: win games and hit home runs to earn them"><i class="coinIc"></i><b>0</b> COINS</div>
         <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
         <a class="mmFoot" href="https://imugilabs.com" target="_blank" rel="noopener"><img id="ilMark" alt="Imugi Labs" width="100" height="48"><span>AN IMUGI LABS GAME</span></a>
       </div>
@@ -272,7 +274,7 @@
         <button class="big" id="olNext" type="button" hidden>NEXT GAME</button>
         <button class="big" id="toLobby" type="button" hidden>BACK TO THE ROOM</button>
         <button class="big alt" id="change" type="button">MAIN MENU</button>
-        <p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Open card packs</button>
+        <p class="coinEarn" id="coinEarn" hidden></p><p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Open card packs</button>
       </div>
     </div>
   </div>

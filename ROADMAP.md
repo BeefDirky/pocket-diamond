@@ -78,3 +78,8 @@
 
 ## Bugs found while playing
 - See PLAYTEST.md for the 10 Nov session (all fixed)
+
+## Coins (in-game currency)
+- [x] Coins: full-game win 100, arcade win 20; home run 10 in a full game, 4 in arcade (not while AUTO bats); balance on the main menu, tally on the final screen; saved and synced as pd-wallet
+- [ ] Daily challenges that pay coins
+- [ ] Something to spend coins on

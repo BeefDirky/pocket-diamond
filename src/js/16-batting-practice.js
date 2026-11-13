@@ -397,7 +397,7 @@ function finishPlay(){
   const outsAfter=S.outs+r.outs;const runs=outsAfter>=3?0:r.runs;
   S.outs=Math.min(3,outsAfter);addRuns(runs);
   const mine=batKey()===S.you;
-  if(r.hit){if(mine)S.hits++;else S.oppHits++}if(r.hr&&mine)S.hr++;if(r.code==='E'){if(fldKey()===S.opp)S.errs++;else S.myErrs++;if(mine)S.cheerUntil=now+1600}
+  if(r.hit){if(mine)S.hits++;else S.oppHits++}if(r.hr&&mine){S.hr++;coinHR()}if(r.code==='E'){if(fldKey()===S.opp)S.errs++;else S.myErrs++;if(mine)S.cheerUntil=now+1600}
   S.bases=outsAfter>=3?[null,null,null]:r.newBases;
   if(r.desc)logPA(curBatter(),r.desc,!!r.hit||runs>0);
   const runTxt=`+${runs} RUN${runs>1?'S':''}`;

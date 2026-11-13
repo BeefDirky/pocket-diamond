@@ -982,7 +982,7 @@ body.isOffline #goMulti{opacity:.55}
 body.isOffline #goMulti::after{content:'NEEDS INTERNET';display:block;font-size:9px;letter-spacing:.16em;margin-top:4px;opacity:.8}
 /* a phone on its side: the menus are short and wide, so lay them out in two columns instead of making you scroll for the main button */
 @media (orientation:landscape) and (max-height:520px){
- .card.menuMain{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:"logo btns" "acct btns" "foot btns";align-items:center;column-gap:28px;row-gap:8px;max-width:760px;padding:8px 16px}
+ .card.menuMain{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:"logo btns" "coin btns" "acct btns" "foot btns";align-items:center;column-gap:28px;row-gap:8px;max-width:760px;padding:8px 16px}
  .menuMain .mmLogo{grid-area:logo}.menuMain .mmBtns{grid-area:btns;gap:8px}.menuMain .mmAcct{grid-area:acct}.menuMain .mmFoot{grid-area:foot}
  .menuMain .mmLogo h1{font-size:clamp(26px,11vh,44px)}
  .menuMain .mmBtn{padding:12px 14px;font-size:clamp(14px,5vh,19px)}.menuMain .mmSm{padding:9px 8px;font-size:11px}.menuMain .mmPair{gap:8px}
@@ -1044,3 +1044,16 @@ body:has(#olNet:not([hidden])) :is(.app:not(.deskApp),.app.phoneLand) .pkBar{top
 /* Press Start 2P is monospaced and draws T and I one pixel in from the left of their cell, so they sat a pixel further from
    the letter before them than every other pair: pull them back one font pixel (1/8 em) */
 i.kn{font-style:normal;margin-left:-.125em}
+/* coins: a pixel coin, the balance on the main menu, the pop on a home run and the tally on the final screen */
+.coinIc{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px;background:#ffd23f;
+ box-shadow:inset -2px -2px 0 #c7871a,inset 2px 2px 0 #fff0a8,0 0 0 2px #4a2c06;clip-path:polygon(2px 0,8px 0,10px 2px,10px 8px,8px 10px,2px 10px,0 8px,0 2px)}
+.coinBal{display:flex;align-items:center;justify-content:center;gap:2px;font-family:var(--f-hud);font-size:13px;letter-spacing:.14em;color:#ffd23f;text-shadow:2px 2px 0 var(--edge)}
+.coinBal b{font-weight:400;font-size:15px;margin-right:6px;color:#fff3c4}
+.menuMain .coinBal{grid-area:coin}
+.coinPop{position:absolute;left:50%;top:132px;transform:translateX(-50%);z-index:30;pointer-events:none;font-family:var(--f-hud);font-size:16px;letter-spacing:.12em;color:#ffd23f;
+ background:rgba(8,20,14,.82);border:2px solid #c7871a;padding:4px 10px;text-shadow:2px 2px 0 var(--edge)}
+.coinPop.go{animation:coinUp 1.7s steps(10) forwards}
+@keyframes coinUp{0%{opacity:0;transform:translate(-50%,8px)}12%{opacity:1;transform:translate(-50%,0)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-12px)}}
+@media (prefers-reduced-motion:reduce){.coinPop.go{animation:none}}
+.coinEarn{color:#ffd23f!important;font-family:var(--f-hud);font-size:13px!important;letter-spacing:.04em}
+.coinEarn b{font-weight:400;color:#fff3c4}

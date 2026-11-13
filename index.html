@@ -1004,7 +1004,7 @@ body.isOffline #goMulti{opacity:.55}
 body.isOffline #goMulti::after{content:'NEEDS INTERNET';display:block;font-size:9px;letter-spacing:.16em;margin-top:4px;opacity:.8}
 /* a phone on its side: the menus are short and wide, so lay them out in two columns instead of making you scroll for the main button */
 @media (orientation:landscape) and (max-height:520px){
- .card.menuMain{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:"logo btns" "acct btns" "foot btns";align-items:center;column-gap:28px;row-gap:8px;max-width:760px;padding:8px 16px}
+ .card.menuMain{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:"logo btns" "coin btns" "acct btns" "foot btns";align-items:center;column-gap:28px;row-gap:8px;max-width:760px;padding:8px 16px}
  .menuMain .mmLogo{grid-area:logo}.menuMain .mmBtns{grid-area:btns;gap:8px}.menuMain .mmAcct{grid-area:acct}.menuMain .mmFoot{grid-area:foot}
  .menuMain .mmLogo h1{font-size:clamp(26px,11vh,44px)}
  .menuMain .mmBtn{padding:12px 14px;font-size:clamp(14px,5vh,19px)}.menuMain .mmSm{padding:9px 8px;font-size:11px}.menuMain .mmPair{gap:8px}
@@ -1066,6 +1066,19 @@ body:has(#olNet:not([hidden])) :is(.app:not(.deskApp),.app.phoneLand) .pkBar{top
 /* Press Start 2P is monospaced and draws T and I one pixel in from the left of their cell, so they sat a pixel further from
    the letter before them than every other pair: pull them back one font pixel (1/8 em) */
 i.kn{font-style:normal;margin-left:-.125em}
+/* coins: a pixel coin, the balance on the main menu, the pop on a home run and the tally on the final screen */
+.coinIc{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px;background:#ffd23f;
+ box-shadow:inset -2px -2px 0 #c7871a,inset 2px 2px 0 #fff0a8,0 0 0 2px #4a2c06;clip-path:polygon(2px 0,8px 0,10px 2px,10px 8px,8px 10px,2px 10px,0 8px,0 2px)}
+.coinBal{display:flex;align-items:center;justify-content:center;gap:2px;font-family:var(--f-hud);font-size:13px;letter-spacing:.14em;color:#ffd23f;text-shadow:2px 2px 0 var(--edge)}
+.coinBal b{font-weight:400;font-size:15px;margin-right:6px;color:#fff3c4}
+.menuMain .coinBal{grid-area:coin}
+.coinPop{position:absolute;left:50%;top:132px;transform:translateX(-50%);z-index:30;pointer-events:none;font-family:var(--f-hud);font-size:16px;letter-spacing:.12em;color:#ffd23f;
+ background:rgba(8,20,14,.82);border:2px solid #c7871a;padding:4px 10px;text-shadow:2px 2px 0 var(--edge)}
+.coinPop.go{animation:coinUp 1.7s steps(10) forwards}
+@keyframes coinUp{0%{opacity:0;transform:translate(-50%,8px)}12%{opacity:1;transform:translate(-50%,0)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-12px)}}
+@media (prefers-reduced-motion:reduce){.coinPop.go{animation:none}}
+.coinEarn{color:#ffd23f!important;font-family:var(--f-hud);font-size:13px!important;letter-spacing:.04em}
+.coinEarn b{font-weight:400;color:#fff3c4}
 </style>
 
 <div class="app">
@@ -1080,6 +1093,7 @@ i.kn{font-style:normal;margin-left:-.125em}
     <button type="button" class="pauseBtn" id="pauseBtn" aria-label="Pause (P)"><i></i><i></i></button>
     <button type="button" class="parkBtn" id="parkBtn" hidden>PARK ▾</button>
     <div class="zoomCtl"><button type="button" id="zIn" aria-label="Zoom in">+</button><button type="button" id="zOut" aria-label="Zoom out">−</button></div>
+    <div class="coinPop" id="coinPop" hidden aria-live="polite"></div>
     <div class="tag" id="tag" hidden><span id="tagTxt"></span><canvas id="flame" width="72" height="26" hidden></canvas></div>
     <div class="bug" aria-label="Score, count, outs and runners">
       <div class="bugSc"><div id="bsA"><i></i><span></span><b></b></div><div id="bsH"><i></i><span></span><b></b></div></div>
@@ -1113,6 +1127,7 @@ i.kn{font-style:normal;margin-left:-.125em}
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button>
         </nav>
+        <div class="coinBal" id="coinBal" title="Coins: win games and hit home runs to earn them"><i class="coinIc"></i><b>0</b> COINS</div>
         <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
         <a class="mmFoot" href="https://imugilabs.com" target="_blank" rel="noopener"><img id="ilMark" alt="Imugi Labs" width="100" height="48"><span>AN IMUGI LABS GAME</span></a>
       </div>
@@ -1341,7 +1356,7 @@ i.kn{font-style:normal;margin-left:-.125em}
         <button class="big" id="olNext" type="button" hidden>NEXT GAME</button>
         <button class="big" id="toLobby" type="button" hidden>BACK TO THE ROOM</button>
         <button class="big alt" id="change" type="button">MAIN MENU</button>
-        <p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Open card packs</button>
+        <p class="coinEarn" id="coinEarn" hidden></p><p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Open card packs</button>
       </div>
     </div>
   </div>
@@ -5452,7 +5467,7 @@ function finishPlay(){
   const outsAfter=S.outs+r.outs;const runs=outsAfter>=3?0:r.runs;
   S.outs=Math.min(3,outsAfter);addRuns(runs);
   const mine=batKey()===S.you;
-  if(r.hit){if(mine)S.hits++;else S.oppHits++}if(r.hr&&mine)S.hr++;if(r.code==='E'){if(fldKey()===S.opp)S.errs++;else S.myErrs++;if(mine)S.cheerUntil=now+1600}
+  if(r.hit){if(mine)S.hits++;else S.oppHits++}if(r.hr&&mine){S.hr++;coinHR()}if(r.code==='E'){if(fldKey()===S.opp)S.errs++;else S.myErrs++;if(mine)S.cheerUntil=now+1600}
   S.bases=outsAfter>=3?[null,null,null]:r.newBases;
   if(r.desc)logPA(curBatter(),r.desc,!!r.hit||runs>0);
   const runTxt=`+${runs} RUN${runs>1?'S':''}`;
@@ -5517,7 +5532,7 @@ const ord=n=>n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%10
 // ---------- game flow ----------
 function startGame(mode){S.gameNo=(S.gameNo||0)+1;tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
- S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.stamOf={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.kLook=[];S.wildUntil=0;
+ S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.stamOf={};S.coinGame={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.kLook=[];S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();
  S.inning=1;S.errs=0;S.outs=0;S.balls=0;S.strikes=0;S.runs=0;S.hits=0;S.hr=0;S.ks=0;
  S.bases=[null,null,null];S.play=null;S.swing=null;S.pitch=null;S.jumbo=null;
@@ -5571,7 +5586,7 @@ function gameOver(win){const onl=onlineGame();
   const need=Math.ceil(se.len/2);se.done=se.w>=need||se.l>=need;$('olSeries').hidden=false;
   if(se.done){$('overT').innerHTML=se.w>se.l?'<span>SERIES</span> WON':'SERIES LOST';$('olSeries').textContent=`${se.w>se.l?you.name+' take':opp.name+' take'} the best of ${se.len}, ${Math.max(se.w,se.l)}-${Math.min(se.w,se.l)}.`}
   else $('olSeries').textContent=`Best of ${se.len} · ${you.name} ${se.w}, ${opp.name} ${se.l} · game ${se.w+se.l+1} next.`}
- awardPacks(win);
+ awardPacks(win);coinGameOver(win);
  $('toLobby').hidden=!onl;if(onl){resumeClear();$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false;const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;$('again').textContent=se?(se.done?'NEW SERIES':`GAME ${se.w+se.l+1}`):'PLAY AGAIN'}
  if(S.celebr){const gid=S.overGid=(S.overGid||0)+1;setTimeout(()=>{if(S.phase==='over'&&S.overGid===gid&&$('title').hidden)$('over').hidden=false},3400)}else $('over').hidden=false;/* the results card always follows the celebration */updateHUD();
@@ -6325,7 +6340,7 @@ $('olRejoin').addEventListener('click',()=>{const r=resumeGet();if(!r)return;S.y
 // The device keeps working offline exactly as before; each change is pushed to the player's row in `saves` a few
 // seconds later. Signing in on a device that already has guest progress uploads it, unless the account already
 // has a different save, in which case the player chooses which one to keep.
-const SAVE_KEYS=['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-opts2'];
+const SAVE_KEYS=['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-opts2','pd-wallet'];
 const ACC={user:null,state:'out',msg:'',pushT:0,busy:false,cloud:null};
 const accMeta=()=>{try{return JSON.parse(localStorage.getItem('pd-acct')||'{}')}catch(e){return{}}};
 const accSetMeta=m=>{try{RAW_SET('pd-acct',JSON.stringify(m))}catch(e){}};
@@ -6333,7 +6348,7 @@ const RAW_SI=Storage.prototype.setItem,RAW_SET=(k,v)=>RAW_SI.call(localStorage,k
 // every progress write marks the save as changed and schedules an upload
 try{Storage.prototype.setItem=function(k,v){RAW_SI.call(this,k,v);if(this===localStorage&&SAVE_KEYS.includes(k))accDirty()}}catch(e){}
 function localBlob(){const o={};for(const k of SAVE_KEYS){const v=localStorage.getItem(k);if(v!=null)o[k]=v}return o}
-const hasProgress=o=>!!(o['pd-cards']||o['pd-signings']||o['pd-playoffs']||o['pd-custom']);
+const hasProgress=o=>!!(o['pd-cards']||o['pd-signings']||o['pd-playoffs']||o['pd-custom']||o['pd-wallet']);
 function accDirty(){const m=accMeta();m.localAt=Date.now();accSetMeta(m);if(ACC.user){clearTimeout(ACC.pushT);ACC.pushT=setTimeout(accPush,4000)}}
 async function accPush(){if(!ACC.user||ACC.state==='conflict')return;try{const c=await supaClient(),at=new Date().toISOString();
   const {error}=await c.from('saves').upsert({user_id:ACC.user.id,data:localBlob(),updated_at:at});if(error)throw error;
@@ -6614,6 +6629,26 @@ function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in fro
  if(c.r>=3){for(const[sx,sy]of[[3,4],[28,9],[27,28]]){P(sx,sy,'#fff3b0');P(sx-1,sy,'#ffcf4a');P(sx+1,sy,'#ffcf4a');P(sx,sy-1,'#ffcf4a');P(sx,sy+1,'#ffcf4a')}}
  const out=document.createElement('canvas');out.width=128;out.height=160;const o=out.getContext('2d');o.imageSmoothingEnabled=false;o.drawImage(L,0,0,128,160);
  return out.toDataURL()}
+// ---------- coins: the in-game currency ----------
+// Earned by winning and by hitting home runs; a full game (including playoff and online games) pays much more than a
+// 3-inning arcade game. Batting practice pays nothing, and a home run hit while AUTO is batting for you doesn't count.
+// Saved as pd-wallet with the rest of the progress, so it follows a signed-in account. Daily challenges come later.
+const COIN={win:{full:100,arcade:20},hr:{full:10,arcade:4}};
+let WAL={coins:0,earned:0};
+try{const v=JSON.parse(localStorage.getItem('pd-wallet')||'null');if(v&&typeof v==='object')WAL={coins:Math.max(0,v.coins|0),earned:Math.max(0,v.earned|0)}}catch(e){}
+const saveWal=()=>{try{localStorage.setItem('pd-wallet',JSON.stringify(WAL))}catch(e){}};
+const coinFmt=n=>n.toLocaleString('en-US');
+const coinMode=()=>S.mode==='full'?'full':S.mode==='arcade'?'arcade':null;
+function coinUI(){const el=$('coinBal');if(el)el.querySelector('b').textContent=coinFmt(WAL.coins)}
+function coinAdd(n,why){if(!(n>0))return;WAL.coins+=n;WAL.earned+=n;saveWal();coinUI();S.coinGame=S.coinGame||{};S.coinGame[why]=(S.coinGame[why]||0)+n}
+function coinPop(txt){const el=$('coinPop');if(!el)return;el.textContent=txt;el.hidden=false;el.classList.remove('go');void el.offsetWidth;el.classList.add('go');
+ clearTimeout(coinPop.t);coinPop.t=setTimeout(()=>{el.hidden=true},1700)}
+function coinHR(){const m=coinMode();if(!m||S.auto)return;const n=COIN.hr[m];coinAdd(n,'hr');coinPop(`+${n} COINS`)}
+function coinGameOver(win){const m=coinMode();if(m&&win)coinAdd(COIN.win[m],'win');
+ const g=S.coinGame||{},tot=(g.win||0)+(g.hr||0),el=$('coinEarn');if(!el)return;
+ const parts=[];if(g.win)parts.push(`win +${g.win}`);if(g.hr)parts.push(`home runs +${g.hr}`);
+ el.innerHTML=tot?`<i class="coinIc"></i>+${coinFmt(tot)} coins · ${parts.join(' · ')} · <b>${coinFmt(WAL.coins)}</b> total`:`<i class="coinIc"></i>No coins this game · win or homer to earn · <b>${coinFmt(WAL.coins)}</b> total`;el.hidden=false}
+coinUI();
 // ---------- league map: pixel Korea with every club pinned to its city ----------
 const KR_MAIN=[[126.1,37.75],[126.45,37.82],[126.7,37.97],[126.95,38.15],[127.1,38.3],[127.6,38.33],[128.0,38.3],[128.35,38.62],[128.6,38.2],[128.85,37.85],[129.05,37.6],[129.3,37.15],[129.38,36.7],[129.45,36.2],[129.45,35.9],[129.5,35.6],[129.4,35.4],[129.2,35.17],[128.95,35.05],[128.6,34.92],[128.3,34.88],[128.0,34.85],[127.75,34.75],[127.5,34.62],[127.3,34.48],[127.0,34.42],[126.75,34.32],[126.5,34.3],[126.3,34.45],[126.28,34.75],[126.35,35.05],[126.42,35.4],[126.55,35.65],[126.7,35.95],[126.6,36.2],[126.5,36.45],[126.2,36.65],[126.15,36.85],[126.45,37.0],[126.8,37.15],[126.65,37.4],[126.55,37.6]];
 const KR_ISL=[[[126.25,33.28],[126.3,33.42],[126.55,33.56],[126.85,33.54],[126.95,33.45],[126.8,33.29],[126.55,33.21]],[[130.86,37.45],[130.92,37.53],[130.8,37.53]],[[128.6,34.9],[128.72,34.95],[128.7,34.75],[128.58,34.72]]];
