@@ -223,6 +223,8 @@
           <div class="olVs"><div class="olSide" id="olMe"></div><span class="vs">VS</span><div class="olSide" id="olThem"></div></div>
           <div class="pick"><span class="k">SELECT YOUR TEAM</span><div class="olPick" id="olPick"></div></div>
           <div class="opt" id="olInnRow"><span>Innings</span><div class="seg" id="olInn"><button type="button" data-v="3" aria-pressed="true">3</button><button type="button" data-v="6">6</button><button type="button" data-v="9">9</button></div><b></b></div>
+          <div class="opt" id="olRkRow" hidden><span>Match</span><div class="seg" id="olRk"><button type="button" data-v="0" aria-pressed="true">Casual</button><button type="button" data-v="1">Ranked</button></div><b></b></div>
+          <p class="olRkNote" id="olRkNote" hidden></p>
           <div class="opt" id="olBoRow"><span>Series</span><div class="seg" id="olBo"><button type="button" data-v="1" aria-pressed="true">Best of 1</button><button type="button" data-v="3">Best of 3</button><button type="button" data-v="5">Best of 5</button></div><b></b></div>
           <p id="olStatus" class="oppLine"></p>
           <button class="big" id="olGo" type="button" aria-pressed="false" hidden>READY</button>
@@ -289,6 +291,7 @@
         <p id="overS"></p>
         <div class="stats" id="overStats"></div>
         <p class="olSeries" id="olSeries" hidden></p>
+        <p class="rkRes" id="rkRes" hidden></p>
         <button class="big" id="again" type="button">PLAY AGAIN</button>
         <button class="big" id="toBracket" type="button" hidden>BACK TO THE BRACKET</button>
         <button class="big" id="olNext" type="button" hidden>NEXT GAME</button>

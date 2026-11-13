@@ -1,7 +1,7 @@
 // ---------- pitching ----------
-function startWindup(kf){closePen();unduckMusic();
- const bpm=S.mode==='bp';if(bpm)kf=S.bpPitch==='RND'?pick(['FB','SL','CH','SP','CB','KN']):(S.bpPitch||'FB');
- const pt=bpm?{vel:70,mov:72,ctl:99,slot:'over',hand:'R'}:pitcher(),dmn=!bpm&&pt.type==='demon',knk=!bpm&&pt.type==='knuckle';
+// every random draw of a pitch, in one place: online it runs under the pitch's shared seed, so the batter's phone can
+// roll the same pitch from (pitch type, seed) and check what the pitcher's phone sent
+function pitchRoll(kf,pt,bpm,dmn,knk){
  const r=Math.random()*100;
  let k=kf;if(!k){const A=arsOf(pt),PW={FB:dmn?76:50,SL:dmn?15:21,CH:dmn?5:17,SP:dmn?4:12,CB:dmn?3:15,KN:42};let x=r/100*A.reduce((a,q)=>a+PW[q],0);k=A.find(q=>(x-=PW[q])<0)||A[0]}
  const P=PITCHES[k];
@@ -17,10 +17,16 @@ function startWindup(kf){closePen();unduckMusic();
  WIN=winOf(curBatter())*Math.pow(95/mph,1.3);
  const sideArm=pt.slot==='side'&&!bpm;
  const side=pitcher().hand==='R'?1:-1;
- S.pitch={k,name:P.name,mph,travel,side,slot:pt.slot||'over',h0:sideArm?3.9:6.2,relX:-(sideArm?4.4:2.2)*side,plateX:rand(-.7,.7),mov:.7+pt.mov*.006,inZone:bpm?Math.random()<.92:k==='SP'?Math.random()<.2:Math.random()<P.zone*(.72+pt.ctl*.003),kn:[rand(9,15),rand(0,6.3),rand(17,24),rand(0,6.3),rand(8,13),rand(0,6.3)],wind:pitching()?rand(1600,2000):rand(1000,1500),releaseAt:0,trail:[]};
- if(bpm){S.pitch.relX=0;S.pitch.h0=4.2;S.pitch.wind=1400;S.pitch.side=1}
- else if(!S.pitch.inZone&&Math.random()<.0045+tiredness()*.006&&k!=='KN')/* fresh arms rarely plunk anyone; tired ones lose the handle */{S.pitch.hbp=true;S.pitch.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
- if(!bpm&&!S.pitch.inZone&&!S.pitch.hbp)S.pitch.plateX=(Math.random()<.5?-1:1)*rand(1.05,1.6);// a ball misses the plate, so you can read it
+ const p={k,name:P.name,mph,travel,side,slot:pt.slot||'over',h0:sideArm?3.9:6.2,relX:-(sideArm?4.4:2.2)*side,plateX:rand(-.7,.7),mov:.7+pt.mov*.006,inZone:bpm?Math.random()<.92:k==='SP'?Math.random()<.2:Math.random()<P.zone*(.72+pt.ctl*.003),kn:[rand(9,15),rand(0,6.3),rand(17,24),rand(0,6.3),rand(8,13),rand(0,6.3)],wind:pitching()?rand(1600,2000):rand(1000,1500),releaseAt:0,trail:[]};
+ if(bpm){p.relX=0;p.h0=4.2;p.wind=1400;p.side=1}
+ else if(!p.inZone&&Math.random()<.0045+tiredness()*.006&&k!=='KN')/* fresh arms rarely plunk anyone; tired ones lose the handle */{p.hbp=true;p.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
+ if(!bpm&&!p.inZone&&!p.hbp)p.plateX=(Math.random()<.5?-1:1)*rand(1.05,1.6);// a ball misses the plate, so you can read it
+ return p}
+function startWindup(kf){closePen();unduckMusic();
+ const bpm=S.mode==='bp';if(bpm)kf=S.bpPitch==='RND'?pick(['FB','SL','CH','SP','CB','KN']):(S.bpPitch||'FB');
+ const pt=bpm?{vel:70,mov:72,ctl:99,slot:'over',hand:'R'}:pitcher(),dmn=!bpm&&pt.type==='demon',knk=!bpm&&pt.type==='knuckle';
+ const pid=S.online&&S.online.inGame&&pitching()?S.online.role[0]+((S.online.n||0)+1):null;
+ S.pitch=netSeedPid(pid,'w',()=>pitchRoll(kf,pt,bpm,dmn,knk));WIN=winOf(curBatter())*Math.pow(95/S.pitch.mph,1.3);
  S.swing=null;setPhase('windup');
  if(S.online&&S.online.inGame&&pitching())netWindup();
  if(pitching()&&!S.auto){S.pitch.q=null;S.meterT0=performance.now();const z=meterZones(),gh=goodHalf(z);$('rmP').hidden=z.pz<=0;$('rmP').style.left=$('rmP').style.right=`${(.5-z.pz)*100}%`;$('rmG').style.left=$('rmG').style.right=`${(.5-gh)*100}%`;$('rmTxt').textContent=z.pz<=0?'GASSED · TAP TO RELEASE':'TAP TO RELEASE';$('relMeter').hidden=false}
@@ -46,19 +52,26 @@ function cpuDecide(){
  const err=clamp(randn()*WIN*.36*(1.3-b.con/150)*(1+q*.6)*(p.inZone?1:1.5),-WIN*1.1,WIN*1.1);
  S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)};
 }
+// a human pitcher's release quality q puts the pitch somewhere (a CPU pitcher's spot was rolled at the windup);
+// a tired arm, or a careless release, sometimes gets away from the catcher
+function relRoll(p){
+ if(p.q!=null)netSeedPid(p.pid,'r',()=>{const edge=p.q>=1||p.q>.55,inP=p.q>=1?.55:p.q>.55?.66:p.q>=.3?.95:0;
+  p.inZone=Math.random()<inP&&(p.k!=='SP'||Math.random()<(p.q>=1?.3:.15));// a splitter dives out of the zone 80% of the time
+  const sg=Math.random()<.5?-1:1;p.plateX=p.inZone?(edge?sg*rand(.5,.68):rand(-.35,.35)):edge&&p.q>=.3?sg*rand(.82,1.05):sg*rand(1.2,1.8)});
+ p.wild=S.mode!=='bp'&&netSeedPid(p.pid,'x',()=>Math.random()<(.0032+tiredness()*.003+(gassed()?.002:0)+(p.q!=null&&p.q<.15?.035:0)))}
 function release(now){S.pitch.releaseAt=now;setPhase('pitch');const _rel=()=>{if(S.online&&S.online.inGame&&pitching())netRelease()};setTimeout(_rel,0);
  {const f=fldKey();S.pcOf[f]=(S.pcOf[f]||0)+1}
  if(pitching()&&!S.auto){const p=S.pitch;if(p.q==null){p.q=.22;$('rmTxt').textContent='LATE RELEASE'}
   // where it ends up: a pitch on the corner is right on the black (some called strikes, some just off), a good one mostly
   // catches the edge, one left over the plate is a strike but hittable, a missed spot is a ball (2025 MLB: ~48% in the zone)
-  const edge=p.q>=1||p.q>.55,inP=p.q>=1?.55:p.q>.55?.66:p.q>=.3?.95:0;
-  p.inZone=Math.random()<inP&&(p.k!=='SP'||Math.random()<(p.q>=1?.3:.15));// a splitter dives out of the zone 80% of the time
-  const sg=Math.random()<.5?-1:1;p.plateX=p.inZone?(edge?sg*rand(.5,.68):rand(-.35,.35)):edge&&p.q>=.3?sg*rand(.82,1.05):sg*rand(1.2,1.8);
   setTimeout(()=>{$('relMeter').hidden=true},700)}
  else if(pitching())$('relMeter').hidden=true;// AUTO switched on mid-windup
+ // where it ends up and whether it gets away: decided from the release quality under the pitch's shared seed, before the
+ // pitcher's arm pays for it, so the batter's phone can work out the same thing from (q, seed)
+ if(!S.pitch.remote)relRoll(S.pitch);
  stamSpend(S.pitch);
- if(S.pitch.remote){}else S.pitch.wild=S.mode!=='bp'&&Math.random()<(.0032+tiredness()*.003+(gassed()?.002:0)+(pitching()&&!S.auto&&S.pitch.q<.15?.035:0));
  if(S.pitch.wild)S.wildUntil=now+1700;
+ mlPitch();
  if(!onlineGame()&&(pitching()||(S.auto&&S.mode!=='bp')))cpuDecide();else if(S.auto&&S.mode==='bp'&&Math.random()<.85){const arr=S.pitch.releaseAt+S.pitch.travel,err=randn()*WIN*.3;S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)}}
  if(S.mode==='bp'&&BUF.bpthrow&&!muted)playSample('bpthrow',.8,.97+Math.random()*.06);// the machine's own thunk-and-whir
  else sfx('woosh',{FB:1.06,SL:1,CH:.92,CB:.95}[S.pitch.k]);
@@ -81,6 +94,9 @@ function pitchPos(p,el){
  const a=f(1),b=f(.97),dx=(a.x-b.x)/.03;
  return{x:a.x+dx*(u-1),y:54-52*u,h:Math.max(.3,a.h-(u-1)*4)};
 }
+// does a swing in the timing window still miss? (under the pitch's shared seed, so the pitcher's phone can check it)
+function swingMiss(err){const bb=curBatter(),wp=Math.max(0,58-bb.con)*.006+(S.pitch.k==='SL'?.1:S.pitch.k==='CH'?.04:S.pitch.k==='KN'?.14:S.pitch.k==='CB'?.08:0)+.3*Math.pow(Math.abs(err)/WIN,2);
+ return netSeedPid(S.pitch.pid,'s',()=>Math.random()<wp)}
 function swing(){const had=!!S.swing;swing0();if(S.online&&S.online.inGame&&!pitching()&&!had&&S.swing)netDecide(S.swing.bunt?'bunt':'swing')}
 function swing0(){
  ensureAudio();
@@ -92,8 +108,7 @@ function swing0(){
  if(S.pitch.k==='SP'){S.swing.miss=true;showTiming(err);sfx('whiff');return}
  if(Math.abs(err)<=WIN){
   // the further off the timing, the likelier the bat just misses it (a perfect swing still finds the ball)
-  const bb=curBatter(),wp=Math.max(0,58-bb.con)*.006+(S.pitch.k==='SL'?.1:S.pitch.k==='CH'?.04:S.pitch.k==='KN'?.14:S.pitch.k==='CB'?.08:0)+.3*Math.pow(Math.abs(err)/WIN,2);
-  if(Math.random()<wp){S.swing.miss=true;showTiming(err);sfx('whiff');return}
+  if(swingMiss(err)){S.swing.miss=true;showTiming(err);sfx('whiff');return}
   if(err<0)S.swing.contactAt=S.pitch.releaseAt+S.pitch.travel;else doContact()}
  else{S.swing.miss=true;showTiming(err);sfx('whiff')}
 }
@@ -120,6 +135,7 @@ function doContact(){
  if(S.swing.bunt){
   const sw=S.swing;sw.done=true;
   if(netRand(()=>Math.random()<.08)||S.pitch.k==='SP'){sw.miss=true;return}
+  mlContact();
   if(S.mode==='bp'){const s0=rand(-38,38),P={err:0,q:.5,EV:rand(22,38),L:rand(-18,-4),s:s0};S.play=buildBP(P,{x:Math.sin(s0*RAD),y:Math.cos(s0*RAD)},curBatter());S.play.res.banner='BUNT';sfx('crack',.1);
    const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});S.bpCam={pl,at:performance.now()};setPhase('play');return}
   S.play=netRand(()=>simulateBunt(curBatter()));sfx('crack',.1);spawnFlash(6);setPhase('play');setCam('follow');return;
@@ -131,7 +147,7 @@ function doContact(){
  S.steal=null;
  const sw=S.swing;sw.done=true;if(!sw.cpu)showTiming(sw.err);spawnFlash(14);
  const b=curBatter();
- S.play=netRand(()=>simulateContact(sw.err,effHand(b),b));S.stealCarry=null;
+ mlContact();S.play=netRand(()=>simulateContact(sw.err,effHand(b),b));S.stealCarry=null;
  {const r=S.play.res;if(S.mode!=='bp'&&!S.play.foul&&batKey()===S.you&&(r.hr||S.play.deep||r.runs>0))sfx('bigcheer')}
  const q=clamp(1-Math.pow(Math.abs(sw.err)/WIN,1.25),0,1);
  if(!S.play.foul&&(S.play.res.hr||S.play.deep)&&BUF.echo1&&!muted)playSample(pick(['echo1','echo2','echo3']),.65+.35*q,1);else sfx('crack',q);
@@ -142,13 +158,14 @@ function pitchEnd(){
  const b=curBatter();
  if(S.online&&S.online.inGame&&!pitching()&&!S.swing)netDecide('take');
  if(S.mode==='bp'){banner(S.swing?'SWING AND MISS':'TAKE',S.pitch.name.toLowerCase()+` · ${S.pitch.mph} mph`,S.swing?'strike':'ball');setPhase('call');updateHUD();return}
+ mlPitchEnd();
  if(S.pitch.wild){
   if(S.bases[0]||S.bases[1]||S.bases[2]){const sc=S.bases[2]?1:0;S.bases=[null,S.bases[0],S.bases[1]];addRuns(sc);logPA(b,'Wild pitch, runners advance'+(sc?' · 1 run scores':''),!!sc)}
  }else if(!S.pitch.popped)sfx('pop');
  if(S.pitch.hbp&&!S.swing){const nb=[...S.bases];let runs=0;
   {const hp=pitchPos(S.pitch,S.pitch.travel*.97),sg=hp.x<0?-1:1;S.hbpFx={at:performance.now(),x0:hp.x,y0:hp.y,h0:Math.max(2.5,hp.h),dx:sg*rand(7,13),dy:rand(5,11),who:b,hand:effHand(b),T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5'}}
   if(nb[0]){if(nb[1]){if(nb[2])runs++;nb[2]=nb[1]}nb[1]=nb[0]}nb[0]=b;S.bases=nb;addRuns(runs);S.steal=null;
-  logPA(b,'Hit by pitch, HBP'+(runs?' · 1 run scores':''),!!runs);banner('HIT BY PITCH',runs?'Forces in a run':'Take your base','ball');
+  logPA(b,'Hit by pitch, HBP'+(runs?' · 1 run scores':''),!!runs);mlDone('HBP',runs);banner('HIT BY PITCH',runs?'Forces in a run':'Take your base','ball');
   noise(.07,'lowpass',380,.6);crowdReach();crowdSad();nextBatter();setPhase('call');updateHUD();return}
  const stealOn=S.steal&&(S.steal[1]||S.steal[2])&&!S.pitch.wild,outsB=S.outs,ballsB=S.balls;
  if(S.swing&&S.swing.bunt){S.swing.miss=true;strike(true,b,true)}else if(S.swing)strike(true,b);else if(S.pitch.inZone)strike(false,b);else ball(b);
@@ -161,7 +178,7 @@ function pitchEnd(){
 function strike(swinging,b,buntMiss){
  S.strikes++;if(!swinging)S.umpPunch=performance.now()+800;
  if(S.strikes>=3){S.outs++;S.jumbo={kBig:true,look:!swinging,text:swinging?'STRIKEOUT':'CAUGHT LOOKING',until:performance.now()+2800};if(batKey()===S.you){S.ks++;(S.kLook=S.kLook||[]).push(!swinging);if(S.mode!=='bp')crowdSad()}else{S.myK++;S.cheerUntil=performance.now()+1800;if(fldKey()===S.you)organCue('klost')}
-  logPA(b,swinging?'Strikeout swinging, K':'Called strike three, backwards K',false);
+  logPA(b,swinging?'Strikeout swinging, K':'Called strike three, backwards K',false);mlDone(swinging?'K':'KL',0);
   banner(swinging?'STRIKEOUT':'STRIKE THREE',swinging?`Got him with the ${S.pitch.name.toLowerCase()}`:'Caught looking','strike');sfx('out');S.koWalk={who:b,at:performance.now(),sd:batKey()===S.you?1:-1,T:TEAMS[batKey()],pants:batKey()===S.you?'#eeeae0':'#a9b0b5',hand:effHand(b)};nextBatter();
  }else banner(buntMiss?'MISSED THE BUNT':swinging?'SWING AND MISS':'STRIKE',`${S.balls}-${S.strikes}`,'strike');
 }
@@ -171,7 +188,7 @@ function ball(b){
   const nb=[...S.bases];let runs=0;
   if(nb[0]){if(nb[1]){if(nb[2])runs++;nb[2]=nb[1]}nb[1]=nb[0]}nb[0]=b;
   S.bases=nb;addRuns(runs);
-  logPA(b,'Walk, BB'+(runs?' · 1 run scores':''),!!runs);
+  logPA(b,'Walk, BB'+(runs?' · 1 run scores':''),!!runs);mlDone('BB',runs);
   banner('BALL FOUR',runs?'Bases-loaded walk forces in a run':'Take your base','ball');crowdReach();nextBatter();
  }else banner('BALL',`${S.balls}-${S.strikes}`,'ball');
 }

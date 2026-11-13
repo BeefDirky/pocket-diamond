@@ -3,13 +3,46 @@
 | Step | What | State |
 |---|---|---|
 | 1 | Audit | done (13 Nov) |
-| 2 | Database schema (`supabase/migrations/001_core.sql`) | **written and tested locally; run it in Supabase** |
-| 3a | Make online games verifiable (client netcode, below) | next |
-| 3b | `match-start` / `match-submit` Edge Functions | after 3a |
+| 2 | Database schema (`supabase/migrations/001_core.sql`) | done; live in Supabase (13 Nov) |
+| 3a | Make online games verifiable (client netcode, below) | done (13 Nov) |
+| 3b | Server match flow + settlement (`supabase/migrations/002_ranked.sql`) and the ranked lobby | done; **run 002 in Supabase** |
 | 4 | Leaderboard screen + player profiles | after 3b |
 | 5 | Analytics events → PostHog (catalogue in `ANALYTICS_EVENTS.md`) | any time |
 | 6 | PostHog dashboards + Postgres warehouse link | after 5 |
 | 7 | Multiplayer reliability (rejoin, connection indicator, version lock, rematch) | any time |
+
+## What step 3 changed (13 Nov)
+
+**In the game (`src/js/14-pitching.js`, `23-online.js`, `23b-match-log.js`, `23c-ranked.js`):**
+- Every random part of a pitch is rolled under the pitch's shared seed: the pitch itself, where a release puts it, wild pitches, and whether a swing in the window still misses. The receiving phone re-rolls each one and compares.
+- **Cross-checks on every pitch:**
+  - The batter's phone compares the pitcher's state snapshot with its own state *before* taking it.
+  - The pitcher's phone compares a hash of the batter's state that comes with each swing/take decision.
+  - Any mismatch is recorded. In casual it's only logged and the game heals as before; in ranked it voids the result.
+- **Fixed an existing bug the checks exposed:** the pitcher's snapshot shared live objects. When the batter first saw a pitch at its release, it counted that pitch twice (pitch count and stamina were off by one until the next pitch).
+- A structured match record on both phones: every plate appearance with every pitch. The hash covers only discrete facts, so floating-point differences between browsers can't split it.
+- **Ranked lobby:**
+  - The host picks Casual or Ranked. Both players must be signed in with a username.
+  - Stock rosters, one game. The server opens the match, the guest joins it, and the server rolls the seed. The guest only starts the game the server set up.
+  - Pings every 30 s. At the end, the final screen shows the result and the rating change.
+- **Your own line:** single player and casual online report it (when you're signed in) to `report_match`, unverified. AUTO-only games aren't reported.
+
+**On the server (`002_ranked.sql`):**
+- **Postgres functions, not Edge Functions.** They run with the caller's verified sign-in (`auth.uid()`), which gives the same security as an Edge Function, with nothing extra to deploy. Edge Functions stay the place for the later server replay, which needs the game's JavaScript.
+- `pd_validate_log` re-adds every record: runs per half equal the line score, 3 outs per half, totals equal the final, plate appearances in order, each PA's last pitch fits its result, and the game ended legally.
+- `ranked_submit` settles a match only when both records hash the same, neither phone flagged anything, the clubs/innings/no-AUTO rules hold, and the record validates. Otherwise it's **disputed**.
+- `ranked_claim` gives a forfeit win after the opponent has been silent for 3 minutes. It counts for W/L and rating, but writes no batting lines.
+- Rate limits: ranked opens (5 a minute, 200 a day), submits, and self-reports (one per 20 s, 300 a day).
+- `report_match`: validated self-reported lines by mode. They never reach a leaderboard.
+
+**Tests:**
+- `supabase/tests/run.sh`: 95 database checks on real game records.
+- `tests/desync.py`: an honest online game must raise no cross-check flags.
+- `tests/ranked_e2e.py`: two real game clients against the real SQL. An honest ranked game settles; a phone that inflates its own score is disputed.
+
+**Known limits:**
+- A page reload in the middle of a ranked game loses that phone's record, so the result won't count.
+- A timing script (perfect swings or releases) isn't caught yet; the per-pitch timing data is stored for flagging later.
 
 ## Decisions (Derrick, 13 Nov)
 

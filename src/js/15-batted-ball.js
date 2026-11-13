@@ -130,7 +130,7 @@ function simulateContact(err,hand,b){
  const tm=Math.min(1.25,Math.abs(err)/WIN);
  const s=pull*(Math.sign(-err)*Math.pow(tm,.75)*50+3)+randn()*6;
  const dir={x:Math.sin(s*RAD),y:Math.cos(s*RAD)};
- const P={err,q,EV,L,s};
+ const P={err,q,EV,L,s};S.lastBB=P;
  if(S.mode==='bp')return buildBP(P,dir,b);
  // fouls: fewer than MLB's ~half of contact, which made at-bats drag. Late or early contact fouls off more;
  // a PERFECT swing almost always stays fair
