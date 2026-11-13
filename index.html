@@ -1292,8 +1292,8 @@ canvas.shake{animation:packShake .6s steps(6)}
       </div>
       <div class="card wide" id="scrCards" hidden>
         <div class="ckTop"><h1>INVEN<span>TORY</span></h1><span class="ckProg" id="ckProg"></span></div>
-        <div class="seg ckSet" id="ckSet"><button type="button" data-v="kbo" aria-pressed="true">KBO Series</button><button type="button" data-v="bl" aria-pressed="false">Big League Series</button></div>
-        <p class="invHint">Tap a card to see it up close. A duplicate levels a player up: +1 to a rating of your choice, in every game he plays for your club.</p>
+        <div class="seg ckSet" id="ckSet"><button type="button" data-v="fa" aria-pressed="true">Free Agents</button><button type="button" data-v="bl" aria-pressed="false">Big League Series</button></div>
+        <p class="invHint">Tap a card to see it up close. Every card is a free agent: sign him to any club on the Lineup screen. A duplicate levels him up: +1 to a rating of your choice.</p>
         <div class="ckFilter" id="ckFilter"></div>
         <div class="binder" id="binder"></div>
         <button class="mbtn back" type="button" id="invBack" data-go="scrSingle">Back</button>
@@ -1301,10 +1301,10 @@ canvas.shake{animation:packShake .6s steps(6)}
       <div class="card wide" id="scrShop" hidden>
         <div class="ckTop"><h1>SH<span>OP</span></h1><span class="shopBal" id="shopBal"></span></div>
         <div class="shopRow">
-          <div class="shopItem"><canvas id="shopCvK" width="48" height="64"></canvas><div class="shopTxt"><b>KBO SERIES PACK</b><p>Five cards from the ten clubs, at least one Rare or better. Duplicates level your players up.</p>
-            <button class="big shopBuy" type="button" data-set="kbo"><i class="coinIc"></i>200 · BUY</button></div></div>
+          <div class="shopItem"><canvas id="shopCvK" width="48" height="64"></canvas><div class="shopTxt"><b>FREE AGENT PACK</b><p>Five free agents, at least one Rare or better. Sign them to any club; duplicates level them up.</p>
+            <button class="big shopBuy" type="button" data-set="fa"><i class="coinIc"></i>200 · BUY</button></div></div>
           <div class="shopItem bl"><canvas id="shopCvB" width="48" height="64"></canvas><div class="shopTxt"><b>BIG LEAGUE PACK</b><p>Five cards from the 60 parody big-league stars, every one Rare or better.</p>
-            <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>200 · BUY</button></div></div>
+            <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>500 · BUY</button></div></div>
         </div>
         <div class="shopOwn" id="shopOwn" hidden><span id="shopOwnTxt"></span><button class="mbtn" type="button" id="shopOpenOwn">OPEN ONE</button></div>
         <p class="shopMsg" id="shopMsg" aria-live="polite"></p>
@@ -6307,7 +6307,7 @@ const saveSign=()=>{try{localStorage.setItem('pd-signings',JSON.stringify(SIGN))
 function snapOrig(){for(const k of ORDER){const T=TEAMS[k];if(!T.orig)T.orig={L:T.lineup.slice(),P:T.staff.slice()}}}
 function signClone(c,base,lvSpec){const p={...c.p,...cardEff(c,lvSpec)},q={name:p.name,hand:p.hand,thr:p.thr||p.hand,pos:base.pos,natPos:p.pos,no:base.no,signed:c.id,
   con:p.con,pow:p.pow,spd:p.spd,def:p.def==null?60:p.def,vel:p.vel,mov:p.mov,ctl:p.ctl,slot:p.slot||'over',type:p.type,bat:p.bat||base.bat||'#d9b07a'};
- if(p.skin)SKIN_OVR[q.name]=p.skin;if(lvSpec)q.lvSpec=lvSpec;if(c.pit)q.ars=arsFor({...q,pos:base.pos},c.code||c.k);return q}
+ if(p.skin)SKIN_OVR[q.name]=p.skin;if(lvSpec)q.lvSpec=lvSpec;if(c.pit)q.ars=arsFor({...q,pos:base.pos},c.code||c.k||'fa');return q}
 // where does the original player for this slot live now (lineup order can be shuffled)
 function slotOf(T,orig,pit){const arr=pit?T.staff:T.lineup;return arr.findIndex(p=>p===orig||(p.signedFor===orig.name))}
 function signPlayer(k,origName,cardId,pit,save){const T=TEAMS[k],arr=pit?T.staff:T.lineup,orig=(pit?T.orig.P:T.orig.L).find(p=>p.name===origName),c=CARD_BY[cardId];
@@ -6341,7 +6341,7 @@ function openSheet(i){const T=TEAMS[S.you],pit=i<0,p=pit?T.staff[-1-i]:T.lineup[
  const sorted=own.slice().sort((a,b)=>b.o-a.o);
  $('shList').innerHTML=sorted.length?sorted.map(c=>{const q=c.p,T2=c.T||TEAMS[c.k],inUse=used.has(c.id),here=real.signed===c.id;
    const st=c.pit?[['VEL',q.vel],['MOV',q.mov],['CTL',q.ctl]]:[['CON',q.con],['POW',q.pow],['SPD',q.spd],['DEF',q.def]];
-   return `<button type="button" class="shRow r${c.r}" data-id="${c.id}" ${inUse?'disabled':''}><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">
+   return `<button type="button" class="shRow r${c.r}" data-id="${c.id}" ${inUse?'disabled':''}><img alt="" src="${cardLogo(c)}">
     <span class="nm"><b>${q.name}</b><small>${c.set==='bl'?T2.city+' · Big League':T2.city+' '+T2.name} · ${q.pos} · ${RARITY[c.r]}${here?' · IN THIS SPOT':inUse?' · ALREADY SIGNED':''}</small></span>
     <span class="o" style="color:${rcol(c.o)}">${c.o}</span><span class="sts">${st.map(([k,v])=>`<i>${k} <b style="color:${rcol(v)}">${v}</b></i>`).join('')}</span></button>`}).join('')
   :`<p class="shEmpty">No ${pit?'pitcher':'hitter'} cards yet. Buy card packs in the shop to collect players.</p>`;
@@ -6951,21 +6951,23 @@ acRender();
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'];
 let CARDS=[],CARD_BY={};
-let COL={packs:3,owned:{},seen:{},lv:{}};
-try{const v=JSON.parse(localStorage.getItem('pd-cards')||'null');if(v&&typeof v==='object')COL={packs:v.packs|0,owned:v.owned||{},seen:v.seen||{},lv:v.lv||{}}}catch(e){}
+let COL={packs:3,owned:{},seen:{},lv:{},mig:1};
+try{const v=JSON.parse(localStorage.getItem('pd-cards')||'null');if(v&&typeof v==='object')COL={packs:v.packs|0,owned:v.owned||{},seen:v.seen||{},lv:v.lv||{},mig:v.mig|0}}catch(e){}
 const saveCol=()=>{try{localStorage.setItem('pd-cards',JSON.stringify(COL))}catch(e){}};
 function buildCardDB(){
  CARDS=[];for(const k of ORDER){const T=TEAMS[k];
-  T.lineup.forEach((p,i)=>{const q=p.custom?T.benched:p;if(q)CARDS.push({id:k+':'+i,k,p:q,pit:false,set:'kbo'})});
-  (T.staff||[T.pitcher]).forEach((p,j)=>CARDS.push({id:k+':p'+j,k,p,pit:true,set:'kbo'}))}
+  T.lineup.forEach((p,i)=>{const q=p.custom?T.benched:p;if(q)CARDS.push({id:k+':'+i,k,p:q,pit:false,set:'club'})});
+  (T.staff||[T.pitcher]).forEach((p,j)=>CARDS.push({id:k+':p'+j,k,p,pit:true,set:'club'}))}
  const sorted=CARDS.map(c=>ovr(c.p)).sort((a,b)=>b-a),cut=f=>sorted[Math.floor(sorted.length*f)];
  const L=cut(.08),E=cut(.25),Rr=cut(.55);
  for(const c of CARDS){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};const o=ovr(c.p);c.o=o;c.r=o>=L?3:o>=E?2:o>=Rr?1:0;if(c.p.type&&c.r<2)c.r=2;CARD_BY[c.id]=c}
+ for(const c of buildFreeAgents()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};c.o=ovr(c.p);CARDS.push(c);CARD_BY[c.id]=c}
+ {const F=CARDS.filter(c=>c.set==='fa'),s=F.map(c=>c.o).sort((a,b)=>b-a),cut=f=>s[Math.floor(s.length*f)],L=cut(.08),E=cut(.25),R=cut(.55);for(const c of F){c.r=c.o>=L?3:c.o>=E?2:c.o>=R?1:0;if(c.p.type&&c.r<2)c.r=2}}
  for(const c of buildBigLeague()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};CARDS.push(c);CARD_BY[c.id]=c}
 }
 const ART={};
 function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key];try{return ART[key]=cardArt2(c,tk)}catch(e){console.warn(e)}
- const T=c.T||TEAMS[c.k],ST2=c.set==='bl'?BL_PARK:STADIUMS[c.k],p=c.p,cv2=document.createElement('canvas');cv2.width=64;cv2.height=80;const g=cv2.getContext('2d');
+ const T=c.T||TEAMS[c.k],ST2=c.set==='bl'||!STADIUMS[c.k]?BL_PARK:STADIUMS[c.k],p=c.p,cv2=document.createElement('canvas');cv2.width=64;cv2.height=80;const g=cv2.getContext('2d');
  const rr=mulberry32(hash(c.id+'art'));
  // backdrop: crowd, wall, grass, dirt where he plays
  g.fillStyle=ST2.seat[0];g.fillRect(0,0,64,22);
@@ -6995,36 +6997,36 @@ function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],own=COL.owned[c.
  const st=(c.pit?[['VEL','vel'],['MOV','mov'],['CTL','ctl'],['DEF','def']]:[['CON','con'],['POW','pow'],['SPD','spd'],['DEF','def']]).map(([k,f])=>[k,p[f],lv[f]|0]);
  const tag=(p.slot==='side'?' · SIDEARM':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'');
  return `<div class="tc r${c.r}${lock?' lock':''}${c.set==='bl'?' bl':''}" data-id="${c.id}" style="--tj:${T.jersey};--tc:${T.cap}">
-  <div class="tcHead"><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">${c.set==='bl'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(o)}"`}>${lock?'??':o}</span></div>
+  <div class="tcHead"><img alt="" src="${cardLogo(c)}">${c.set==='bl'||c.set==='fa'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(o)}"`}>${lock?'??':o}</span></div>
   <img class="art" alt="" src="${cardArt(c)}">
   <div class="nm">${lock?'???':p.name}</div>
   <div class="ps"><span>${p.no!=null?'#'+p.no+' ':''}${c.pit?(p.pos==='SP'?'SP':'RP'):p.pos}</span><span>${c.pit?'T':'B'} ${p.hand}</span></div>
   <div class="st">${st.map(([k,v,up])=>`<span${up&&!lock?' class="up"':''}>${k}<b${lock||v==null?'':` style="color:${rcol(v)}"`}>${lock||v==null?'–':v}</b></span>`).join('')}</div>
   <div class="rar">${RARITY[c.r]}${tag}</div>
   ${!lock&&own>1&&!opts.noCount?`<em class="cnt">x${own}</em>`:''}${!lock&&n?`<em class="lvB">LV ${n+1}</em>`:''}${opts.isNew?'<em class="new">NEW</em>':''}</div>`}
-let binderTeam='all',binderSet='kbo';
+let binderTeam='all',binderSet='fa';
 function renderBinder(){
  if(!CARDS.length)buildCardDB();
  const SET=CARDS.filter(c=>c.set===binderSet),ownedN=SET.filter(c=>COL.owned[c.id]).length;
  $('ckProg').textContent=`Collected ${ownedN} / ${SET.length}`;
  for(const b of $('ckSet').children)b.setAttribute('aria-pressed',String(b.dataset.v===binderSet));
- $('ckFilter').innerHTML=binderSet==='bl'?['all','bat','pit'].map(k=>`<button type="button" data-k="${k}" aria-pressed="${binderTeam===k}">${{all:'All',bat:'Hitters',pit:'Pitchers'}[k]}</button>`).join(''):`<button type="button" data-k="all" aria-pressed="${binderTeam==='all'}">All</button>`+ORDER.map(k=>{const n=CARDS.filter(c=>c.k===k&&COL.owned[c.id]).length,t=CARDS.filter(c=>c.k===k).length;return`<button type="button" data-k="${k}" aria-pressed="${binderTeam===k}"><img alt="" src="${LOGO_URL[k]}">${n}/${t}</button>`}).join('');
- const list=SET.filter(c=>binderTeam==='all'||(binderSet==='bl'?(binderTeam==='pit')===c.pit:c.k===binderTeam)).slice().sort((a,b)=>(!!COL.owned[b.id]-!!COL.owned[a.id])||b.r-a.r||b.o-a.o);
+ $('ckFilter').innerHTML=binderSet==='bl'||binderSet==='fa'?['all','bat','pit'].map(k=>`<button type="button" data-k="${k}" aria-pressed="${binderTeam===k}">${{all:'All',bat:'Hitters',pit:'Pitchers'}[k]}</button>`).join(''):`<button type="button" data-k="all" aria-pressed="${binderTeam==='all'}">All</button>`+ORDER.map(k=>{const n=CARDS.filter(c=>c.k===k&&COL.owned[c.id]).length,t=CARDS.filter(c=>c.k===k).length;return`<button type="button" data-k="${k}" aria-pressed="${binderTeam===k}"><img alt="" src="${LOGO_URL[k]}">${n}/${t}</button>`}).join('');
+ const list=SET.filter(c=>binderTeam==='all'||(binderTeam==='pit')===c.pit).slice().sort((a,b)=>(!!COL.owned[b.id]-!!COL.owned[a.id])||b.r-a.r||b.o-a.o);
  $('binder').innerHTML=list.map(c=>cardHTML(c,{lock:!COL.owned[c.id]})).join('');
  updatePackBadge();
 }
 function updatePackBadge(){for(const id of['pkBadge','pkBadge2']){const b=$(id);if(!b)continue;b.hidden=COL.packs<=0;b.textContent=COL.packs}}
-function drawPack(cv,set){const g=cv.getContext('2d'),bl=set==='bl',T=bl?{jersey:'#1d3f7a',cap:'#c8202a'}:TEAMS[S.you];g.clearRect(0,0,48,64);
+function drawPack(cv,set){const g=cv.getContext('2d'),bl=set==='bl',T=bl?{jersey:'#1d3f7a',cap:'#c8202a'}:{jersey:'#4b535c',cap:'#ffbf3c'};g.clearRect(0,0,48,64);
  g.fillStyle='#1b1f24';g.fillRect(2,2,44,60);g.fillStyle=T.jersey;g.fillRect(4,4,40,56);g.fillStyle=T.cap;g.fillRect(4,4,40,8);g.fillRect(4,52,40,8);
  g.fillStyle='rgba(255,255,255,.25)';for(let x=4;x<44;x+=4){g.fillRect(x,4,2,2);g.fillRect(x+2,58,2,2)}
  g.fillStyle='#ffbf3c';g.fillRect(8,16,32,24);g.fillStyle='#1b1f24';g.fillRect(10,18,28,20);
  g.fillStyle='#f4f1e8';g.beginPath();g.moveTo(24,20);g.lineTo(34,28);g.lineTo(24,36);g.lineTo(14,28);g.closePath();g.fill();
  g.fillStyle='#c48c56';g.beginPath();g.moveTo(24,24);g.lineTo(29,28);g.lineTo(24,32);g.lineTo(19,28);g.closePath();g.fill();
- g.fillStyle='#ffbf3c';g.font='6px "Press Start 2P", monospace';g.textAlign='center';g.fillText(bl?'BIG LG':'CARDS',24,48);g.textAlign='left';
+ g.fillStyle='#ffbf3c';g.font='6px "Press Start 2P", monospace';g.textAlign='center';g.fillText(bl?'BIG LG':'FREE AG',24,48);g.textAlign='left';
  if(bl){g.fillStyle='#f4f1e8';for(const[x,y]of[[8,7],[24,7],[40,7],[16,55],[32,55]])g.fillRect(x-1,y-1,3,3)}}
-function rollCard(minR,set){set=set||'kbo';const w=set==='bl'?[0,70,24,6]:[60,28,10,2.6];let r;do{let x=Math.random()*w.reduce((a,b)=>a+b),i=0;while(x>w[i]){x-=w[i];i++}r=i}while(r<minR);
+function rollCard(minR,set){set=set||'fa';const w=set==='bl'?[0,70,24,6]:[60,28,10,2.6];let r;do{let x=Math.random()*w.reduce((a,b)=>a+b),i=0;while(x>w[i]){x-=w[i];i++}r=i}while(r<minR);
  const all=CARDS.filter(c=>c.set===set);let pool=all.filter(c=>c.r===r);if(!pool.length)pool=all;return pick(pool)}
-function openPack(set,paid){set=set||'kbo';
+function openPack(set,paid){set=set||'fa';
  if(!paid&&COL.packs<=0)return;if(!CARDS.length)buildCardDB();
  if(!paid)COL.packs--;const got=[];for(let i=0;i<5;i++)got.push(rollCard(i===4&&!got.some(c=>c.r>=1)?1:0,set));
  got.sort((a,b)=>a.r-b.r);
@@ -7196,7 +7198,7 @@ coinUI();
 // can be spent to level a player up: +1 to a rating of your choice (up to 99). A levelled player plays at his levelled
 // ratings whenever he plays for your club, as one of its own players or signed into your lineup. Online, the levels travel
 // with the roster spec, so both phones field the same players.
-const PACK_COST=200;
+const PACK_COST={fa:200,bl:500};
 const LV_KEYS={bat:['con','pow','spd','def'],pit:['vel','mov','ctl']};
 const LV_NAME={con:'CON',pow:'POW',spd:'SPD',def:'DEF',vel:'VEL',mov:'MOV',ctl:'CTL'};
 const lvOf=id=>(COL.lv&&COL.lv[id])||{};
@@ -7208,36 +7210,77 @@ function levelUp(id,key){const c=CARD_BY[id],own=COL.owned[id]|0;if(!c||own<2)re
  const lv=COL.lv[id]=COL.lv[id]||{};if(b+(lv[key]|0)>=99)return false;lv[key]=(lv[key]|0)+1;COL.owned[id]=own-1;saveCol();applyLevels();return true}
 // the club's own players take their card's levels in place (only for your club; everyone else plays at their base ratings)
 function applyLevels(){if(!CARDS.length)return;const you=S.you;
- for(const c of CARDS){if(c.set!=='kbo'||!c.b)continue;const lv=c.k===you?lvOf(c.id):{};for(const k in c.b){if(c.b[k]==null)continue;c.p[k]=Math.min(99,c.b[k]+(lv[k]|0))}}
  // signed players carry their levels with them
  for(const k of ORDER){const T=TEAMS[k];for(const arr of[T.lineup,T.staff,T.benched?[T.benched]:[]])for(const p of arr){if(!p||!p.signed||!CARD_BY[p.signed])continue;const e=cardEff(CARD_BY[p.signed],p.lvSpec||lvOf(p.signed));for(const kk in e)p[kk]=e[kk]}}}
 // the native card for a player of club k
-const nativeCard=(k,name)=>CARDS.find(c=>c.set==='kbo'&&c.k===k&&c.p.name===name);
+const nativeCard=()=>null;// club players have no collectible card: levels belong to free agents and Big League cards you sign
 // ---- the zoomed card, with its level-up panel ----
 let ZOOM=null;
 function zoomOpen(id){ZOOM=id;zoomRender();$('zoomCard').hidden=false}
 function zoomRender(){const c=CARD_BY[ZOOM];if(!c)return;const own=COL.owned[c.id]|0,spare=Math.max(0,own-1),keys=LV_KEYS[c.pit?'pit':'bat'],e=cardEff(c),lv=lvOf(c.id),n=lvN(c.id);
  const btns=keys.map(k=>{const v=e[k],max=v>=99;return`<button type="button" class="lvUp" data-k="${k}" ${!spare||max?'disabled':''}><b>${LV_NAME[k]}</b><span>${v}${lv[k]?` <i>+${lv[k]}</i>`:''}</span><em>${max?'MAX':'+1'}</em></button>`}).join('');
  $('zoomCard').innerHTML=`<div class="zoomWrap">${cardHTML(c)}<div class="lvPanel"><div class="lvHead"><b>LEVEL ${n+1}</b><span>${spare?`${spare} spare cop${spare>1?'ies':'y'} · each one is +1 to a rating`:'Get a duplicate of this card to level him up'}</span></div><div class="lvBtns">${btns}</div>
-  <p class="lvNote">${c.set==='kbo'?`Plays at these ratings for ${c.k===S.you?'your club':`your club when signed (or when you play as ${TEAMS[c.k].name})`}.`:'Plays at these ratings when signed into your lineup.'}</p><button type="button" class="mbtn lvClose">Close</button></div></div>`}
+  <p class="lvNote">Plays at these ratings for whichever club you sign him to (Lineup screen).</p><button type="button" class="mbtn lvClose">Close</button></div></div>`}
 $('zoomCard').addEventListener('click',e=>{const b=e.target.closest('.lvUp');if(b){if(!b.disabled&&levelUp(ZOOM,b.dataset.k)){sfx('glove');zoomRender();renderBinder();const t=$('zoomCard').querySelector(`.lvUp[data-k="${b.dataset.k}"]`);if(t){t.classList.add('pop');setTimeout(()=>t.classList.remove('pop'),400)}}return}
  if(e.target.closest('.lvPanel')&&!e.target.closest('.lvClose'))return;$('zoomCard').hidden=true;ZOOM=null});
 // ---- the shop ----
 function shopRender(){if(!$('scrShop'))return;$('shopBal').innerHTML=`<i class="coinIc"></i>${coinFmt(WAL.coins)} COINS`;
- for(const b of document.querySelectorAll('.shopBuy'))b.disabled=WAL.coins<PACK_COST;
+ for(const b of document.querySelectorAll('.shopBuy'))b.disabled=WAL.coins<PACK_COST[b.dataset.set];
  $('shopOwn').hidden=COL.packs<=0;$('shopOwnTxt').textContent=COL.packs===1?'You have 1 unopened pack.':`You have ${COL.packs} unopened packs.`;
- drawPack($('shopCvK'),'kbo');drawPack($('shopCvB'),'bl');updatePackBadge()}
+ drawPack($('shopCvK'),'fa');drawPack($('shopCvB'),'bl');updatePackBadge()}
 function shopMsg(t){$('shopMsg').textContent=t;clearTimeout(shopMsg.t);shopMsg.t=setTimeout(()=>{$('shopMsg').textContent=''},3500)}
 function shopOpen(from){$('shopBack').dataset.go=from||'scrMain';shopRender();showScreen('scrShop')}
 function invOpen(from){$('invBack').dataset.go=from||'scrMain';showScreen('scrCards')}
-for(const b of document.querySelectorAll('.shopBuy'))b.addEventListener('click',()=>{ensureAudio();if(WAL.coins<PACK_COST){shopMsg(`You need ${coinFmt(PACK_COST-WAL.coins)} more coins.`);return}
- WAL.coins-=PACK_COST;saveWal();coinUI();shopRender();shopMsg(`Bought a ${b.dataset.set==='bl'?'Big League':'KBO'} pack for ${PACK_COST} coins.`);openPack(b.dataset.set,true)});
-$('shopOpenOwn').addEventListener('click',()=>{ensureAudio();openPack('kbo',false);shopRender()});
+for(const b of document.querySelectorAll('.shopBuy'))b.addEventListener('click',()=>{ensureAudio();const cost=PACK_COST[b.dataset.set];if(WAL.coins<cost){shopMsg(`You need ${coinFmt(cost-WAL.coins)} more coins.`);return}
+ WAL.coins-=cost;saveWal();coinUI();shopRender();shopMsg(`Bought a ${b.dataset.set==='bl'?'Big League':'Free Agent'} pack for ${coinFmt(cost)} coins.`);openPack(b.dataset.set,true)});
+$('shopOpenOwn').addEventListener('click',()=>{ensureAudio();openPack('fa',false);shopRender()});
 $('shopToInv').addEventListener('click',()=>invOpen('scrShop'));
 $('goShop').addEventListener('click',()=>{ensureAudio();shopOpen('scrMain')});
 $('goInv').addEventListener('click',()=>{ensureAudio();invOpen('scrMain')});
 // the single-player Cards tile opens the inventory, and comes back to single player
 for(const t of document.querySelectorAll('#scrSingle .tile[data-go="scrCards"]'))t.addEventListener('click',()=>{$('invBack').dataset.go='scrSingle'});
+// ---------- the Free Agent set: general players who belong to no club ----------
+// The cards you pull are free agents, not players lifted off the ten clubs' rosters (those stay with their clubs and are
+// never in packs). 90 hitters (ten at each spot in the order's positions) and 50 pitchers, generated once from a fixed seed,
+// so every phone has the same pool and an online roster spec can name a card by id. Cards wear a plain kit and a
+// free-agent badge instead of a club's colours and logo; on the field a signed free agent wears your club's uniform.
+const FA_SUR=['KIM','LEE','PARK','CHOI','JUNG','KANG','CHO','YOON','JANG','LIM','HAN','OH','SEO','SHIN','KWON','HWANG','AHN','SONG','YOO','HONG','JEON','KO','MOON','YANG','SON','BAE','BAEK','HEO','NAM','SIM','NOH','HA','KWAK','SUNG','CHA','JOO','WOO','MIN','RYU','NA','JIN','EOM','CHAE','WON','BANG','GONG','HYUN','PYO','DO','YEO'];
+const FA_FOR=['ALVARADO','BECKETT','CASTILLO','DUVAL','ESPINOZA','FLETCHER','GRANGER','HOLLOWAY','IBARRA','JANSEN','KESSLER','LOMBARDI','MORENO','NAKAMURA','OKAFOR','PRESCOTT','QUINTANA','RAMIREZ','SAWYER','TOLLIVER','VARGAS','WHITLOCK','YAMADA','ZELLER'];
+const FA_KIT={jersey:'#3a4652',cap:'#232b33',city:'FREE AGENT'};
+const FA_POS=['C','1B','2B','3B','SS','LF','CF','RF','DH'];
+function buildFreeAgents(){const rr=mulberry32(20261113),out=[],used=new Set();
+ // names: never the same as anyone on a club roster
+ for(const k of ORDER){const T=TEAMS[k];for(const p of[...T.lineup,...(T.staff||[])])if(p)used.add(p.name)}
+ const L='ABCDEGHJKMSWY',name=()=>{let n,i=0;do{n=rr()<.15?FA_FOR[(rr()*FA_FOR.length)|0]:`${FA_SUR[(rr()*FA_SUR.length)|0]} ${L[(rr()*L.length)|0]}.${L[(rr()*L.length)|0]}.`;i++}while(used.has(n)&&i<50);used.add(n);return n};
+ const st=v=>clamp(Math.round(v),20,99),q=()=>Math.pow(rr(),1.5);// most free agents are role players; a few are stars
+ let no=0;const num=()=>{no=(no%98)+1+((rr()*3)|0);return no%99+1};
+ FA_POS.forEach((pos,pi)=>{const a=ARCH[pos==='DH'?'DH':pos];for(let i=0;i<10;i++){const u=q(),b=u*26-8,n=()=>(rr()*20-10);
+  const p={name:name(),hand:rr()<.32?'L':rr()<.06?'S':'R',thr:'R',pos,no:num(),con:st(a[0]+b+n()),pow:st(a[1]+b+n()),spd:st(a[2]+b*.6+n()),def:st(a[3]+b*.7+n())};
+  if(p.hand==='S')p.hand='R';if((pos==='1B'||pos==='LF'||pos==='RF'||pos==='DH')&&rr()<.3)p.thr='L';
+  if(rr()<.3){const k=['con','pow','spd','def'][(rr()*4)|0];p[k]=st(p[k]+14)}// one standout tool
+  p.bat=['#1c1c1f','#5a2a1e','#d9b07a'][(rr()*3)|0];out.push({id:'fa:b'+(pi*10+i),set:'fa',T:FA_KIT,pit:false,p})}});
+ for(let j=0;j<50;j++){const sp=j<20,u=q(),b=u*26-8,n=()=>(rr()*20-10),hand=rr()<.3?'L':'R';
+  const p={name:name(),hand,thr:hand,pos:sp?'SP':'RP',no:num(),vel:st((sp?80:83)+b+n()),mov:st(68+b+n()),ctl:st((sp?68:62)+b+n()),def:null,slot:rr()<.18?'side':'over'};
+  if(!sp&&j%13===4){p.type='knuckle';p.vel=Math.min(p.vel,62);p.mov=Math.max(p.mov,88)}else if(!sp&&j%17===8){p.type='demon';p.vel=Math.max(p.vel,95)}
+  out.push({id:'fa:p'+j,set:'fa',T:FA_KIT,pit:true,p})}
+ return out}
+// the badge in the corner of a free agent's card: the position on a plain diamond
+const FA_LOGO={};
+function faLogo(c){const key=c.pit?(c.p.pos||'P'):c.p.pos;if(FA_LOGO[key])return FA_LOGO[key];const cv=document.createElement('canvas');cv.width=cv.height=32;const g=cv.getContext('2d');
+ g.fillStyle='#1b1f24';g.beginPath();g.moveTo(16,1);g.lineTo(31,16);g.lineTo(16,31);g.lineTo(1,16);g.closePath();g.fill();
+ g.fillStyle='#f4f1e8';g.beginPath();g.moveTo(16,4);g.lineTo(28,16);g.lineTo(16,28);g.lineTo(4,16);g.closePath();g.fill();
+ g.fillStyle='#1b1f24';g.font='bold 10px "Pixelify Sans", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText(key,16,17);return FA_LOGO[key]=cv.toDataURL()}
+const cardLogo=c=>c.set==='bl'?blLogo(c.code):c.set==='fa'?faLogo(c):LOGO_URL[c.k];
+// ---- one-time: cards from the old club-roster set become free agents of the same rarity and kind ----
+// counts and levels carry over; a signing of an old card points at its replacement
+function migrateCards(){if(COL.mig>=1)return;const map={};
+ const old=Object.keys(COL.owned).filter(id=>!/^(fa|bl):/.test(id));
+ for(const id of old){const c=CARD_BY[id];if(!c){delete COL.owned[id];continue}
+  const pool=CARDS.filter(x=>x.set==='fa'&&x.pit===c.pit&&x.r===c.r),alt=CARDS.filter(x=>x.set==='fa'&&x.pit===c.pit),P=pool.length?pool:alt;
+  const nc=P[hash(id+'mig')%P.length];map[id]=nc.id;COL.owned[nc.id]=(COL.owned[nc.id]|0)+(COL.owned[id]|0);delete COL.owned[id];
+  if(COL.lv[id]){const L=COL.lv[nc.id]=COL.lv[nc.id]||{};for(const k in COL.lv[id])L[k]=(L[k]|0)+COL.lv[id][k];delete COL.lv[id]}}
+ for(const k in SIGN)for(const slot in SIGN[k]){const id=SIGN[k][slot];if(map[id])SIGN[k][slot]=map[id];else if(!/^(fa|bl):/.test(id))delete SIGN[k][slot]}
+ COL.mig=1;saveCol();saveSign()}
 // ---------- league map: pixel Korea with every club pinned to its city ----------
 const KR_MAIN=[[126.1,37.75],[126.45,37.82],[126.7,37.97],[126.95,38.15],[127.1,38.3],[127.6,38.33],[128.0,38.3],[128.35,38.62],[128.6,38.2],[128.85,37.85],[129.05,37.6],[129.3,37.15],[129.38,36.7],[129.45,36.2],[129.45,35.9],[129.5,35.6],[129.4,35.4],[129.2,35.17],[128.95,35.05],[128.6,34.92],[128.3,34.88],[128.0,34.85],[127.75,34.75],[127.5,34.62],[127.3,34.48],[127.0,34.42],[126.75,34.32],[126.5,34.3],[126.3,34.45],[126.28,34.75],[126.35,35.05],[126.42,35.4],[126.55,35.65],[126.7,35.95],[126.6,36.2],[126.5,36.45],[126.2,36.65],[126.15,36.85],[126.45,37.0],[126.8,37.15],[126.65,37.4],[126.55,37.6]];
 const KR_ISL=[[[126.25,33.28],[126.3,33.42],[126.55,33.56],[126.85,33.54],[126.95,33.45],[126.8,33.29],[126.55,33.21]],[[130.86,37.45],[130.92,37.53],[130.8,37.53]],[[128.6,34.9],[128.72,34.95],[128.7,34.75],[128.58,34.72]]];
@@ -8395,7 +8438,7 @@ $('snd').addEventListener('click',()=>{muted=!muted;ensureAudio();applyVolumes()
 
 document.addEventListener('pointerdown',e=>{if(e.button>0||overlayOpen()||e.target===cv)return;if(e.target.closest('button,input,select,textarea,a,label,.book,.zoomCtl,.pauseBtn'))return;if(S.phase==='title'||S.phase==='over')return;swing()});
 addEventListener('pointerdown',ensureAudio,{once:true});addEventListener('keydown',ensureAudio,{once:true});
-if(!TEAMS[S.you])S.you='busan';if(S.opp===S.you)S.opp=TS_ORDER.find(k=>k!==S.you);document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();applySignings();applyLevels();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
+if(!TEAMS[S.you])S.you='busan';if(S.opp===S.you)S.opp=TS_ORDER.find(k=>k!==S.you);document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();migrateCards();applySignings();applyLevels();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
 const fontsReady=Promise.race([
  Promise.all([document.fonts.load('12px "Pixelify Sans"'),document.fonts.load('12px Jua'),document.fonts.load('bold 10px "Silkscreen"'),document.fonts.load('12px "Press Start 2P"'),document.fonts.load('40px "Yellowtail"')]),
  new Promise(r=>setTimeout(r,2500))]).catch(()=>{});
