@@ -42,7 +42,7 @@ $('goFull').addEventListener('click',()=>chooseMode('full'));
 $('goBP').addEventListener('click',()=>chooseMode('bp'));
 $('goPO').addEventListener('click',()=>chooseMode('playoffs'));
 $('goWatch').addEventListener('click',()=>chooseMode('watch'));
-$('goMulti').addEventListener('click',()=>{ensureAudio();if(!navigator.onLine){netSay('Multiplayer needs an internet connection. Single player and batting practice work offline.',4500);return}openOnline()});
+$('goMulti').addEventListener('click',()=>{ensureAudio();if(!navigator.onLine){netSay('Multiplayer needs an internet connection. Single player and batting practice work offline.',4500);return}const o=S.online;if(o&&o.nr){openOnline();return}mpOpen()});
 $('goAcct').addEventListener('click',()=>{if(!navigator.onLine)netSay('Offline: your progress is saved on this device and will sync when you reconnect.',4500)});
 // a loading screen while the park is built: shown first, painted, then the heavy work runs, then it fades once the
 // first frame of the new park has been drawn

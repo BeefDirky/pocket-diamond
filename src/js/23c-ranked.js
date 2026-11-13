@@ -14,12 +14,18 @@ const rkErr=e=>((e&&e.message)||'Could not reach the server').replace(/^.*?excep
 const rkReady=()=>supaOK()&&!!(ACC.user&&ACC.name);
 // stock rosters: each club's own players at their own ratings, in their usual order
 function stockSpec(k){snapOrig();const T=TEAMS[k];return{L:T.orig.L.map(p=>['n',p.name,{}]),P:T.orig.P.map(p=>['n',p.name,{}])}}
-// is this room playing ranked? (the host chooses; the guest follows)
-const rkOn=o=>!!o&&(o.role==='host'?$('olRk').querySelector('[aria-pressed=true]').dataset.v==='1':!!(o.opp&&o.opp.rk));
+// is this room playing ranked? (the host chose Ranked on the Multiplayer page; a guest plays whatever room it joined)
+const rkOn=o=>!!o&&(o.role==='guest'?!!(o.opp&&o.opp.rk):o.mode==='ranked');
+// the room's heading and blurb follow its kind
+function rkHead(o){const on=rkOn(o);$('olHead').innerHTML=on?'RANKED <span>1v1</span>':'CUSTOM <span>1v1</span>';
+ $('olNote').textContent=on?'A rated game against a friend. One of you creates a room and shares the code, the other joins with it. Each club plays its own roster, one game, and the result counts for both ratings.'
+  :'Play a friend in real time. One of you creates a room and shares the code, the other joins with it. Then you each pick a club. The host is the home team.'}
 // the lobby: who may ready up, and what the room needs to hear about it
 function rkLobby(o){const on=rkOn(o),host=o.role==='host';
- $('olRkRow').hidden=!host||!supaOK();$('olBoRow').hidden=!host||on;
- const nt=$('olRkNote');nt.hidden=!on;
+ $('olBoRow').hidden=!host||on;
+ rkHead(o);
+ const nt=$('olRkNote'),odd=!host&&o.mode==='ranked'&&!!o.opp&&!on;nt.hidden=!on&&!odd;
+ if(odd)nt.textContent='This is a Custom 1v1 room, so it won\u2019t count for rating.';
  if(on)nt.textContent=`RANKED · ${ACC.name||'you'} vs ${(o.opp&&o.opp.acct)||'?'} · stock rosters, one game, counts for rating`;
  if(host&&o.mine.rk!==(on?1:0))netPresence({rk:on?1:0,ros:on?null:rosterSpec(S.you)});
  if(!host&&on&&o.mine.ros)netPresence({ros:null});
@@ -28,8 +34,13 @@ function rkLobby(o){const on=rkOn(o),host=o.role==='host';
  if(!rkReady())return ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account. Sign in on the Account screen (main menu), then come back.';
  if(o.opp&&!o.opp.acct)return'Your opponent needs to sign in to play ranked.';
  return null}
-$('olRk').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const x of $('olRk').children)x.setAttribute('aria-pressed',String(x===b));
- const o=S.online;if(o&&o.mine.rdy)netPresence({rdy:null});lobbyRender()});
+// the Multiplayer page: Ranked or Custom 1v1
+function mpOpen(){const ok=supaOK();$('goRanked').disabled=!ok;$('mpNote').hidden=ok;
+ if(!ok)$('mpNote').textContent='Ranked is played on imugilabs.com/pocket-diamond (it needs the game server).';showScreen('scrMulti')}
+$('goRanked').addEventListener('click',()=>{ensureAudio();if(!rkReady()){$('mpNote').hidden=false;
+  $('mpNote').textContent=ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account so your rating can be saved. Sign in on the Account screen (main menu).';return}
+ openOnline('ranked')});
+$('goCustom').addEventListener('click',()=>{ensureAudio();openOnline('custom')});
 // host: open the match on the server, wait for the guest to join it, then start with the server's seed
 async function rkHostStart(inn){const o=S.online;if(o.rkBusy)return;o.rkBusy=true;
  try{$('olStatus').textContent='Opening a ranked match…';

@@ -705,6 +705,7 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .acMsg{font-size:12px;color:var(--amber);margin:0;min-height:1em}
 /* ranked */
 .abBuild{font-size:.75em;opacity:.55;letter-spacing:.04em}
+.mpNote{margin:10px 0 0;font-size:12px;color:var(--amber);text-align:center;line-height:1.5}
 .olRkNote{margin:2px 0 6px;font-size:11px;letter-spacing:.08em;color:var(--amber);text-align:center}
 .rkRes{margin:6px 0 2px;font-family:var(--f-hud);font-size:13px;letter-spacing:.1em;text-align:center;color:var(--chalk)}
 .rkRes[data-tone=win]{color:#7fd77f}.rkRes[data-tone=loss]{color:var(--amber)}.rkRes[data-tone=bad]{color:#ff8a6a}
@@ -1348,8 +1349,17 @@ canvas.shake{animation:packShake .6s steps(6)}
         <button class="big" id="poPlay" type="button">PLAY GAME</button>
         <div class="tiles three"><button class="tile" type="button" id="poSim"><span>Sim this game</span></button><button class="tile" type="button" id="poNew"><span>New bracket</span></button><button class="tile" type="button" data-go="scrMain"><span>Menu</span></button></div>
       </div>
+      <div class="card" id="scrMulti" hidden>
+        <h1>MULTI<span>PLAYER</span></h1>
+        <div class="modes">
+          <button class="mode" id="goRanked" type="button"><b>RANKED</b><small>One rated game against a friend. Each club plays its own roster. Counts for your rating and the leaderboard.</small></button>
+          <button class="mode alt" id="goCustom" type="button"><b>CUSTOM 1V1</b><small>Play a friend your way: your signed cards, 3, 6 or 9 innings, one game or a series.</small></button>
+        </div>
+        <p class="mpNote" id="mpNote" hidden></p>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
       <div class="card wide" id="scrOnline" hidden>
-        <h1>ONLINE <span>1v1</span></h1>
+        <h1 id="olHead">ONLINE <span>1v1</span></h1>
         <p id="olNote">Play a friend in real time. One of you creates a room and shares the code, the other joins with it. Then you each pick a club. The host is the home team.</p>
         <div id="olStart" class="olStart">
           <button class="big" id="olRejoin" type="button" hidden>REJOIN GAME</button>
@@ -1361,14 +1371,13 @@ canvas.shake{animation:packShake .6s steps(6)}
           <div class="olVs"><div class="olSide" id="olMe"></div><span class="vs">VS</span><div class="olSide" id="olThem"></div></div>
           <div class="pick"><span class="k">SELECT YOUR TEAM</span><div class="olPick" id="olPick"></div></div>
           <div class="opt" id="olInnRow"><span>Innings</span><div class="seg" id="olInn"><button type="button" data-v="3" aria-pressed="true">3</button><button type="button" data-v="6">6</button><button type="button" data-v="9">9</button></div><b></b></div>
-          <div class="opt" id="olRkRow" hidden><span>Match</span><div class="seg" id="olRk"><button type="button" data-v="0" aria-pressed="true">Casual</button><button type="button" data-v="1">Ranked</button></div><b></b></div>
           <p class="olRkNote" id="olRkNote" hidden></p>
           <div class="opt" id="olBoRow"><span>Series</span><div class="seg" id="olBo"><button type="button" data-v="1" aria-pressed="true">Best of 1</button><button type="button" data-v="3">Best of 3</button><button type="button" data-v="5">Best of 5</button></div><b></b></div>
           <p id="olStatus" class="oppLine"></p>
           <button class="big" id="olGo" type="button" aria-pressed="false" hidden>READY</button>
           <button class="mbtn" id="olLeave" type="button">Leave room</button>
         </div>
-        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+        <button class="mbtn back" type="button" data-go="scrMulti">Back</button>
       </div>
       <div class="card" id="scrPause" hidden>
         <h1>GAME <span>PAUSED</span></h1>
@@ -6291,7 +6300,7 @@ $('lnOpp').addEventListener('click',()=>{lnView='opp';lnSel=null;lfFlip=null;ren
 let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.fillStyle='#1b1f24';g.beginPath();g.arc(48,48,44,0,Math.PI*2);g.fill();g.strokeStyle='#3a4048';g.lineWidth=6;g.stroke();g.fillStyle='#ffbf3c';g.font='48px "Press Start 2P", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('?',50,52);return Q_URL=c.toDataURL()}
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
-function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds','scrShop'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds','scrShop','scrMulti'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
 {let lastK=null;const chk=()=>{const k=isWide()+'|'+isDesk()+'|'+isPhoneLand();if(k!==lastK){lastK=k;applyWide()}};addEventListener('resize',chk);addEventListener('resize',()=>requestAnimationFrame(bpLayout));addEventListener('orientationchange',chk);if(window.visualViewport)visualViewport.addEventListener('resize',chk)}
 /* full-screen batting practice: measure where the pitch buttons end and stack AUTO/INFO, then the info boxes, above them */
@@ -6914,7 +6923,7 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
  S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:rosterSpec(t),rdy:null});lobbyRender()});
-function openOnline(){if(!S.online)S.online={mine:{},opp:null};lobbyRender();showScreen('scrOnline')}
+function openOnline(mode){if(!S.online)S.online={mine:{},opp:null,mode:mode||'custom'};else if(mode&&!S.online.nr)S.online.mode=mode;lobbyRender();rkHead(S.online);showScreen('scrOnline')}
 $('olCreate').addEventListener('click',()=>{const L='abcdefghjkmnpqrstuvwxyz';let c='';for(let i=0;i<4;i++)c+=L[Math.floor(Math.random()*L.length)];joinRoom(c,'host')});
 $('olJoin').addEventListener('click',()=>joinRoom($('olCode').value,'guest'));
 $('olCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')joinRoom($('olCode').value,'guest')});
@@ -6931,7 +6940,7 @@ function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o
  netPresence({start:st});startOnline(st)}
 $('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp||o.inGame)return;netPresence({rdy:o.mine.rdy==='L'?null:'L'});lobbyRender()});
 $('olNext').addEventListener('click',()=>{const o=S.online,se=o&&o.series;if(!se||se.done||o.inGame)return;const tok='N'+se.gn;netPresence({rdy:o.mine.rdy===tok?null:tok});nextRender()});
-$('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;openOnline()});
+$('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}const md=o&&o.mode;S.online=null;openOnline(md)});
 $('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
 
 // the connection pill: shown during an online game; green when live, amber while it reconnects (tap to retry now)
@@ -7102,7 +7111,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='da329fb407',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='a514b6c32d',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7110,12 +7119,18 @@ const rkErr=e=>((e&&e.message)||'Could not reach the server').replace(/^.*?excep
 const rkReady=()=>supaOK()&&!!(ACC.user&&ACC.name);
 // stock rosters: each club's own players at their own ratings, in their usual order
 function stockSpec(k){snapOrig();const T=TEAMS[k];return{L:T.orig.L.map(p=>['n',p.name,{}]),P:T.orig.P.map(p=>['n',p.name,{}])}}
-// is this room playing ranked? (the host chooses; the guest follows)
-const rkOn=o=>!!o&&(o.role==='host'?$('olRk').querySelector('[aria-pressed=true]').dataset.v==='1':!!(o.opp&&o.opp.rk));
+// is this room playing ranked? (the host chose Ranked on the Multiplayer page; a guest plays whatever room it joined)
+const rkOn=o=>!!o&&(o.role==='guest'?!!(o.opp&&o.opp.rk):o.mode==='ranked');
+// the room's heading and blurb follow its kind
+function rkHead(o){const on=rkOn(o);$('olHead').innerHTML=on?'RANKED <span>1v1</span>':'CUSTOM <span>1v1</span>';
+ $('olNote').textContent=on?'A rated game against a friend. One of you creates a room and shares the code, the other joins with it. Each club plays its own roster, one game, and the result counts for both ratings.'
+  :'Play a friend in real time. One of you creates a room and shares the code, the other joins with it. Then you each pick a club. The host is the home team.'}
 // the lobby: who may ready up, and what the room needs to hear about it
 function rkLobby(o){const on=rkOn(o),host=o.role==='host';
- $('olRkRow').hidden=!host||!supaOK();$('olBoRow').hidden=!host||on;
- const nt=$('olRkNote');nt.hidden=!on;
+ $('olBoRow').hidden=!host||on;
+ rkHead(o);
+ const nt=$('olRkNote'),odd=!host&&o.mode==='ranked'&&!!o.opp&&!on;nt.hidden=!on&&!odd;
+ if(odd)nt.textContent='This is a Custom 1v1 room, so it won\u2019t count for rating.';
  if(on)nt.textContent=`RANKED · ${ACC.name||'you'} vs ${(o.opp&&o.opp.acct)||'?'} · stock rosters, one game, counts for rating`;
  if(host&&o.mine.rk!==(on?1:0))netPresence({rk:on?1:0,ros:on?null:rosterSpec(S.you)});
  if(!host&&on&&o.mine.ros)netPresence({ros:null});
@@ -7124,8 +7139,13 @@ function rkLobby(o){const on=rkOn(o),host=o.role==='host';
  if(!rkReady())return ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account. Sign in on the Account screen (main menu), then come back.';
  if(o.opp&&!o.opp.acct)return'Your opponent needs to sign in to play ranked.';
  return null}
-$('olRk').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const x of $('olRk').children)x.setAttribute('aria-pressed',String(x===b));
- const o=S.online;if(o&&o.mine.rdy)netPresence({rdy:null});lobbyRender()});
+// the Multiplayer page: Ranked or Custom 1v1
+function mpOpen(){const ok=supaOK();$('goRanked').disabled=!ok;$('mpNote').hidden=ok;
+ if(!ok)$('mpNote').textContent='Ranked is played on imugilabs.com/pocket-diamond (it needs the game server).';showScreen('scrMulti')}
+$('goRanked').addEventListener('click',()=>{ensureAudio();if(!rkReady()){$('mpNote').hidden=false;
+  $('mpNote').textContent=ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account so your rating can be saved. Sign in on the Account screen (main menu).';return}
+ openOnline('ranked')});
+$('goCustom').addEventListener('click',()=>{ensureAudio();openOnline('custom')});
 // host: open the match on the server, wait for the guest to join it, then start with the server's seed
 async function rkHostStart(inn){const o=S.online;if(o.rkBusy)return;o.rkBusy=true;
  try{$('olStatus').textContent='Opening a ranked match…';
@@ -8627,7 +8647,7 @@ $('goFull').addEventListener('click',()=>chooseMode('full'));
 $('goBP').addEventListener('click',()=>chooseMode('bp'));
 $('goPO').addEventListener('click',()=>chooseMode('playoffs'));
 $('goWatch').addEventListener('click',()=>chooseMode('watch'));
-$('goMulti').addEventListener('click',()=>{ensureAudio();if(!navigator.onLine){netSay('Multiplayer needs an internet connection. Single player and batting practice work offline.',4500);return}openOnline()});
+$('goMulti').addEventListener('click',()=>{ensureAudio();if(!navigator.onLine){netSay('Multiplayer needs an internet connection. Single player and batting practice work offline.',4500);return}const o=S.online;if(o&&o.nr){openOnline();return}mpOpen()});
 $('goAcct').addEventListener('click',()=>{if(!navigator.onLine)netSay('Offline: your progress is saved on this device and will sync when you reconnect.',4500)});
 // a loading screen while the park is built: shown first, painted, then the heavy work runs, then it fades once the
 // first frame of the new park has been drawn

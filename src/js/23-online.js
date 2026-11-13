@@ -175,7 +175,7 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
  S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:rosterSpec(t),rdy:null});lobbyRender()});
-function openOnline(){if(!S.online)S.online={mine:{},opp:null};lobbyRender();showScreen('scrOnline')}
+function openOnline(mode){if(!S.online)S.online={mine:{},opp:null,mode:mode||'custom'};else if(mode&&!S.online.nr)S.online.mode=mode;lobbyRender();rkHead(S.online);showScreen('scrOnline')}
 $('olCreate').addEventListener('click',()=>{const L='abcdefghjkmnpqrstuvwxyz';let c='';for(let i=0;i<4;i++)c+=L[Math.floor(Math.random()*L.length)];joinRoom(c,'host')});
 $('olJoin').addEventListener('click',()=>joinRoom($('olCode').value,'guest'));
 $('olCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')joinRoom($('olCode').value,'guest')});
@@ -192,7 +192,7 @@ function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o
  netPresence({start:st});startOnline(st)}
 $('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp||o.inGame)return;netPresence({rdy:o.mine.rdy==='L'?null:'L'});lobbyRender()});
 $('olNext').addEventListener('click',()=>{const o=S.online,se=o&&o.series;if(!se||se.done||o.inGame)return;const tok='N'+se.gn;netPresence({rdy:o.mine.rdy===tok?null:tok});nextRender()});
-$('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;openOnline()});
+$('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}const md=o&&o.mode;S.online=null;openOnline(md)});
 $('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
 
 // the connection pill: shown during an online game; green when live, amber while it reconnects (tap to retry now)

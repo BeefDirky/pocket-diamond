@@ -25,9 +25,9 @@ try:
   for slot in ('3','-1'):
    A.click('#cards .lfField .lfc[data-i="%s"]'%slot);A.click('#cards .lfTray .lfc.deck:not(.used)');A.wait_for_timeout(450);A.click('#cards .lfTray .lfc.flip [data-sign]');A.wait_for_timeout(200)
   A.evaluate("document.querySelector('#scrLineup .xClose').click()");A.evaluate("document.querySelector('#scrSingle .xClose').click()")
-  A.click('#goMulti');A.click('#olCreate');A.wait_for_timeout(600);A.click('#olPick [data-t=seoul]')
+  A.click('#goMulti');A.click('#goCustom');A.click('#olCreate');A.wait_for_timeout(600);A.click('#olPick [data-t=seoul]')
   code=A.inner_text('#olCodeShow')
-  B.click('#goMulti');B.fill('#olCode',code);B.click('#olJoin');B.wait_for_timeout(800)
+  B.click('#goMulti');B.click('#goCustom');B.fill('#olCode',code);B.click('#olJoin');B.wait_for_timeout(800)
   B.click('#olPick [data-t=seoul]');B.wait_for_timeout(300);print('same-club warning:',B.inner_text('#olStatus')[:70])
   B.evaluate("__pd.S.you='seoul'");B.click('#olPick [data-t=busan]');B.wait_for_timeout(800)
   print('A:',A.inner_text('#olStatus'),'| B:',B.inner_text('#olStatus'))

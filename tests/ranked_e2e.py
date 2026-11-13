@@ -72,10 +72,10 @@ with sync_playwright() as p:
     def play(label, cheat=False):
         global ok
         setup()
-        PA.click('#goMulti'); PA.click('#olCreate'); PA.wait_for_timeout(700); PA.click('#olPick [data-t=seoul]')
+        PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#olCreate'); PA.wait_for_timeout(700); PA.click('#olPick [data-t=seoul]')
         code = PA.inner_text('#olCodeShow')
-        PB.click('#goMulti'); PB.fill('#olCode', code); PB.click('#olJoin'); PB.wait_for_timeout(900); PB.click('#olPick [data-t=busan]'); PB.wait_for_timeout(600)
-        PA.click('#olRk [data-v="1"]'); PA.click('#olInn [data-v="3"]'); PA.wait_for_timeout(800)
+        PB.click('#goMulti'); PB.click('#goRanked'); PB.fill('#olCode', code); PB.click('#olJoin'); PB.wait_for_timeout(900); PB.click('#olPick [data-t=busan]'); PB.wait_for_timeout(600)
+        PA.click('#olInn [data-v="3"]'); PA.wait_for_timeout(800)
         print(label, '| A lobby:', PA.inner_text('#olRkNote'), '|', PA.inner_text('#olStatus'))
         if cheat:  # the guest's phone lies: one extra run for itself (away) in every snapshot it sends while pitching
             PB.evaluate("__x(\"const _ss=snapState;snapState=()=>{const z=_ss();if(pitching())z.t+=1;return z}\")")
