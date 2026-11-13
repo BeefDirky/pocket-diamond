@@ -67,6 +67,7 @@
 
 ## Later
 - [ ] Custom domain (play.imugilabs.com: CNAME at Squarespace)
+- [x] Usernames: chosen at sign-up, unique ignoring case (database index), changeable on the Account screen; SQL in supabase/profiles.sql
 - [ ] Stat tracking / records
 - [ ] Ranked or matchmaking
 

@@ -56,14 +56,23 @@
           <p class="acLead">Sign in to keep your cards, lineup, playoff run and settings in the cloud, on every device. You can keep playing as a guest; your progress stays on this device and uploads the first time you sign in.</p>
           <input class="acIn" id="acEmail" type="email" placeholder="EMAIL" autocomplete="email" inputmode="email" spellcheck="false">
           <input class="acIn" id="acPass" type="password" placeholder="PASSWORD (6+ CHARACTERS)" autocomplete="current-password">
+          <input class="acIn" id="acUser" type="text" placeholder="USERNAME (NEW ACCOUNTS ONLY)" autocomplete="username" spellcheck="false" maxlength="16" autocapitalize="off">
+          <p class="acHint" id="acUserHint">3-16 letters, numbers or _ · only needed to create an account</p>
           <div class="acRow"><button class="big" id="acSignIn" type="button">SIGN IN</button><button class="big alt" id="acSignUp" type="button">CREATE ACCOUNT</button></div>
           <button class="ghost" id="acForgot" type="button">Forgot password?</button>
         </div>
         <div class="acPane" id="acSignedIn" hidden>
-          <p class="acLead">Signed in as <b id="acWho"></b></p>
+          <p class="acLead">Signed in as <b id="acName"></b><br><small id="acWho"></small></p>
+          <button class="ghost" id="acRename" type="button">Change username</button>
           <p class="acSync" id="acSync"></p>
           <button class="big" id="acSaveNow" type="button">SAVE NOW</button>
           <button class="mbtn" id="acSignOut" type="button">Sign out</button>
+        </div>
+        <div class="acPane" id="acPickName" hidden>
+          <p class="acLead" id="acPickTxt">Choose your username. It's how other players see you, and no one else can have it.</p>
+          <input class="acIn" id="acNewName" type="text" placeholder="USERNAME" spellcheck="false" maxlength="16" autocapitalize="off">
+          <p class="acHint" id="acNameHint">3-16 letters, numbers or _</p>
+          <div class="acRow"><button class="big" id="acNameSave" type="button">SAVE USERNAME</button><button class="big alt" id="acNameCancel" type="button">CANCEL</button></div>
         </div>
         <div class="acPane" id="acConflict" hidden>
           <p class="acLead" id="acCfTxt"></p>

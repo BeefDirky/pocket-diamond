@@ -703,6 +703,8 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .acRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (max-width:420px){.acRow{grid-template-columns:1fr}}
 .acMsg{font-size:12px;color:var(--amber);margin:0;min-height:1em}
+.acHint{font-size:11px;color:var(--dim);margin:-4px 0 0}.acHint.ok{color:#7fd77f}.acHint.bad{color:#ff8a6a}
+.acLead small{font-size:11px;color:var(--dim)}
 
 /* AUTO and INFO: same size and baseline, side by side */
 .autoBtn,.infoBtn{font-size:10px!important;padding:0 7px!important;height:26px;display:flex;align-items:center;gap:4px;box-sizing:border-box;line-height:1}
@@ -1186,14 +1188,23 @@ canvas.shake{animation:packShake .6s steps(6)}
           <p class="acLead">Sign in to keep your cards, lineup, playoff run and settings in the cloud, on every device. You can keep playing as a guest; your progress stays on this device and uploads the first time you sign in.</p>
           <input class="acIn" id="acEmail" type="email" placeholder="EMAIL" autocomplete="email" inputmode="email" spellcheck="false">
           <input class="acIn" id="acPass" type="password" placeholder="PASSWORD (6+ CHARACTERS)" autocomplete="current-password">
+          <input class="acIn" id="acUser" type="text" placeholder="USERNAME (NEW ACCOUNTS ONLY)" autocomplete="username" spellcheck="false" maxlength="16" autocapitalize="off">
+          <p class="acHint" id="acUserHint">3-16 letters, numbers or _ · only needed to create an account</p>
           <div class="acRow"><button class="big" id="acSignIn" type="button">SIGN IN</button><button class="big alt" id="acSignUp" type="button">CREATE ACCOUNT</button></div>
           <button class="ghost" id="acForgot" type="button">Forgot password?</button>
         </div>
         <div class="acPane" id="acSignedIn" hidden>
-          <p class="acLead">Signed in as <b id="acWho"></b></p>
+          <p class="acLead">Signed in as <b id="acName"></b><br><small id="acWho"></small></p>
+          <button class="ghost" id="acRename" type="button">Change username</button>
           <p class="acSync" id="acSync"></p>
           <button class="big" id="acSaveNow" type="button">SAVE NOW</button>
           <button class="mbtn" id="acSignOut" type="button">Sign out</button>
+        </div>
+        <div class="acPane" id="acPickName" hidden>
+          <p class="acLead" id="acPickTxt">Choose your username. It's how other players see you, and no one else can have it.</p>
+          <input class="acIn" id="acNewName" type="text" placeholder="USERNAME" spellcheck="false" maxlength="16" autocapitalize="off">
+          <p class="acHint" id="acNameHint">3-16 letters, numbers or _</p>
+          <div class="acRow"><button class="big" id="acNameSave" type="button">SAVE USERNAME</button><button class="big alt" id="acNameCancel" type="button">CANCEL</button></div>
         </div>
         <div class="acPane" id="acConflict" hidden>
           <p class="acLead" id="acCfTxt"></p>
@@ -6889,7 +6900,7 @@ $('olRejoin').addEventListener('click',()=>{const r=resumeGet();if(!r)return;S.y
 // seconds later. Signing in on a device that already has guest progress uploads it, unless the account already
 // has a different save, in which case the player chooses which one to keep.
 const SAVE_KEYS=['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-opts2','pd-wallet'];
-const ACC={user:null,state:'out',msg:'',pushT:0,busy:false,cloud:null};
+const ACC={user:null,state:'out',msg:'',pushT:0,busy:false,cloud:null,name:'',pick:false};
 const accMeta=()=>{try{return JSON.parse(localStorage.getItem('pd-acct')||'{}')}catch(e){return{}}};
 const accSetMeta=m=>{try{RAW_SET('pd-acct',JSON.stringify(m))}catch(e){}};
 const RAW_SI=Storage.prototype.setItem,RAW_SET=(k,v)=>RAW_SI.call(localStorage,k,v);
@@ -6915,9 +6926,10 @@ async function accSync(){const c=await supaClient(),u=ACC.user;if(!u)return;
  // both this device and the account have progress that the other hasn't seen: the player decides
  ACC.cloud=row;ACC.state='conflict';acRender();showScreen('scrAcct')}
 function acWhen(t){if(!t)return'never';const d=new Date(t),s=(Date.now()-d)/1000;return s<60?'just now':s<3600?`${Math.round(s/60)} min ago`:d.toLocaleString()}
-function acRender(){const on=!!ACC.user,cf=ACC.state==='conflict';$('mmAcct').textContent=on?`SIGNED IN · ${ACC.user.email.toUpperCase()}`:'GUEST · SAVED ON THIS DEVICE';
- if(!$('acSignedOut'))return;$('acSignedOut').hidden=on||cf;$('acSignedIn').hidden=!on||cf;$('acConflict').hidden=!cf;
- if(on){$('acWho').textContent=ACC.user.email;const m=accMeta();$('acSync').textContent=`Cloud save: ${acWhen(m.syncedAt)}${(m.localAt||0)>(m.pushedAt||0)?' · uploading changes…':''}`}
+function acRender(){const on=!!ACC.user,cf=ACC.state==='conflict',pk=on&&!cf&&ACC.pick;$('mmAcct').textContent=on?(ACC.name?`SIGNED IN · ${ACC.name.toUpperCase()}`:'SIGNED IN · CHOOSE A USERNAME'):'GUEST · SAVED ON THIS DEVICE';
+ if(!$('acSignedOut'))return;$('acSignedOut').hidden=on||cf;$('acSignedIn').hidden=!on||cf||pk;$('acConflict').hidden=!cf;$('acPickName').hidden=!pk;
+ if(pk){$('acNameCancel').hidden=!ACC.name;$('acPickTxt').textContent=ACC.name?`Your username is ${ACC.name}. Pick a new one; no one else can have it.`:"Choose your username. It's how other players see you, and no one else can have it."}
+ if(on){$('acName').textContent=ACC.name||'(no username yet)';$('acWho').textContent=ACC.user.email;const m=accMeta();$('acSync').textContent=`Cloud save: ${acWhen(m.syncedAt)}${(m.localAt||0)>(m.pushedAt||0)?' · uploading changes…':''}`}
  if(cf){const c=ACC.cloud;$('acCfTxt').innerHTML=`This device has progress, and your account already has a save from <b>${acWhen(c.updated_at)}</b>. Which one do you want to keep? The other one is replaced.`}
  if(!supaOK()&&!on){$('acMsg').textContent='Accounts work in the website version of the game.';for(const id of['acSignIn','acSignUp','acForgot'])$(id).disabled=true}else $('acMsg').textContent=ACC.msg}
 const acCreds=()=>({email:$('acEmail').value.trim(),password:$('acPass').value});
@@ -6927,7 +6939,9 @@ async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=a
  ACC.busy=true;ACC.msg=kind==='up'?'Creating your account…':kind==='in'?'Signing in…':'Sending…';acRender();
  try{const c=await supaClient(),back=location.origin+location.pathname;
   if(kind==='forgot'){const {error}=await c.auth.resetPasswordForEmail(email,{redirectTo:back});if(error)throw error;ACC.msg='Check your email for a link to set a new password.'}
-  else if(kind==='up'){const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:back}});if(error)throw error;
+  else if(kind==='up'){const un=$('acUser').value.trim(),bad=nameBad(un);if(bad)throw{message:bad};
+   const free=await nameFree(un);if(free===false)throw{message:`${un} is taken. Try another username.`};
+   const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:back,data:{username:un}}});if(error)throw error;
    ACC.msg=data.session?'':'Almost there: open the confirmation link we just emailed you, then sign in.'}
   else{const {error}=await c.auth.signInWithPassword({email,password});if(error)throw error;ACC.msg=''}
  }catch(e){ACC.msg=(e&&e.message)||'Something went wrong. Try again.'}
@@ -6935,11 +6949,11 @@ async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=a
 async function accWatch(){if(!supaOK())return;const c=await supaClient();
  c.auth.onAuthStateChange((ev,session)=>{const u=session&&session.user||null,was=ACC.user&&ACC.user.id;ACC.user=u;
   if(ev==='PASSWORD_RECOVERY'){const np=prompt('Choose a new password (6+ characters):');if(np&&np.length>=6)c.auth.updateUser({password:np}).then(({error})=>{ACC.msg=error?error.message:'Password updated.';acRender()})}
-  if(u&&u.id!==was)accSync().catch(()=>{});if(!u)ACC.state='out';acRender()})}
+  if(u&&u.id!==was){accSync().catch(()=>{});accProfile().catch(()=>{})}if(!u){ACC.state='out';ACC.name='';ACC.pick=false}acRender()})}
 $('acSignIn').addEventListener('click',()=>acDo('in'));$('acSignUp').addEventListener('click',()=>acDo('up'));$('acForgot').addEventListener('click',()=>acDo('forgot'));
-for(const id of['acEmail','acPass'])$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')acDo('in')});
+for(const id of['acEmail','acPass','acUser'])$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')acDo('in')});
 $('acSaveNow').addEventListener('click',()=>{ACC.msg='Saving…';acRender();accPush()});
-$('acSignOut').addEventListener('click',async()=>{clearTimeout(ACC.pushT);if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut();ACC.user=null;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
+$('acSignOut').addEventListener('click',async()=>{clearTimeout(ACC.pushT);if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut();ACC.user=null;ACC.name='';ACC.pick=false;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
 $('acUseCloud').addEventListener('click',()=>{const r=ACC.cloud;accApply(r.data);accSetMeta({uid:ACC.user.id,syncedAt:r.updated_at,pushedAt:Date.now(),localAt:Date.now()});location.reload()});
 $('acUseLocal').addEventListener('click',()=>{ACC.state='in';ACC.cloud=null;accPush()});
 // leaving the page: get the last changes up if we can
@@ -6947,6 +6961,42 @@ addEventListener('visibilitychange',()=>{if(document.hidden&&ACC.user&&(accMeta(
 // a remembered session (or a confirmation/reset link) loads the client right away; guests never load it
 if(supaOK()&&(Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k))||/access_token|type=recovery|code=/.test(location.hash+location.search)))accWatch().catch(()=>{});
 else if(supaOK())$('goAcct').addEventListener('click',()=>accWatch().catch(()=>{}),{once:true});
+// ---- usernames: one per account, unique ignoring case (the database's unique index is the final word) ----
+const NAME_RE=/^[A-Za-z0-9_]{3,16}$/,NAME_RES=/^(admin|administrator|mod|moderator|imugi|imugilabs|pocketdiamond|system|support|guest|cpu|null|undefined)$/i;
+function nameBad(n){if(!n)return'Choose a username.';if(n.length<3)return'Usernames are at least 3 characters.';if(n.length>16)return'Usernames are at most 16 characters.';
+ if(!NAME_RE.test(n))return'Use only letters, numbers and _ in your username.';if(NAME_RES.test(n))return'That username is reserved. Try another.';return''}
+const noProfiles=e=>/profiles|relation|schema cache/i.test((e&&e.message)||'');
+// true = free, false = taken, null = couldn't check
+async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.from('profiles').select('user_id').eq('uname_lc',n.toLowerCase()).limit(1);if(error)return null;
+ return!data.length||!!(ACC.user&&data[0].user_id===ACC.user.id)}catch(e){return null}}
+async function nameClaim(n){const c=await supaClient(),{error}=await c.from('profiles').upsert({user_id:ACC.user.id,username:n});
+ if(!error){ACC.name=n;const m=accMeta();m.name=n;accSetMeta(m);return''}
+ if(error.code==='23505'||/duplicate|unique/i.test(error.message||''))return`${n} is taken. Try another username.`;
+ if(noProfiles(error))return'Usernames are not set up on the server yet.';return error.message||'Could not save your username. Try again.'}
+// after sign-in: load the username; a new account claims the one it signed up with, or picks one
+async function accProfile(){const c=await supaClient(),u=ACC.user;if(!u)return;
+ const {data,error}=await c.from('profiles').select('username').eq('user_id',u.id).maybeSingle();
+ if(error){if(!noProfiles(error)){const m=accMeta();if(m.uid===u.id&&m.name)ACC.name=m.name}acRender();return}
+ if(data){ACC.name=data.username;ACC.pick=false;const m=accMeta();m.name=data.username;accSetMeta(m);acRender();return}
+ const want=(u.user_metadata&&u.user_metadata.username)||'';
+ if(want&&!nameBad(want)){const err=await nameClaim(want);if(!err){ACC.pick=false;acRender();return}ACC.msg=err}
+ ACC.pick=true;$('acNewName').value=want;$('acNameHint').textContent='3-16 letters, numbers or _';$('acNameHint').className='acHint';acRender();showScreen('scrAcct')}
+function acNameHint(el,hint){const n=el.value.trim(),h=$(hint);clearTimeout(el._t);h.className='acHint';
+ if(!n){h.textContent='3-16 letters, numbers or _';return}const bad=nameBad(n);if(bad){h.textContent=bad;h.classList.add('bad');return}
+ if(!supaOK()){h.textContent='';return}h.textContent='Checking…';
+ el._t=setTimeout(async()=>{const f=await nameFree(n);if(el.value.trim()!==n)return;h.textContent=f===null?'':f?`${n} is available`:`${n} is taken`;if(f!==null)h.classList.add(f?'ok':'bad')},400)}
+$('acUser').addEventListener('input',()=>acNameHint($('acUser'),'acUserHint'));
+$('acNewName').addEventListener('input',()=>acNameHint($('acNewName'),'acNameHint'));
+async function acSaveName(){if(ACC.busy||!ACC.user)return;const n=$('acNewName').value.trim(),bad=nameBad(n);if(bad){ACC.msg=bad;acRender();return}
+ if(n===ACC.name){ACC.pick=false;ACC.msg='';acRender();return}
+ ACC.busy=true;ACC.msg='Saving…';acRender();const err=await nameClaim(n).catch(e=>(e&&e.message)||'Could not save your username.');ACC.busy=false;
+ if(err){ACC.msg=err;acRender();return}ACC.pick=false;ACC.msg=`You're ${n}.`;acRender()}
+$('acNameSave').addEventListener('click',acSaveName);
+$('acNewName').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')acSaveName()});
+$('acNameCancel').addEventListener('click',()=>{ACC.pick=false;ACC.msg='';acRender()});
+$('acRename').addEventListener('click',()=>{ACC.pick=true;ACC.msg='';$('acNewName').value=ACC.name||'';$('acNameHint').textContent='3-16 letters, numbers or _';$('acNameHint').className='acHint';acRender();$('acNewName').focus()});
+// the menu shows the last known username before the network answers
+{const m=accMeta();if(m.name&&Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k)))ACC.name=m.name}
 acRender();
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'];

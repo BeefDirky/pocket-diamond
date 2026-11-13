@@ -681,6 +681,8 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .acRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (max-width:420px){.acRow{grid-template-columns:1fr}}
 .acMsg{font-size:12px;color:var(--amber);margin:0;min-height:1em}
+.acHint{font-size:11px;color:var(--dim);margin:-4px 0 0}.acHint.ok{color:#7fd77f}.acHint.bad{color:#ff8a6a}
+.acLead small{font-size:11px;color:var(--dim)}
 
 /* AUTO and INFO: same size and baseline, side by side */
 .autoBtn,.infoBtn{font-size:10px!important;padding:0 7px!important;height:26px;display:flex;align-items:center;gap:4px;box-sizing:border-box;line-height:1}
