@@ -152,7 +152,8 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
  if(joinRoom.busy)return;joinRoom.busy=true;note('Connecting…');
  let nr;try{nr=await ROOM.join('pd-'+code)}catch(e){joinRoom.busy=false;note('Could not reach the room ('+(e&&e.code||'error')+'). Check your connection and try again.');return}
  joinRoom.busy=false;note(role==='host'?'Room open. Send your friend the code.':'Joined room '+code.toUpperCase()+'.');
- const o=S.online={code,role,me:role==='host'?'home':'away',nr,mine:{},opp:null,inGame:false};
+ const md=(S.online&&S.online.mode)||'custom';// Ranked or Custom 1v1, as picked on the Multiplayer page
+ const o=S.online={code,role,me:role==='host'?'home':'away',nr,mine:{},opp:null,inGame:false,mode:md};
  if(resume){o.gid=resume.gid;o.resume=resume}
  if(nr.onStatus)nr.onStatus(up=>{if(S.online!==o)return;o.selfDown=!up;
   if(!up&&o.inGame){o.selfBan=true;$('bt').textContent='YOU\u2019RE OFFLINE';$('bs').textContent='Reconnecting… your game is saved and picks up where it left off.';$('banner').dataset.tone='';$('banner').hidden=false}
