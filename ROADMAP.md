@@ -82,4 +82,5 @@
 ## Coins (in-game currency)
 - [x] Coins: full-game win 100, arcade win 20; home run 10 in a full game, 4 in arcade (not while AUTO bats); balance on the main menu, tally on the final screen; saved and synced as pd-wallet
 - [ ] Daily challenges that pay coins
-- [ ] Something to spend coins on
+- [x] Something to spend coins on: card packs in the SHOP, 200 coins each (games no longer award packs; a playoff title pays 1,000 coins)
+- [x] Inventory (all your cards) under Multiplayer on the main menu; duplicates level a player up (+1 to a rating of your choice)

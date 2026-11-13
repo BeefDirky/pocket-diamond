@@ -23,7 +23,7 @@ function poAdvance(){
 function poRecord(win){const sr=poMySeries();if(!sr)return;if((sr.a===PO.you)===win)sr.wa++;else sr.wb++;
  if(serDone(sr,PO.round)){const r=PO.round;for(const o of PO.rounds[r])while(!serDone(o,r))simGame(o);
   if(serWin(sr)!==PO.you)PO.out=true;poAdvance();
-  if(PO.champ===PO.you){COL.packs+=5;saveCol();updatePackBadge()}}
+  if(PO.champ===PO.you){coinAdd(1000,'champ')}}// a title pays 1,000 coins (it used to be five packs)
  savePO()}
 function renderBracket(){
  const H=$('bracket');let h='';
@@ -37,7 +37,7 @@ function renderBracket(){
  h+=`<div class="champ">${PO.champ?`<img alt="" src="${LOGO_URL[PO.champ]}"><b>CHAMPIONS</b>${TEAMS[PO.champ].city} ${TEAMS[PO.champ].name}`:'<div class="rh">CHAMPION</div>🏆'}</div>`;
  H.innerHTML=h;
  const sr=poMySeries();
- if(PO.champ===PO.you){$('poStatus').textContent='Champions! +5 card packs';$('poNext').innerHTML=`<b>${TEAMS[PO.you].name}</b> win the Korean Series!`}
+ if(PO.champ===PO.you){$('poStatus').textContent='Champions! +1,000 coins';$('poNext').innerHTML=`<b>${TEAMS[PO.you].name}</b> win the Korean Series!`}
  else if(PO.out){$('poStatus').textContent='Eliminated';$('poNext').innerHTML=PO.champ?`${TEAMS[PO.champ].city} ${TEAMS[PO.champ].name} won it all. Start a new bracket for another run.`:'Eliminated.'}
  else if(sr){const opp=sr.a===PO.you?sr.b:sr.a,g=sr.wa+sr.wb+1;$('poStatus').textContent=`${PO_NAMES[PO.round]} · ${poLine(sr)}`;$('poNext').innerHTML=`Game ${g} vs <b>${TEAMS[opp].city} ${TEAMS[opp].name}</b> · first to ${need(PO.round)} wins`}
  $('poPlay').hidden=!sr;$('poSim').disabled=!sr;$('poPlay').textContent=sr?`PLAY GAME ${sr.wa+sr.wb+1}`:'PLAY GAME';

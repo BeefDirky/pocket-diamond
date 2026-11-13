@@ -41,6 +41,7 @@
         <nav class="mmBtns">
           <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
+          <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">INVENTORY</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button>
@@ -160,23 +161,33 @@
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
       <div class="card wide" id="scrCards" hidden>
-        <div class="ckTop"><h1>CARD <span>PACKS</span></h1><span class="ckProg" id="ckProg"></span></div>
+        <div class="ckTop"><h1>INVEN<span>TORY</span></h1><span class="ckProg" id="ckProg"></span></div>
         <div class="seg ckSet" id="ckSet"><button type="button" data-v="kbo" aria-pressed="true">KBO Series</button><button type="button" data-v="bl" aria-pressed="false">Big League Series</button></div>
-        <div class="packRow">
-          <button type="button" class="pack" id="packBtn" aria-label="Open a card pack"><canvas id="packCv" width="48" height="64"></canvas></button>
-          <div class="packInfo"><b id="packN"></b><p id="packInfoTxt">Five cards a pack, at least one Rare or better. Earn a pack for every game you finish and a bonus pack for a win.</p>
-            <button class="big" id="openPack" type="button">OPEN PACK</button></div>
-        </div>
+        <p class="invHint">Tap a card to see it up close. A duplicate levels a player up: +1 to a rating of your choice, in every game he plays for your club.</p>
         <div class="ckFilter" id="ckFilter"></div>
         <div class="binder" id="binder"></div>
-        <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
-        <div class="reveal" id="reveal" hidden>
+        <button class="mbtn back" type="button" id="invBack" data-go="scrSingle">Back</button>
+      </div>
+      <div class="card wide" id="scrShop" hidden>
+        <div class="ckTop"><h1>SH<span>OP</span></h1><span class="shopBal" id="shopBal"></span></div>
+        <div class="shopRow">
+          <div class="shopItem"><canvas id="shopCvK" width="48" height="64"></canvas><div class="shopTxt"><b>KBO SERIES PACK</b><p>Five cards from the ten clubs, at least one Rare or better. Duplicates level your players up.</p>
+            <button class="big shopBuy" type="button" data-set="kbo"><i class="coinIc"></i>200 · BUY</button></div></div>
+          <div class="shopItem bl"><canvas id="shopCvB" width="48" height="64"></canvas><div class="shopTxt"><b>BIG LEAGUE PACK</b><p>Five cards from the 60 parody big-league stars, every one Rare or better.</p>
+            <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>200 · BUY</button></div></div>
+        </div>
+        <div class="shopOwn" id="shopOwn" hidden><span id="shopOwnTxt"></span><button class="mbtn" type="button" id="shopOpenOwn">OPEN ONE</button></div>
+        <p class="shopMsg" id="shopMsg" aria-live="polite"></p>
+        <p class="shopEarn">Earn coins by winning (100 for a full game, 20 for arcade) and by hitting home runs (10 in a full game, 4 in arcade).</p>
+        <div class="tiles"><button class="tile" type="button" id="shopToInv"><span>Inventory</span></button></div>
+        <button class="mbtn back" type="button" id="shopBack" data-go="scrMain">Back</button>
+      </div>
+      <div class="reveal" id="reveal" hidden>
           <div class="rvTop"><b id="rvTitle">PACK OPENED</b><span id="rvHint">Tap each card to flip it</span></div>
           <div class="rvCards" id="rvCards"></div>
           <div class="rvBtns"><button class="mbtn" type="button" id="rvAll">Flip all</button><button class="big" type="button" id="rvDone">DONE</button></div>
         </div>
         <div class="zoomCard" id="zoomCard" hidden></div>
-      </div>
       <div class="card wide" id="scrPick" hidden>
         <h1>PICK A <span>HITTER</span></h1>
         <p id="pickNote"></p>
@@ -274,7 +285,7 @@
         <button class="big" id="olNext" type="button" hidden>NEXT GAME</button>
         <button class="big" id="toLobby" type="button" hidden>BACK TO THE ROOM</button>
         <button class="big alt" id="change" type="button">MAIN MENU</button>
-        <p class="coinEarn" id="coinEarn" hidden></p><p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Open card packs</button>
+        <p class="coinEarn" id="coinEarn" hidden></p><p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Shop</button>
       </div>
     </div>
   </div>

@@ -1,8 +1,8 @@
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'];
 let CARDS=[],CARD_BY={};
-let COL={packs:3,owned:{},seen:{}};
-try{const v=JSON.parse(localStorage.getItem('pd-cards')||'null');if(v&&typeof v==='object')COL={packs:v.packs|0,owned:v.owned||{},seen:v.seen||{}}}catch(e){}
+let COL={packs:3,owned:{},seen:{},lv:{}};
+try{const v=JSON.parse(localStorage.getItem('pd-cards')||'null');if(v&&typeof v==='object')COL={packs:v.packs|0,owned:v.owned||{},seen:v.seen||{},lv:v.lv||{}}}catch(e){}
 const saveCol=()=>{try{localStorage.setItem('pd-cards',JSON.stringify(COL))}catch(e){}};
 function buildCardDB(){
  CARDS=[];for(const k of ORDER){const T=TEAMS[k];
@@ -10,8 +10,8 @@ function buildCardDB(){
   (T.staff||[T.pitcher]).forEach((p,j)=>CARDS.push({id:k+':p'+j,k,p,pit:true,set:'kbo'}))}
  const sorted=CARDS.map(c=>ovr(c.p)).sort((a,b)=>b-a),cut=f=>sorted[Math.floor(sorted.length*f)];
  const L=cut(.08),E=cut(.25),Rr=cut(.55);
- for(const c of CARDS){const o=ovr(c.p);c.o=o;c.r=o>=L?3:o>=E?2:o>=Rr?1:0;if(c.p.type&&c.r<2)c.r=2;CARD_BY[c.id]=c}
- for(const c of buildBigLeague()){CARDS.push(c);CARD_BY[c.id]=c}
+ for(const c of CARDS){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};const o=ovr(c.p);c.o=o;c.r=o>=L?3:o>=E?2:o>=Rr?1:0;if(c.p.type&&c.r<2)c.r=2;CARD_BY[c.id]=c}
+ for(const c of buildBigLeague()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};CARDS.push(c);CARD_BY[c.id]=c}
 }
 const ART={};
 function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key];try{return ART[key]=cardArt2(c,tk)}catch(e){console.warn(e)}
@@ -41,33 +41,30 @@ function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key]
  // motion dust
  g.fillStyle='rgba(244,241,232,.5)';for(let k=0;k<5;k++)g.fillRect(8+Math.floor(rr()*48),66+Math.floor(rr()*10),2,1);
  return ART[c.id]=cv2.toDataURL()}
-function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],p=c.p,own=COL.owned[c.id]|0,lock=opts.lock;
- const st=c.pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl],['DEF',p.def]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
+function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],own=COL.owned[c.id]|0,lock=opts.lock,lv=lvOf(c.id),n=lvN(c.id),p={...c.p,...cardEff(c)},o=n?ovr(p):c.o;
+ const st=(c.pit?[['VEL','vel'],['MOV','mov'],['CTL','ctl'],['DEF','def']]:[['CON','con'],['POW','pow'],['SPD','spd'],['DEF','def']]).map(([k,f])=>[k,p[f],lv[f]|0]);
  const tag=(p.slot==='side'?' · SIDEARM':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'');
  return `<div class="tc r${c.r}${lock?' lock':''}${c.set==='bl'?' bl':''}" data-id="${c.id}" style="--tj:${T.jersey};--tc:${T.cap}">
-  <div class="tcHead"><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">${c.set==='bl'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(c.o)}"`}>${lock?'??':c.o}</span></div>
+  <div class="tcHead"><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">${c.set==='bl'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(o)}"`}>${lock?'??':o}</span></div>
   <img class="art" alt="" src="${cardArt(c)}">
   <div class="nm">${lock?'???':p.name}</div>
   <div class="ps"><span>${p.no!=null?'#'+p.no+' ':''}${c.pit?(p.pos==='SP'?'SP':'RP'):p.pos}</span><span>${c.pit?'T':'B'} ${p.hand}</span></div>
-  <div class="st">${st.map(([k,v])=>`<span>${k}<b${lock||v==null?'':` style="color:${rcol(v)}"`}>${lock||v==null?'–':v}</b></span>`).join('')}</div>
+  <div class="st">${st.map(([k,v,up])=>`<span${up&&!lock?' class="up"':''}>${k}<b${lock||v==null?'':` style="color:${rcol(v)}"`}>${lock||v==null?'–':v}</b></span>`).join('')}</div>
   <div class="rar">${RARITY[c.r]}${tag}</div>
-  ${!lock&&own>1&&!opts.noCount?`<em class="cnt">x${own}</em>`:''}${opts.isNew?'<em class="new">NEW</em>':''}</div>`}
+  ${!lock&&own>1&&!opts.noCount?`<em class="cnt">x${own}</em>`:''}${!lock&&n?`<em class="lvB">LV ${n+1}</em>`:''}${opts.isNew?'<em class="new">NEW</em>':''}</div>`}
 let binderTeam='all',binderSet='kbo';
 function renderBinder(){
  if(!CARDS.length)buildCardDB();
  const SET=CARDS.filter(c=>c.set===binderSet),ownedN=SET.filter(c=>COL.owned[c.id]).length;
  $('ckProg').textContent=`Collected ${ownedN} / ${SET.length}`;
  for(const b of $('ckSet').children)b.setAttribute('aria-pressed',String(b.dataset.v===binderSet));
- $('openPack').textContent=binderSet==='bl'?'OPEN BIG LEAGUE PACK':'OPEN KBO PACK';
- $('packInfoTxt').textContent=binderSet==='bl'?'Big League Series: 60 parody big-league stars. Five cards a pack, every one Rare or better. Collectible only.':'Five cards a pack, at least one Rare or better. Earn a pack for every game you finish and a bonus pack for a win.';
- $('packN').textContent=COL.packs===1?'1 PACK':`${COL.packs} PACKS`;$('openPack').disabled=COL.packs<=0;
  $('ckFilter').innerHTML=binderSet==='bl'?['all','bat','pit'].map(k=>`<button type="button" data-k="${k}" aria-pressed="${binderTeam===k}">${{all:'All',bat:'Hitters',pit:'Pitchers'}[k]}</button>`).join(''):`<button type="button" data-k="all" aria-pressed="${binderTeam==='all'}">All</button>`+ORDER.map(k=>{const n=CARDS.filter(c=>c.k===k&&COL.owned[c.id]).length,t=CARDS.filter(c=>c.k===k).length;return`<button type="button" data-k="${k}" aria-pressed="${binderTeam===k}"><img alt="" src="${LOGO_URL[k]}">${n}/${t}</button>`}).join('');
  const list=SET.filter(c=>binderTeam==='all'||(binderSet==='bl'?(binderTeam==='pit')===c.pit:c.k===binderTeam)).slice().sort((a,b)=>(!!COL.owned[b.id]-!!COL.owned[a.id])||b.r-a.r||b.o-a.o);
  $('binder').innerHTML=list.map(c=>cardHTML(c,{lock:!COL.owned[c.id]})).join('');
- drawPack();updatePackBadge();
+ updatePackBadge();
 }
-function updatePackBadge(){const b=$('pkBadge');if(!b)return;b.hidden=COL.packs<=0;b.textContent=COL.packs}
-function drawPack(){const g=$('packCv').getContext('2d'),bl=binderSet==='bl',T=bl?{jersey:'#1d3f7a',cap:'#c8202a'}:TEAMS[S.you];g.clearRect(0,0,48,64);
+function updatePackBadge(){for(const id of['pkBadge','pkBadge2']){const b=$(id);if(!b)continue;b.hidden=COL.packs<=0;b.textContent=COL.packs}}
+function drawPack(cv,set){const g=cv.getContext('2d'),bl=set==='bl',T=bl?{jersey:'#1d3f7a',cap:'#c8202a'}:TEAMS[S.you];g.clearRect(0,0,48,64);
  g.fillStyle='#1b1f24';g.fillRect(2,2,44,60);g.fillStyle=T.jersey;g.fillRect(4,4,40,56);g.fillStyle=T.cap;g.fillRect(4,4,40,8);g.fillRect(4,52,40,8);
  g.fillStyle='rgba(255,255,255,.25)';for(let x=4;x<44;x+=4){g.fillRect(x,4,2,2);g.fillRect(x+2,58,2,2)}
  g.fillStyle='#ffbf3c';g.fillRect(8,16,32,24);g.fillStyle='#1b1f24';g.fillRect(10,18,28,20);
@@ -77,27 +74,24 @@ function drawPack(){const g=$('packCv').getContext('2d'),bl=binderSet==='bl',T=b
  if(bl){g.fillStyle='#f4f1e8';for(const[x,y]of[[8,7],[24,7],[40,7],[16,55],[32,55]])g.fillRect(x-1,y-1,3,3)}}
 function rollCard(minR,set){set=set||'kbo';const w=set==='bl'?[0,70,24,6]:[60,28,10,2.6];let r;do{let x=Math.random()*w.reduce((a,b)=>a+b),i=0;while(x>w[i]){x-=w[i];i++}r=i}while(r<minR);
  const all=CARDS.filter(c=>c.set===set);let pool=all.filter(c=>c.r===r);if(!pool.length)pool=all;return pick(pool)}
-function openPack(){
- if(COL.packs<=0)return;if(!CARDS.length)buildCardDB();
- COL.packs--;const got=[];for(let i=0;i<5;i++)got.push(rollCard(i===4&&!got.some(c=>c.r>=1)?1:0,binderSet));
+function openPack(set,paid){set=set||'kbo';
+ if(!paid&&COL.packs<=0)return;if(!CARDS.length)buildCardDB();
+ if(!paid)COL.packs--;const got=[];for(let i=0;i<5;i++)got.push(rollCard(i===4&&!got.some(c=>c.r>=1)?1:0,set));
  got.sort((a,b)=>a.r-b.r);
  const fresh=got.map(c=>{const n=!COL.owned[c.id];COL.owned[c.id]=(COL.owned[c.id]|0)+1;return n});saveCol();
- const pk=$('packBtn');pk.classList.add('shake');sfx('woosh');
- setTimeout(()=>{pk.classList.remove('shake');
+ const pk=$(set==='bl'?'shopCvB':'shopCvK');if(pk)pk.classList.add('shake');sfx('woosh');updatePackBadge();
+ setTimeout(()=>{if(pk)pk.classList.remove('shake');
   $('rvTitle').textContent=got.some(c=>c.r===3)?'LEGEND PULL!':got.some(c=>c.r===2)?'EPIC PULL!':'PACK OPENED';
   $('rvCards').innerHTML=got.map((c,i)=>`<button type="button" class="flip r${c.r}" data-i="${i}"><div class="in"><div class="bk">POCKET<br>DIAMOND<br>★</div><div class="fr">${cardHTML(c,{isNew:fresh[i],noCount:true})}</div></div></button>`).join('');
-  $('reveal').hidden=false;$('rvAll').hidden=false;renderBinder()},650)}
+  $('reveal').hidden=false;$('rvAll').hidden=false;renderBinder();shopRender()},650)}
 function flipCard(b){if(!b||b.classList.contains('on'))return;b.classList.add('on');const r=+(b.className.match(/r(\d)/)||[0,0])[1];sfx(r>=2?'bigcheer':'glove');
  if([...document.querySelectorAll('#rvCards .flip')].every(x=>x.classList.contains('on')))$('rvAll').hidden=true}
 $('rvCards').addEventListener('click',e=>flipCard(e.target.closest('.flip')));
 $('rvAll').addEventListener('click',()=>{const fs=[...document.querySelectorAll('#rvCards .flip:not(.on)')];fs.forEach((b,i)=>setTimeout(()=>flipCard(b),i*160))});
 $('rvDone').addEventListener('click',()=>{$('reveal').hidden=true;renderBinder()});
-$('openPack').addEventListener('click',()=>{ensureAudio();openPack()});
-$('packBtn').addEventListener('click',()=>{ensureAudio();openPack()});
 $('ckSet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;binderSet=b.dataset.v;binderTeam='all';renderBinder()});
 $('ckFilter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;binderTeam=b.dataset.k;renderBinder()});
-$('binder').addEventListener('click',e=>{const c=e.target.closest('.tc');if(!c||c.classList.contains('lock'))return;$('zoomCard').innerHTML=cardHTML(CARD_BY[c.dataset.id]);$('zoomCard').hidden=false});
-$('zoomCard').addEventListener('click',()=>{$('zoomCard').hidden=true});
-function awardPacks(win){const n=win?2:1;COL.packs+=n;saveCol();updatePackBadge();const el=$('packEarn');el.textContent=`+${n} card pack${n>1?'s':''} earned${win?' (win bonus)':''} · ${COL.packs} to open`;el.hidden=false}
-$('overCards').addEventListener('click',()=>{$('over').hidden=true;toTitle();showScreen('scrCards')});
+$('binder').addEventListener('click',e=>{const c=e.target.closest('.tc');if(!c||c.classList.contains('lock'))return;zoomOpen(c.dataset.id)});
+function awardPacks(){$('packEarn').hidden=true}// packs are bought with coins in the shop now; games pay coins
+$('overCards').addEventListener('click',()=>{$('over').hidden=true;toTitle();shopOpen('scrMain')});
 

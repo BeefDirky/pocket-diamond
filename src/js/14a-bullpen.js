@@ -10,7 +10,7 @@ function togglePen(){if(!$('penPanel').hidden){closePen();return}if(!canPen())re
 function renderPen(){const k=fldKey(),st=staffOf(k),cur=S.pIdxOf[k]||0,pc=S.pcOf[k]||0;
  $('penSub').textContent=`${TEAMS[k].name} · current pitcher at ${pc} pitches`;
  $('penList').innerHTML=st.map((p,i)=>{const now=i===cur,used=usedOf(k).includes(i);
-  const tag=now?`<span class="st now">PITCHING · ${pc}P</span>`:used?'<span class="st">USED</span>':'<span class="st ready">READY</span>';
+  const sf=now?clamp(stamFrac(),0,1):1,tag=now?`<span class="st now">PITCHING · ${pc}P<i class="penStam"><i style="width:${Math.round(sf*100)}%;background:${sf<=0?'#e2603a':sf<.25?'#e2603a':sf<.5?'#e6b93a':'#5fc25a'}"></i></i></span>`:used?'<span class="st">USED</span>':'<span class="st ready">READY</span>';
   const role=p.pos==='SP'?'Starter':p.type==='demon'?'Flamethrower':p.type==='knuckle'?'Knuckleballer':'Reliever';
   return `<button type="button" class="penRow" data-i="${i}" ${now?'aria-current="true"':''} ${now||used?'disabled':''}>
 <span class="no">#${p.no}</span><span class="nm"><b>${p.name}</b><small>${role} · ${p.hand}HP${p.slot==='side'?' · sidearm':''}</small></span>${tag}<span class="ln2"><span class="rt">VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}</span><span class="ars">${arsOf(p).map(a=>`<i>${PITCHES[a].name}</i>`).join('')}</span></span></button>`}).join('')}

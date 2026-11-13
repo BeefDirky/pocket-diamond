@@ -1079,6 +1079,54 @@ i.kn{font-style:normal;margin-left:-.125em}
 @media (prefers-reduced-motion:reduce){.coinPop.go{animation:none}}
 .coinEarn{color:#ffd23f!important;font-family:var(--f-hud);font-size:13px!important;letter-spacing:.04em}
 .coinEarn b{font-weight:400;color:#fff3c4}
+/* the bullpen on PC: a centred panel above the HUD (it used to run the full width under the matchup cards and pitch buttons) */
+.penStam{display:block;height:4px;margin-top:4px;background:rgba(0,0,0,.45);box-shadow:0 0 0 1px rgba(255,255,255,.12)}.penStam i{display:block;height:100%}
+.app.deskApp:not(.phoneLand) .penPanel{left:50%;right:auto;top:72px;bottom:auto;width:min(760px,calc(100% - 40px));max-height:calc(100% - 110px);transform:translateX(-50%);z-index:60;box-shadow:inset 0 0 0 2px var(--panel-hi),0 10px 0 rgba(0,0,0,.4),0 0 0 9999px rgba(0,0,0,.35)}
+.app.deskApp:not(.phoneLand) .penHead{padding:12px 14px}.app.deskApp:not(.phoneLand) .penHead b{font-size:14px}.app.deskApp:not(.phoneLand) .penHead span{font-size:12px}
+.app.deskApp:not(.phoneLand) .penList{display:grid;grid-template-columns:1fr 1fr}
+.app.deskApp:not(.phoneLand) .penRow{border-right:1px solid var(--panel-hi);padding:12px 14px}
+.app.deskApp:not(.phoneLand) .penRow:hover:not(:disabled){background:rgba(255,190,60,.08)}
+.app.deskApp:not(.phoneLand) .penRow .nm b{font-size:15px}.app.deskApp:not(.phoneLand) .penRow .rt{font-size:12px}
+/* ---- main menu: INVENTORY and SHOP under multiplayer ---- */
+.mmSm.mmInv,.mmSm.mmShop{position:relative;color:#ffd23f;box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px #c7871a}
+.mmSm .pkBadge{position:absolute;top:-8px;right:-8px}
+/* ---- the shop ---- */
+.shopBal{display:inline-flex;align-items:center;font-family:var(--f-hud);font-size:16px;letter-spacing:.1em;color:#ffd23f}
+.shopRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.shopItem{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:var(--edge);padding:14px;border:2px solid var(--panel-hi)}
+.shopItem.bl{border-color:#3a5aa0}
+.shopItem canvas{width:72px;height:96px;image-rendering:pixelated}
+.shopTxt{display:flex;flex-direction:column;gap:8px}.shopTxt b{font-family:var(--f-px);font-weight:400;font-size:12px;color:var(--amber)}.shopTxt p{margin:0;font-size:12px;color:var(--dim);line-height:1.4}
+.shopBuy{display:inline-flex;align-items:center;justify-content:center;gap:2px}.shopBuy:disabled{opacity:.45;cursor:not-allowed}
+.shopOwn{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,190,60,.08);border:2px solid var(--panel-hi);padding:10px 12px;font-size:13px}
+.shopOwn[hidden]{display:none}
+.shopMsg{min-height:1.2em;margin:0;color:#ffd23f;font-family:var(--f-hud);font-size:13px}
+.shopEarn{margin:0;color:var(--dim);font-size:12px}
+.invHint{margin:0;color:var(--dim);font-size:12px}
+canvas.shake{animation:packShake .6s steps(6)}
+@keyframes packShake{20%{transform:rotate(-6deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(4deg)}}
+/* ---- levelled cards ---- */
+.tc .st span.up b{text-decoration:underline;text-decoration-color:#7fe08a;text-underline-offset:2px}
+.tc .lvB{position:absolute;top:30px;left:6px;font-family:var(--f-px);font-size:7px;padding:2px 3px;background:#2f8a3e;color:#f4f1e8}
+.tc .lvB+.new{top:44px}
+/* ---- the zoomed card and its level-up panel ---- */
+.zoomWrap{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;cursor:default;max-width:640px}
+.zoomWrap>.tc{width:min(260px,80vw)}
+.lvPanel{width:min(300px,90vw);background:rgba(8,20,14,.96);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--panel-hi);padding:12px;display:flex;flex-direction:column;gap:10px;cursor:default}
+.lvHead{display:flex;flex-direction:column;gap:4px}.lvHead b{font-family:var(--f-px);font-weight:400;font-size:13px;color:var(--amber)}.lvHead span{font-size:12px;color:var(--dim)}
+.lvBtns{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.lvUp{display:grid;grid-template-columns:1fr auto;grid-template-areas:"k e" "v e";align-items:center;gap:2px 8px;text-align:left;padding:8px 10px;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);cursor:pointer;font-family:var(--f-hud)}
+.lvUp b{grid-area:k;font-weight:400;font-size:10px;letter-spacing:.12em;color:var(--dim)}.lvUp span{grid-area:v;font-size:18px}.lvUp span i{font-style:normal;font-size:11px;color:#7fe08a}
+.lvUp em{grid-area:e;font-style:normal;font-family:var(--f-px);font-size:10px;color:#7fe08a}
+.lvUp:hover:not(:disabled){border-color:#7fe08a}.lvUp:disabled{opacity:.45;cursor:not-allowed}.lvUp:disabled em{color:var(--dim)}
+.lvUp.pop{animation:lvPop .4s steps(4)}@keyframes lvPop{50%{transform:scale(1.08);border-color:#7fe08a}}
+.lvNote{margin:0;font-size:11px;color:var(--dim);line-height:1.4}
+.lvClose{align-self:flex-end}
+@media (prefers-reduced-motion:reduce){canvas.shake,.lvUp.pop{animation:none}}
+/* the bullpen tag: the stamina bar under PITCHING */
+.penRow .st.now{display:flex;flex-direction:column;align-items:flex-end}.penRow .st.now .penStam{width:72px}
+.shopBuy,.shopOwn .mbtn{white-space:nowrap}
+.zoomCard{overflow-y:auto}
 </style>
 
 <div class="app">
@@ -1123,6 +1171,7 @@ i.kn{font-style:normal;margin-left:-.125em}
         <nav class="mmBtns">
           <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
+          <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">INVENTORY</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button>
@@ -1242,23 +1291,33 @@ i.kn{font-style:normal;margin-left:-.125em}
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
       <div class="card wide" id="scrCards" hidden>
-        <div class="ckTop"><h1>CARD <span>PACKS</span></h1><span class="ckProg" id="ckProg"></span></div>
+        <div class="ckTop"><h1>INVEN<span>TORY</span></h1><span class="ckProg" id="ckProg"></span></div>
         <div class="seg ckSet" id="ckSet"><button type="button" data-v="kbo" aria-pressed="true">KBO Series</button><button type="button" data-v="bl" aria-pressed="false">Big League Series</button></div>
-        <div class="packRow">
-          <button type="button" class="pack" id="packBtn" aria-label="Open a card pack"><canvas id="packCv" width="48" height="64"></canvas></button>
-          <div class="packInfo"><b id="packN"></b><p id="packInfoTxt">Five cards a pack, at least one Rare or better. Earn a pack for every game you finish and a bonus pack for a win.</p>
-            <button class="big" id="openPack" type="button">OPEN PACK</button></div>
-        </div>
+        <p class="invHint">Tap a card to see it up close. A duplicate levels a player up: +1 to a rating of your choice, in every game he plays for your club.</p>
         <div class="ckFilter" id="ckFilter"></div>
         <div class="binder" id="binder"></div>
-        <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
-        <div class="reveal" id="reveal" hidden>
+        <button class="mbtn back" type="button" id="invBack" data-go="scrSingle">Back</button>
+      </div>
+      <div class="card wide" id="scrShop" hidden>
+        <div class="ckTop"><h1>SH<span>OP</span></h1><span class="shopBal" id="shopBal"></span></div>
+        <div class="shopRow">
+          <div class="shopItem"><canvas id="shopCvK" width="48" height="64"></canvas><div class="shopTxt"><b>KBO SERIES PACK</b><p>Five cards from the ten clubs, at least one Rare or better. Duplicates level your players up.</p>
+            <button class="big shopBuy" type="button" data-set="kbo"><i class="coinIc"></i>200 · BUY</button></div></div>
+          <div class="shopItem bl"><canvas id="shopCvB" width="48" height="64"></canvas><div class="shopTxt"><b>BIG LEAGUE PACK</b><p>Five cards from the 60 parody big-league stars, every one Rare or better.</p>
+            <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>200 · BUY</button></div></div>
+        </div>
+        <div class="shopOwn" id="shopOwn" hidden><span id="shopOwnTxt"></span><button class="mbtn" type="button" id="shopOpenOwn">OPEN ONE</button></div>
+        <p class="shopMsg" id="shopMsg" aria-live="polite"></p>
+        <p class="shopEarn">Earn coins by winning (100 for a full game, 20 for arcade) and by hitting home runs (10 in a full game, 4 in arcade).</p>
+        <div class="tiles"><button class="tile" type="button" id="shopToInv"><span>Inventory</span></button></div>
+        <button class="mbtn back" type="button" id="shopBack" data-go="scrMain">Back</button>
+      </div>
+      <div class="reveal" id="reveal" hidden>
           <div class="rvTop"><b id="rvTitle">PACK OPENED</b><span id="rvHint">Tap each card to flip it</span></div>
           <div class="rvCards" id="rvCards"></div>
           <div class="rvBtns"><button class="mbtn" type="button" id="rvAll">Flip all</button><button class="big" type="button" id="rvDone">DONE</button></div>
         </div>
         <div class="zoomCard" id="zoomCard" hidden></div>
-      </div>
       <div class="card wide" id="scrPick" hidden>
         <h1>PICK A <span>HITTER</span></h1>
         <p id="pickNote"></p>
@@ -1356,7 +1415,7 @@ i.kn{font-style:normal;margin-left:-.125em}
         <button class="big" id="olNext" type="button" hidden>NEXT GAME</button>
         <button class="big" id="toLobby" type="button" hidden>BACK TO THE ROOM</button>
         <button class="big alt" id="change" type="button">MAIN MENU</button>
-        <p class="coinEarn" id="coinEarn" hidden></p><p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Open card packs</button>
+        <p class="coinEarn" id="coinEarn" hidden></p><p class="packEarn" id="packEarn" hidden></p><button class="ghost" id="overCards" type="button">Shop</button>
       </div>
     </div>
   </div>
@@ -5332,7 +5391,7 @@ function togglePen(){if(!$('penPanel').hidden){closePen();return}if(!canPen())re
 function renderPen(){const k=fldKey(),st=staffOf(k),cur=S.pIdxOf[k]||0,pc=S.pcOf[k]||0;
  $('penSub').textContent=`${TEAMS[k].name} · current pitcher at ${pc} pitches`;
  $('penList').innerHTML=st.map((p,i)=>{const now=i===cur,used=usedOf(k).includes(i);
-  const tag=now?`<span class="st now">PITCHING · ${pc}P</span>`:used?'<span class="st">USED</span>':'<span class="st ready">READY</span>';
+  const sf=now?clamp(stamFrac(),0,1):1,tag=now?`<span class="st now">PITCHING · ${pc}P<i class="penStam"><i style="width:${Math.round(sf*100)}%;background:${sf<=0?'#e2603a':sf<.25?'#e2603a':sf<.5?'#e6b93a':'#5fc25a'}"></i></i></span>`:used?'<span class="st">USED</span>':'<span class="st ready">READY</span>';
   const role=p.pos==='SP'?'Starter':p.type==='demon'?'Flamethrower':p.type==='knuckle'?'Knuckleballer':'Reliever';
   return `<button type="button" class="penRow" data-i="${i}" ${now?'aria-current="true"':''} ${now||used?'disabled':''}>
 <span class="no">#${p.no}</span><span class="nm"><b>${p.name}</b><small>${role} · ${p.hand}HP${p.slot==='side'?' · sidearm':''}</small></span>${tag}<span class="ln2"><span class="rt">VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}</span><span class="ars">${arsOf(p).map(a=>`<i>${PITCHES[a].name}</i>`).join('')}</span></span></button>`}).join('')}
@@ -6017,7 +6076,7 @@ function fullInning(){
 const ord=n=>n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
 
 // ---------- game flow ----------
-function startGame(mode){S.gameNo=(S.gameNo||0)+1;tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
+function startGame(mode){S.gameNo=(S.gameNo||0)+1;if(!onlineGame())applyLevels();tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
  S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.stamOf={};S.coinGame={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.kLook=[];S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();
@@ -6146,7 +6205,7 @@ let lnView='mine',lnSel=null;
 const CUSTOM={name:'ROOKIE',no:99,hand:'R',bat:'#1c1c1f',con:70,pow:70,spd:70,def:70,slot:0,active:false};
 try{Object.assign(CUSTOM,JSON.parse(localStorage.getItem('pd-custom')||'{}'))}catch(e){}
 function saveCustom(){try{localStorage.setItem('pd-custom',JSON.stringify(CUSTOM))}catch(e){}}
-function applyCustom(){
+function applyCustom(){applyLevels();
  for(const k of ORDER){const T=TEAMS[k];if(T.benched){const ci=T.lineup.findIndex(p=>p.custom);if(ci>=0)T.lineup[ci]=T.benched;T.benched=null}}
  if(!CUSTOM.active)return;
  const T=TEAMS[S.you],idx=clamp(CUSTOM.slot|0,0,8),rp=T.lineup[idx];T.benched=rp;
@@ -6195,7 +6254,7 @@ $('lnOpp').addEventListener('click',()=>{lnView='opp';lnSel=null;lfFlip=null;ren
 let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.fillStyle='#1b1f24';g.beginPath();g.arc(48,48,44,0,Math.PI*2);g.fill();g.strokeStyle='#3a4048';g.lineWidth=6;g.stroke();g.fillStyle='#ffbf3c';g.font='48px "Press Start 2P", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('?',50,52);return Q_URL=c.toDataURL()}
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
-function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds'])$(k).hidden=k!==id;if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+function showScreen(id){if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds','scrShop'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
 {let lastK=null;const chk=()=>{const k=isWide()+'|'+isDesk()+'|'+isPhoneLand();if(k!==lastK){lastK=k;applyWide()}};addEventListener('resize',chk);addEventListener('resize',()=>requestAnimationFrame(bpLayout));addEventListener('orientationchange',chk);if(window.visualViewport)visualViewport.addEventListener('resize',chk)}
 /* full-screen batting practice: measure where the pitch buttons end and stack AUTO/INFO, then the info boxes, above them */
@@ -6246,9 +6305,9 @@ document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=
 let SIGN={};try{SIGN=JSON.parse(localStorage.getItem('pd-signings')||'{}')||{}}catch(e){SIGN={}}
 const saveSign=()=>{try{localStorage.setItem('pd-signings',JSON.stringify(SIGN))}catch(e){}};
 function snapOrig(){for(const k of ORDER){const T=TEAMS[k];if(!T.orig)T.orig={L:T.lineup.slice(),P:T.staff.slice()}}}
-function signClone(c,base){const p=c.p,q={name:p.name,hand:p.hand,thr:p.thr||p.hand,pos:base.pos,natPos:p.pos,no:base.no,signed:c.id,
+function signClone(c,base,lvSpec){const p={...c.p,...cardEff(c,lvSpec)},q={name:p.name,hand:p.hand,thr:p.thr||p.hand,pos:base.pos,natPos:p.pos,no:base.no,signed:c.id,
   con:p.con,pow:p.pow,spd:p.spd,def:p.def==null?60:p.def,vel:p.vel,mov:p.mov,ctl:p.ctl,slot:p.slot||'over',type:p.type,bat:p.bat||base.bat||'#d9b07a'};
- if(p.skin)SKIN_OVR[q.name]=p.skin;if(c.pit)q.ars=arsFor({...q,pos:base.pos},c.code||c.k);return q}
+ if(p.skin)SKIN_OVR[q.name]=p.skin;if(lvSpec)q.lvSpec=lvSpec;if(c.pit)q.ars=arsFor({...q,pos:base.pos},c.code||c.k);return q}
 // where does the original player for this slot live now (lineup order can be shuffled)
 function slotOf(T,orig,pit){const arr=pit?T.staff:T.lineup;return arr.findIndex(p=>p===orig||(p.signedFor===orig.name))}
 function signPlayer(k,origName,cardId,pit,save){const T=TEAMS[k],arr=pit?T.staff:T.lineup,orig=(pit?T.orig.P:T.orig.L).find(p=>p.name===origName),c=CARD_BY[cardId];
@@ -6262,9 +6321,11 @@ function applySignings(){snapOrig();for(const k in SIGN){if(!TEAMS[k])continue;f
    if(!CARD_BY[id]||!COL.owned[id]){delete SIGN[k][key];continue}signPlayer(k,nm,id,pit,false)}}saveSign()}
 const usedCards=k=>new Set([...TEAMS[k].lineup,...(TEAMS[k].benched?[TEAMS[k].benched]:[]),...TEAMS[k].staff].filter(p=>p&&p.signed).map(p=>p.signed));
 // ---- online roster spec ----
-function rosterSpec(k){const T=TEAMS[k],ent=p=>{if(p.custom)p=T.benched||p;return p.signed?['c',p.signed,p.signedFor]:['n',p.name]};return{L:T.lineup.map(ent),P:T.staff.map(ent)}}
+function rosterSpec(k){const T=TEAMS[k],ent=p=>{if(p.custom)p=T.benched||p;if(p.signed)return['c',p.signed,p.signedFor,lvOf(p.signed)];const nc=nativeCard(k,p.name);return['n',p.name,nc?lvOf(nc.id):{}]};return{L:T.lineup.map(ent),P:T.staff.map(ent)}}
 function applyRosterSpec(k,spec){if(!spec||!spec.L||!spec.P)return;snapOrig();const T=TEAMS[k];if(!T.netBackup)T.netBackup={L:T.lineup.slice(),P:T.staff.slice()};
- const build=(list,origs,pit)=>list.map(e=>{const base=origs.find(p=>p.name===(e[0]==='c'?e[2]:e[1]))||origs[0];if(e[0]==='c'&&CARD_BY[e[1]]){const q=signClone(CARD_BY[e[1]],base);q.signedFor=base.name;return q}return base});
+ const build=(list,origs,pit)=>list.map(e=>{const base=origs.find(p=>p.name===(e[0]==='c'?e[2]:e[1]))||origs[0];if(e[0]==='c'&&CARD_BY[e[1]]){const q=signClone(CARD_BY[e[1]],base,e[3]||{});q.signedFor=base.name;return q}
+  // one of the club's own players: at his base ratings plus whatever levels his owner has given him
+  const lv=e[0]==='n'&&e[2]?e[2]:null,nc=lv&&Object.keys(lv).length?nativeCard(k,base.name):null;if(nc){const q={...base,...cardEff(nc,lv)};return q}return base});
  T.lineup=build(spec.L,T.orig.L,false);T.staff=build(spec.P,T.orig.P,true)}
 function restoreNetRosters(){for(const k of ORDER){const T=TEAMS[k];if(T.netBackup){T.lineup=T.netBackup.L;T.staff=T.netBackup.P;T.netBackup=null}}}
 
@@ -6283,7 +6344,7 @@ function openSheet(i){const T=TEAMS[S.you],pit=i<0,p=pit?T.staff[-1-i]:T.lineup[
    return `<button type="button" class="shRow r${c.r}" data-id="${c.id}" ${inUse?'disabled':''}><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">
     <span class="nm"><b>${q.name}</b><small>${c.set==='bl'?T2.city+' · Big League':T2.city+' '+T2.name} · ${q.pos} · ${RARITY[c.r]}${here?' · IN THIS SPOT':inUse?' · ALREADY SIGNED':''}</small></span>
     <span class="o" style="color:${rcol(c.o)}">${c.o}</span><span class="sts">${st.map(([k,v])=>`<i>${k} <b style="color:${rcol(v)}">${v}</b></i>`).join('')}</span></button>`}).join('')
-  :`<p class="shEmpty">No ${pit?'pitcher':'hitter'} cards yet. Open card packs to collect players.</p>`;
+  :`<p class="shEmpty">No ${pit?'pitcher':'hitter'} cards yet. Buy card packs in the shop to collect players.</p>`;
  $('lnSheet').hidden=false}
 function closeSheet(){$('lnSheet').hidden=true;sheetFor=null}
 $('shClose').addEventListener('click',closeSheet);
@@ -6614,7 +6675,7 @@ function poAdvance(){
 function poRecord(win){const sr=poMySeries();if(!sr)return;if((sr.a===PO.you)===win)sr.wa++;else sr.wb++;
  if(serDone(sr,PO.round)){const r=PO.round;for(const o of PO.rounds[r])while(!serDone(o,r))simGame(o);
   if(serWin(sr)!==PO.you)PO.out=true;poAdvance();
-  if(PO.champ===PO.you){COL.packs+=5;saveCol();updatePackBadge()}}
+  if(PO.champ===PO.you){coinAdd(1000,'champ')}}// a title pays 1,000 coins (it used to be five packs)
  savePO()}
 function renderBracket(){
  const H=$('bracket');let h='';
@@ -6628,7 +6689,7 @@ function renderBracket(){
  h+=`<div class="champ">${PO.champ?`<img alt="" src="${LOGO_URL[PO.champ]}"><b>CHAMPIONS</b>${TEAMS[PO.champ].city} ${TEAMS[PO.champ].name}`:'<div class="rh">CHAMPION</div>🏆'}</div>`;
  H.innerHTML=h;
  const sr=poMySeries();
- if(PO.champ===PO.you){$('poStatus').textContent='Champions! +5 card packs';$('poNext').innerHTML=`<b>${TEAMS[PO.you].name}</b> win the Korean Series!`}
+ if(PO.champ===PO.you){$('poStatus').textContent='Champions! +1,000 coins';$('poNext').innerHTML=`<b>${TEAMS[PO.you].name}</b> win the Korean Series!`}
  else if(PO.out){$('poStatus').textContent='Eliminated';$('poNext').innerHTML=PO.champ?`${TEAMS[PO.champ].city} ${TEAMS[PO.champ].name} won it all. Start a new bracket for another run.`:'Eliminated.'}
  else if(sr){const opp=sr.a===PO.you?sr.b:sr.a,g=sr.wa+sr.wb+1;$('poStatus').textContent=`${PO_NAMES[PO.round]} · ${poLine(sr)}`;$('poNext').innerHTML=`Game ${g} vs <b>${TEAMS[opp].city} ${TEAMS[opp].name}</b> · first to ${need(PO.round)} wins`}
  $('poPlay').hidden=!sr;$('poSim').disabled=!sr;$('poPlay').textContent=sr?`PLAY GAME ${sr.wa+sr.wb+1}`:'PLAY GAME';
@@ -6890,8 +6951,8 @@ acRender();
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'];
 let CARDS=[],CARD_BY={};
-let COL={packs:3,owned:{},seen:{}};
-try{const v=JSON.parse(localStorage.getItem('pd-cards')||'null');if(v&&typeof v==='object')COL={packs:v.packs|0,owned:v.owned||{},seen:v.seen||{}}}catch(e){}
+let COL={packs:3,owned:{},seen:{},lv:{}};
+try{const v=JSON.parse(localStorage.getItem('pd-cards')||'null');if(v&&typeof v==='object')COL={packs:v.packs|0,owned:v.owned||{},seen:v.seen||{},lv:v.lv||{}}}catch(e){}
 const saveCol=()=>{try{localStorage.setItem('pd-cards',JSON.stringify(COL))}catch(e){}};
 function buildCardDB(){
  CARDS=[];for(const k of ORDER){const T=TEAMS[k];
@@ -6899,8 +6960,8 @@ function buildCardDB(){
   (T.staff||[T.pitcher]).forEach((p,j)=>CARDS.push({id:k+':p'+j,k,p,pit:true,set:'kbo'}))}
  const sorted=CARDS.map(c=>ovr(c.p)).sort((a,b)=>b-a),cut=f=>sorted[Math.floor(sorted.length*f)];
  const L=cut(.08),E=cut(.25),Rr=cut(.55);
- for(const c of CARDS){const o=ovr(c.p);c.o=o;c.r=o>=L?3:o>=E?2:o>=Rr?1:0;if(c.p.type&&c.r<2)c.r=2;CARD_BY[c.id]=c}
- for(const c of buildBigLeague()){CARDS.push(c);CARD_BY[c.id]=c}
+ for(const c of CARDS){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};const o=ovr(c.p);c.o=o;c.r=o>=L?3:o>=E?2:o>=Rr?1:0;if(c.p.type&&c.r<2)c.r=2;CARD_BY[c.id]=c}
+ for(const c of buildBigLeague()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};CARDS.push(c);CARD_BY[c.id]=c}
 }
 const ART={};
 function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key];try{return ART[key]=cardArt2(c,tk)}catch(e){console.warn(e)}
@@ -6930,33 +6991,30 @@ function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key]
  // motion dust
  g.fillStyle='rgba(244,241,232,.5)';for(let k=0;k<5;k++)g.fillRect(8+Math.floor(rr()*48),66+Math.floor(rr()*10),2,1);
  return ART[c.id]=cv2.toDataURL()}
-function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],p=c.p,own=COL.owned[c.id]|0,lock=opts.lock;
- const st=c.pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl],['DEF',p.def]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
+function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],own=COL.owned[c.id]|0,lock=opts.lock,lv=lvOf(c.id),n=lvN(c.id),p={...c.p,...cardEff(c)},o=n?ovr(p):c.o;
+ const st=(c.pit?[['VEL','vel'],['MOV','mov'],['CTL','ctl'],['DEF','def']]:[['CON','con'],['POW','pow'],['SPD','spd'],['DEF','def']]).map(([k,f])=>[k,p[f],lv[f]|0]);
  const tag=(p.slot==='side'?' · SIDEARM':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'');
  return `<div class="tc r${c.r}${lock?' lock':''}${c.set==='bl'?' bl':''}" data-id="${c.id}" style="--tj:${T.jersey};--tc:${T.cap}">
-  <div class="tcHead"><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">${c.set==='bl'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(c.o)}"`}>${lock?'??':c.o}</span></div>
+  <div class="tcHead"><img alt="" src="${c.set==='bl'?blLogo(c.code):LOGO_URL[c.k]}">${c.set==='bl'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(o)}"`}>${lock?'??':o}</span></div>
   <img class="art" alt="" src="${cardArt(c)}">
   <div class="nm">${lock?'???':p.name}</div>
   <div class="ps"><span>${p.no!=null?'#'+p.no+' ':''}${c.pit?(p.pos==='SP'?'SP':'RP'):p.pos}</span><span>${c.pit?'T':'B'} ${p.hand}</span></div>
-  <div class="st">${st.map(([k,v])=>`<span>${k}<b${lock||v==null?'':` style="color:${rcol(v)}"`}>${lock||v==null?'–':v}</b></span>`).join('')}</div>
+  <div class="st">${st.map(([k,v,up])=>`<span${up&&!lock?' class="up"':''}>${k}<b${lock||v==null?'':` style="color:${rcol(v)}"`}>${lock||v==null?'–':v}</b></span>`).join('')}</div>
   <div class="rar">${RARITY[c.r]}${tag}</div>
-  ${!lock&&own>1&&!opts.noCount?`<em class="cnt">x${own}</em>`:''}${opts.isNew?'<em class="new">NEW</em>':''}</div>`}
+  ${!lock&&own>1&&!opts.noCount?`<em class="cnt">x${own}</em>`:''}${!lock&&n?`<em class="lvB">LV ${n+1}</em>`:''}${opts.isNew?'<em class="new">NEW</em>':''}</div>`}
 let binderTeam='all',binderSet='kbo';
 function renderBinder(){
  if(!CARDS.length)buildCardDB();
  const SET=CARDS.filter(c=>c.set===binderSet),ownedN=SET.filter(c=>COL.owned[c.id]).length;
  $('ckProg').textContent=`Collected ${ownedN} / ${SET.length}`;
  for(const b of $('ckSet').children)b.setAttribute('aria-pressed',String(b.dataset.v===binderSet));
- $('openPack').textContent=binderSet==='bl'?'OPEN BIG LEAGUE PACK':'OPEN KBO PACK';
- $('packInfoTxt').textContent=binderSet==='bl'?'Big League Series: 60 parody big-league stars. Five cards a pack, every one Rare or better. Collectible only.':'Five cards a pack, at least one Rare or better. Earn a pack for every game you finish and a bonus pack for a win.';
- $('packN').textContent=COL.packs===1?'1 PACK':`${COL.packs} PACKS`;$('openPack').disabled=COL.packs<=0;
  $('ckFilter').innerHTML=binderSet==='bl'?['all','bat','pit'].map(k=>`<button type="button" data-k="${k}" aria-pressed="${binderTeam===k}">${{all:'All',bat:'Hitters',pit:'Pitchers'}[k]}</button>`).join(''):`<button type="button" data-k="all" aria-pressed="${binderTeam==='all'}">All</button>`+ORDER.map(k=>{const n=CARDS.filter(c=>c.k===k&&COL.owned[c.id]).length,t=CARDS.filter(c=>c.k===k).length;return`<button type="button" data-k="${k}" aria-pressed="${binderTeam===k}"><img alt="" src="${LOGO_URL[k]}">${n}/${t}</button>`}).join('');
  const list=SET.filter(c=>binderTeam==='all'||(binderSet==='bl'?(binderTeam==='pit')===c.pit:c.k===binderTeam)).slice().sort((a,b)=>(!!COL.owned[b.id]-!!COL.owned[a.id])||b.r-a.r||b.o-a.o);
  $('binder').innerHTML=list.map(c=>cardHTML(c,{lock:!COL.owned[c.id]})).join('');
- drawPack();updatePackBadge();
+ updatePackBadge();
 }
-function updatePackBadge(){const b=$('pkBadge');if(!b)return;b.hidden=COL.packs<=0;b.textContent=COL.packs}
-function drawPack(){const g=$('packCv').getContext('2d'),bl=binderSet==='bl',T=bl?{jersey:'#1d3f7a',cap:'#c8202a'}:TEAMS[S.you];g.clearRect(0,0,48,64);
+function updatePackBadge(){for(const id of['pkBadge','pkBadge2']){const b=$(id);if(!b)continue;b.hidden=COL.packs<=0;b.textContent=COL.packs}}
+function drawPack(cv,set){const g=cv.getContext('2d'),bl=set==='bl',T=bl?{jersey:'#1d3f7a',cap:'#c8202a'}:TEAMS[S.you];g.clearRect(0,0,48,64);
  g.fillStyle='#1b1f24';g.fillRect(2,2,44,60);g.fillStyle=T.jersey;g.fillRect(4,4,40,56);g.fillStyle=T.cap;g.fillRect(4,4,40,8);g.fillRect(4,52,40,8);
  g.fillStyle='rgba(255,255,255,.25)';for(let x=4;x<44;x+=4){g.fillRect(x,4,2,2);g.fillRect(x+2,58,2,2)}
  g.fillStyle='#ffbf3c';g.fillRect(8,16,32,24);g.fillStyle='#1b1f24';g.fillRect(10,18,28,20);
@@ -6966,29 +7024,26 @@ function drawPack(){const g=$('packCv').getContext('2d'),bl=binderSet==='bl',T=b
  if(bl){g.fillStyle='#f4f1e8';for(const[x,y]of[[8,7],[24,7],[40,7],[16,55],[32,55]])g.fillRect(x-1,y-1,3,3)}}
 function rollCard(minR,set){set=set||'kbo';const w=set==='bl'?[0,70,24,6]:[60,28,10,2.6];let r;do{let x=Math.random()*w.reduce((a,b)=>a+b),i=0;while(x>w[i]){x-=w[i];i++}r=i}while(r<minR);
  const all=CARDS.filter(c=>c.set===set);let pool=all.filter(c=>c.r===r);if(!pool.length)pool=all;return pick(pool)}
-function openPack(){
- if(COL.packs<=0)return;if(!CARDS.length)buildCardDB();
- COL.packs--;const got=[];for(let i=0;i<5;i++)got.push(rollCard(i===4&&!got.some(c=>c.r>=1)?1:0,binderSet));
+function openPack(set,paid){set=set||'kbo';
+ if(!paid&&COL.packs<=0)return;if(!CARDS.length)buildCardDB();
+ if(!paid)COL.packs--;const got=[];for(let i=0;i<5;i++)got.push(rollCard(i===4&&!got.some(c=>c.r>=1)?1:0,set));
  got.sort((a,b)=>a.r-b.r);
  const fresh=got.map(c=>{const n=!COL.owned[c.id];COL.owned[c.id]=(COL.owned[c.id]|0)+1;return n});saveCol();
- const pk=$('packBtn');pk.classList.add('shake');sfx('woosh');
- setTimeout(()=>{pk.classList.remove('shake');
+ const pk=$(set==='bl'?'shopCvB':'shopCvK');if(pk)pk.classList.add('shake');sfx('woosh');updatePackBadge();
+ setTimeout(()=>{if(pk)pk.classList.remove('shake');
   $('rvTitle').textContent=got.some(c=>c.r===3)?'LEGEND PULL!':got.some(c=>c.r===2)?'EPIC PULL!':'PACK OPENED';
   $('rvCards').innerHTML=got.map((c,i)=>`<button type="button" class="flip r${c.r}" data-i="${i}"><div class="in"><div class="bk">POCKET<br>DIAMOND<br>★</div><div class="fr">${cardHTML(c,{isNew:fresh[i],noCount:true})}</div></div></button>`).join('');
-  $('reveal').hidden=false;$('rvAll').hidden=false;renderBinder()},650)}
+  $('reveal').hidden=false;$('rvAll').hidden=false;renderBinder();shopRender()},650)}
 function flipCard(b){if(!b||b.classList.contains('on'))return;b.classList.add('on');const r=+(b.className.match(/r(\d)/)||[0,0])[1];sfx(r>=2?'bigcheer':'glove');
  if([...document.querySelectorAll('#rvCards .flip')].every(x=>x.classList.contains('on')))$('rvAll').hidden=true}
 $('rvCards').addEventListener('click',e=>flipCard(e.target.closest('.flip')));
 $('rvAll').addEventListener('click',()=>{const fs=[...document.querySelectorAll('#rvCards .flip:not(.on)')];fs.forEach((b,i)=>setTimeout(()=>flipCard(b),i*160))});
 $('rvDone').addEventListener('click',()=>{$('reveal').hidden=true;renderBinder()});
-$('openPack').addEventListener('click',()=>{ensureAudio();openPack()});
-$('packBtn').addEventListener('click',()=>{ensureAudio();openPack()});
 $('ckSet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;binderSet=b.dataset.v;binderTeam='all';renderBinder()});
 $('ckFilter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;binderTeam=b.dataset.k;renderBinder()});
-$('binder').addEventListener('click',e=>{const c=e.target.closest('.tc');if(!c||c.classList.contains('lock'))return;$('zoomCard').innerHTML=cardHTML(CARD_BY[c.dataset.id]);$('zoomCard').hidden=false});
-$('zoomCard').addEventListener('click',()=>{$('zoomCard').hidden=true});
-function awardPacks(win){const n=win?2:1;COL.packs+=n;saveCol();updatePackBadge();const el=$('packEarn');el.textContent=`+${n} card pack${n>1?'s':''} earned${win?' (win bonus)':''} · ${COL.packs} to open`;el.hidden=false}
-$('overCards').addEventListener('click',()=>{$('over').hidden=true;toTitle();showScreen('scrCards')});
+$('binder').addEventListener('click',e=>{const c=e.target.closest('.tc');if(!c||c.classList.contains('lock'))return;zoomOpen(c.dataset.id)});
+function awardPacks(){$('packEarn').hidden=true}// packs are bought with coins in the shop now; games pay coins
+$('overCards').addEventListener('click',()=>{$('over').hidden=true;toTitle();shopOpen('scrMain')});
 
 // ---------- Big League Series: a second card set of parody big-league stars (collectible only) ----------
 // Skin: L light, M medium, T tan, D deep (cartoon palette only). '?' = not given yet, drawn with the medium palette.
@@ -7136,6 +7191,53 @@ function coinGameOver(win){const m=coinMode();if(m&&win)coinAdd(COIN.win[m],'win
  const parts=[];if(g.win)parts.push(`win +${g.win}`);if(g.hr)parts.push(`home runs +${g.hr}`);
  el.innerHTML=tot?`<i class="coinIc"></i>+${coinFmt(tot)} coins · ${parts.join(' · ')} · <b>${coinFmt(WAL.coins)}</b> total`:`<i class="coinIc"></i>No coins this game · win or homer to earn · <b>${coinFmt(WAL.coins)}</b> total`;el.hidden=false}
 coinUI();
+// ---------- the shop, the inventory and levelling up ----------
+// Packs cost coins (200 each); games no longer hand them out. Every card you own sits in the inventory. A duplicate copy
+// can be spent to level a player up: +1 to a rating of your choice (up to 99). A levelled player plays at his levelled
+// ratings whenever he plays for your club, as one of its own players or signed into your lineup. Online, the levels travel
+// with the roster spec, so both phones field the same players.
+const PACK_COST=200;
+const LV_KEYS={bat:['con','pow','spd','def'],pit:['vel','mov','ctl']};
+const LV_NAME={con:'CON',pow:'POW',spd:'SPD',def:'DEF',vel:'VEL',mov:'MOV',ctl:'CTL'};
+const lvOf=id=>(COL.lv&&COL.lv[id])||{};
+const lvN=id=>Object.values(lvOf(id)).reduce((a,b)=>a+(b|0),0);
+// a card's ratings with its levels on top (only the ratings the card has)
+function cardEff(c,lv){lv=lv||lvOf(c.id);const b=c.b||c.p,o={};for(const k in b){if(b[k]==null)continue;o[k]=Math.min(99,b[k]+(lv[k]|0))}return o}
+// spend one duplicate on +1 to a rating
+function levelUp(id,key){const c=CARD_BY[id],own=COL.owned[id]|0;if(!c||own<2)return false;const b=(c.b||c.p)[key];if(b==null)return false;
+ const lv=COL.lv[id]=COL.lv[id]||{};if(b+(lv[key]|0)>=99)return false;lv[key]=(lv[key]|0)+1;COL.owned[id]=own-1;saveCol();applyLevels();return true}
+// the club's own players take their card's levels in place (only for your club; everyone else plays at their base ratings)
+function applyLevels(){if(!CARDS.length)return;const you=S.you;
+ for(const c of CARDS){if(c.set!=='kbo'||!c.b)continue;const lv=c.k===you?lvOf(c.id):{};for(const k in c.b){if(c.b[k]==null)continue;c.p[k]=Math.min(99,c.b[k]+(lv[k]|0))}}
+ // signed players carry their levels with them
+ for(const k of ORDER){const T=TEAMS[k];for(const arr of[T.lineup,T.staff,T.benched?[T.benched]:[]])for(const p of arr){if(!p||!p.signed||!CARD_BY[p.signed])continue;const e=cardEff(CARD_BY[p.signed],p.lvSpec||lvOf(p.signed));for(const kk in e)p[kk]=e[kk]}}}
+// the native card for a player of club k
+const nativeCard=(k,name)=>CARDS.find(c=>c.set==='kbo'&&c.k===k&&c.p.name===name);
+// ---- the zoomed card, with its level-up panel ----
+let ZOOM=null;
+function zoomOpen(id){ZOOM=id;zoomRender();$('zoomCard').hidden=false}
+function zoomRender(){const c=CARD_BY[ZOOM];if(!c)return;const own=COL.owned[c.id]|0,spare=Math.max(0,own-1),keys=LV_KEYS[c.pit?'pit':'bat'],e=cardEff(c),lv=lvOf(c.id),n=lvN(c.id);
+ const btns=keys.map(k=>{const v=e[k],max=v>=99;return`<button type="button" class="lvUp" data-k="${k}" ${!spare||max?'disabled':''}><b>${LV_NAME[k]}</b><span>${v}${lv[k]?` <i>+${lv[k]}</i>`:''}</span><em>${max?'MAX':'+1'}</em></button>`}).join('');
+ $('zoomCard').innerHTML=`<div class="zoomWrap">${cardHTML(c)}<div class="lvPanel"><div class="lvHead"><b>LEVEL ${n+1}</b><span>${spare?`${spare} spare cop${spare>1?'ies':'y'} · each one is +1 to a rating`:'Get a duplicate of this card to level him up'}</span></div><div class="lvBtns">${btns}</div>
+  <p class="lvNote">${c.set==='kbo'?`Plays at these ratings for ${c.k===S.you?'your club':`your club when signed (or when you play as ${TEAMS[c.k].name})`}.`:'Plays at these ratings when signed into your lineup.'}</p><button type="button" class="mbtn lvClose">Close</button></div></div>`}
+$('zoomCard').addEventListener('click',e=>{const b=e.target.closest('.lvUp');if(b){if(!b.disabled&&levelUp(ZOOM,b.dataset.k)){sfx('glove');zoomRender();renderBinder();const t=$('zoomCard').querySelector(`.lvUp[data-k="${b.dataset.k}"]`);if(t){t.classList.add('pop');setTimeout(()=>t.classList.remove('pop'),400)}}return}
+ if(e.target.closest('.lvPanel')&&!e.target.closest('.lvClose'))return;$('zoomCard').hidden=true;ZOOM=null});
+// ---- the shop ----
+function shopRender(){if(!$('scrShop'))return;$('shopBal').innerHTML=`<i class="coinIc"></i>${coinFmt(WAL.coins)} COINS`;
+ for(const b of document.querySelectorAll('.shopBuy'))b.disabled=WAL.coins<PACK_COST;
+ $('shopOwn').hidden=COL.packs<=0;$('shopOwnTxt').textContent=COL.packs===1?'You have 1 unopened pack.':`You have ${COL.packs} unopened packs.`;
+ drawPack($('shopCvK'),'kbo');drawPack($('shopCvB'),'bl');updatePackBadge()}
+function shopMsg(t){$('shopMsg').textContent=t;clearTimeout(shopMsg.t);shopMsg.t=setTimeout(()=>{$('shopMsg').textContent=''},3500)}
+function shopOpen(from){$('shopBack').dataset.go=from||'scrMain';shopRender();showScreen('scrShop')}
+function invOpen(from){$('invBack').dataset.go=from||'scrMain';showScreen('scrCards')}
+for(const b of document.querySelectorAll('.shopBuy'))b.addEventListener('click',()=>{ensureAudio();if(WAL.coins<PACK_COST){shopMsg(`You need ${coinFmt(PACK_COST-WAL.coins)} more coins.`);return}
+ WAL.coins-=PACK_COST;saveWal();coinUI();shopRender();shopMsg(`Bought a ${b.dataset.set==='bl'?'Big League':'KBO'} pack for ${PACK_COST} coins.`);openPack(b.dataset.set,true)});
+$('shopOpenOwn').addEventListener('click',()=>{ensureAudio();openPack('kbo',false);shopRender()});
+$('shopToInv').addEventListener('click',()=>invOpen('scrShop'));
+$('goShop').addEventListener('click',()=>{ensureAudio();shopOpen('scrMain')});
+$('goInv').addEventListener('click',()=>{ensureAudio();invOpen('scrMain')});
+// the single-player Cards tile opens the inventory, and comes back to single player
+for(const t of document.querySelectorAll('#scrSingle .tile[data-go="scrCards"]'))t.addEventListener('click',()=>{$('invBack').dataset.go='scrSingle'});
 // ---------- league map: pixel Korea with every club pinned to its city ----------
 const KR_MAIN=[[126.1,37.75],[126.45,37.82],[126.7,37.97],[126.95,38.15],[127.1,38.3],[127.6,38.33],[128.0,38.3],[128.35,38.62],[128.6,38.2],[128.85,37.85],[129.05,37.6],[129.3,37.15],[129.38,36.7],[129.45,36.2],[129.45,35.9],[129.5,35.6],[129.4,35.4],[129.2,35.17],[128.95,35.05],[128.6,34.92],[128.3,34.88],[128.0,34.85],[127.75,34.75],[127.5,34.62],[127.3,34.48],[127.0,34.42],[126.75,34.32],[126.5,34.3],[126.3,34.45],[126.28,34.75],[126.35,35.05],[126.42,35.4],[126.55,35.65],[126.7,35.95],[126.6,36.2],[126.5,36.45],[126.2,36.65],[126.15,36.85],[126.45,37.0],[126.8,37.15],[126.65,37.4],[126.55,37.6]];
 const KR_ISL=[[[126.25,33.28],[126.3,33.42],[126.55,33.56],[126.85,33.54],[126.95,33.45],[126.8,33.29],[126.55,33.21]],[[130.86,37.45],[130.92,37.53],[130.8,37.53]],[[128.6,34.9],[128.72,34.95],[128.7,34.75],[128.58,34.72]]];
@@ -7874,7 +7976,8 @@ function render(now){
  const sdB=batKey()===S.you?1:-1,deckP=toPx(sdB*38,-6);
  if(ph!=='title'&&ph!=='over'){
   if(!S.walkUp||S.walkUp.who!==cb){S.walkUp={who:cb,at:(S.walkUp?now+(S.koWalk?650:0):now-2000)};S.stance={vert:Math.random()<.55,ph:Math.random()*6}}
-  const waitUp=inPlay&&ph==='result'&&!play.foul&&S.mode!=='bp';if(waitUp)S.walkUp.at=now;
+  const keepBat=inPlay&&play.res&&play.res.steal;// a pickoff or a steal: the batter stays put in the box
+  const waitUp=inPlay&&ph==='result'&&!play.foul&&!keepBat&&S.mode!=='bp';if(waitUp)S.walkUp.at=now;
   const od=waitUp?cb:TEAMS[batKey()].lineup[((S.orderOf[batKey()]||0)+1)%9],wu=waitUp?1:(now-S.walkUp.at)/900;
   if(od&&(od!==cb||waitUp)&&wu>=1&&S.mode!=='bp'){const sw=Math.sin(now/520+1.3);add(deckP.y,()=>{drawPlayer(wg,deckP.x,deckP.y,bat,{legs:'stand',arms:'bat',skin:runSkin(od),helmet:true,pants:batPants,flip:sdB<0});drawBat(wg,deckP.x,deckP.y,(sdB>0?125:55)*RAD+sw*.9,sdB>0?'R':'L',od.bat)})}
  }
@@ -7893,7 +7996,7 @@ function render(now){
  const walking=S.mode!=='bp'&&S.walkUp&&S.walkUp.who===cb&&now-S.walkUp.at<900&&ph!=='pitch'&&!inPlay;
  if(walking){const k=ease(clamp((now-S.walkUp.at)/900,0,1)),wx=lerp(deckP.x,bx.x,k),wy=lerp(deckP.y,bx.y,k);
   add(wy,()=>{drawPlayer(wg,wx,wy,bat,{legs:'run',arms:'down',frame:Math.floor(now/170),skin:runSkin(cb),helmet:true,pants:batPants,flip:wx>bx.x});drawBat(wg,wx,wy,(hand==='R'?120:60)*RAD,hand,cb.bat,.8)})}
- const batterVisible=!walking&&(!inPlay||play.foul||play.bp||t<(hrPlay?wt+.6:.6));
+ const batterVisible=!walking&&(!inPlay||play.foul||play.bp||(play.res&&play.res.steal)||t<(hrPlay?wt+.6:.6));
  if(batterVisible){
   add(bx.y,()=>{
    const sq=S.swing&&S.swing.bunt&&(ph==='pitch'||ph==='call'||(inPlay&&t<.6));
@@ -8292,7 +8395,7 @@ $('snd').addEventListener('click',()=>{muted=!muted;ensureAudio();applyVolumes()
 
 document.addEventListener('pointerdown',e=>{if(e.button>0||overlayOpen()||e.target===cv)return;if(e.target.closest('button,input,select,textarea,a,label,.book,.zoomCtl,.pauseBtn'))return;if(S.phase==='title'||S.phase==='over')return;swing()});
 addEventListener('pointerdown',ensureAudio,{once:true});addEventListener('keydown',ensureAudio,{once:true});
-if(!TEAMS[S.you])S.you='busan';if(S.opp===S.you)S.opp=TS_ORDER.find(k=>k!==S.you);document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();applySignings();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
+if(!TEAMS[S.you])S.you='busan';if(S.opp===S.you)S.opp=TS_ORDER.find(k=>k!==S.you);document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();buildCardDB();applySignings();applyLevels();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');
 const fontsReady=Promise.race([
  Promise.all([document.fonts.load('12px "Pixelify Sans"'),document.fonts.load('12px Jua'),document.fonts.load('bold 10px "Silkscreen"'),document.fonts.load('12px "Press Start 2P"'),document.fonts.load('40px "Yellowtail"')]),
  new Promise(r=>setTimeout(r,2500))]).catch(()=>{});

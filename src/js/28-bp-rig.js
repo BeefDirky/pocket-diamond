@@ -273,7 +273,8 @@ function render(now){
  const sdB=batKey()===S.you?1:-1,deckP=toPx(sdB*38,-6);
  if(ph!=='title'&&ph!=='over'){
   if(!S.walkUp||S.walkUp.who!==cb){S.walkUp={who:cb,at:(S.walkUp?now+(S.koWalk?650:0):now-2000)};S.stance={vert:Math.random()<.55,ph:Math.random()*6}}
-  const waitUp=inPlay&&ph==='result'&&!play.foul&&S.mode!=='bp';if(waitUp)S.walkUp.at=now;
+  const keepBat=inPlay&&play.res&&play.res.steal;// a pickoff or a steal: the batter stays put in the box
+  const waitUp=inPlay&&ph==='result'&&!play.foul&&!keepBat&&S.mode!=='bp';if(waitUp)S.walkUp.at=now;
   const od=waitUp?cb:TEAMS[batKey()].lineup[((S.orderOf[batKey()]||0)+1)%9],wu=waitUp?1:(now-S.walkUp.at)/900;
   if(od&&(od!==cb||waitUp)&&wu>=1&&S.mode!=='bp'){const sw=Math.sin(now/520+1.3);add(deckP.y,()=>{drawPlayer(wg,deckP.x,deckP.y,bat,{legs:'stand',arms:'bat',skin:runSkin(od),helmet:true,pants:batPants,flip:sdB<0});drawBat(wg,deckP.x,deckP.y,(sdB>0?125:55)*RAD+sw*.9,sdB>0?'R':'L',od.bat)})}
  }
@@ -292,7 +293,7 @@ function render(now){
  const walking=S.mode!=='bp'&&S.walkUp&&S.walkUp.who===cb&&now-S.walkUp.at<900&&ph!=='pitch'&&!inPlay;
  if(walking){const k=ease(clamp((now-S.walkUp.at)/900,0,1)),wx=lerp(deckP.x,bx.x,k),wy=lerp(deckP.y,bx.y,k);
   add(wy,()=>{drawPlayer(wg,wx,wy,bat,{legs:'run',arms:'down',frame:Math.floor(now/170),skin:runSkin(cb),helmet:true,pants:batPants,flip:wx>bx.x});drawBat(wg,wx,wy,(hand==='R'?120:60)*RAD,hand,cb.bat,.8)})}
- const batterVisible=!walking&&(!inPlay||play.foul||play.bp||t<(hrPlay?wt+.6:.6));
+ const batterVisible=!walking&&(!inPlay||play.foul||play.bp||(play.res&&play.res.steal)||t<(hrPlay?wt+.6:.6));
  if(batterVisible){
   add(bx.y,()=>{
    const sq=S.swing&&S.swing.bunt&&(ph==='pitch'||ph==='call'||(inPlay&&t<.6));
