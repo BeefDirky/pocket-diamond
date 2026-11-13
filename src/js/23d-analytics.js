@@ -46,3 +46,10 @@ addEventListener('unhandledrejection',ev=>phError('promise',ev.reason));
 for(const b of $('optStats').children)b.addEventListener('click',()=>{phOptOut(b.dataset.v==='off');phOptSync()});
 function phOptSync(){for(const b of $('optStats').children)b.setAttribute('aria-pressed',String((b.dataset.v==='off')===(OPT.stats===false)))}
 phOptSync();if(phOn())setTimeout(phLoad,1500);// after the title screen is up
+// ---- the first-visit notice: says stats are collected, links the policy, offers the off switch; shown once ----
+const privSeen=()=>{try{return localStorage.getItem('pd-privacy')==='1'}catch(e){return true}};
+function privClose(){$('privBar').hidden=true;try{localStorage.setItem('pd-privacy','1')}catch(e){}}
+if(/^phc_/.test(PH.key)&&typeof window.claude==='undefined'&&!privSeen())setTimeout(()=>{if(!privSeen())$('privBar').hidden=false},2600);// after the title screen
+$('privOk').addEventListener('click',privClose);
+$('privOff').addEventListener('click',()=>{phOptOut(true);phOptSync();privClose()});
+$('privMore').addEventListener('click',()=>{privClose();showScreen('scrAbout');setTimeout(()=>$('abPriv').scrollIntoView({block:'start',behavior:'smooth'}),60)});

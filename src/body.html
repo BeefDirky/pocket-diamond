@@ -112,6 +112,10 @@
         <div class="adsWrap" id="adsWrap"></div>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
+      <div class="privBar" id="privBar" role="region" aria-label="Privacy notice" hidden>
+        <p>This game collects gameplay stats to improve it.</p>
+        <div><button type="button" id="privMore">Privacy</button><button type="button" id="privOff">Turn off</button><button type="button" id="privOk">OK</button></div>
+      </div>
       <div class="card" id="scrAbout" hidden>
         <h1><span>ABOUT</span></h1>
         <div class="about">
@@ -123,6 +127,13 @@
             <dt>Design</dt><dd>Supported with Claude</dd>
             <dt>Version</dt><dd id="abVer">2.0.3</dd>
           </dl>
+          <section class="abPriv" id="abPriv" aria-labelledby="abPrivH">
+            <h2 id="abPrivH">Privacy</h2>
+            <p><b>Account.</b> If you make one: your email (to sign in) and your username (other players see it).</p>
+            <p><b>Gameplay stats.</b> Games you play and how they go (results, pitches, swings, screens you visit), to balance the game and fix bugs. Ranked results are kept for ratings and leaderboards.</p>
+            <p><b>Connection.</b> Your IP address and country, for analytics and to stop cheating in ranked.</p>
+            <p>We don't sell your data or use it for ads. You can turn gameplay stats off any time in <b>Options → Share gameplay stats</b>. To delete your account and its data, contact Imugi Labs at imugilabs.com.</p>
+          </section>
           <p class="abFoot">© Imugi Labs · imugilabs.com</p>
         </div>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>

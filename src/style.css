@@ -682,6 +682,15 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 @media (max-width:420px){.acRow{grid-template-columns:1fr}}
 .acMsg{font-size:12px;color:var(--amber);margin:0;min-height:1em}
 /* ranked */
+/* privacy: the About section and the first-visit notice */
+.abPriv{margin:14px 0 4px;text-align:left;border-top:1px solid rgba(244,241,232,.12);padding-top:10px}
+.abPriv h2{font-family:var(--f-hud);font-size:13px;letter-spacing:.14em;color:var(--amber);margin:0 0 6px}
+.abPriv p{font-size:12px;line-height:1.55;color:var(--dim);margin:0 0 7px}.abPriv b{color:var(--chalk);font-weight:600}
+.privBar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
+ width:min(560px,calc(100vw - 24px));box-sizing:border-box;padding:9px 12px;background:#14231b;border:2px solid #0b130e;box-shadow:0 4px 0 #0b130e;color:var(--chalk);font-size:12px}
+.privBar p{margin:0;flex:1 1 180px}.privBar div{display:flex;gap:6px;flex:0 0 auto}.privBar button{white-space:nowrap}
+.privBar button{font:inherit;font-size:11px;letter-spacing:.08em;padding:5px 9px;border:2px solid #0b130e;background:#26372d;color:var(--chalk);cursor:pointer}
+.privBar #privOk{background:var(--amber);color:#14110a}.privBar button:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
 .abBuild{font-size:.75em;opacity:.55;letter-spacing:.04em}
 /* the Multiplayer page: two buttons side by side; the ranked queue */
 .mpPick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:6px 0 4px}
