@@ -62,6 +62,10 @@ try:
   short,long_=(la,lb) if len(la)<=len(lb) else (lb,la)
   same= long_.startswith(short)
   print('logs consistent:',same)
+  # each phone re-checks what the other sent (state snapshots, rolled pitches, releases, swings): an honest game has no flags
+  fa=A.evaluate("JSON.stringify((__pd.S.online&&__pd.S.online.flags)||[])");fb=B.evaluate("JSON.stringify((__pd.S.online&&__pd.S.online.flags)||[])")
+  print('cross-check flags A:',fa[:1500]);print('B:',fb[:1500])
+  if fa!='[]' or fb!='[]': ok=False;print('honest game raised online check flags')
   if not same: ok=False;print(la[:800]);print('---');print(lb[:800])
   if errs: ok=False;print('\n'.join(errs))
   if not (A.evaluate('__pd.S.phase')=='over' and B.evaluate('__pd.S.phase')=='over'): ok=False;print('game did not finish in time')

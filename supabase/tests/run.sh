@@ -16,3 +16,5 @@ $P -d pd_test -c "set role service_role; insert into public.matches (id, mode, s
 for i in 1 2 3 4 5 6 7 8; do $P -d pd_test -c "set role service_role; select public.finalize_match('cccccccc-0000-0000-0000-000000000001')" >/dev/null & done; wait
 G=$($P -tA -d pd_test -c "select games from public.ratings where user_id='33333333-3333-3333-3333-333333333333'")
 [ "$G" = "1" ] && echo "ok  8 simultaneous finalize calls counted once" || { echo "FAIL: race counted $G times"; exit 1; }
+# migration 002: the ranked flow, on real game records
+$P -tA -d pd_test -f supabase/tests/ranked_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"

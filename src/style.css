@@ -681,6 +681,10 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .acRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (max-width:420px){.acRow{grid-template-columns:1fr}}
 .acMsg{font-size:12px;color:var(--amber);margin:0;min-height:1em}
+/* ranked */
+.olRkNote{margin:2px 0 6px;font-size:11px;letter-spacing:.08em;color:var(--amber);text-align:center}
+.rkRes{margin:6px 0 2px;font-family:var(--f-hud);font-size:13px;letter-spacing:.1em;text-align:center;color:var(--chalk)}
+.rkRes[data-tone=win]{color:#7fd77f}.rkRes[data-tone=loss]{color:var(--amber)}.rkRes[data-tone=bad]{color:#ff8a6a}
 .acHint{font-size:11px;color:var(--dim);margin:-4px 0 0}.acHint.ok{color:#7fd77f}.acHint.bad{color:#ff8a6a}
 .acLead small{font-size:11px;color:var(--dim)}
 

@@ -11,7 +11,7 @@ const myTeam=()=>S.online&&S.online.inGame?(S.online.me==='home'?S.you:S.opp):S.
 const pitching=()=>S.mode==='full'&&S.fld===myTeam();
 const myBat=()=>S.bat===myTeam();
 function setSides(){if(S.half==='top'){S.bat=S.opp;S.fld=S.you}else{S.bat=S.you;S.fld=S.opp}applyDefense()}
-function addRuns(n){if(!n)return;const f=fldKey();S.pRunsOf[f]=(S.pRunsOf[f]||0)+n;if(batKey()===S.you){S.runs+=n;S.youLine[S.inning-1]+=n}else{S.target+=n;S.oppLine[S.inning-1]+=n}}
+function addRuns(n){if(!n)return;mlRuns(n);const f=fldKey();S.pRunsOf[f]=(S.pRunsOf[f]||0)+n;if(batKey()===S.you){S.runs+=n;S.youLine[S.inning-1]+=n}else{S.target+=n;S.oppLine[S.inning-1]+=n}}
 const isWalkoff=()=>S.mode==='arcade'?S.runs>S.target:(S.half==='bot'&&S.inning>=(S.schedInn||9)&&S.runs>S.target);
 const effHand=b=>b.hand==='S'?(pitcher().hand==='R'?'L':'R'):b.hand;
 function setCam(m){S.camMode=m}

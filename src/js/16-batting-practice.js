@@ -389,8 +389,8 @@ function finishPlay(){
   banner(r.banner,r.sub,r.tone);logPA(curBatter(),r.desc,r.hr||r.code==='LD');
   setPhase('result');updateHUD();return}
  if(r.code==='FOUL'&&S.play.bunt&&S.strikes>=2){
-  S.outs++;S.jumbo={kBig:true,look:false,text:'STRIKEOUT',until:performance.now()+2800};if(batKey()===S.you){S.ks++;(S.kLook=S.kLook||[]).push(false);crowdSad()}else{S.myK++;if(fldKey()===S.you)organCue('klost')}logPA(curBatter(),'Foul bunt on strike three, K',false);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
- }else if(r.code==='FOUL'){
+  S.outs++;S.jumbo={kBig:true,look:false,text:'STRIKEOUT',until:performance.now()+2800};if(batKey()===S.you){S.ks++;(S.kLook=S.kLook||[]).push(false);crowdSad()}else{S.myK++;if(fldKey()===S.you)organCue('klost')}mlFoul();logPA(curBatter(),'Foul bunt on strike three, K',false);mlDone('K',0);banner('STRIKEOUT','Foul bunt with two strikes','strike');sfx('out');nextBatter();
+ }else if(r.code==='FOUL'){mlFoul();
   const had2=S.strikes>=2;if(!had2)S.strikes++;
   banner(S.play.bunt?'FOUL BUNT':'FOUL BALL',had2?'Still two strikes':`${S.balls}-${S.strikes}`);// (a foul that made it strike two used to say "still two strikes")
  }else{
@@ -406,7 +406,7 @@ function finishPlay(){
   if(!r.hr){sfx(r.hit?'hit':'out');if(mine?(r.hit||runs):r.outs>0)S.cheerUntil=now+2200;if((r.hit||r.code==='E'||r.code==='IFH')&&!r.steal&&!S.play.reachCued){crowdReach();if(r.code==='E'&&fldKey()===S.you)crowdSad()}}
   if(r.hr){}
   else if(runs)S.jumbo={text:runs>1?`${runs} RUNS SCORE`:'RUN SCORES',until:now+3000};
-  if(!r.steal)nextBatter();
+  if(!r.steal){mlInPlay(r,runs);nextBatter()}
   S.postOff=outsAfter>=3?(fldKey()===S.you?1:-1):0;
  }
  S.postAt=now;if(!(S.outs>=3))S.postOff=0;

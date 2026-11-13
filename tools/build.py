@@ -51,6 +51,9 @@ def build_web(js, cfg):
 
 def main():
     js = source_js()
+    # the game's own version (same for both builds): ranked submissions carry it, and both phones must match
+    assert js.count('__PD_VER__') == 1
+    js = js.replace('__PD_VER__', hashlib.sha1(js.encode()).hexdigest()[:10])
     cfg = json.loads(rd('tools/config.json'))
     os.makedirs(os.path.join(ROOT, 'dist'), exist_ok=True)
     art = build_artifact(js)

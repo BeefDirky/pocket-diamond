@@ -1,0 +1,86 @@
+// ---------- ranked online: the server opens the match, rolls the seed, and settles the result ----------
+// A ranked game is an ordinary online game with four differences: both players must be signed in with a username;
+// both clubs play their stock rosters (no signed cards, no levels, no AUTO); the match id and random seed come from
+// the server (supabase/migrations/002_ranked.sql), not from the host's phone; and at the end both phones submit their
+// match record. The server counts the result only when the two records agree, neither phone's checks failed, and
+// the record adds up as a baseball game. Single-player and casual online games are reported as your own
+// (unverified) stat line instead, for your profile.
+const PD_VER='__PD_VER__';
+const RK={pingT:0,pollT:0,claimT:0};
+async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
+const rkErr=e=>((e&&e.message)||'Could not reach the server').replace(/^.*?exception:\s*/,'');
+const rkReady=()=>supaOK()&&!!(ACC.user&&ACC.name);
+// stock rosters: each club's own players at their own ratings, in their usual order
+function stockSpec(k){snapOrig();const T=TEAMS[k];return{L:T.orig.L.map(p=>['n',p.name,{}]),P:T.orig.P.map(p=>['n',p.name,{}])}}
+// is this room playing ranked? (the host chooses; the guest follows)
+const rkOn=o=>!!o&&(o.role==='host'?$('olRk').querySelector('[aria-pressed=true]').dataset.v==='1':!!(o.opp&&o.opp.rk));
+// the lobby: who may ready up, and what the room needs to hear about it
+function rkLobby(o){const on=rkOn(o),host=o.role==='host';
+ $('olRkRow').hidden=!host||!supaOK();$('olBoRow').hidden=!host||on;
+ const nt=$('olRkNote');nt.hidden=!on;
+ if(on)nt.textContent=`RANKED · ${ACC.name||'you'} vs ${(o.opp&&o.opp.acct)||'?'} · stock rosters, one game, counts for rating`;
+ if(host&&o.mine.rk!==(on?1:0))netPresence({rk:on?1:0,ros:on?null:rosterSpec(S.you)});
+ if(!host&&on&&o.mine.ros)netPresence({ros:null});
+ if(!on&&!o.mine.ros&&o.mine.team)netPresence({ros:rosterSpec(S.you)});// back to casual: your signed cards count again
+ if(!on)return null;
+ if(!rkReady())return ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account. Sign in on the Account screen (main menu), then come back.';
+ if(o.opp&&!o.opp.acct)return'Your opponent needs to sign in to play ranked.';
+ return null}
+$('olRk').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const x of $('olRk').children)x.setAttribute('aria-pressed',String(x===b));
+ const o=S.online;if(o&&o.mine.rdy)netPresence({rdy:null});lobbyRender()});
+// host: open the match on the server, wait for the guest to join it, then start with the server's seed
+async function rkHostStart(inn){const o=S.online;if(o.rkBusy)return;o.rkBusy=true;
+ try{$('olStatus').textContent='Opening a ranked match…';
+  const r=await rpc('ranked_open',{p_home_club:o.mine.team,p_away_club:o.opp.team,p_innings:inn,p_version:PD_VER});
+  o.rkm=r.match_id;netPresence({rkm:o.rkm});$('olStatus').textContent='Waiting for your opponent to join the ranked match…';
+  const t0=Date.now();while(Date.now()-t0<20000&&S.online===o){
+   if(o.opp&&o.opp.rkj===o.rkm){const info=await rpc('ranked_info',{p_match:o.rkm});
+    if(info.status==='live'&&info.seed){const st={gid:o.rkm+':'+info.seed,home:o.mine.team,away:o.opp.team,inn,night:Math.random()<.55,bo:1,sid:o.rkm,gn:1,sw:[0,0],
+      rk:{m:o.rkm,home:info.home_name,away:info.away_name}};netPresence({start:st});startOnline(st);return}}
+   await new Promise(r=>setTimeout(r,500))}
+  throw{message:'Your opponent did not join the ranked match. Press Ready to try again.'}}
+ catch(e){o.rkm=null;netPresence({rkm:null,rdy:null});o.warnUntil=performance.now()+6000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=rkErr(e)}
+ finally{o.rkBusy=false}}
+// guest: the host opened a match: join it on the server (which rolls the seed) and remember what to expect
+async function rkGuestJoin(o,m){if(o.rkJoining===m)return;o.rkJoining=m;
+ try{const info=await rpc('ranked_join',{p_match:m});if(S.online!==o)return;o.rkGid=m+':'+info.seed;netPresence({rkj:m})}
+ catch(e){o.warnUntil=performance.now()+6000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=rkErr(e);o.rkJoining=null}}
+// the guest starts only the game the server set up for it
+const rkStartOK=(o,st)=>!st.rk||st.gid===o.rkGid;
+// ---- in the game ----
+function rkBegin(o,st){o.ranked=!!st.rk;o.rk=st.rk||null;clearInterval(RK.pingT);RK.done=false;
+ if(o.ranked){applyRosterSpec(st.home,stockSpec(st.home));applyRosterSpec(st.away,stockSpec(st.away));
+  const ping=()=>{if(S.online===o&&o.inGame)rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{})};ping();RK.pingT=setInterval(ping,30000)}}
+function rkStop(){clearInterval(RK.pingT);clearTimeout(RK.pollT);clearTimeout(RK.claimT)}
+// the final screen's ranked line
+function rkShow(t,tone){const el=$('rkRes');el.hidden=!t;el.textContent=t||'';el.dataset.tone=tone||''}
+function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=null?info.rating_after-info.rating_before:null;
+ if(info.status==='final'||info.status==='forfeit'){const won=info.winner_side===info.me;
+  rkShow(`RANKED ${won?'WIN':'LOSS'}${info.status==='forfeit'?' (FORFEIT)':''} · RATING ${info.rating_after!=null?info.rating_after:'?'}${d!=null?` (${d>=0?'+':''}${d})`:''}`,won?'win':'loss');return true}
+ if(info.status==='disputed'){rkShow(`NOT COUNTED · ${info.dispute||'the two phones did not agree'}`,'bad');return true}
+ if(info.status==='abandoned'){rkShow('NOT COUNTED · the match timed out','bad');return true}
+ return false}
+// game over: ranked submits the match record; everything else reports your own line (if you're signed in)
+async function rkGameOver(){const o=S.online,m=ML&&ML.fin?ML:null;if(!m||RK.done)return;RK.done=true;
+ if(o&&o.ranked&&o.rk){clearInterval(RK.pingT);rkShow('RANKED · sending the result…');
+  try{const h=await mlHash(m);let info=await rpc('ranked_submit',{p_match:o.rk.m,p_hash:h,p_log:mlWire(m),p_flags:o.flags||[],p_version:PD_VER});
+   if(rkResult(info))return;rkShow('RANKED · waiting for your opponent’s result…');
+   const t0=Date.now(),poll=async()=>{try{info=await rpc('ranked_info',{p_match:o.rk.m});if(rkResult(info))return}catch(e){}
+    if(Date.now()-t0>180000){rkShow('RANKED · still waiting on your opponent. If they left, the win is yours after 3 minutes.');rkClaimLoop(o);return}
+    RK.pollT=setTimeout(poll,3000)};RK.pollT=setTimeout(poll,2000)}
+  catch(e){rkShow('RANKED · '+rkErr(e),'bad')}
+  return}
+ // your own line: needs an account, and at least one plate appearance you played yourself
+ if(!rkReady()||!m.pa.some(c=>!c.auto))return;
+ rpc('report_match',{p_log:mlWire(m),p_version:PD_VER}).catch(()=>{})}
+// the opponent left a ranked game: after 3 minutes of silence the server gives you the win
+function rkOppGone(o){if(!o.ranked||!o.rk)return false;banner('OPPONENT LEFT','If they don’t come back within 3 minutes, the win is yours.');rkClaimLoop(o);return true}
+function rkClaimLoop(o){clearTimeout(RK.claimT);const t0=Date.now();
+ const go=async()=>{if(S.online!==o)return;if(o.opp&&o.inGame&&!(ML&&ML.fin))return;// they came back
+  try{rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{});const info=await rpc('ranked_claim',{p_match:o.rk.m});
+   if(info.status==='forfeit'||info.status==='final'||info.status==='disputed'){o.inGame=false;rkStop();
+    const d=info.rating_after-info.rating_before,won=info.winner_side===info.me;
+    banner(won?'WIN BY FORFEIT':'MATCH OVER',won?`Your opponent left. Rating ${info.rating_after} (${d>=0?'+':''}${d})`:'');
+    setTimeout(()=>{if(S.online!==o)return;toTitle();openOnline()},5000);return}}catch(e){}
+  if(Date.now()-t0<15*60000)RK.claimT=setTimeout(go,20000)};
+ RK.claimT=setTimeout(go,20000)}

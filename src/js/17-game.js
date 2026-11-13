@@ -25,7 +25,7 @@ function startGame(mode){S.gameNo=(S.gameNo||0)+1;if(!onlineGame())applyLevels()
  if(S.mode==='full')banner('PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name}, 9 innings. You pitch the top halves.`);
  else banner(`${TEAMS[S.opp].name} POSTED ${S.target}`,`${TEAMS[S.you].city} needs ${S.target+1} in ${INNINGS} innings`);
  S.jumbo={text:'PLAY BALL',kr:'플레이 볼!',until:performance.now()+3000};
- setPhase('inning');updateHUD();
+ mlStart();setPhase('inning');updateHUD();
 }
 function startCelebration(early){const k=batKey(),T=TEAMS[k],sd=k===S.you?1:-1,now=performance.now();
  const dug=toPx(sd*84,14),pants=k===S.you?'#eeeae0':'#a9b0b5',mob=[];
@@ -34,7 +34,7 @@ function startCelebration(early){const k=batKey(),T=TEAMS[k],sd=k===S.you?1:-1,n
   const st={x:dug.x+rand(-14,14),y:dug.y+rand(-8,8)};mob.push({sx:st.x,sy:st.y,tx:tg.x,ty:tg.y,d:rand(0,500),dur:rand(1300,1900),ph:rand(0,6),hj:rand(0,4),sk:skinOf(p.name),pants,helmet:false})});
  for(let j=0;j<5;j++){const a=Math.PI*rand(.1,.9),r=rand(18,32),tg=toPx(Math.cos(a)*r,Math.sin(a)*r*.5+4);mob.push({sx:dug.x+rand(-16,16),sy:dug.y+rand(-8,8),tx:tg.x,ty:tg.y,d:rand(300,900),dur:rand(1500,2200),ph:rand(0,6),hj:rand(0,4),sk:SKINS[j%5],pants,helmet:false})}
  S.celebr={k,at:now,mob,early:!!early}}
-function gameOver(win){const onl=onlineGame();
+function gameOver(win){const onl=onlineGame();mlEnd();rkShow('');rkGameOver();
  if(!(S.celebr&&S.celebr.early&&win)){S.celebr=null;if(win&&(S.mode==='arcade'||S.half==='bot'))startCelebration()}
  setPhase('over');setCam(S.celebr?'pitch':'full');hideBanner();$('tag').hidden=true;
  const you=TEAMS[S.you],opp=TEAMS[S.opp];
