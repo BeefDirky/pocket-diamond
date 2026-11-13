@@ -126,7 +126,7 @@ function buildField(){H_NIGHT=false;
   else if(feat==='pool'){if(r<fdh+9||r>fdh+49)col=((px>>2)+(py>>2))&1?C.tile:C.tile2;else{const w=Math.sin(x*.42+y*.31)+Math.sin(y*.53-x*.19);col=w>1.35?C.poolHi:C.pool;seatMask[i]=4}}
   else if(feat==='fort'){const rw=Math.floor(py/7),off=(rw&1)*7;col=(py%7===0||(px+off)%14===0)?C.mortar:(((px+off)/14|0)+rw)%3===0?C.st2:C.st1;if(r<fdh+13&&((px>>3)&1))col=C.st2}
   else if(feat==='trees'){const n=Math.sin(x*.21)*Math.cos(y*.19)+Math.sin(x*.07+y*.11)+Math.sin(x*.5+y*.45)*.35;col=n>.75?C.tr1:n>-.1?C.tr2:C.tr3;if(n>1.2)col=C.trHi}
-  else if(feat==='harbor'){if(HSEA&&HSEA[(py>>3)*HSW+(px>>3)])col=hSeaCol(x,y,px+.5,py+.5);else{col=harborCol(px+.5,py+.5)||(ST.bowl==='mudung'?(S.night?[40,38,38]:[201,193,178]):ST.bowl==='orbit'?(S.night?[30,34,44]:[150,156,166]):ST.bowl==='brick'?((HY-py)*FT>120?fTrees(px+.5,py+.5):S.night?[44,46,54]:[214,210,200]):ST.bowl==='steel'?(S.night?[44,46,54]:[214,210,200]):[200,198,192]);if(H_SEAT)seatMask[i]=H_ROWF>.16&&H_ROWF<.52?5:1}}
+  else if(feat==='harbor'){if(HSEA&&HSEA[(py>>3)*HSW+(px>>3)])col=hSeaCol(x,y,px+.5,py+.5);else{col=harborCol(px+.5,py+.5)||(ST.bowl==='mudung'?(S.night?[40,38,38]:[201,193,178]):ST.bowl==='bread'?(S.night?[36,40,50]:[196,198,202]):ST.bowl==='orbit'?(S.night?[30,34,44]:[150,156,166]):ST.bowl==='brick'?((HY-py)*FT>120?fTrees(px+.5,py+.5):S.night?[44,46,54]:[214,210,200]):ST.bowl==='steel'?(S.night?[44,46,54]:[214,210,200]):[200,198,192]);if(H_SEAT)seatMask[i]=H_ROWF>.16&&H_ROWF<.52?5:1}}
   else if(feat==='whale'){const w=Math.sin(x*.11+Math.sin(y*.05)*2.2)+Math.sin(y*.23+x*.02);col=w>1.35?C.wave:w<-1.1?C.sea2:C.sea;
    const wx=WHALE.x,wy=WHALE.y,dx=x-wx,dy=y-wy,e=(dx/30)**2+(dy/(9-Math.max(0,dx)*.12))**2;
    if(e<1)col=dy<-3&&e>.35?C.whB:C.wh1;else{const tx=x-(wx+30),ty=y-wy;if(tx>0&&tx<12&&Math.abs(ty)<tx*.85&&Math.abs(ty)>tx*.25)col=C.wh2}}
@@ -188,11 +188,11 @@ function buildField(){H_NIGHT=false;
  CONC=[];AISLES=[];RAIL=[];
  const dAt=(x,y)=>{x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=W||y>=H)return null;const i=y*W+x;return inside[i]?-1:DO[i]/3/K};
  for(let a=-178;a<=178;a++){const sn=Math.sin(a*RAD),cs=Math.cos(a*RAD);
-  for(let r=40;r<2400;r++){const x=HX+sn*r,y=HY-cs*r;const dd=dAt(x,y);if(dd===null)break;if(dd>=117&&dd<=119){CONC.push({x,y,ang:a});break}}
+  for(let r=40;r<2400;r++){const x=HX+sn*r,y=HY-cs*r;const dd=dAt(x,y);if(dd===null)break;if(dd>=117&&dd<=119){if(!(ST.bowl==='bread'&&Math.abs(a)<46))CONC.push({x,y,ang:a});break}}
   for(let r=40;r<2400;r++){const x=HX+sn*r,y=HY-cs*r;const dd=dAt(x,y);if(dd===null)break;if(dd>=7&&dd<=9){RAIL.push({x,y,ang:a});break}}}
  for(let a=-125;a<=125;a+=10){const sn=Math.sin(a*RAD),cs=Math.cos(a*RAD);let r0=null,r1=null;
   for(let r=40;r<2400;r++){const x=HX+sn*r,y=HY-cs*r;const dd=dAt(x,y);if(dd===null)break;if(r0===null&&dd>5)r0=r;if(r0!==null&&dd>=108){r1=r;break}}
-  if(Math.abs(a)>=27&&Math.abs(a)<=43)continue;if(r0!==null&&r1!==null&&r1-r0>40)AISLES.push({a,r0:r0+4,r1:r1-4})}
+  if(Math.abs(a)>=27&&Math.abs(a)<=43)continue;if(ST.bowl==='bread'&&Math.abs(a)<46)continue;if(r0!==null&&r1!==null&&r1-r0>40)AISLES.push({a,r0:r0+4,r1:r1-4})}
  // foul lines (2px) + poles
  for(const s of[1,-1]){
   for(let i=0;i<W;i++){

@@ -1,4 +1,4 @@
-// ---------- splash: a home run that comes down in water (Ulsan's sea and cove, Busan's harbor, the Daejeon pool) ----------
+// ---------- splash: a home run that comes down in water (Ulsan's sea and cove, Busan's harbor) ----------
 let SPLASH=[];
 function waterAt(x,y){if(!ST)return false;const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fd=y>0?fenceDist(Math.max(-45,Math.min(45,th))):0;
  if(ST.harbor){harborCol(HX+x/FT,HY-y/FT);return H_KIND===1||(hInCove(x,y)&&hCoveR(x,y)-Math.hypot(x-H_COVE_C.x,y-H_COVE_C.y)>8)}

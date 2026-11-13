@@ -52,6 +52,7 @@ function drawBanners(g){
  const sl=(CLUB_INFO[S.you]&&CLUB_INFO[S.you].slogans)||[];
  const list=[[50,sl[0]||`${home.kname} 화이팅!`,home,1],[24,`LET'S GO ${home.name}!`,home],[-50,`${away.kname} 원정 응원단`,away,1],[-24,`${away.city} TRAVELS`,away],[9,sl[1]||`최강 ${home.kname}`,home,1],[-9,`${home.mascot.toUpperCase()} FAN CLUB`,home]];// (the two over the bullpens are gone: they covered the pens)
  for(const[ang,txt0,T,kr]of list){
+  if(ST.bowl==='bread'&&Math.abs(ang)<45)continue;/* Bread Bowl Park: the cave's terrace and the boards stand where these hung */
   const txt=txt0;
   let best=null,bd=99;for(const c of RAIL){const d=Math.abs(c.ang-ang);if(d<bd){bd=d;best=c}}
   if(!best||bd>2)continue;

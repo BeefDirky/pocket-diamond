@@ -11,7 +11,7 @@ const STADIUMS={
  daegu:{name:'CROWN PARK',kname:'크라운파크',dims:[325,372,400,372,325],grass:['#3a9c39','#46ad45','#50b64e'],mow:'check',
   seat:['#1f57c3','#1b4dad'],seatU:['#e8b730','#d4a62a'],pad:'#1b1b1f',pad2:'#111114',wallFt:8,feature:'honey',net:true},
  daejeon:{name:'BREAD BOWL PARK',kname:'빵그릇파크',dims:[325,360,400,355,315],grass:['#3fa23c','#4cb447','#56bd50'],mow:'stripe',
-  seat:['#24396e','#1f3262'],seatU:['#c8202a','#b01c26'],pad:'#14244e',pad2:'#0c1834',wallFt:8,feature:'pool',net:true},
+  seat:['#24396e','#1f3262'],seatU:['#c8202a','#b01c26'],pad:'#14244e',pad2:'#0c1834',wallFt:8,feature:'bread',net:true,bowl:'bread'},
  suwon:{name:'FORTRESS FIELD',kname:'화성필드',dims:[330,395,400,375,318],grass:['#3d9e3c','#49af46','#54b950'],mow:'diag',
   seat:['#4b2a8a','#42257a'],seatU:['#1b1b22','#16161c'],pad:'#2a1650',pad2:'#1d0f3a',wallFt:8,feature:'fortress',net:true,bowl:'fortress'},
  changwon:{name:'FOSSIL YARD',kname:'화석야드',dims:[324,370,400,370,324],grass:['#3c9f37','#48b142','#52ba4b'],mow:'arc',

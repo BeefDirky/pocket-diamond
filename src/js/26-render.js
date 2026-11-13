@@ -33,7 +33,7 @@ function drawJumboFort(g,now){const cx=HX/K,sc=1.18,y0=-18,h=66,w=190,x0=cx-95,y
  g.drawImage(jCache('fortRoof'+night+cx,cx-92,y0-48,184,40,g=>{kRoof(g,cx,y0-26,170,30,0,night);kRoof(g,cx,y0-30,96,16,0,night)}),cx-92,y0-48,184,40);/* the pavilion roof, painted once */
  {const p=y0-14;g.fillStyle='#5a2a2a';for(const px of[cx-70,cx-40,cx+40,cx+70]){g.fillRect(px-2,p,4,6)}}// the pavilion's red posts
  g.restore()}
-function drawJumbo(g,now){if(S.you==='suwon')return drawJumboFort(g,now);if(S.you==='changwon')return drawJumboSteel(g,now);if(S.you==='busan')return drawJumboBrick(g,now);if(S.you==='incheon')return drawJumboOrbit(g,now);if(S.you==='gwangju')return drawJumboMudung(g,now);if(S.you!=='ulsan')return drawJumbo0(g,now);
+function drawJumbo(g,now){if(S.you==='suwon')return drawJumboFort(g,now);if(S.you==='changwon')return drawJumboSteel(g,now);if(S.you==='busan')return drawJumboBrick(g,now);if(S.you==='incheon')return drawJumboOrbit(g,now);if(S.you==='gwangju')return drawJumboMudung(g,now);if(S.you==='daejeon')return drawJumboBread(g,now);if(S.you!=='ulsan')return drawJumbo0(g,now);
  const cx=HX/K,fy=(HY-fenceDist(0)/FT)/K,sc=1.22,yb=fy-8;g.save();g.translate(cx,yb);g.scale(sc,sc);g.translate(-cx,-yb);
  {const y0=-18,h=66,night=!!S.night,yc=y0+h/2;// the deck it stands on, and the flippers
   g.fillStyle='rgba(0,0,0,.25)';g.fillRect(cx-118,yb-4,250,16);g.fillStyle=night?'#3a4048':'#9aa3ad';g.fillRect(cx-122,yb-8,244,12);g.fillStyle=night?'#4a525c':'#c3cad1';g.fillRect(cx-122,yb-8,244,3);
@@ -116,7 +116,8 @@ function drawDugoutCrew(g,now){
  })}
 function drawFlags(g,now){
  const xs=[298,320,342,364,596,618,640,662];
- ORDER.forEach((k,n)=>{const T=TEAMS[k],x=xs[n],y=3;
+ const dj=ST&&ST.bowl==='bread';/* Bread Bowl Park: the league's flags fly along the standing decks behind the bullpens, five a side (the cave and the boards stand where the usual row goes) */
+ ORDER.forEach((k,n)=>{const T=TEAMS[k];let x=xs[n],y=3;if(dj){const p=oXY((n<5?-1:1)*(30.6+(n%5)*2.9),23.5);x=Math.round(p.x/K);y=Math.round(p.y/K)-14}
   g.fillStyle='#14181c';g.fillRect(x,y,1,15);
   for(let c=0;c<12;c++){const o=Math.round(Math.sin(now/220+c*.55+n)*1.4);g.fillStyle=T.jersey;g.fillRect(x+1+c,y+1+o,1,7);g.fillStyle=T.cap;g.fillRect(x+1+c,y+1+o,1,2)}
  });

@@ -54,7 +54,7 @@ function bRoof(k,Rd,phi,sF,gapSeat){
 function bOpenR(phi,t0){const dx=Math.sin(phi*RAD),dy=Math.cos(phi*RAD);let lo=0,hi=1400;for(let i=0;i<22;i++){const m=(lo+hi)/2,x=H_CC.x+dx*m,y=H_CC.y+dy*m,r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD;
   const q=y>0&&Math.abs(th)<=45?r-fenceDist(th)-hPenOff(th)-H_WALLW:(y>0?r-fenceDist(Math.sign(th)*45)-H_WALLW:-1);if(q>B_LIM())hi=m;else lo=m}return Math.max(t0,lo)}
 // ---- the coast: a shoreline off to the upper left, everything measured as t (ft seaward) and u (ft along it) ----
-const B_LIM=()=>H_THEME==='orbit'?104:H_THEME==='mudung'?100:84;// how far past the wall the outfield buildings run before the ring closes
+const B_LIM=()=>H_THEME==='orbit'?104:H_THEME==='mudung'?100:H_THEME==='bread'?112:84;// how far past the wall the outfield buildings run before the ring closes
 let B_EXT=null,B_EXT_K='',B_OR=null,B_OR_K='';
 function bInOL(x,y){const k=DIMS.join(',')+H_THEME;if(!B_OR||B_OR_K!==k){B_OR_K=k;const T=hRS();B_OR=new Float32Array(360);for(let i=0;i<360;i++)B_OR[i]=T.open[i]?bOpenR(i-180,T.R[i]):T.R[i]}
  const phi=Math.atan2(x-H_CC.x,y-H_CC.y)/RAD,f=phi+180,i=Math.floor(f)%360,j=(i+1)%360,R=B_OR[i]+(B_OR[j]-B_OR[i])*(f-Math.floor(f));return Math.hypot(x-H_CC.x,y-H_CC.y)<R+2}
