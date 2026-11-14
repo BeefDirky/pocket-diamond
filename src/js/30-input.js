@@ -79,8 +79,8 @@ $('actsPitch').addEventListener('click',e=>{const b=e.target.closest('.pbtn');if
 const zoomBy=d=>{const lo=zFit()/(isWide()?W*VA/820:CAM_PITCH.z);S.zoom=clamp(S.zoom*(d>0?1.15:1/1.15),lo,1.35);if(S.zoom<lo*1.07&&d<0)S.zoom=lo};
 $('zIn').addEventListener('click',()=>zoomBy(1));$('zOut').addEventListener('click',()=>zoomBy(-1));
 cv.addEventListener('wheel',e=>{if(overlayOpen())return;e.preventDefault();zoomBy(e.deltaY<0?1:-1)},{passive:false});
-const syncAuto=()=>{const on=!!S.auto;$('autoBtn').setAttribute('aria-pressed',String(on));$('autoBtn').innerHTML=`AUTO <b>${on?'ON':'OFF'}</b>`;document.body.classList.toggle('autoOn',on);if(on&&S.phase==='choose'&&pitching()){hideBanner();startWindup()}if(on&&S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null){S.pitch.q=clamp(rand(.3,1.08),0,1);$('relMeter').hidden=true}};
-$('autoBtn').addEventListener('click',e=>{e.stopPropagation();if(onlineGame())return;S.auto=!S.auto;syncAuto();track('auto_toggled',{on:S.auto,side:pitching()?'pitch':'bat',inning:S.inning})});$('autoBtn').addEventListener('pointerdown',e=>e.stopPropagation());
+const syncAuto=()=>{const on=!!S.auto;$('autoBtn').setAttribute('aria-pressed',String(on||!!S.olAuto));$('autoBtn').innerHTML=`AUTO <b>${on||S.olAuto?'ON':'OFF'}</b>`;document.body.classList.toggle('autoOn',on);if(on&&S.phase==='choose'&&pitching()){hideBanner();startWindup()}if(on&&S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null){S.pitch.q=clamp(rand(.3,1.08),0,1);$('relMeter').hidden=true}};
+$('autoBtn').addEventListener('click',e=>{e.stopPropagation();if(onlineGame()){S.olAuto=!S.olAuto;syncAuto();track('auto_toggled',{on:S.olAuto,online:true,ranked:!!S.online.ranked});return}S.auto=!S.auto;syncAuto();track('auto_toggled',{on:S.auto,side:pitching()?'pitch':'bat',inning:S.inning})});$('autoBtn').addEventListener('pointerdown',e=>e.stopPropagation());
 const syncInfo=()=>{const on=OPT.info!==false;$('infoBtn').setAttribute('aria-pressed',String(on));$('infoBtn').innerHTML=`INFO <b>${on?'ON':'OFF'}</b>`};
 $('infoBtn').addEventListener('click',e=>{e.stopPropagation();OPT.info=OPT.info===false;saveOpts();syncInfo();if(OPT.info===false)hideBanner()});
 $('infoBtn').addEventListener('pointerdown',e=>e.stopPropagation());syncInfo();
@@ -115,6 +115,15 @@ addEventListener('keydown',e=>{if(e.key!=='Escape'||e.repeat||$('title').hidden)
   const b=card&&([...card.querySelectorAll(':scope>.xClose,.mbtn.back,#qCancel')].find(shown));if(b)act=()=>b.click()}
  if(act){e.preventDefault();e.stopPropagation();act()}},true);
 
+// TESTING ONLY: AUTO in online games (ranked too). It plays like a person would, through the same keys a player
+// presses (pick a pitch, release the meter, swing), so both phones stay in step exactly as with human input.
+const OA={rel:null,last:null};
+setInterval(()=>{if(!S.olAuto||!onlineGame()||S.olMenu||!$('over').hidden)return;
+ const key=(k,c)=>document.dispatchEvent(new KeyboardEvent('keydown',{key:k,code:c||k,bubbles:true}));
+ if(S.phase==='choose'&&pitching()&&Math.random()<.06)key(String(1+Math.floor(Math.random()*arsOf(pitcher()).length)));
+ if(S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null&&OA.rel!==S.pitch){OA.rel=S.pitch;setTimeout(()=>{if(S.olAuto)key(' ','Space')},250+Math.random()*700)}
+ if(S.pitch&&S.pitch!==OA.last&&S.pitch.releaseAt&&S.pitch.remote&&!pitching()){OA.last=S.pitch;if(Math.random()<.8){const p=S.pitch;setTimeout(()=>{if(S.olAuto&&S.pitch===p)key(' ','Space')},Math.max(0,p.travel+(Math.random()*70-35)-(performance.now()-p.releaseAt)))}}
+ const sk=$('skipBtn');if(sk&&!sk.hidden&&!pitching())sk.click()},30);
 // get the audio ready as the page opens: where the browser already allows sound (a site you often play, the
 // installed app) the menu theme starts by itself; elsewhere it starts on the first tap (the wake-up listener in 12-audio)
 setTimeout(()=>{try{ensureAudio()}catch(e){}},250);

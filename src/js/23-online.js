@@ -116,7 +116,7 @@ function startOnline(st){const o=S.online;o.gid=st.gid;o.start=st;if(o.mine.rdy)
  {const mk=o.role==='host'?st.home:st.away;if(!st.rk&&MYTEAM&&mk!==MYTEAM.club)applyRosterSpec(mk,mySpec)}
  rkBegin(o,st);// field the opponent exactly as their phone does
  S.you=st.home;S.opp=st.away;S.night=!!st.night;syncPicker();if(FIELD){rebuildPark();SIGNS=buildSigns()}
- S.auto=false;syncAuto();o.sawIng=false;o.lostAt=0;netPresence({pt:null,dc:null,ing:st.gid});
+ S.auto=false;S.olAuto=false;syncAuto();o.sawIng=false;o.lostAt=0;netPresence({pt:null,dc:null,ing:st.gid});
  pendingMode=null;startGame('full');if(S.night!==!!st.night){S.night=!!st.night;SIGNS=buildSigns()}S.totalInn=st.inn;S.schedInn=st.inn;S.oppLine=Array(st.inn).fill(0);S.youLine=Array(st.inn).fill(0);
  banner(st.rk?'RANKED · PLAY BALL':o.series.bo>1?`GAME ${o.series.gn} · BEST OF ${o.series.bo}`:'PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name} · ${st.inn} innings · you are ${o.me==='home'?'home':'away'}${o.series.bo>1?` · series ${o.series.w[o.role]}-${o.series.w[o.role==='host'?'guest':'host']}`:''}`);updateHUD()}
 function lobbyRender(){const o=S.online;netPill();if(!o)return;{const r=resumeGet();const rb=$('olRejoin');rb.hidden=!r||!!o.nr;if(r)rb.textContent=`REJOIN GAME · ROOM ${r.code.toUpperCase()}`}$('olStart').hidden=!!o.nr;$('olRoom').hidden=!o.nr;if(!o.nr)return;

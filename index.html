@@ -7064,7 +7064,7 @@ function startOnline(st){const o=S.online;o.gid=st.gid;o.start=st;if(o.mine.rdy)
  {const mk=o.role==='host'?st.home:st.away;if(!st.rk&&MYTEAM&&mk!==MYTEAM.club)applyRosterSpec(mk,mySpec)}
  rkBegin(o,st);// field the opponent exactly as their phone does
  S.you=st.home;S.opp=st.away;S.night=!!st.night;syncPicker();if(FIELD){rebuildPark();SIGNS=buildSigns()}
- S.auto=false;syncAuto();o.sawIng=false;o.lostAt=0;netPresence({pt:null,dc:null,ing:st.gid});
+ S.auto=false;S.olAuto=false;syncAuto();o.sawIng=false;o.lostAt=0;netPresence({pt:null,dc:null,ing:st.gid});
  pendingMode=null;startGame('full');if(S.night!==!!st.night){S.night=!!st.night;SIGNS=buildSigns()}S.totalInn=st.inn;S.schedInn=st.inn;S.oppLine=Array(st.inn).fill(0);S.youLine=Array(st.inn).fill(0);
  banner(st.rk?'RANKED · PLAY BALL':o.series.bo>1?`GAME ${o.series.gn} · BEST OF ${o.series.bo}`:'PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name} · ${st.inn} innings · you are ${o.me==='home'?'home':'away'}${o.series.bo>1?` · series ${o.series.w[o.role]}-${o.series.w[o.role==='host'?'guest':'host']}`:''}`);updateHUD()}
 function lobbyRender(){const o=S.online;netPill();if(!o)return;{const r=resumeGet();const rb=$('olRejoin');rb.hidden=!r||!!o.nr;if(r)rb.textContent=`REJOIN GAME · ROOM ${r.code.toUpperCase()}`}$('olStart').hidden=!!o.nr;$('olRoom').hidden=!o.nr;if(!o.nr)return;
@@ -7333,7 +7333,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='94d09597ce',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='197e1eaebb',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -9127,8 +9127,8 @@ $('actsPitch').addEventListener('click',e=>{const b=e.target.closest('.pbtn');if
 const zoomBy=d=>{const lo=zFit()/(isWide()?W*VA/820:CAM_PITCH.z);S.zoom=clamp(S.zoom*(d>0?1.15:1/1.15),lo,1.35);if(S.zoom<lo*1.07&&d<0)S.zoom=lo};
 $('zIn').addEventListener('click',()=>zoomBy(1));$('zOut').addEventListener('click',()=>zoomBy(-1));
 cv.addEventListener('wheel',e=>{if(overlayOpen())return;e.preventDefault();zoomBy(e.deltaY<0?1:-1)},{passive:false});
-const syncAuto=()=>{const on=!!S.auto;$('autoBtn').setAttribute('aria-pressed',String(on));$('autoBtn').innerHTML=`AUTO <b>${on?'ON':'OFF'}</b>`;document.body.classList.toggle('autoOn',on);if(on&&S.phase==='choose'&&pitching()){hideBanner();startWindup()}if(on&&S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null){S.pitch.q=clamp(rand(.3,1.08),0,1);$('relMeter').hidden=true}};
-$('autoBtn').addEventListener('click',e=>{e.stopPropagation();if(onlineGame())return;S.auto=!S.auto;syncAuto();track('auto_toggled',{on:S.auto,side:pitching()?'pitch':'bat',inning:S.inning})});$('autoBtn').addEventListener('pointerdown',e=>e.stopPropagation());
+const syncAuto=()=>{const on=!!S.auto;$('autoBtn').setAttribute('aria-pressed',String(on||!!S.olAuto));$('autoBtn').innerHTML=`AUTO <b>${on||S.olAuto?'ON':'OFF'}</b>`;document.body.classList.toggle('autoOn',on);if(on&&S.phase==='choose'&&pitching()){hideBanner();startWindup()}if(on&&S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null){S.pitch.q=clamp(rand(.3,1.08),0,1);$('relMeter').hidden=true}};
+$('autoBtn').addEventListener('click',e=>{e.stopPropagation();if(onlineGame()){S.olAuto=!S.olAuto;syncAuto();track('auto_toggled',{on:S.olAuto,online:true,ranked:!!S.online.ranked});return}S.auto=!S.auto;syncAuto();track('auto_toggled',{on:S.auto,side:pitching()?'pitch':'bat',inning:S.inning})});$('autoBtn').addEventListener('pointerdown',e=>e.stopPropagation());
 const syncInfo=()=>{const on=OPT.info!==false;$('infoBtn').setAttribute('aria-pressed',String(on));$('infoBtn').innerHTML=`INFO <b>${on?'ON':'OFF'}</b>`};
 $('infoBtn').addEventListener('click',e=>{e.stopPropagation();OPT.info=OPT.info===false;saveOpts();syncInfo();if(OPT.info===false)hideBanner()});
 $('infoBtn').addEventListener('pointerdown',e=>e.stopPropagation());syncInfo();
@@ -9163,6 +9163,15 @@ addEventListener('keydown',e=>{if(e.key!=='Escape'||e.repeat||$('title').hidden)
   const b=card&&([...card.querySelectorAll(':scope>.xClose,.mbtn.back,#qCancel')].find(shown));if(b)act=()=>b.click()}
  if(act){e.preventDefault();e.stopPropagation();act()}},true);
 
+// TESTING ONLY: AUTO in online games (ranked too). It plays like a person would, through the same keys a player
+// presses (pick a pitch, release the meter, swing), so both phones stay in step exactly as with human input.
+const OA={rel:null,last:null};
+setInterval(()=>{if(!S.olAuto||!onlineGame()||S.olMenu||!$('over').hidden)return;
+ const key=(k,c)=>document.dispatchEvent(new KeyboardEvent('keydown',{key:k,code:c||k,bubbles:true}));
+ if(S.phase==='choose'&&pitching()&&Math.random()<.06)key(String(1+Math.floor(Math.random()*arsOf(pitcher()).length)));
+ if(S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null&&OA.rel!==S.pitch){OA.rel=S.pitch;setTimeout(()=>{if(S.olAuto)key(' ','Space')},250+Math.random()*700)}
+ if(S.pitch&&S.pitch!==OA.last&&S.pitch.releaseAt&&S.pitch.remote&&!pitching()){OA.last=S.pitch;if(Math.random()<.8){const p=S.pitch;setTimeout(()=>{if(S.olAuto&&S.pitch===p)key(' ','Space')},Math.max(0,p.travel+(Math.random()*70-35)-(performance.now()-p.releaseAt)))}}
+ const sk=$('skipBtn');if(sk&&!sk.hidden&&!pitching())sk.click()},30);
 // get the audio ready as the page opens: where the browser already allows sound (a site you often play, the
 // installed app) the menu theme starts by itself; elsewhere it starts on the first tap (the wake-up listener in 12-audio)
 setTimeout(()=>{try{ensureAudio()}catch(e){}},250);
