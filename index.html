@@ -763,6 +763,7 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 #scrMain .mmSm.mmNew{background:var(--amber);color:#14110a !important;border-color:#0b130e;animation:mmNew 1.6s ease-in-out infinite}
 @keyframes mmNew{0%,100%{box-shadow:0 0 0 0 rgba(242,190,85,.0)}50%{box-shadow:0 0 0 5px rgba(242,190,85,.35)}}
 @media (prefers-reduced-motion:reduce){.mmSm.mmNew{animation:none}}
+#lnPre.noSeries #lnSeries,#lnPre.noSeries .lnPreTop>span{display:none}
 .lnTeamBar{display:none;gap:8px;margin:2px 0 8px}.lnTeamBar .mbtn{flex:1}
 body.lnTeam .lnTeamBar{display:flex}body.lnTeam .lnTop .seg{display:none}
 .mpNote{margin:10px 0 0;font-size:12px;color:var(--amber);text-align:center;line-height:1.5}
@@ -7320,7 +7321,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='493f7e0369',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='8de4aad9a2',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -9053,7 +9054,10 @@ let pendingMode=null;
 const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTING PRACTICE',playoffs:'PLAYOFFS',watch:'WATCH A GAME'};
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}
 function updateOppLine(){const o=TEAMS[S.opp];$('oppLine').innerHTML=pendingMode==='online'?'Your friend picks their own club when they join.':pendingMode==='playoffs'?'Seven other clubs are drawn into the bracket with you.':parkFromBP?'Pick a club: you hit in their park, with their hitters.':pendingMode==='bp'?'Batting practice: just you, the machine and an empty park.':`Opponent (random): <b>${o.city} ${o.name}</b>`}
-function chooseMode(m){ensureAudio();$('scrTeams').querySelector('.mbtn.back').dataset.go='scrSingle';if(m!=='bp')myTeamRestore();{const lock=!!MYTEAM&&m!=='bp';$('tsPrev').hidden=$('tsNext').hidden=lock}if(S.online&&!S.online.inGame){const o=S.online;if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null}pendingMode=m;if(S.opp===S.you||m!=='bp')drawOpp();updateOppLine();$('playGo').hidden=false;$('playGo').textContent=m==='online'?'TO THE LOBBY':m==='bp'?'START PRACTICE':m==='playoffs'?'TO THE BRACKET':m==='watch'?'WATCH':'PLAY BALL';
+// arcade / full game: no club-select page; your club against a random opponent, straight to the lineup
+function quickStart(m){if(S.online&&!S.online.inGame){const o=S.online;if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null}
+ myTeamRestore();pendingMode=null;drawOpp();tsFlush();openPregame(m)}
+function chooseMode(m){ensureAudio();if(m==='arcade'||m==='full'){quickStart(m);return}$('scrTeams').querySelector('.mbtn.back').dataset.go='scrSingle';if(m!=='bp')myTeamRestore();{const lock=!!MYTEAM&&m!=='bp';$('tsPrev').hidden=$('tsNext').hidden=lock}if(S.online&&!S.online.inGame){const o=S.online;if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null}pendingMode=m;if(S.opp===S.you||m!=='bp')drawOpp();updateOppLine();$('playGo').hidden=false;$('playGo').textContent=m==='online'?'TO THE LOBBY':m==='bp'?'START PRACTICE':m==='playoffs'?'TO THE BRACKET':m==='watch'?'WATCH':'PLAY BALL';
  document.querySelector('#scrTeams h1').innerHTML=`${MODE_NAME[m]}<small>${MYTEAM&&m!=='bp'?'YOUR CLUB':m==='bp'?'PICK A PARK':'SELECT YOUR TEAM'}</small>`;showScreen('scrTeams')}
 $('go').addEventListener('click',()=>chooseMode('arcade'));
 $('goFull').addEventListener('click',()=>chooseMode('full'));
@@ -9079,13 +9083,14 @@ $('bpBar').addEventListener('click',e=>{const b=e.target.closest('.pbtn');if(b){
 $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;
  if(se&&se.done){S.series={len:se.len,w:0,l:0};drawOpp();withLoading(()=>{startGame('arcade');render(performance.now())});return}startGame(S.mode)});
 // ---- arcade game day: series length and the lineup, on the lineup screen, before the first pitch ----
-let pregame=false;
-function openPregame(){pregame=true;lnView='mine';lnSel=null;lfFlip=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=`vs ${o.city} ${o.name}`;
+// (arcade and full games come straight here from Single Player: your club is set, the opponent is drawn at random)
+let pregame=false,pregameMode='arcade';
+function openPregame(m){pregameMode=m||'arcade';pregame=true;$('scrLineup').querySelector('.mbtn.back').dataset.go='scrSingle';$('lnPre').classList.toggle('noSeries',pregameMode!=='arcade');lnView='mine';lnSel=null;lfFlip=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=`vs ${o.city} ${o.name}`;
  const n=(S.series&&S.series.len)||1;for(const b of $('lnSeries').children)b.setAttribute('aria-pressed',String(+b.dataset.n===n));$('lnPre').hidden=false;showScreen('scrLineup')}
 $('lnSeries').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const c of $('lnSeries').children)c.setAttribute('aria-pressed',String(c===b))});
-$('lnPlay').addEventListener('click',()=>{const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
+$('lnPlay').addEventListener('click',()=>{if(pregameMode==='full'){pregame=false;$('lnPre').hidden=true;S.series=null;S.auto=false;syncAuto();withLoading(()=>{tsFlush();startGame('full');render(performance.now())});return}const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
  S.series={len:n,w:0,l:0};pregame=false;$('lnPre').hidden=true;S.auto=false;syncAuto();withLoading(()=>{startGame('arcade');render(performance.now())})});
-document.querySelector('#scrLineup .mbtn.back').addEventListener('click',e=>{if(!pregame)return;e.stopImmediatePropagation();pregame=false;$('lnPre').hidden=true;chooseMode('arcade')},true);
+document.querySelector('#scrLineup .mbtn.back').addEventListener('click',e=>{if(!pregame)return;e.stopImmediatePropagation();pregame=false;$('lnPre').hidden=true;pendingMode=null;showScreen('scrSingle')},true);
 $('change').addEventListener('click',toTitle);
 $('quit').addEventListener('click',toTitle);
 $('optsBtn').addEventListener('click',openOptionsInGame);
