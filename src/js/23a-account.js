@@ -94,14 +94,14 @@ const noProfiles=e=>/profiles|relation|schema cache/i.test((e&&e.message)||'');
 async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.from('profiles').select('user_id').eq('uname_lc',n.toLowerCase()).limit(1);if(error)return null;
  return!data.length||!!(ACC.user&&data[0].user_id===ACC.user.id)}catch(e){return null}}
 async function nameClaim(n){const c=await supaClient(),{error}=await c.from('profiles').upsert({user_id:ACC.user.id,username:n});
- if(!error){track('username_set',{first:!ACC.name});ACC.name=n;const m=accMeta();m.name=n;accSetMeta(m);return''}
+ if(!error){track('username_set',{first:!ACC.name});ACC.name=n;phIdent();const m=accMeta();m.name=n;accSetMeta(m);return''}
  if(error.code==='23505'||/duplicate|unique/i.test(error.message||''))return`${n} is taken. Try another username.`;
  if(noProfiles(error))return'Usernames are not set up on the server yet.';return error.message||'Could not save your username. Try again.'}
 // after sign-in: load the username; a new account claims the one it signed up with, or picks one
 async function accProfile(){const c=await supaClient(),u=ACC.user;if(!u)return;
  const {data,error}=await c.from('profiles').select('username').eq('user_id',u.id).maybeSingle();
  if(error){if(!noProfiles(error)){const m=accMeta();if(m.uid===u.id&&m.name)ACC.name=m.name}acRender();return}
- if(data){ACC.name=data.username;ACC.pick=false;const m=accMeta();m.name=data.username;accSetMeta(m);acRender();return}
+ if(data){ACC.name=data.username;ACC.pick=false;phIdent();const m=accMeta();m.name=data.username;accSetMeta(m);acRender();return}
  const want=(u.user_metadata&&u.user_metadata.username)||ACC.wantName||'';ACC.wantName='';
  if(want&&!nameBad(want)){const err=await nameClaim(want);if(!err){ACC.pick=false;acRender();return}ACC.msg=err}
  ACC.pick=true;$('acNewName').value=want;$('acNameHint').textContent='3-16 letters, numbers or _';$('acNameHint').className='acHint';acRender();showScreen('scrAcct')}

@@ -11,14 +11,20 @@ function phLoad(){if(PH.ready||PH.loading||!phOn())return;PH.loading=true;
  const s=document.createElement('script');s.async=true;s.src='https://us-assets.i.posthog.com/static/array.full.js';s.crossOrigin='anonymous';
  s.onload=()=>{try{window.posthog.init(PH.key,{api_host:PH.host,person_profiles:'always',autocapture:false,capture_pageview:true,capture_pageleave:true,
    disable_session_recording:true,persistence:'localStorage',ip:false,property_denylist:['$ip'],
-   loaded:ph=>{PH.ready=true;ph.register({/* country only: a PostHog Property Filter transformation strips city, postal code and coordinates */build:PD_VER,layout:document.body.classList.contains('phone')||innerWidth<innerHeight?'phone':'pc',sampled:PH.sample});
+   loaded:ph=>{PH.ready=true;PH.base={/* country only: a PostHog Property Filter transformation strips city, postal code and coordinates */build:PD_VER,layout:document.body.classList.contains('phone')||innerWidth<innerHeight?'phone':'pc',sampled:PH.sample};ph.register(PH.base);
     phIdent();for(const [n,p] of PH.q.splice(0))ph.capture(n,p)}})}catch(e){}};
  s.onerror=()=>{PH.loading=false};document.head.appendChild(s)}
 // record an event (queued until PostHog has loaded; dropped if stats are off)
 function track(name,props){if(!phOn())return;const p={...(props||{}),signed_in:!!ACC.user};
  if(PH.ready)try{window.posthog.capture(name,p)}catch(e){}else{if(PH.q.length<200)PH.q.push([name,p]);phLoad()}}
 // the signed-in account is the person (by UUID); signing out starts a fresh anonymous visitor
-function phIdent(){if(!PH.ready)return;try{const id=ACC.user&&ACC.user.id;if(id&&window.posthog.get_distinct_id()!==id)window.posthog.identify(id);else if(!id&&PH.who)window.posthog.reset();PH.who=id||null}catch(e){}}
+// every event says whether it came from a guest or an account; a signed-in player's username (public anyway, on the
+// leaderboard) is on their PostHog profile and their events. Email and IP never are.
+function phIdent(){if(!PH.ready)return;try{const ph=window.posthog,id=ACC.user&&ACC.user.id,nm=id&&ACC.name?ACC.name:null;
+ if(id&&ph.get_distinct_id()!==id)ph.identify(id,nm?{username:nm,player_type:'account'}:{player_type:'account'});else if(!id&&PH.who){ph.reset();if(PH.base)ph.register(PH.base)}/* (reset forgets the build and layout labels too) */
+ ph.register({player_type:id?'account':'guest'});
+ if(nm){ph.register({username:nm});if(PH.nm!==nm)ph.setPersonProperties({username:nm,player_type:'account'})}else ph.unregister('username');
+ PH.who=id||null;PH.nm=nm}catch(e){}}
 function phOptOut(off){OPT.stats=!off;saveOpts();if(PH.ready)try{off?window.posthog.opt_out_capturing():window.posthog.opt_in_capturing()}catch(e){}if(!off)phLoad()}
 // ---- what happens in a game ----
 const phGame=()=>{const o=S.online,on=onlineGame();return{mode:on?(o.ranked?'ranked':'custom'):S.mode,club:S.you,opp_club:S.opp,park:S.you,

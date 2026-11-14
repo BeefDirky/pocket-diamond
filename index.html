@@ -7230,14 +7230,14 @@ const noProfiles=e=>/profiles|relation|schema cache/i.test((e&&e.message)||'');
 async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.from('profiles').select('user_id').eq('uname_lc',n.toLowerCase()).limit(1);if(error)return null;
  return!data.length||!!(ACC.user&&data[0].user_id===ACC.user.id)}catch(e){return null}}
 async function nameClaim(n){const c=await supaClient(),{error}=await c.from('profiles').upsert({user_id:ACC.user.id,username:n});
- if(!error){track('username_set',{first:!ACC.name});ACC.name=n;const m=accMeta();m.name=n;accSetMeta(m);return''}
+ if(!error){track('username_set',{first:!ACC.name});ACC.name=n;phIdent();const m=accMeta();m.name=n;accSetMeta(m);return''}
  if(error.code==='23505'||/duplicate|unique/i.test(error.message||''))return`${n} is taken. Try another username.`;
  if(noProfiles(error))return'Usernames are not set up on the server yet.';return error.message||'Could not save your username. Try again.'}
 // after sign-in: load the username; a new account claims the one it signed up with, or picks one
 async function accProfile(){const c=await supaClient(),u=ACC.user;if(!u)return;
  const {data,error}=await c.from('profiles').select('username').eq('user_id',u.id).maybeSingle();
  if(error){if(!noProfiles(error)){const m=accMeta();if(m.uid===u.id&&m.name)ACC.name=m.name}acRender();return}
- if(data){ACC.name=data.username;ACC.pick=false;const m=accMeta();m.name=data.username;accSetMeta(m);acRender();return}
+ if(data){ACC.name=data.username;ACC.pick=false;phIdent();const m=accMeta();m.name=data.username;accSetMeta(m);acRender();return}
  const want=(u.user_metadata&&u.user_metadata.username)||ACC.wantName||'';ACC.wantName='';
  if(want&&!nameBad(want)){const err=await nameClaim(want);if(!err){ACC.pick=false;acRender();return}ACC.msg=err}
  ACC.pick=true;$('acNewName').value=want;$('acNameHint').textContent='3-16 letters, numbers or _';$('acNameHint').className='acHint';acRender();showScreen('scrAcct')}
@@ -7315,7 +7315,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='a4fe040ac6',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='bbca125455',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7456,14 +7456,20 @@ function phLoad(){if(PH.ready||PH.loading||!phOn())return;PH.loading=true;
  const s=document.createElement('script');s.async=true;s.src='https://us-assets.i.posthog.com/static/array.full.js';s.crossOrigin='anonymous';
  s.onload=()=>{try{window.posthog.init(PH.key,{api_host:PH.host,person_profiles:'always',autocapture:false,capture_pageview:true,capture_pageleave:true,
    disable_session_recording:true,persistence:'localStorage',ip:false,property_denylist:['$ip'],
-   loaded:ph=>{PH.ready=true;ph.register({/* country only: a PostHog Property Filter transformation strips city, postal code and coordinates */build:PD_VER,layout:document.body.classList.contains('phone')||innerWidth<innerHeight?'phone':'pc',sampled:PH.sample});
+   loaded:ph=>{PH.ready=true;PH.base={/* country only: a PostHog Property Filter transformation strips city, postal code and coordinates */build:PD_VER,layout:document.body.classList.contains('phone')||innerWidth<innerHeight?'phone':'pc',sampled:PH.sample};ph.register(PH.base);
     phIdent();for(const [n,p] of PH.q.splice(0))ph.capture(n,p)}})}catch(e){}};
  s.onerror=()=>{PH.loading=false};document.head.appendChild(s)}
 // record an event (queued until PostHog has loaded; dropped if stats are off)
 function track(name,props){if(!phOn())return;const p={...(props||{}),signed_in:!!ACC.user};
  if(PH.ready)try{window.posthog.capture(name,p)}catch(e){}else{if(PH.q.length<200)PH.q.push([name,p]);phLoad()}}
 // the signed-in account is the person (by UUID); signing out starts a fresh anonymous visitor
-function phIdent(){if(!PH.ready)return;try{const id=ACC.user&&ACC.user.id;if(id&&window.posthog.get_distinct_id()!==id)window.posthog.identify(id);else if(!id&&PH.who)window.posthog.reset();PH.who=id||null}catch(e){}}
+// every event says whether it came from a guest or an account; a signed-in player's username (public anyway, on the
+// leaderboard) is on their PostHog profile and their events. Email and IP never are.
+function phIdent(){if(!PH.ready)return;try{const ph=window.posthog,id=ACC.user&&ACC.user.id,nm=id&&ACC.name?ACC.name:null;
+ if(id&&ph.get_distinct_id()!==id)ph.identify(id,nm?{username:nm,player_type:'account'}:{player_type:'account'});else if(!id&&PH.who){ph.reset();if(PH.base)ph.register(PH.base)}/* (reset forgets the build and layout labels too) */
+ ph.register({player_type:id?'account':'guest'});
+ if(nm){ph.register({username:nm});if(PH.nm!==nm)ph.setPersonProperties({username:nm,player_type:'account'})}else ph.unregister('username');
+ PH.who=id||null;PH.nm=nm}catch(e){}}
 function phOptOut(off){OPT.stats=!off;saveOpts();if(PH.ready)try{off?window.posthog.opt_out_capturing():window.posthog.opt_in_capturing()}catch(e){}if(!off)phLoad()}
 // ---- what happens in a game ----
 const phGame=()=>{const o=S.online,on=onlineGame();return{mode:on?(o.ranked?'ranked':'custom'):S.mode,club:S.you,opp_club:S.opp,park:S.you,
