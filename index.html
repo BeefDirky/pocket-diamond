@@ -5164,7 +5164,7 @@ function drawBall(g,x,y,h,spin,big){
  if(spin!=null){g.fillStyle='#d4402f';const o=[[0,-1],[1,0],[0,1],[-1,0]][spin%4];g.fillRect(sx+ox+o[0],sy-oy+o[1],1,1)}
 }
 // ---------- audio ----------
-const SND_B64={sad:1,homer:1,charge:1,klost:1,bpthrow:1,fworks:1,chant:1,csingle:1,boo:1,slide:1,ramp:1,fence1:1,clang:1,grass:1,horn:1,echo1:1,echo2:1,echo3:1,amb:1,woosh:1,weak:1,drop:1,mitt:1,cheer:1,crowd:1,bat:1,organ:1,roar:1,menu:1};
+const SND_B64={sad:1,homer:1,charge:1,klost:1,bpthrow:1,fworks:1,chant:1,csingle:1,boo:1,slide:1,ramp:1,fence1:1,clang:1,grass:1,horn:1,echo1:1,echo2:1,echo3:1,amb:1,woosh:1,weak:1,drop:1,mitt:1,cheer:1,crowd:1,bat:1,organ:1,roar:1,menu:1,uiclick:1};
 let AC=null,muted=false,MASTER=null,organSrc=null,menuSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
@@ -5254,6 +5254,13 @@ function sfx(k,q){
  }catch(e){}
 }
 
+
+// ---- menu buttons click: every button on a menu page, the pause menu, the final screen and menu pop-ups ----
+// (not the in-game controls). The sample has 0.03 s of silence in front; skipping it makes the click land on the press.
+function uiClick(){if(!AC||muted||!BUF.uiclick)return;const now=performance.now();if(now-(uiClick.t||0)<60)return;uiClick.t=now;// (the back arrow presses the page's hidden Back button: one press, one click)
+ try{const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF.uiclick;g.gain.value=.9;src.connect(g).connect(BUS.sfx);src.start(0,.028)}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;
+ if(b.closest('#title,#over,#lbProf,#privBar,#reveal,#zoomCard,#scrPause,#tsInfo'))uiClick()},true);
 // ---------- state ----------
 const onlineGame=()=>!!(S.online&&S.online.inGame);
 const S={phase:'title',pt:0,you:(()=>{try{const k=localStorage.getItem('pd-club');if(k&&/^[a-z]+$/.test(k))return k}catch(e){}return 'busan'})(),opp:'seoul',mode:'arcade',half:'bot',bat:null,fld:null,orderOf:{},pIdxOf:{},pcOf:{},pRunsOf:{},pBFOf:{},myErrs:0,myK:0,wildUntil:0,inning:1,totalInn:INNINGS,outs:0,balls:0,strikes:0,runs:0,hits:0,hr:0,ks:0,
@@ -7237,7 +7244,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='67b87b7e1e',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='6304485ca2',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

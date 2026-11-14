@@ -1,5 +1,5 @@
 // ---------- audio ----------
-const SND_B64=/*@AUDIO:sad,homer,charge,klost,bpthrow,fworks,chant,csingle,boo,slide,ramp,fence1,clang,grass,horn,echo1,echo2,echo3,amb,woosh,weak,drop,mitt,cheer,crowd,bat,organ,roar,menu*/{};
+const SND_B64=/*@AUDIO:sad,homer,charge,klost,bpthrow,fworks,chant,csingle,boo,slide,ramp,fence1,clang,grass,horn,echo1,echo2,echo3,amb,woosh,weak,drop,mitt,cheer,crowd,bat,organ,roar,menu,uiclick*/{};
 let AC=null,muted=false,MASTER=null,organSrc=null,menuSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
@@ -89,3 +89,10 @@ function sfx(k,q){
  }catch(e){}
 }
 
+
+// ---- menu buttons click: every button on a menu page, the pause menu, the final screen and menu pop-ups ----
+// (not the in-game controls). The sample has 0.03 s of silence in front; skipping it makes the click land on the press.
+function uiClick(){if(!AC||muted||!BUF.uiclick)return;const now=performance.now();if(now-(uiClick.t||0)<60)return;uiClick.t=now;// (the back arrow presses the page's hidden Back button: one press, one click)
+ try{const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF.uiclick;g.gain.value=.9;src.connect(g).connect(BUS.sfx);src.start(0,.028)}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;
+ if(b.closest('#title,#over,#lbProf,#privBar,#reveal,#zoomCard,#scrPause,#tsInfo'))uiClick()},true);
