@@ -42,10 +42,10 @@ addEventListener('pageshow',()=>wakeAudio());
 // (two hype tunes take turns: the classic ramp and the charge)
 function organRamp(){organCue(BUF.charge&&(S.hypeN=(S.hypeN||0)+1)%2===0?'charge':'ramp')}
 // any organ cue over the music: the background music fades out, the cue plays, the music comes back after
-function organCue(k){if(!AC||!BUF[k]||muted||S.bpOn)return;stopRamp();const t=AC.currentTime,mg=BUS.music.gain;
+function organCue(k){if(!AC||!BUF[k]||muted||S.bpOn)return;if(S.rampSrc){S.rampNext=k;return}/* one is playing: this one waits for it to finish */const t=AC.currentTime,mg=BUS.music.gain;
  mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.7);
  const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=Math.max(.25,OPT.music/100)*.95;src.connect(g).connect(MASTER);src.start(t+.35);S.rampSrc=src;
- src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
+ src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;{const nx=S.rampNext;S.rampNext=null;if(nx&&!S.bpOn&&S.phase!=='title'&&S.phase!=='over'){organCue(nx);return}}const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
 function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=vol;src.connect(g).connect(BUS.crowd);src.start();return src}
 // someone reached base: the home crowd roars, and is much quieter for the visitors
 // the home crowd's groan: a home K, a home error, a diving catch that robs a home hitter, any hit batter
@@ -56,7 +56,7 @@ function crowdChant(){if(chantSrc||S.mode==='bp')return;chantSrc=crowdClip('chan
 // home-run horn: the music fades out under it and comes back in when the next pitch is on its way
 function duckMusic(){if(!AC||!BUS.music||S.musicDuck)return;S.musicDuck=true;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.6)}
 function unduckMusic(){if(!S.musicDuck)return;S.musicDuck=false;if(!AC||!BUS.music||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t+1.8)}
-function stopRamp(){if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
+function stopRamp(){S.rampNext=null;if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
 function playSample(k,vol,rate){if(!AC||!BUF[k])return false;const src=AC.createBufferSource(),gn=AC.createGain();src.buffer=BUF[k];src.playbackRate.value=rate||1;gn.gain.value=vol;src.connect(gn).connect(BUS.sfx);src.start();return true}
 function noise(dur,type,freq,vol,swell){if(!AC||!BUS.sfx)return;/* sound not switched on yet: stay silent */
  const len=Math.max(1,Math.floor(AC.sampleRate*dur));const b=AC.createBuffer(1,len,AC.sampleRate);const dd=b.getChannelData(0);

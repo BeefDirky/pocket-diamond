@@ -152,7 +152,7 @@ function doContact(){
  const q=clamp(1-Math.pow(Math.abs(sw.err)/WIN,1.25),0,1);
  if(!S.play.foul&&(S.play.res.hr||S.play.deep)&&BUF.echo1&&!muted)playSample(pick(['echo1','echo2','echo3']),.65+.35*q,1);else sfx('crack',q);
  if(S.mode==='bp'){const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});S.bpCam={pl,at:performance.now()};setPhase('play');return}
- setPhase('play');setCam('follow');
+ setPhase('play');setCam('follow');S.gCam={pl:S.play,doneAt:0};
 }
 function pitchEnd(){
  const b=curBatter();

@@ -47,7 +47,7 @@ try:
   B.click('#olGo');A.wait_for_timeout(1500)
   print('host lineup on guest phone:',B.evaluate("__pd.TEAMS.seoul.lineup[3].name+' / '+__pd.TEAMS.seoul.staff[0].name"),'| on host:',A.evaluate("__pd.TEAMS.seoul.lineup[3].name+' / '+__pd.TEAMS.seoul.staff[0].name"))
   assert A.evaluate("__pd.S.online.inGame") and B.evaluate("__pd.S.online.inGame"),'game did not start'
-  bot="""()=>{let last=null;setInterval(()=>{const S=__pd.S;if(!S.online||!S.online.inGame)return;
+  bot="""()=>{let last=null;setInterval(()=>{const S=__pd.S;if(!S.online||!S.online.inGame)return;__pd.afkPoke&&__pd.afkPoke();
    if(S.phase==='choose'&&Math.random()<.05){document.dispatchEvent(new KeyboardEvent('keydown',{key:String(1+Math.floor(Math.random()*3)),bubbles:true}))}
    if(S.pitch&&S.pitch!==last&&S.pitch.releaseAt&&S.pitch.remote){last=S.pitch;if(Math.random()<.8)setTimeout(()=>document.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',key:' ',bubbles:true})),(S.pitch.travel+(Math.random()*50-25)-(performance.now()-S.pitch.releaseAt))/3)}
    const sk=document.getElementById('skipBtn');if(!sk.hidden)sk.click()},20)}"""

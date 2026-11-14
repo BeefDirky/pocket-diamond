@@ -63,7 +63,7 @@ with sync_playwright() as p:
           pg.goto('http://localhost:8766/index.html'); pg.wait_for_timeout(3000)
           pg.evaluate(f"window.__uid='{uid}';__x(\"ACC.user={{id:'{uid}',email:'x@x.co'}};ACC.name='{name}';acRender()\")")
       # the bots: the pitcher picks a pitch and releases the meter at a random moment; the batter swings at most pitches
-      bot = """()=>{let last=null,rel=null;setInterval(()=>{const S=__x('S');if(!S.online||!S.online.inGame)return;
+      bot = """()=>{let last=null,rel=null;setInterval(()=>{const S=__x('S');if(!S.online||!S.online.inGame)return;__x('AFK.last=Date.now()');
       const key=(k,c)=>document.dispatchEvent(new KeyboardEvent('keydown',{key:k,code:c||k,bubbles:true}));
       if(S.phase==='choose'&&Math.random()<.05)key(String(1+Math.floor(Math.random()*3)));
       if(S.phase==='windup'&&__x('pitching()')&&S.pitch&&S.pitch.q==null&&rel!==S.pitch){rel=S.pitch;setTimeout(()=>key(' ','Space'),200+Math.random()*900)}

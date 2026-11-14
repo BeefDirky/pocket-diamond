@@ -137,6 +137,20 @@ reset role;
 select pg_temp.ok((select after > before from public.rating_history where match_id = :'m5' and user_id = :A), 'forfeit counted for rating');
 select pg_temp.ok((select count(*) = 0 from public.plate_appearances where match_id = :'m5'), 'forfeit writes no batting lines');
 
+-- ---------------------------------------------------------------- conceding (Forfeit button / inactive player)
+reset role; update public.matches set created_at = created_at - interval '2 minutes'; set role authenticated;
+set request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
+select (public.ranked_open('incheon','daejeon',3)->>'match_id')::uuid as m6 \gset
+set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+select public.ranked_join(:'m6');
+set request.jwt.claim.sub = '33333333-3333-3333-3333-333333333333';
+select pg_temp.fails(format('select public.ranked_concede(%L)', :'m6'), 'a bystander cannot concede');
+set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+select pg_temp.ok((select (r->>'status') = 'forfeit' and (r->>'winner_side') = 'home' from (select public.ranked_concede(:'m6') r) x), 'away concedes: home wins by forfeit at once');
+select pg_temp.ok((public.ranked_concede(:'m6')->>'status') = 'forfeit', 'conceding twice changes nothing');
+reset role;
+select pg_temp.ok((select after < before from public.rating_history where match_id = :'m6' and user_id = '22222222-2222-2222-2222-222222222222'), 'the player who conceded loses rating');
+
 -- ---------------------------------------------------------------- self-reported games
 set role authenticated;
 set request.jwt.claim.sub = '33333333-3333-3333-3333-333333333333';

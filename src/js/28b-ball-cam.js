@@ -2,12 +2,15 @@
 // last ball you hit, then holds on where it came down (with the distance) for a few seconds ----------
 function bcPos(pl,tt){let seg=null;for(const sg of pl.segs)if(tt>=sg.t0&&tt<=sg.t1){seg=sg;break}
  if(!seg)for(const sg of pl.segs)if(sg.t1<=tt&&(!seg||sg.t1>=seg.t1))seg=sg;return seg?seg.fn(Math.min(tt,seg.t1)):null}
-function drawBallCam(now){const box=$('ballCam'),cam=S.bpCam;
- if(S.mode!=='bp'||!cam||S.phase==='title'||S.paused||OPT.ballCam===false){if(!box.hidden)box.hidden=true;return}
- const pl=cam.pl,tt=(now-cam.at)/1000*SPEED,done=tt>=pl.fullEnd;
- if(now-cam.at>pl.fullEnd/SPEED*1000+(OPT.bpWait?BP_CAM_HOLD:2600)){box.hidden=true;return}// it holds on the landing spot, then tucks away
- const p=bcPos(pl,Math.min(tt,pl.fullEnd));if(!p)return;
- if(box.hidden)box.hidden=false;
+// In games (arcade, full, online) it rides along with every ball put in play, on the play's own clock, and holds on
+// where it ended up for a moment after the play is over.
+function drawBallCam(now){const box=$('ballCam'),bp=S.mode==='bp',cam=bp?S.bpCam:S.gCam;
+ if(!cam||S.phase==='title'||S.paused||OPT.ballCam===false){if(!box.hidden)box.hidden=true;if(!bp)S.gCam=null;return}
+ const pl=cam.pl;let tt,done,end=bp?pl.fullEnd:pl.end;
+ if(bp){tt=(now-cam.at)/1000*SPEED;done=tt>=end;if(now-cam.at>end/SPEED*1000+(OPT.bpWait?BP_CAM_HOLD:2600)){box.hidden=true;return}}// it holds on the landing spot, then tucks away
+ else{done=S.play!==pl||S.phase!=='play';tt=done?end:Math.min(pl.t||0,end);if(done&&!cam.doneAt)cam.doneAt=now;if(cam.doneAt&&now-cam.doneAt>2600){box.hidden=true;S.gCam=null;return}}
+ const p=bcPos(pl,Math.min(tt,end));if(!p)return;
+ if(box.hidden){box.hidden=false;bcPlace(box)}
  const cv=$('ballCamCv'),dpr=Math.min(devicePixelRatio||1,2),cw=Math.round(cv.clientWidth*dpr),ch=Math.round(cv.clientHeight*dpr);if(!cw||!ch)return;
  if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch}
  const q=toPx(p.x,p.y),lift=(p.h||0)/FT,tx=q.x-lift*.2,ty=q.y-lift*.5;
@@ -24,3 +27,8 @@ function drawBallCam(now){const box=$('ballCam'),cam=S.bpCam;
  const r=pl.res||{},live=Math.round(Math.hypot(p.x,p.y-2));
  $('ballCamTxt').textContent=done?`${r.hr?'HOME RUN · ':r.code==='FOUL'?'FOUL · ':''}${r.dist||live} FT`:`${live} FT`;
  box.classList.toggle('hr',!!(done&&r.hr))}
+// in a game the scoreboard can sit in the same corner: drop the cam just below it when they'd overlap
+function bcPlace(box){box.style.top='';if(S.mode==='bp')return;const par=box.offsetParent;if(!par)return;
+ for(let k=0;k<3;k++){const a=box.getBoundingClientRect();let low=0;
+  for(const bd of document.querySelectorAll('.bug,.pcBox')){const b=bd.getBoundingClientRect();if(b.width&&a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top)low=Math.max(low,b.bottom)}
+  if(!low)return;box.style.top=`${Math.round(low-par.getBoundingClientRect().top+6)}px`}}

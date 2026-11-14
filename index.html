@@ -129,6 +129,8 @@ body.autoOn .acts,body.autoOn .pacts{opacity:.45}
 .infoBtn b{font-weight:400;color:var(--amber)}.infoBtn[aria-pressed=false] b{color:var(--dim)}
 .stage:has(#title:not([hidden])) .infoBtn,.stage:has(#over:not([hidden])) .infoBtn{display:none}
 .skipBtn{position:absolute;right:8px;margin-bottom:40px;bottom:max(8px,env(safe-area-inset-bottom,0px));font-family:var(--f-hud);font-size:15px;padding:10px 12px;background:var(--amber);color:var(--edge);border:3px solid var(--edge);box-shadow:0 3px 0 var(--edge);cursor:pointer;z-index:2}
+.afk{position:absolute;left:50%;top:12%;transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;background:rgba(8,20,14,.92);border:3px solid var(--amber);box-shadow:4px 4px 0 rgba(0,0,0,.4);pointer-events:none;text-align:center;font-family:var(--f-hud);color:var(--chalk);animation:mmNew 1.4s ease-in-out infinite}
+.afk[hidden]{display:none}.afk b{font-size:14px;letter-spacing:.1em}.afk span{font-size:18px;color:var(--amber)}.afk small{font-size:10px;color:var(--dim);letter-spacing:.08em}
 .banner{position:absolute;left:8px;right:8px;top:24%;text-align:center;pointer-events:none}
 .banner b{display:block;font-family:var(--f-px);font-weight:400;font-size:clamp(15px,5.4vw,26px);line-height:1.3;text-wrap:balance;text-shadow:3px 3px 0 var(--edge),-1px -1px 0 var(--edge)}
 .banner small{display:block;margin-top:10px;font-size:13px;text-shadow:2px 2px 0 var(--edge)}
@@ -1236,6 +1238,7 @@ canvas.shake{animation:packShake .6s steps(6)}
     <div class="ballCam" id="ballCam" hidden><canvas id="ballCamCv"></canvas><span id="ballCamTxt"></span><i>BALL CAM</i></div>
     <div class="netToast" id="netToast" role="status" aria-live="polite" hidden></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
+    <div class="afk" id="afk" hidden><b>ARE YOU STILL THERE?</b><span id="afkT"></span><small>Tap anywhere to keep playing</small></div>
 
     <div id="loadScr" hidden><div class="ldCard"><img id="loadLogo" alt=""><div id="loadClub"></div><div id="loadPark"></div><div class="ldBar"><i></i></div><div class="ldTxt">LOADING THE PARK<span>...</span></div></div></div>
     <div class="overlay" id="title">
@@ -5222,10 +5225,10 @@ addEventListener('pageshow',()=>wakeAudio());
 // (two hype tunes take turns: the classic ramp and the charge)
 function organRamp(){organCue(BUF.charge&&(S.hypeN=(S.hypeN||0)+1)%2===0?'charge':'ramp')}
 // any organ cue over the music: the background music fades out, the cue plays, the music comes back after
-function organCue(k){if(!AC||!BUF[k]||muted||S.bpOn)return;stopRamp();const t=AC.currentTime,mg=BUS.music.gain;
+function organCue(k){if(!AC||!BUF[k]||muted||S.bpOn)return;if(S.rampSrc){S.rampNext=k;return}/* one is playing: this one waits for it to finish */const t=AC.currentTime,mg=BUS.music.gain;
  mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.7);
  const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=Math.max(.25,OPT.music/100)*.95;src.connect(g).connect(MASTER);src.start(t+.35);S.rampSrc=src;
- src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
+ src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;{const nx=S.rampNext;S.rampNext=null;if(nx&&!S.bpOn&&S.phase!=='title'&&S.phase!=='over'){organCue(nx);return}}const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
 function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=vol;src.connect(g).connect(BUS.crowd);src.start();return src}
 // someone reached base: the home crowd roars, and is much quieter for the visitors
 // the home crowd's groan: a home K, a home error, a diving catch that robs a home hitter, any hit batter
@@ -5236,7 +5239,7 @@ function crowdChant(){if(chantSrc||S.mode==='bp')return;chantSrc=crowdClip('chan
 // home-run horn: the music fades out under it and comes back in when the next pitch is on its way
 function duckMusic(){if(!AC||!BUS.music||S.musicDuck)return;S.musicDuck=true;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.6)}
 function unduckMusic(){if(!S.musicDuck)return;S.musicDuck=false;if(!AC||!BUS.music||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t+1.8)}
-function stopRamp(){if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
+function stopRamp(){S.rampNext=null;if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
 function playSample(k,vol,rate){if(!AC||!BUF[k])return false;const src=AC.createBufferSource(),gn=AC.createGain();src.buffer=BUF[k];src.playbackRate.value=rate||1;gn.gain.value=vol;src.connect(gn).connect(BUS.sfx);src.start();return true}
 function noise(dur,type,freq,vol,swell){if(!AC||!BUS.sfx)return;/* sound not switched on yet: stay silent */
  const len=Math.max(1,Math.floor(AC.sampleRate*dur));const b=AC.createBuffer(1,len,AC.sampleRate);const dd=b.getChannelData(0);
@@ -5503,7 +5506,7 @@ function doContact(){
  const q=clamp(1-Math.pow(Math.abs(sw.err)/WIN,1.25),0,1);
  if(!S.play.foul&&(S.play.res.hr||S.play.deep)&&BUF.echo1&&!muted)playSample(pick(['echo1','echo2','echo3']),.65+.35*q,1);else sfx('crack',q);
  if(S.mode==='bp'){const pl=S.play;pl.fullEnd=pl.end;pl.hide=true;pl.watch=null;pl.end=Math.min(pl.end,.85);(S.bpFly=S.bpFly||[]).push({play:pl,at:performance.now()});S.bpCam={pl,at:performance.now()};setPhase('play');return}
- setPhase('play');setCam('follow');
+ setPhase('play');setCam('follow');S.gCam={pl:S.play,doneAt:0};
 }
 function pitchEnd(){
  const b=curBatter();
@@ -6475,7 +6478,7 @@ $('pauseBtn').addEventListener('pointerdown',e=>e.stopPropagation());
 $('resume').addEventListener('click',resumeGame);
 $('pOpts').addEventListener('click',()=>{optsFromGame=true;showScreen('scrOpts')});
 $('pLine').addEventListener('click',()=>{lineFromPause=true;showScreen('scrLineup')});
-$('pQuit').addEventListener('click',()=>{S.paused=false;S.olMenu=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
+$('pQuit').addEventListener('click',()=>{if(S.olMenu&&onlineGame()){const o=S.online;S.olMenu=false;$('title').hidden=true;showScreen('scrMain');olForfeit(o,o.ranked?'You forfeited the game.':'You left the game.');return}S.paused=false;S.olMenu=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&!onlineGame())pauseGame()});
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const toMenu=b.dataset.go==='scrMain'||b.dataset.go==='scrSingle';if(parkFromBP&&toMenu){backToCage();return}if(lineFromPause&&S.paused&&toMenu){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
 // on PC the pitch-type panel is taller than the swing buttons and would cover AUTO and INFO: while it shows, they move to its left
@@ -7333,7 +7336,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='197e1eaebb',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='9c7c3f32f0',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7423,8 +7426,8 @@ function rkGoneTick(){const g=RK.gone;if(!g)return;const o=g.o,post=!!(ML&&ML.fi
  if(!post&&o.opp&&o.inGame&&o.opp.ing===o.gid){rkGoneClear();return}/* they came back */
  const left=Math.max(0,RK_FORFEIT-(Date.now()-g.t0)/1000),clock=left>0?`WIN BY FORFEIT IN ${fmtClock(Math.ceil(left))}`:'CLAIMING THE WIN…';
  if(post)rkShow('RANKED · your opponent left · '+clock);else{$('bt').textContent='OPPONENT LEFT';$('bs').textContent=clock;$('banner').dataset.tone='';$('banner').hidden=false}
- if(left<=0&&!g.busy&&Date.now()-g.tried>3000){g.busy=true;g.tried=Date.now();rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{});
-  rpc('ranked_claim',{p_match:o.rk.m}).then(info=>{if(RK.gone===g&&['forfeit','final','disputed'].includes(info.status))rkForfeitEnd(o,info)}).catch(()=>{}).finally(()=>{g.busy=false})}}
+ if(!g.busy&&Date.now()-g.tried>(left<=0?3000:5000)){g.busy=true;g.tried=Date.now();rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{});
+  (left<=0?rpc('ranked_claim',{p_match:o.rk.m}):rpc('ranked_info',{p_match:o.rk.m})).then(info=>{if(RK.gone===g&&['forfeit','final','disputed'].includes(info.status))rkForfeitEnd(o,info)}).catch(()=>{}).finally(()=>{g.busy=false})}}
 function rkGoneClear(){const g=RK.gone;clearInterval(RK.goneT);RK.gone=null;if(g&&!(ML&&ML.fin)&&$('bt').textContent==='OPPONENT LEFT')hideBanner()}
 function rkForfeitEnd(o,info){rkGoneClear();rkStop();if(S.phase==='over'&&ML&&ML.fin){rkResult(info);return}
  const won=info.winner_side===info.me;olEndScreen(o,won?'<span>WIN</span> BY FORFEIT':'MATCH OVER',won?'Your opponent left the game.':'The match was settled without you.');rkResult(info)}
@@ -7443,9 +7446,7 @@ const Q={on:false,t0:0,tick:0,gen:0};
 const fmtClock=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 function qSay(status,info){$('qStatus').textContent=status;if(info!=null)$('qInfo').textContent=info}
 // the estimated wait: the median of recent matches' waits (from the server), counting down from when you joined
-function qEst(r){if(r&&r.queue==='waiting'){Q.est=r.est_secs==null?null:r.est_secs;Q.n=r.waiting|0}
- const el=$('qEst');if(!el)return;const left=Q.est==null?null:Math.max(0,Q.est-(Date.now()-Q.t0)/1000);
- el.textContent=Q.est==null?(Q.n>1?'EST. WAIT UNDER 0:10':'EST. WAIT: UNKNOWN'):left>0?`EST. WAIT ~${fmtClock(Q.est)}`:'EST. WAIT ANY MOMENT NOW'}
+/* qEst: see 23f-live.js (it counts who's online) */
 // the queue's ball: a 16-pixel baseball spinning forward (top toward you) as it bounces. Each frame every pixel of the
 // disc is found on the sphere, turned back by the spin, and colored white, edge-shaded or seam-red from where it lands.
 function qBallDraw(t){const cv=$('qBall');if(!cv)return;const g=cv.getContext('2d'),R=7.2,c=7.5,id=g.createImageData(16,16),d=id.data,th=t/1000*5.2;
@@ -7485,7 +7486,7 @@ async function qMatched(info,gen){Q.on=false;if(Q.fromLn){Q.fromLn=false;qLnSync
  // (whatever the other phone already said before this one finished joining)
  if(o.opp){if(o.role==='host'){if(!o.qStarted)qStartGame(o)}else if(o.opp.start&&!o.inGame&&rkStartOK(o,o.opp.start))startOnline(o.opp.start)}
  // nobody showed up: back to the queue (the empty match is cleaned up by the server)
- setTimeout(()=>{if(S.online===o&&!o.inGame&&Q.gen===gen){o.nr.leave().catch(()=>{});S.online=null;qSay('OPPONENT DIDN\u2019T CONNECT','Back in the queue…');setTimeout(()=>{if(Q.gen===gen)qStart()},1200)}},25000)}
+ setTimeout(()=>{if(S.online===o&&!o.inGame&&!o.gid&&!o.qStarted&&Q.gen===gen){/* (a game that already began and ended early isn't a no-show) */o.nr.leave().catch(()=>{});S.online=null;qSay('OPPONENT DIDN\u2019T CONNECT','Back in the queue…');setTimeout(()=>{if(Q.gen===gen)qStart()},1200)}},25000)}
 // host: the guest is here: start with the match the server set up
 function qStartGame(o){const i=o.qInfo;if(!i)return;o.qStarted=true;clearInterval(Q.tick);
  const st={gid:o.rkGid,home:i.home_club,away:i.away_club,hb:MYTEAM?MYTEAM.base:i.home_club,ab:(o.opp&&o.opp.base)||i.away_club,hs:myRosterSpec(),as:(o.opp&&o.opp.ros)||null,inn:3,night:Math.random()<.55,bo:1,sid:i.match_id,gn:1,sw:[0,0],rk:{m:i.match_id,home:i.home_name,away:i.away_name}};
@@ -7626,6 +7627,44 @@ async function lbProfile(uid){const box=$('lbProf'),card=$('lbpCard');box.hidden
  catch(e){card.innerHTML=`<p class="lbpEmpty">Couldn’t load this profile: ${esc(rkErr(e))}</p><button class="mbtn lbpClose" type="button" id="lbpClose">Close</button>`}}
 $('lbProf').addEventListener('click',e=>{if(e.target===$('lbProf')||e.target.closest('#lbpClose'))$('lbProf').hidden=true});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('lbProf').hidden){$('lbProf').hidden=true;e.stopImmediatePropagation()}},true);// (only closes the profile, not the page under it)
+// ---------- who's online right now, and the inactivity forfeit ----------
+// Every open copy of the game (on a build with the server) sits in one presence channel and says what it's doing:
+// on the menus (m), in the ranked queue (q) or in an online game (g). The queue's estimate uses those counts.
+const LIVE={ch:null,n:0,q:0,g:0,s:null};
+async function liveJoin(){if(LIVE.ch||LIVE.joining||!supaOK())return;LIVE.joining=true;
+ try{const c=await supaClient(),ch=c.channel('pd-live',{config:{presence:{key:'p'+Math.random().toString(36).slice(2,10)}}});
+  ch.on('presence',{event:'sync'},()=>{try{const st=ch.presenceState();let n=0,q=0,g=0;
+   for(const k in st){const m=(st[k]&&st[k][0])||{};n++;if(m.s==='q')q++;else if(m.s==='g')g++}LIVE.n=n;LIVE.q=q;LIVE.g=g;if(Q.on)qEst()}catch(e){}});
+  ch.subscribe(s=>{if(s==='SUBSCRIBED'){LIVE.ch=ch;LIVE.s=null;liveSay()}})}catch(e){LIVE.joining=false}}
+function liveSay(){if(!LIVE.ch)return;const s=Q.on?'q':onlineGame()?'g':'m';if(LIVE.s===s)return;LIVE.s=s;try{const r=LIVE.ch.track({s,v:PD_VER});if(r&&r.catch)r.catch(()=>{})}catch(e){}}
+setTimeout(liveJoin,3000);setInterval(liveSay,2000);
+// the estimate: someone else already waiting → any moment; otherwise the more people on the menus, the shorter the
+// wait (blended with how long recent waits actually took, when the server has enough of them)
+function qEstSecs(){const others=Math.max((Q.n|0)-1,(LIVE.q|0)-1,0);if(others>0)return 5;
+ const idle=LIVE.ch?Math.max(0,LIVE.n-LIVE.q-LIVE.g):null;if(idle===0)return Q.est!=null?Q.est:null;
+ const byIdle=idle==null?null:clamp(Math.round(180/idle),10,300);
+ return byIdle!=null&&Q.est!=null?Math.round((byIdle+Q.est)/2):byIdle!=null?byIdle:Q.est}
+function qEst(r){if(r&&r.queue==='waiting'){Q.est=r.est_secs==null?null:r.est_secs;Q.n=r.waiting|0}
+ const el=$('qEst');if(!el)return;const est=qEstSecs(),left=est==null?null:est-(Date.now()-Q.t0)/1000;
+ const who=LIVE.ch?`${LIVE.n} ONLINE · ${Math.max(LIVE.q,Q.n|0)} IN QUEUE · `:'';
+ el.textContent=who+(est==null?(LIVE.ch&&LIVE.n-LIVE.q-LIVE.g<=0?'NO ONE ELSE IS ON RIGHT NOW':'EST. WAIT: UNKNOWN'):left>0?`EST. WAIT ~${fmtClock(Math.ceil(left))}`:'EST. WAIT ANY MOMENT NOW')}
+// ---- inactivity: in an online game without AUTO, a minute with no input brings a warning and a 30-second
+// countdown; if it runs out, you forfeit (the game keeps going while you're on another tab or app) ----
+const AFK={last:0,warn:false,T:0},AFK_IDLE=60,AFK_GRACE=30;
+for(const ev of['pointerdown','keydown','touchstart'])addEventListener(ev,e=>{if(!e.isTrusted)return;AFK.last=Date.now();if(AFK.warn){AFK.warn=false;$('afk').hidden=true}},{capture:true,passive:true});
+function afkTick(){const o=S.online,on=onlineGame()&&!S.olAuto&&S.phase!=='over'&&$('over').hidden;
+ if(!on){AFK.last=Date.now();if(AFK.warn){AFK.warn=false;$('afk').hidden=true}return}
+ if(!AFK.last)AFK.last=Date.now();const idle=(Date.now()-AFK.last)/1000;
+ if(idle<AFK_IDLE){if(AFK.warn){AFK.warn=false;$('afk').hidden=true}return}
+ const left=Math.ceil(AFK_IDLE+AFK_GRACE-idle);
+ if(!AFK.warn){AFK.warn=true;$('afk').hidden=false;try{sfx('glove')}catch(e){}track('afk_warned',{ranked:!!o.ranked})}
+ $('afkT').textContent=`FORFEIT IN ${fmtClock(Math.max(0,left))}`;
+ if(left<=0){AFK.warn=false;$('afk').hidden=true;track('afk_forfeit',{ranked:!!o.ranked});olForfeit(o,'You were inactive for 90 seconds.')}}
+setInterval(afkTick,500);
+// you forfeit (the menu's Forfeit/Leave, or inactivity): ranked tells the server at once, so your opponent wins
+// right away instead of waiting out their countdown; you land on the results card
+function olForfeit(o,why){if(!o)return;if(o.ranked&&o.rk){rkStop();rpc('ranked_concede',{p_match:o.rk.m}).then(info=>{if(S.online===o)rkResult(info)}).catch(()=>{})}
+ olEndScreen(o,'FORFEITED',why)}
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'];
 let CARDS=[],CARD_BY={};
@@ -8035,7 +8074,7 @@ let FIELD=null,DECOR=null,SIGNS=null,CROWD_A=null,CROWD_B=null,FANS=[],CONC=[],A
 // pixels, repainted several layers deep every frame. Past ~4.2 million the density steps down (never below 1x); phones are far under it.
 const CV_MAXPX=4.2e6;
 function resize(){const r=cv.getBoundingClientRect();const dpr=Math.max(1,Math.min(window.devicePixelRatio||1,3,Math.sqrt(CV_MAXPX/Math.max(1,r.width*r.height))));cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));VA=cv.height/cv.width}
-new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,cs:()=>[JC.size,PSPR.size],gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},gbPlay:(s,EV,b1)=>{S.bases=[b1?curBatter():null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());S.play=pl;S.phase='play';const th=pl.segs.filter(g=>g.thr).map(g=>[g.t0.toFixed(2),g.from.x|0,g.from.y|0]);return{end:pl.end,th,sl:pl.runners.filter(r=>r.slide).map(r=>({t0:r.slide.t0,t1:r.slide.t1,b:r.slide.b,head:r.slide.head,out:!!r.out}))}},setT:t=>{S.play.t=t},fpos:(pl,i,t)=>fpos(pl,i,t),splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{WB_FULL=true;render(now);WB_FULL=false;const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
+new ResizeObserver(resize).observe(cv);resize();applyWide();if(/dbg/.test(location.hash))window.__pd={TEAMS,S,cs:()=>[JC.size,PSPR.size],gb:(s,EV)=>{S.bases=[null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());const o=[];for(let t=0;t<pl.end;t+=.1){const f=fpos(pl,2,t);o.push(t.toFixed(1)+":"+f.x.toFixed(0)+","+f.y.toFixed(0))}return (pl.res&&pl.res.desc)+" | "+JSON.stringify(pl.fk[2])+" | "+o.join(" ")},gbPlay:(s,EV,b1)=>{S.bases=[b1?curBatter():null,null,null];const P={err:0,q:.6,EV,L:-5,s};const pl=buildGrounder(P,{x:Math.sin(s*RAD),y:Math.cos(s*RAD)},curBatter());S.play=pl;S.phase='play';const th=pl.segs.filter(g=>g.thr).map(g=>[g.t0.toFixed(2),g.from.x|0,g.from.y|0]);return{end:pl.end,th,sl:pl.runners.filter(r=>r.slide).map(r=>({t0:r.slide.t0,t1:r.slide.t1,b:r.slide.b,head:r.slide.head,out:!!r.out}))}},setT:t=>{S.play.t=t},fpos:(pl,i,t)=>fpos(pl,i,t),splashT:()=>{SPLASH=[];splashCheck({segs:[airSeg(0,3,{x:0,y:2},{x:220,y:350},90)],ballGone:3})},setRoom:r=>{ROOM=r},afkPoke:()=>{AFK.last=Date.now()},olState:()=>{const o=S.online;return o?{inGame:o.inGame,gid:o.gid,selfDown:o.selfDown,lostAt:o.lostAt,inning:S.inning,half:S.half,runs:S.runs,target:S.target,outs:S.outs,phase:S.phase,pill:document.getElementById("olNet").textContent,rejoin:!document.getElementById("olRejoin").hidden}:null},ov:()=>[outsideFor(),wb,EXT_M,W,H],snap:(now,x,y,w,h,z)=>{WB_FULL=true;render(now);WB_FULL=false;const c=document.createElement("canvas");c.width=w*z;c.height=h*z;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(wb,x,y,w,h,0,0,w*z,h*z);return c.toDataURL()},hp:()=>toPx(0,0),rt:(n,skip)=>{const t=performance.now();for(let i=0;i<n;i++){if(skip==="lights")window.__noRL=1;render(performance.now())}window.__noRL=0;return (performance.now()-t)/n},ballScr:()=>{const pl=S.play;if(!pl||S.camMode!=="follow"||!S.view)return null;const b=ballAt(pl,S.phase==="result"?pl.end:pl.t);if(!b)return null;const q=toPx(b.x,b.y),v=S.view;return{x:(q.x-v.sx)*v.scale/cv.width,y:(q.y-(b.h||0)/FT*.5-v.sy)*v.scale/cv.height,d:Math.hypot(b.x,b.y)|0,h:b.h|0}},go:()=>{const t=performance.now();tsGo(1);return performance.now()-t},prof:()=>{const T=[];const m=(n,f)=>{const t=performance.now();f();T.push(n+":"+Math.round(performance.now()-t))};m("sync",syncPicker);m("custom",applyCustom);m("hud",updateHUD);m("rebuild",rebuildPark);return T.join(" ")},logo:k=>LOGO[k],tile:k=>tsTile(k),tsp:(g,k,w,h,t)=>tsPaint(g,k,w,h,t,1),start:m=>startGame(m),show:()=>{S.lightShow=performance.now()},throw:k=>{S.phase="choose";startWindup(k)},zoom:d=>zoomBy(d),park:(t,n)=>{S.you=t;OPT.time=n?"night":"day";S.night=!!n;rebuildPark();buildCrowd()},toTitle:()=>toTitle(),sim:(e,h,b)=>simulateContact(e,h,b),win:()=>WIN,gameOver:w=>gameOver(w),fullInning:()=>fullInning(),pitcher:()=>pitcher(),aud:()=>({ramp:!!S.rampSrc,bufs:Object.keys(BUF),amb:BUS.amb?BUS.amb.gain.value:null,crowd:BUS.crowd?BUS.crowd.gain.value:null,music:BUS.music?BUS.music.gain.value:null})};
 
 // Ulsan's board is a size up and sits in a navy frame shaped like a pair of whale flippers, on its own deck
 // Suwon's board is built into the fortress: a stone bastion around it, a purple frame, a tiled pavilion roof above
@@ -8564,7 +8603,7 @@ function render(now){
  // The whole park is recomposed every frame (field, crowd, signs, decor, players, lighting): four or more full layers of
  // a 1280x1360 buffer. The camera only ever shows part of it, so compose just that part. (The batting-practice ball cam
  // and the debug snapshot read other parts of the buffer, so they get the whole thing.)
- let WBC=null;if(!WB_FULL&&!(S.mode==='bp'&&S.bpCam)){const C0=clampCam(S.cam),[w0,h0]=viewWH(C0.z),x0=Math.max(0,Math.floor(C0.x-w0/2)-3),y0=Math.max(0,Math.floor(C0.y-h0/2)-3),x1=Math.min(W,Math.ceil(C0.x+w0/2)+3),y1=Math.min(H,Math.ceil(C0.y+h0/2)+3);
+ let WBC=null;if(!WB_FULL&&!(S.mode==='bp'&&S.bpCam)&&!S.gCam){const C0=clampCam(S.cam),[w0,h0]=viewWH(C0.z),x0=Math.max(0,Math.floor(C0.x-w0/2)-3),y0=Math.max(0,Math.floor(C0.y-h0/2)-3),x1=Math.min(W,Math.ceil(C0.x+w0/2)+3),y1=Math.min(H,Math.ceil(C0.y+h0/2)+3);
   if(x1>x0&&y1>y0&&(x1-x0)*(y1-y0)<W*H*.94)WBC=[x0,y0,x1-x0,y1-y0]}
  if(WBC){wg.save();wg.beginPath();wg.rect(WBC[0],WBC[1],WBC[2],WBC[3]);wg.clip()}
  try{
@@ -8920,12 +8959,15 @@ function drawRoofLights(c,vx0,vy0,scale,now){if(window.__noRL)return;if(S.phase=
 // last ball you hit, then holds on where it came down (with the distance) for a few seconds ----------
 function bcPos(pl,tt){let seg=null;for(const sg of pl.segs)if(tt>=sg.t0&&tt<=sg.t1){seg=sg;break}
  if(!seg)for(const sg of pl.segs)if(sg.t1<=tt&&(!seg||sg.t1>=seg.t1))seg=sg;return seg?seg.fn(Math.min(tt,seg.t1)):null}
-function drawBallCam(now){const box=$('ballCam'),cam=S.bpCam;
- if(S.mode!=='bp'||!cam||S.phase==='title'||S.paused||OPT.ballCam===false){if(!box.hidden)box.hidden=true;return}
- const pl=cam.pl,tt=(now-cam.at)/1000*SPEED,done=tt>=pl.fullEnd;
- if(now-cam.at>pl.fullEnd/SPEED*1000+(OPT.bpWait?BP_CAM_HOLD:2600)){box.hidden=true;return}// it holds on the landing spot, then tucks away
- const p=bcPos(pl,Math.min(tt,pl.fullEnd));if(!p)return;
- if(box.hidden)box.hidden=false;
+// In games (arcade, full, online) it rides along with every ball put in play, on the play's own clock, and holds on
+// where it ended up for a moment after the play is over.
+function drawBallCam(now){const box=$('ballCam'),bp=S.mode==='bp',cam=bp?S.bpCam:S.gCam;
+ if(!cam||S.phase==='title'||S.paused||OPT.ballCam===false){if(!box.hidden)box.hidden=true;if(!bp)S.gCam=null;return}
+ const pl=cam.pl;let tt,done,end=bp?pl.fullEnd:pl.end;
+ if(bp){tt=(now-cam.at)/1000*SPEED;done=tt>=end;if(now-cam.at>end/SPEED*1000+(OPT.bpWait?BP_CAM_HOLD:2600)){box.hidden=true;return}}// it holds on the landing spot, then tucks away
+ else{done=S.play!==pl||S.phase!=='play';tt=done?end:Math.min(pl.t||0,end);if(done&&!cam.doneAt)cam.doneAt=now;if(cam.doneAt&&now-cam.doneAt>2600){box.hidden=true;S.gCam=null;return}}
+ const p=bcPos(pl,Math.min(tt,end));if(!p)return;
+ if(box.hidden){box.hidden=false;bcPlace(box)}
  const cv=$('ballCamCv'),dpr=Math.min(devicePixelRatio||1,2),cw=Math.round(cv.clientWidth*dpr),ch=Math.round(cv.clientHeight*dpr);if(!cw||!ch)return;
  if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch}
  const q=toPx(p.x,p.y),lift=(p.h||0)/FT,tx=q.x-lift*.2,ty=q.y-lift*.5;
@@ -8942,6 +8984,11 @@ function drawBallCam(now){const box=$('ballCam'),cam=S.bpCam;
  const r=pl.res||{},live=Math.round(Math.hypot(p.x,p.y-2));
  $('ballCamTxt').textContent=done?`${r.hr?'HOME RUN · ':r.code==='FOUL'?'FOUL · ':''}${r.dist||live} FT`:`${live} FT`;
  box.classList.toggle('hr',!!(done&&r.hr))}
+// in a game the scoreboard can sit in the same corner: drop the cam just below it when they'd overlap
+function bcPlace(box){box.style.top='';if(S.mode==='bp')return;const par=box.offsetParent;if(!par)return;
+ for(let k=0;k<3;k++){const a=box.getBoundingClientRect();let low=0;
+  for(const bd of document.querySelectorAll('.bug,.pcBox')){const b=bd.getBoundingClientRect();if(b.width&&a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top)low=Math.max(low,b.bottom)}
+  if(!low)return;box.style.top=`${Math.round(low-par.getBoundingClientRect().top+6)}px`}}
 // ---------- splash: a home run that comes down in water (Ulsan's sea and cove, Busan's harbor) ----------
 let SPLASH=[];
 function waterAt(x,y){if(!ST)return false;const r=Math.hypot(x,y),th=Math.atan2(x,y)/RAD,ath=Math.abs(th),fd=y>0?fenceDist(Math.max(-45,Math.min(45,th))):0;

@@ -93,7 +93,7 @@ $('pauseBtn').addEventListener('pointerdown',e=>e.stopPropagation());
 $('resume').addEventListener('click',resumeGame);
 $('pOpts').addEventListener('click',()=>{optsFromGame=true;showScreen('scrOpts')});
 $('pLine').addEventListener('click',()=>{lineFromPause=true;showScreen('scrLineup')});
-$('pQuit').addEventListener('click',()=>{S.paused=false;S.olMenu=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
+$('pQuit').addEventListener('click',()=>{if(S.olMenu&&onlineGame()){const o=S.online;S.olMenu=false;$('title').hidden=true;showScreen('scrMain');olForfeit(o,o.ranked?'You forfeited the game.':'You left the game.');return}S.paused=false;S.olMenu=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&!onlineGame())pauseGame()});
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const toMenu=b.dataset.go==='scrMain'||b.dataset.go==='scrSingle';if(parkFromBP&&toMenu){backToCage();return}if(lineFromPause&&S.paused&&toMenu){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
 // on PC the pitch-type panel is taller than the swing buttons and would cover AUTO and INFO: while it shows, they move to its left

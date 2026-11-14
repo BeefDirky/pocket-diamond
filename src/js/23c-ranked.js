@@ -96,8 +96,8 @@ function rkGoneTick(){const g=RK.gone;if(!g)return;const o=g.o,post=!!(ML&&ML.fi
  if(!post&&o.opp&&o.inGame&&o.opp.ing===o.gid){rkGoneClear();return}/* they came back */
  const left=Math.max(0,RK_FORFEIT-(Date.now()-g.t0)/1000),clock=left>0?`WIN BY FORFEIT IN ${fmtClock(Math.ceil(left))}`:'CLAIMING THE WIN…';
  if(post)rkShow('RANKED · your opponent left · '+clock);else{$('bt').textContent='OPPONENT LEFT';$('bs').textContent=clock;$('banner').dataset.tone='';$('banner').hidden=false}
- if(left<=0&&!g.busy&&Date.now()-g.tried>3000){g.busy=true;g.tried=Date.now();rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{});
-  rpc('ranked_claim',{p_match:o.rk.m}).then(info=>{if(RK.gone===g&&['forfeit','final','disputed'].includes(info.status))rkForfeitEnd(o,info)}).catch(()=>{}).finally(()=>{g.busy=false})}}
+ if(!g.busy&&Date.now()-g.tried>(left<=0?3000:5000)){g.busy=true;g.tried=Date.now();rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{});
+  (left<=0?rpc('ranked_claim',{p_match:o.rk.m}):rpc('ranked_info',{p_match:o.rk.m})).then(info=>{if(RK.gone===g&&['forfeit','final','disputed'].includes(info.status))rkForfeitEnd(o,info)}).catch(()=>{}).finally(()=>{g.busy=false})}}
 function rkGoneClear(){const g=RK.gone;clearInterval(RK.goneT);RK.gone=null;if(g&&!(ML&&ML.fin)&&$('bt').textContent==='OPPONENT LEFT')hideBanner()}
 function rkForfeitEnd(o,info){rkGoneClear();rkStop();if(S.phase==='over'&&ML&&ML.fin){rkResult(info);return}
  const won=info.winner_side===info.me;olEndScreen(o,won?'<span>WIN</span> BY FORFEIT':'MATCH OVER',won?'Your opponent left the game.':'The match was settled without you.');rkResult(info)}
@@ -116,9 +116,7 @@ const Q={on:false,t0:0,tick:0,gen:0};
 const fmtClock=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 function qSay(status,info){$('qStatus').textContent=status;if(info!=null)$('qInfo').textContent=info}
 // the estimated wait: the median of recent matches' waits (from the server), counting down from when you joined
-function qEst(r){if(r&&r.queue==='waiting'){Q.est=r.est_secs==null?null:r.est_secs;Q.n=r.waiting|0}
- const el=$('qEst');if(!el)return;const left=Q.est==null?null:Math.max(0,Q.est-(Date.now()-Q.t0)/1000);
- el.textContent=Q.est==null?(Q.n>1?'EST. WAIT UNDER 0:10':'EST. WAIT: UNKNOWN'):left>0?`EST. WAIT ~${fmtClock(Q.est)}`:'EST. WAIT ANY MOMENT NOW'}
+/* qEst: see 23f-live.js (it counts who's online) */
 // the queue's ball: a 16-pixel baseball spinning forward (top toward you) as it bounces. Each frame every pixel of the
 // disc is found on the sphere, turned back by the spin, and colored white, edge-shaded or seam-red from where it lands.
 function qBallDraw(t){const cv=$('qBall');if(!cv)return;const g=cv.getContext('2d'),R=7.2,c=7.5,id=g.createImageData(16,16),d=id.data,th=t/1000*5.2;
@@ -158,7 +156,7 @@ async function qMatched(info,gen){Q.on=false;if(Q.fromLn){Q.fromLn=false;qLnSync
  // (whatever the other phone already said before this one finished joining)
  if(o.opp){if(o.role==='host'){if(!o.qStarted)qStartGame(o)}else if(o.opp.start&&!o.inGame&&rkStartOK(o,o.opp.start))startOnline(o.opp.start)}
  // nobody showed up: back to the queue (the empty match is cleaned up by the server)
- setTimeout(()=>{if(S.online===o&&!o.inGame&&Q.gen===gen){o.nr.leave().catch(()=>{});S.online=null;qSay('OPPONENT DIDN\u2019T CONNECT','Back in the queue…');setTimeout(()=>{if(Q.gen===gen)qStart()},1200)}},25000)}
+ setTimeout(()=>{if(S.online===o&&!o.inGame&&!o.gid&&!o.qStarted&&Q.gen===gen){/* (a game that already began and ended early isn't a no-show) */o.nr.leave().catch(()=>{});S.online=null;qSay('OPPONENT DIDN\u2019T CONNECT','Back in the queue…');setTimeout(()=>{if(Q.gen===gen)qStart()},1200)}},25000)}
 // host: the guest is here: start with the match the server set up
 function qStartGame(o){const i=o.qInfo;if(!i)return;o.qStarted=true;clearInterval(Q.tick);
  const st={gid:o.rkGid,home:i.home_club,away:i.away_club,hb:MYTEAM?MYTEAM.base:i.home_club,ab:(o.opp&&o.opp.base)||i.away_club,hs:myRosterSpec(),as:(o.opp&&o.opp.ros)||null,inn:3,night:Math.random()<.55,bo:1,sid:i.match_id,gn:1,sw:[0,0],rk:{m:i.match_id,home:i.home_name,away:i.away_name}};
