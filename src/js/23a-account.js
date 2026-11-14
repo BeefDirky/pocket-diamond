@@ -36,14 +36,13 @@ async function accSync(){const c=await supaClient(),u=ACC.user;if(!u)return;
  if(m.uid===u.id&&!unsynced){if(!sameT(row.updated_at,m.syncedAt)){accApply(row.data);m.syncedAt=row.updated_at;m.pushedAt=Date.now();m.localAt=m.pushedAt;accSetMeta(m);location.reload()}return}
  if(m.uid===u.id&&sameT(row.updated_at,m.syncedAt)){await accPush();return}
  if(!hasProgress(local)){accApply(row.data);const mm={uid:u.id,syncedAt:row.updated_at,pushedAt:Date.now()};mm.localAt=mm.pushedAt;accSetMeta(mm);location.reload();return}
- // both this device and the account have progress that the other hasn't seen: the player decides
- ACC.cloud=row;ACC.state='conflict';acRender();showScreen('scrAcct')}
+ // both this device and the account have progress the other hasn't seen: the account's save wins (no prompt)
+ accApply(row.data);accSetMeta({...m,uid:u.id,syncedAt:row.updated_at,pushedAt:Date.now(),localAt:Date.now()});location.reload()}
 function acWhen(t){if(!t)return'never';const d=new Date(t),s=(Date.now()-d)/1000;return s<60?'just now':s<3600?`${Math.round(s/60)} min ago`:d.toLocaleString()}
 function acRender(){const on=!!ACC.user,cf=ACC.state==='conflict',pk=on&&!cf&&ACC.pick;$('mmAcct').textContent=on?(ACC.name?`SIGNED IN · ${ACC.name.toUpperCase()}`:'SIGNED IN · CHOOSE A USERNAME'):'GUEST · SAVED ON THIS DEVICE';
- if(!$('acSignedOut'))return;$('acSignedOut').hidden=on||cf;$('acSignedIn').hidden=!on||cf||pk;$('acConflict').hidden=!cf;$('acPickName').hidden=!pk;
+ if(!$('acSignedOut'))return;$('acSignedOut').hidden=on||cf;$('acSignedIn').hidden=!on||cf||pk;$('acPickName').hidden=!pk;
  if(pk){$('acNameCancel').hidden=!ACC.name;$('acPickTxt').textContent=ACC.name?`Your username is ${ACC.name}. Pick a new one; no one else can have it.`:"Choose your username. It's how other players see you, and no one else can have it."}
  if(on){$('acName').textContent=ACC.name||'(no username yet)';$('acWho').textContent=ACC.user.email;const m=accMeta();$('acSync').textContent=`Cloud save: ${acWhen(m.syncedAt)}${(m.localAt||0)>(m.pushedAt||0)?' · uploading changes…':''}`}
- if(cf){const c=ACC.cloud;$('acCfTxt').innerHTML=`This device has progress, and your account already has a save from <b>${acWhen(c.updated_at)}</b>. Which one do you want to keep? The other one is replaced.`}
  if(!supaOK()&&!on){$('acMsg').textContent='Accounts work in the website version of the game.';for(const id of['acSignIn','acSignUp','acForgot'])$(id).disabled=true}else $('acMsg').textContent=ACC.msg}
 const acCreds=()=>({email:$('acEmail').value.trim(),password:$('acPass').value});
 async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=acCreds();
@@ -78,8 +77,6 @@ $('acSignIn').addEventListener('click',()=>acDo('in'));$('acSignUp').addEventLis
 for(const id of['acEmail','acPass','acUser'])$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')acDo('in')});
 $('acSaveNow').addEventListener('click',()=>{ACC.msg='Saving…';acRender();accPush()});
 $('acSignOut').addEventListener('click',async()=>{clearTimeout(ACC.pushT);if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut();ACC.user=null;ACC.name='';ACC.pick=false;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
-$('acUseCloud').addEventListener('click',()=>{const r=ACC.cloud;accApply(r.data);accSetMeta({...accMeta(),uid:ACC.user.id,syncedAt:r.updated_at,pushedAt:Date.now(),localAt:Date.now()});location.reload()});
-$('acUseLocal').addEventListener('click',()=>{ACC.state='in';ACC.cloud=null;accPush()});
 // leaving the page: get the last changes up if we can
 addEventListener('visibilitychange',()=>{if(document.hidden&&ACC.user&&(accMeta().localAt||0)>(accMeta().pushedAt||0))accPush()});
 // a remembered session (or a confirmation/reset link) loads the client right away; guests never load it

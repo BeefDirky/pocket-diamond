@@ -53,7 +53,7 @@
       <div class="card" id="scrAcct" hidden>
         <h1><span>ACCOUNT</span></h1>
         <div class="acPane" id="acSignedOut">
-          <p class="acLead">Sign in to keep your cards, lineup, playoff run and settings in the cloud, on every device. You can keep playing as a guest; your progress stays on this device and uploads the first time you sign in.</p>
+          <p class="acLead">Sign in to keep your cards, lineup, playoff run and settings in the cloud, on every device. You can keep playing as a guest; your progress stays on this device and uploads when you create an account. Signing in to an account that already has a save loads that save.</p>
           <input class="acIn" id="acEmail" type="email" placeholder="EMAIL" autocomplete="email" inputmode="email" spellcheck="false">
           <input class="acIn" id="acPass" type="password" placeholder="PASSWORD (6+ CHARACTERS)" autocomplete="current-password">
           <input class="acIn" id="acUser" type="text" placeholder="USERNAME (NEW ACCOUNTS ONLY)" autocomplete="username" spellcheck="false" maxlength="16" autocapitalize="off">
@@ -73,11 +73,6 @@
           <input class="acIn" id="acNewName" type="text" placeholder="USERNAME" spellcheck="false" maxlength="16" autocapitalize="off">
           <p class="acHint" id="acNameHint">3-16 letters, numbers or _</p>
           <div class="acRow"><button class="big" id="acNameSave" type="button">SAVE USERNAME</button><button class="big alt" id="acNameCancel" type="button">CANCEL</button></div>
-        </div>
-        <div class="acPane" id="acConflict" hidden>
-          <p class="acLead" id="acCfTxt"></p>
-          <button class="big" id="acUseCloud" type="button">USE MY ACCOUNT'S SAVE</button>
-          <button class="big alt" id="acUseLocal" type="button">KEEP THIS DEVICE'S SAVE</button>
         </div>
         <p class="acMsg" id="acMsg"></p>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>

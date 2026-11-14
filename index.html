@@ -1257,7 +1257,7 @@ canvas.shake{animation:packShake .6s steps(6)}
       <div class="card" id="scrAcct" hidden>
         <h1><span>ACCOUNT</span></h1>
         <div class="acPane" id="acSignedOut">
-          <p class="acLead">Sign in to keep your cards, lineup, playoff run and settings in the cloud, on every device. You can keep playing as a guest; your progress stays on this device and uploads the first time you sign in.</p>
+          <p class="acLead">Sign in to keep your cards, lineup, playoff run and settings in the cloud, on every device. You can keep playing as a guest; your progress stays on this device and uploads when you create an account. Signing in to an account that already has a save loads that save.</p>
           <input class="acIn" id="acEmail" type="email" placeholder="EMAIL" autocomplete="email" inputmode="email" spellcheck="false">
           <input class="acIn" id="acPass" type="password" placeholder="PASSWORD (6+ CHARACTERS)" autocomplete="current-password">
           <input class="acIn" id="acUser" type="text" placeholder="USERNAME (NEW ACCOUNTS ONLY)" autocomplete="username" spellcheck="false" maxlength="16" autocapitalize="off">
@@ -1277,11 +1277,6 @@ canvas.shake{animation:packShake .6s steps(6)}
           <input class="acIn" id="acNewName" type="text" placeholder="USERNAME" spellcheck="false" maxlength="16" autocapitalize="off">
           <p class="acHint" id="acNameHint">3-16 letters, numbers or _</p>
           <div class="acRow"><button class="big" id="acNameSave" type="button">SAVE USERNAME</button><button class="big alt" id="acNameCancel" type="button">CANCEL</button></div>
-        </div>
-        <div class="acPane" id="acConflict" hidden>
-          <p class="acLead" id="acCfTxt"></p>
-          <button class="big" id="acUseCloud" type="button">USE MY ACCOUNT'S SAVE</button>
-          <button class="big alt" id="acUseLocal" type="button">KEEP THIS DEVICE'S SAVE</button>
         </div>
         <p class="acMsg" id="acMsg"></p>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
@@ -7193,14 +7188,13 @@ async function accSync(){const c=await supaClient(),u=ACC.user;if(!u)return;
  if(m.uid===u.id&&!unsynced){if(!sameT(row.updated_at,m.syncedAt)){accApply(row.data);m.syncedAt=row.updated_at;m.pushedAt=Date.now();m.localAt=m.pushedAt;accSetMeta(m);location.reload()}return}
  if(m.uid===u.id&&sameT(row.updated_at,m.syncedAt)){await accPush();return}
  if(!hasProgress(local)){accApply(row.data);const mm={uid:u.id,syncedAt:row.updated_at,pushedAt:Date.now()};mm.localAt=mm.pushedAt;accSetMeta(mm);location.reload();return}
- // both this device and the account have progress that the other hasn't seen: the player decides
- ACC.cloud=row;ACC.state='conflict';acRender();showScreen('scrAcct')}
+ // both this device and the account have progress the other hasn't seen: the account's save wins (no prompt)
+ accApply(row.data);accSetMeta({...m,uid:u.id,syncedAt:row.updated_at,pushedAt:Date.now(),localAt:Date.now()});location.reload()}
 function acWhen(t){if(!t)return'never';const d=new Date(t),s=(Date.now()-d)/1000;return s<60?'just now':s<3600?`${Math.round(s/60)} min ago`:d.toLocaleString()}
 function acRender(){const on=!!ACC.user,cf=ACC.state==='conflict',pk=on&&!cf&&ACC.pick;$('mmAcct').textContent=on?(ACC.name?`SIGNED IN · ${ACC.name.toUpperCase()}`:'SIGNED IN · CHOOSE A USERNAME'):'GUEST · SAVED ON THIS DEVICE';
- if(!$('acSignedOut'))return;$('acSignedOut').hidden=on||cf;$('acSignedIn').hidden=!on||cf||pk;$('acConflict').hidden=!cf;$('acPickName').hidden=!pk;
+ if(!$('acSignedOut'))return;$('acSignedOut').hidden=on||cf;$('acSignedIn').hidden=!on||cf||pk;$('acPickName').hidden=!pk;
  if(pk){$('acNameCancel').hidden=!ACC.name;$('acPickTxt').textContent=ACC.name?`Your username is ${ACC.name}. Pick a new one; no one else can have it.`:"Choose your username. It's how other players see you, and no one else can have it."}
  if(on){$('acName').textContent=ACC.name||'(no username yet)';$('acWho').textContent=ACC.user.email;const m=accMeta();$('acSync').textContent=`Cloud save: ${acWhen(m.syncedAt)}${(m.localAt||0)>(m.pushedAt||0)?' · uploading changes…':''}`}
- if(cf){const c=ACC.cloud;$('acCfTxt').innerHTML=`This device has progress, and your account already has a save from <b>${acWhen(c.updated_at)}</b>. Which one do you want to keep? The other one is replaced.`}
  if(!supaOK()&&!on){$('acMsg').textContent='Accounts work in the website version of the game.';for(const id of['acSignIn','acSignUp','acForgot'])$(id).disabled=true}else $('acMsg').textContent=ACC.msg}
 const acCreds=()=>({email:$('acEmail').value.trim(),password:$('acPass').value});
 async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=acCreds();
@@ -7235,8 +7229,6 @@ $('acSignIn').addEventListener('click',()=>acDo('in'));$('acSignUp').addEventLis
 for(const id of['acEmail','acPass','acUser'])$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')acDo('in')});
 $('acSaveNow').addEventListener('click',()=>{ACC.msg='Saving…';acRender();accPush()});
 $('acSignOut').addEventListener('click',async()=>{clearTimeout(ACC.pushT);if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut();ACC.user=null;ACC.name='';ACC.pick=false;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
-$('acUseCloud').addEventListener('click',()=>{const r=ACC.cloud;accApply(r.data);accSetMeta({...accMeta(),uid:ACC.user.id,syncedAt:r.updated_at,pushedAt:Date.now(),localAt:Date.now()});location.reload()});
-$('acUseLocal').addEventListener('click',()=>{ACC.state='in';ACC.cloud=null;accPush()});
 // leaving the page: get the last changes up if we can
 addEventListener('visibilitychange',()=>{if(document.hidden&&ACC.user&&(accMeta().localAt||0)>(accMeta().pushedAt||0))accPush()});
 // a remembered session (or a confirmation/reset link) loads the client right away; guests never load it
@@ -7336,7 +7328,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='c1b70af00e',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='f5b9c0e513',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
