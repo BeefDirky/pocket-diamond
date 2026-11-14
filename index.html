@@ -7248,7 +7248,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='40756338e3',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='01ea39b220',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -9036,6 +9036,9 @@ addEventListener('keydown',e=>{if(e.key!=='Escape'||e.repeat||$('title').hidden)
   const b=card&&([...card.querySelectorAll(':scope>.xClose,.mbtn.back,#qCancel')].find(shown));if(b)act=()=>b.click()}
  if(act){e.preventDefault();e.stopPropagation();act()}},true);
 
+// get the audio ready as the page opens: where the browser already allows sound (a site you often play, the
+// installed app) the menu theme starts by itself; elsewhere it starts on the first tap (the wake-up listener in 12-audio)
+setTimeout(()=>{try{ensureAudio()}catch(e){}},250);
 })();
 
 // every menu card goes back from an arrow in its top-left corner instead of a Back button at the bottom of a long scroll

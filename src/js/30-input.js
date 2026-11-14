@@ -111,6 +111,9 @@ addEventListener('keydown',e=>{if(e.key!=='Escape'||e.repeat||$('title').hidden)
   const b=card&&([...card.querySelectorAll(':scope>.xClose,.mbtn.back,#qCancel')].find(shown));if(b)act=()=>b.click()}
  if(act){e.preventDefault();e.stopPropagation();act()}},true);
 
+// get the audio ready as the page opens: where the browser already allows sound (a site you often play, the
+// installed app) the menu theme starts by itself; elsewhere it starts on the first tap (the wake-up listener in 12-audio)
+setTimeout(()=>{try{ensureAudio()}catch(e){}},250);
 })();
 
 // every menu card goes back from an arrow in its top-left corner instead of a Back button at the bottom of a long scroll
