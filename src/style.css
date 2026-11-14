@@ -685,6 +685,12 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .acIn{font-family:var(--f-hud);font-size:15px;background:var(--edge);color:var(--chalk);border:3px solid var(--panel-hi);padding:11px 12px;width:100%;box-sizing:border-box;min-width:0}
 .acIn:focus{outline:none;border-color:var(--amber)}
 .acRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* signed out: the create-account page, or the log-in page (email and password only) */
+#acSignedOut #acSignIn,#acSignedOut #acForgot{display:none}
+#acSignedOut.login #acSignIn,#acSignedOut.login #acForgot{display:block}
+#acSignedOut.login #acUser,#acSignedOut.login #acUserHint,#acSignedOut.login #acSignUp{display:none}
+#acSignedOut .big{width:100%}
+.acSwap{display:block;margin:10px auto 0;font-size:12px}.acSwap b{color:var(--amber);text-decoration:underline}
 @media (max-width:420px){.acRow{grid-template-columns:1fr}}
 .acMsg{font-size:12px;color:var(--amber);margin:0;min-height:1em}
 /* ranked */
