@@ -734,6 +734,9 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .lbpCard:focus{outline:none}
 .lbpEmpty{font-size:12px;color:var(--dim);margin:4px 0}
 .lbpClose{display:block;width:100%;margin-top:14px}
+/* the TEAM screen: your lineup with the inventory and club switch; no scouting tab */
+.lnTeamBar{display:none;gap:8px;margin:2px 0 8px}.lnTeamBar .mbtn{flex:1}
+body.lnTeam .lnTeamBar{display:flex}body.lnTeam .lnTop .seg{display:none}
 .mpNote{margin:10px 0 0;font-size:12px;color:var(--amber);text-align:center;line-height:1.5}
 .olRkNote{margin:2px 0 6px;font-size:11px;letter-spacing:.08em;color:var(--amber);text-align:center}
 .rkRes{margin:6px 0 2px;font-family:var(--f-hud);font-size:13px;letter-spacing:.1em;text-align:center;color:var(--chalk)}

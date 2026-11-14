@@ -40,7 +40,9 @@ function buildRosters(){
   let pno;do{pno=1+Math.floor(pr()*89)}while(used.has(pno));used.add(pno);
   Object.assign(T.pitcher,{pos:'SP',no:pno,thr:T.pitcher.hand,vel:ps(78),mov:ps(72),ctl:ps(68),def:ps(60)});
   {const L=T.lineup,av=f=>L.reduce((a,p)=>a+p[f],0)/L.length,lift=(f,floor)=>{const d=Math.round(floor-av(f));if(d>0)for(const p of L)p[f]=clamp(p[f]+d,20,99)};
-   lift('con',66);lift('pow',63);if(k==='daejeon'){for(const p of L){p.spd=clamp(p.spd+6,20,99);p.con=clamp(p.con+2,20,99)}}}
+   lift('con',66);lift('pow',63);if(k==='daejeon'){for(const p of L){p.spd=clamp(p.spd+6,20,99);p.con=clamp(p.con+2,20,99)}}
+   // no club's own player hits with more than 80 power: the big boppers come from the cards you collect
+   for(const p of L)p.pow=Math.min(80,p.pow)}
   // deepen every bullpen to six arms: named relievers first, then generated ones
   {const pr2=mulberry32(hash(k+'pen')),SUR=['KIM','LEE','PARK','CHOI','JUNG','KANG','CHO','YOON','JANG','LIM','HAN','OH','SEO','SHIN','KWON','HWANG','AHN','SONG','JEON','HONG','YOO','KO','MOON','YANG','BAE','BAEK','NAM','NOH','HA','GO'],INI='BCDGHJKMSWY',VOW=['A','E','H','J','K','M','S','W','Y'];
    const have=new Set([T.pitcher.name,...(T.pen||[]).map(x=>x.name),...T.lineup.map(x=>x.name)]);T.pen=[...(T.pen||[])];

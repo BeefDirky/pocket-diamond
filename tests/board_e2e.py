@@ -67,7 +67,7 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     for (w, h, tag) in ((420, 860, 'phone'), (1400, 900, 'pc')):
         ctx = b.new_context(viewport={'width': w, 'height': h}, service_workers='block')
-        ctx.add_init_script(MOCK + ";localStorage.setItem('pd-opts2',JSON.stringify({music:0,crowd:0,sfx:0,time:'day'}));localStorage.setItem('pd-privacy','1')")
+        ctx.add_init_script(MOCK + ";localStorage.setItem('pd-opts2',JSON.stringify({music:0,crowd:0,sfx:0,time:'day'}));localStorage.setItem('pd-privacy','1');localStorage.setItem('pd-myteam',JSON.stringify({club:'seoul',base:'seoul'}))")
         def inject(route):
             r = route.fetch(); t = r.text(); i = t.rfind('\n})();'); route.fulfill(response=r, body=t[:i] + '\nwindow.__x=c=>eval(c);' + t[i:])
         ctx.route('**/index.html', inject)

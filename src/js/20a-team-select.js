@@ -36,7 +36,7 @@ function tsRender(){if(!$('tsLogo'))return;const k=S.you,T=TEAMS[k],ST2=STADIUMS
  if(TS.cur!==k){if(TS.cur){TS.prev=TS.cur;TS.t0=performance.now();const im=$('tsLogo');im.classList.remove('pop');void im.offsetWidth;im.classList.add('pop')}TS.cur=k}
  $('tsLogo').src=LOGO_URL[k];$('tsLogo').alt=`${T.city} ${T.name}`;$('tsName').textContent=`${T.city} ${T.name}`;$('tsSub').textContent=`${T.kcity} ${T.kname} · ${ST2?ST2.name:''}`;{const o=teamRating(k).ovr,el=$('tsOvr');el.textContent=`OVR ${o}`;el.style.color=el.style.borderColor=rcol(o)}
  $('tsDots').innerHTML=TS_ORDER.map(t=>`<i class="${t===k?'on':''}"></i>`).join('');tsStart()}
-function tsGo(d){const i=TS_ORDER.indexOf(S.you),k=TS_ORDER[(i+d+TS_ORDER.length)%TS_ORDER.length];if(k===S.opp)S.opp=S.you;S.you=k;clubSave();
+function tsGo(d){const i=TS_ORDER.indexOf(S.you),k=TS_ORDER[(i+d+TS_ORDER.length)%TS_ORDER.length];if(k===S.opp)S.opp=S.you;S.you=k;clubSave();brandArm=0;brandSync();
  syncPicker();applyCustom();updateHUD();
  parkDirty()}
 // building a ballpark takes most of a second, so flipping through clubs only marks it; the new park is built once,

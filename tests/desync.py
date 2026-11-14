@@ -16,6 +16,8 @@ try:
   ctx=b.new_context(viewport={'width':800,'height':1000},service_workers='block')
   ctx.add_init_script("(()=>{const F=3,pn=performance.now.bind(performance),t0=pn();performance.now=()=>t0+(pn()-t0)*F;const raf=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=cb=>raf(()=>cb(performance.now()));})();"+mock+";localStorage.setItem('pd-opts2',JSON.stringify({music:0,crowd:0,sfx:0,time:'day'}));if(!localStorage.getItem('pd-cards')){const o={};for(let i=0;i<30;i++){o['bl:b'+i]=1;o['bl:p'+i]=1}localStorage.setItem('pd-cards',JSON.stringify({packs:0,owned:o,seen:{}}))}")
   A=ctx.new_page();B=ctx.new_page();errs=[]
+  # each player owns a team: A plays Seoul's own roster; B rebranded to Busan but owns Daegu's players
+  A.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'seoul',base:'seoul'}));localStorage.setItem('pd-privacy','1')");B.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'busan',base:'daegu'}));localStorage.setItem('pd-privacy','1')")
   for n,pg in (('A',A),('B',B)):pg.on('pageerror',lambda e,n=n:errs.append(n+' '+str(e)))
   for pg in (A,B):pg.goto('http://localhost:8768/index.html#dbg')
   A.wait_for_timeout(4000)

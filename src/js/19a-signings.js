@@ -20,12 +20,14 @@ function applySignings(){snapOrig();for(const k in SIGN){if(!TEAMS[k])continue;f
    if(!CARD_BY[id]||!COL.owned[id]){delete SIGN[k][key];continue}signPlayer(k,nm,id,pit,false)}}saveSign()}
 const usedCards=k=>new Set([...TEAMS[k].lineup,...(TEAMS[k].benched?[TEAMS[k].benched]:[]),...TEAMS[k].staff].filter(p=>p&&p.signed).map(p=>p.signed));
 // ---- online roster spec ----
-function rosterSpec(k){const T=TEAMS[k],ent=p=>{if(p.custom)p=T.benched||p;if(p.signed)return['c',p.signed,p.signedFor,lvOf(p.signed)];const nc=nativeCard(k,p.name);return['n',p.name,nc?lvOf(nc.id):{}]};return{L:T.lineup.map(ent),P:T.staff.map(ent)}}
+function rosterSpec(k){const T=TEAMS[k],ent=p=>{if(p.custom)p=T.benched||p;if(p.signed)return['c',p.signed,p.signedFor,lvOf(p.signed)];const nc=nativeCard(k,p.name);return['n',p.name,nc?lvOf(nc.id):{}]};return{L:T.lineup.map(ent),P:T.staff.map(ent),base:BASE_OF[k]||k}}
+// (spec.base: whose roster this is; a player who rebranded fields his first club's players in his new club's kit)
 function applyRosterSpec(k,spec){if(!spec||!spec.L||!spec.P)return;snapOrig();const T=TEAMS[k];if(!T.netBackup)T.netBackup={L:T.lineup.slice(),P:T.staff.slice()};
+ const OR=spec.base&&PRISTINE[spec.base]?{L:PRISTINE[spec.base].L,P:PRISTINE[spec.base].P}:T.orig;
  const build=(list,origs,pit)=>list.map(e=>{const base=origs.find(p=>p.name===(e[0]==='c'?e[2]:e[1]))||origs[0];if(e[0]==='c'&&CARD_BY[e[1]]){const q=signClone(CARD_BY[e[1]],base,e[3]||{});q.signedFor=base.name;return q}
   // one of the club's own players: at his base ratings plus whatever levels his owner has given him
   const lv=e[0]==='n'&&e[2]?e[2]:null,nc=lv&&Object.keys(lv).length?nativeCard(k,base.name):null;if(nc){const q={...base,...cardEff(nc,lv)};return q}return base});
- T.lineup=build(spec.L,T.orig.L,false);T.staff=build(spec.P,T.orig.P,true)}
+ T.lineup=build(spec.L,OR.L,false);T.staff=build(spec.P,OR.P,true)}
 function restoreNetRosters(){for(const k of ORDER){const T=TEAMS[k];if(T.netBackup){T.lineup=T.netBackup.L;T.staff=T.netBackup.P;T.netBackup=null}}}
 
 // ---- the lineup screen's player sheet ----

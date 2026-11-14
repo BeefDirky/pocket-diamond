@@ -56,6 +56,7 @@ with sync_playwright() as p:
         r = route.fetch(); t = r.text(); i = t.rfind('\n})();'); route.fulfill(response=r, body=t[:i] + '\nwindow.__x=c=>eval(c);' + t[i:])
     ctx.route('**/index.html', inject)
     PA = ctx.new_page(); PB = ctx.new_page(); errs = []
+    PA.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'seoul',base:'seoul'}));localStorage.setItem('pd-privacy','1')"); PB.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'busan',base:'daegu'}));localStorage.setItem('pd-privacy','1')")
     for n, pg in (('A', PA), ('B', PB)): pg.on('pageerror', lambda e, n=n: errs.append(n + ' ' + str(e)))
     def setup():
       for pg, uid, name in ((PA, A, 'BeefDirky'), (PB, B, 'Rival')):

@@ -110,8 +110,10 @@ function netTick(now){const o=S.online,opp=o.opp;
   if(opp.sk&&S.phase==='play'&&S.play&&S.play.hrFired&&S.pitch&&opp.sk===S.pitch.pid&&S.play.t<S.play.end)S.play.t=S.play.end}}
 function startOnline(st){const o=S.online;o.gid=st.gid;o.start=st;if(o.mine.rdy)netPresence({rdy:null});
  o.series={sid:st.sid||st.gid,bo:st.bo||1,gn:st.gn||1,inn:st.inn,w:{host:(st.sw||[0,0])[0],guest:(st.sw||[0,0])[1]},done:false};$('olNext').hidden=true;$('olSeries').hidden=true;o.inGame=true;o.n=0;o.seenW=o.seenR=null;o.flags=[];
- o.prevCustom=CUSTOM.active;CUSTOM.active=false;applyCustom();
+ o.prevCustom=CUSTOM.active;const mySpec=myRosterSpec();CUSTOM.active=false;applyCustom();
  {const ok=o.role==='host'?st.away:st.home;if(!st.rk&&o.opp&&o.opp.ros)applyRosterSpec(ok,o.opp.ros)}
+ // your own players, in whichever kit you wear in this room
+ {const mk=o.role==='host'?st.home:st.away;if(!st.rk&&MYTEAM&&mk!==MYTEAM.club)applyRosterSpec(mk,mySpec)}
  rkBegin(o,st);// field the opponent exactly as their phone does
  S.you=st.home;S.opp=st.away;S.night=!!st.night;syncPicker();if(FIELD){rebuildPark();SIGNS=buildSigns()}
  S.auto=false;syncAuto();o.sawIng=false;o.lostAt=0;netPresence({pt:null,dc:null,ing:st.gid});
@@ -174,10 +176,10 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
   if(o.inGame&&o.opp&&o.lostAt){track('connection_recovered',{seconds:Math.round((Date.now()-o.lostAt)/1000),ranked:!!o.ranked});o.lostAt=0;clearTimeout(o.lostT);if(o.lostBan){o.lostBan=false;hideBanner()}}
   if(!o.opp&&prev&&!o.inGame&&o.mine.rdy)netPresence({rdy:null});
   lobbyRender();if(!o.inGame)nextRender()});
- netPresence({v:1,role,team:S.you,ros:rosterSpec(S.you),rdy:null,acct:rkReady()?ACC.name:null,...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}
+ netPresence({v:1,role,team:S.you,ros:myRosterSpec(),base:MYTEAM?MYTEAM.base:S.you,rdy:null,acct:rkReady()?ACC.name:null,...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
- S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:rosterSpec(t),rdy:null});lobbyRender()});
+ S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:myRosterSpec(),rdy:null});/* (a kit for this room only: your players stay yours) */lobbyRender()});
 function openOnline(mode){if(!S.online)S.online={mine:{},opp:null,mode:mode||'custom'};else if(mode&&!S.online.nr)S.online.mode=mode;lobbyRender();rkHead(S.online);showScreen('scrOnline')}
 $('olCreate').addEventListener('click',()=>{const L='abcdefghjkmnpqrstuvwxyz';let c='';for(let i=0;i<4;i++)c+=L[Math.floor(Math.random()*L.length)];joinRoom(c,'host')});
 $('olJoin').addEventListener('click',()=>joinRoom($('olCode').value,'guest'));

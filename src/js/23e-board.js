@@ -70,4 +70,4 @@ async function lbProfile(uid){const box=$('lbProf'),card=$('lbpCard');box.hidden
   card.focus({preventScroll:true})}
  catch(e){card.innerHTML=`<p class="lbpEmpty">Couldn’t load this profile: ${esc(rkErr(e))}</p><button class="mbtn lbpClose" type="button" id="lbpClose">Close</button>`}}
 $('lbProf').addEventListener('click',e=>{if(e.target===$('lbProf')||e.target.closest('#lbpClose'))$('lbProf').hidden=true});
-addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('lbProf').hidden){$('lbProf').hidden=true;e.stopPropagation()}},true);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('lbProf').hidden){$('lbProf').hidden=true;e.stopImmediatePropagation()}},true);// (only closes the profile, not the page under it)

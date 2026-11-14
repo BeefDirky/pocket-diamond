@@ -41,7 +41,7 @@
         <nav class="mmBtns">
           <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
-          <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">INVENTORY</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
+          <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">TEAM</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
           <button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button>
@@ -171,6 +171,7 @@
       <div class="card wide" id="scrLineup" hidden>
         <div class="lnTop"><h2 id="lnTitle"></h2><div class="seg"><button type="button" id="lnMine" aria-pressed="true">Your club</button><button type="button" id="lnOpp" aria-pressed="false">Scout visitors</button></div></div>
         <p id="lnHint"></p>
+        <div class="lnTeamBar" id="lnTeamBar"><button class="mbtn" id="lnInv" type="button">INVENTORY</button><button class="mbtn" id="lnClub" type="button">CHANGE CLUB</button></div>
         <div class="lnPre" id="lnPre" hidden>
           <div class="lnPreTop"><b id="lnPreVs"></b><span>SERIES</span><div class="seg" id="lnSeries"><button type="button" data-n="1" aria-pressed="true">1 game</button><button type="button" data-n="3" aria-pressed="false">Best of 3</button><button type="button" data-n="5" aria-pressed="false">Best of 5</button></div></div>
           <button class="big" id="lnPlay" type="button">PLAY BALL</button>

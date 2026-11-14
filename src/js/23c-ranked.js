@@ -13,7 +13,7 @@ async function rpc(fn,args){const c=await supaClient();const {data,error}=await 
 const rkErr=e=>((e&&e.message)||'Could not reach the server').replace(/^.*?exception:\s*/,'');
 const rkReady=()=>supaOK()&&!!(ACC.user&&ACC.name);
 // stock rosters: each club's own players at their own ratings, in their usual order
-function stockSpec(k){snapOrig();const T=TEAMS[k];return{L:T.orig.L.map(p=>['n',p.name,{}]),P:T.orig.P.map(p=>['n',p.name,{}])}}
+function stockSpec(k,base){const R=PRISTINE[base]||PRISTINE[k];return{base:PRISTINE[base]?base:k,L:R.L.map(p=>['n',p.name,{}]),P:R.P.map(p=>['n',p.name,{}])}}
 // is this room playing ranked? (the host chose Ranked on the Multiplayer page; a guest plays whatever room it joined)
 const rkOn=o=>!!o&&(o.role==='guest'?!!(o.opp&&o.opp.rk):o.mode==='ranked');
 // the room's heading and blurb follow its kind
@@ -27,9 +27,9 @@ function rkLobby(o){const on=rkOn(o),host=o.role==='host';
  const nt=$('olRkNote'),odd=!host&&o.mode==='ranked'&&!!o.opp&&!on;nt.hidden=!on&&!odd;
  if(odd)nt.textContent='This is a Custom 1v1 room, so it won\u2019t count for rating.';
  if(on)nt.textContent=`RANKED · ${ACC.name||'you'} vs ${(o.opp&&o.opp.acct)||'?'} · stock rosters, one game, counts for rating`;
- if(host&&o.mine.rk!==(on?1:0))netPresence({rk:on?1:0,ros:on?null:rosterSpec(S.you)});
+ if(host&&o.mine.rk!==(on?1:0))netPresence({rk:on?1:0,ros:on?null:myRosterSpec()});
  if(!host&&on&&o.mine.ros)netPresence({ros:null});
- if(!on&&!o.mine.ros&&o.mine.team)netPresence({ros:rosterSpec(S.you)});// back to casual: your signed cards count again
+ if(!on&&!o.mine.ros&&o.mine.team)netPresence({ros:myRosterSpec()});// back to casual: your signed cards count again
  if(!on)return null;
  if(!rkReady())return ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account. Sign in on the Account screen (main menu), then come back.';
  if(o.opp&&!o.opp.acct)return'Your opponent needs to sign in to play ranked.';
@@ -48,7 +48,7 @@ async function rkHostStart(inn){const o=S.online;if(o.rkBusy)return;o.rkBusy=tru
   o.rkm=r.match_id;netPresence({rkm:o.rkm});$('olStatus').textContent='Waiting for your opponent to join the ranked match…';
   const t0=Date.now();while(Date.now()-t0<20000&&S.online===o){
    if(o.opp&&o.opp.rkj===o.rkm){const info=await rpc('ranked_info',{p_match:o.rkm});
-    if(info.status==='live'&&info.seed){const st={gid:o.rkm+':'+info.seed,home:o.mine.team,away:o.opp.team,inn,night:Math.random()<.55,bo:1,sid:o.rkm,gn:1,sw:[0,0],
+    if(info.status==='live'&&info.seed){const st={gid:o.rkm+':'+info.seed,home:o.mine.team,away:o.opp.team,hb:MYTEAM?MYTEAM.base:o.mine.team,ab:o.opp.base||o.opp.team,inn,night:Math.random()<.55,bo:1,sid:o.rkm,gn:1,sw:[0,0],
       rk:{m:o.rkm,home:info.home_name,away:info.away_name}};netPresence({start:st});startOnline(st);return}}
    await new Promise(r=>setTimeout(r,500))}
   throw{message:'Your opponent did not join the ranked match. Press Ready to try again.'}}
@@ -62,7 +62,7 @@ async function rkGuestJoin(o,m){if(o.rkJoining===m)return;o.rkJoining=m;
 const rkStartOK=(o,st)=>!st.rk||st.gid===o.rkGid;
 // ---- in the game ----
 function rkBegin(o,st){o.ranked=!!st.rk;o.rk=st.rk||null;clearInterval(RK.pingT);RK.done=false;
- if(o.ranked){applyRosterSpec(st.home,stockSpec(st.home));applyRosterSpec(st.away,stockSpec(st.away));
+ if(o.ranked){applyRosterSpec(st.home,stockSpec(st.home,st.hb));applyRosterSpec(st.away,stockSpec(st.away,st.ab));
   const ping=()=>{if(S.online===o&&o.inGame)rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{})};ping();RK.pingT=setInterval(ping,30000)}}
 function rkStop(){clearInterval(RK.pingT);clearTimeout(RK.pollT);clearTimeout(RK.claimT)}
 // the final screen's ranked line
@@ -130,7 +130,7 @@ async function qMatched(info,gen){Q.on=false;track('queue_matched',{wait_secs:Ma
  setTimeout(()=>{if(S.online===o&&!o.inGame&&Q.gen===gen){o.nr.leave().catch(()=>{});S.online=null;qSay('OPPONENT DIDN\u2019T CONNECT','Back in the queue…');setTimeout(()=>{if(Q.gen===gen)qStart()},1200)}},25000)}
 // host: the guest is here: start with the match the server set up
 function qStartGame(o){const i=o.qInfo;if(!i)return;o.qStarted=true;clearInterval(Q.tick);
- const st={gid:o.rkGid,home:i.home_club,away:i.away_club,inn:3,night:Math.random()<.55,bo:1,sid:i.match_id,gn:1,sw:[0,0],rk:{m:i.match_id,home:i.home_name,away:i.away_name}};
+ const st={gid:o.rkGid,home:i.home_club,away:i.away_club,hb:MYTEAM?MYTEAM.base:i.home_club,ab:(o.opp&&o.opp.base)||i.away_club,inn:3,night:Math.random()<.55,bo:1,sid:i.match_id,gn:1,sw:[0,0],rk:{m:i.match_id,home:i.home_name,away:i.away_name}};
  netPresence({start:st});startOnline(st)}
 // after the game: leave the match room and go back to the Multiplayer page
 function qDone(o){resumeClear();if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;mpOpen()}
