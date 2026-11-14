@@ -228,9 +228,20 @@
           <button class="mode" id="goRanked" type="button"><b>RANKED</b></button>
           <button class="mode alt" id="goCustom" type="button"><b>CUSTOM</b></button>
         </div>
+        <button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button>
         <p class="mpNote" id="mpNote" hidden></p>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
+      <div class="card wide" id="scrBoard" hidden>
+        <h1>LEADER<span>BOARD</span></h1>
+        <p class="lbSeason" id="lbSeason">RANKED</p>
+        <div class="seg lbTabs" id="lbTabs"><button type="button" data-k="rating" aria-pressed="true">Rating</button><button type="button" data-k="wins" aria-pressed="false">Wins</button><button type="button" data-k="hr" aria-pressed="false">Home runs</button><button type="button" data-k="avg" aria-pressed="false">Average</button></div>
+        <button class="lbMe" id="lbMe" type="button" hidden></button>
+        <ol class="lbList" id="lbList"></ol>
+        <p class="lbMsg" id="lbMsg"></p>
+        <button class="mbtn back" type="button" data-go="scrMulti">Back</button>
+      </div>
+      <div class="lbProf" id="lbProf" role="dialog" aria-modal="true" aria-labelledby="lbpName" hidden><div class="lbpCard" id="lbpCard" tabindex="-1"></div></div>
       <div class="card" id="scrQueue" hidden>
         <h1>RANKED</h1>
         <div class="qBox">
