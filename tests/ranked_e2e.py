@@ -102,7 +102,13 @@ with sync_playwright() as p:
         c.execute("select username, rating, wins, losses from public.leaderboard_ranked order by rank"); print('  leaderboard:', c.fetchall())
         c.execute("select user_id::text, pa, h, hr, so, outs_pitched from public.player_stats where mode='ranked_stock' and season_id=0 order by user_id"); print('  ranked lines:', c.fetchall())
     r2 = play('GAME 2 (guest cheats)', cheat=True)
-    if not r2 or r2[0]['status'] != 'disputed': ok = False; print('FAIL: a doctored game was not disputed')
+    # a doctored game must never count: either both phones submitted and it was disputed, or the cheater's phone never
+    # finished (the honest phone flagged it and submitted alone), leaving it unverified, open to a forfeit claim
+    if not r2 or r2[0]['verified'] or r2[0]['status'] not in ('disputed', 'live'): ok = False; print('FAIL: a doctored game counted')
+    else:
+        with con.cursor() as c:
+            c.execute("select count(*) from public.match_submissions where match_id=(select id from public.matches order by created_at desc limit 1) and jsonb_array_length(flags) > 0")
+            if c.fetchone()[0] < 1: ok = False; print('FAIL: the honest phone did not flag the doctored game')
     if errs: ok = False; print('page errors:', errs[:5])
     b.close()
 srv.shutdown()
