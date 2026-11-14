@@ -100,6 +100,17 @@ fontsReady.then(()=>{
 document.addEventListener('pointerdown',e=>{if(!(S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null)||overlayOpen())return;
  if(e.target.closest('.pauseBtn,#penPanel,.autoBtn,.infoBtn,.zoomCtl,.lsHot,.board'))return;ensureAudio();releaseTap()},true);
 requestAnimationFrame(frame);
+// Esc on a menu page does what its back arrow does (after closing any pop-up on top of it). In a game, Esc pauses.
+addEventListener('keydown',e=>{if(e.key!=='Escape'||e.repeat||$('title').hidden)return;
+ if(!$('lbProf').hidden||!$('tsInfo').hidden)return;// those pop-ups close themselves
+ const shown=el=>!!el&&!el.hidden&&el.getClientRects().length>0;// (works for pinned elements too)
+ let act=null;
+ if(shown($('zoomCard')))act=()=>{$('zoomCard').hidden=true;ZOOM=null};
+ else if(shown($('reveal'))){if(shown($('rvDone')))act=()=>$('rvDone').click()}
+ else{const card=[...document.querySelectorAll('#title .card')].find(shown);
+  const b=card&&([...card.querySelectorAll(':scope>.xClose,.mbtn.back,#qCancel')].find(shown));if(b)act=()=>b.click()}
+ if(act){e.preventDefault();e.stopPropagation();act()}},true);
+
 })();
 
 // every menu card goes back from an arrow in its top-left corner instead of a Back button at the bottom of a long scroll

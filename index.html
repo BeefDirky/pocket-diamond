@@ -716,8 +716,8 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .privBar #privOk{background:var(--amber);color:#14110a}.privBar button:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
 .abBuild{font-size:.75em;opacity:.55;letter-spacing:.04em}
 /* the Multiplayer page: two buttons side by side; the ranked queue */
-.mpPick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:6px 0 4px}
-.mpPick .mode{min-height:96px;display:flex;align-items:center;justify-content:center;text-align:center}
+.mpPick{display:grid;grid-template-columns:1fr;gap:12px;margin:6px 0 4px}
+.mpPick .mode{min-height:84px;display:flex;align-items:center;justify-content:center;text-align:center}
 .mpPick .mode b{font-size:20px;letter-spacing:.12em}
 .qBox{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 8px 14px;text-align:center}
 .qBox b{font-family:var(--f-hud);letter-spacing:.14em;font-size:15px;color:var(--chalk)}
@@ -728,7 +728,7 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 @keyframes qBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 @media (prefers-reduced-motion:reduce){.qBall{animation:none}}
 /* leaderboard + player profiles */
-.mpBoard{width:100%;margin-top:10px}
+.mpBoard{width:100%;margin-top:12px;text-align:center;justify-content:center}
 .lbSeason{margin:-4px 0 10px;text-align:center;font-family:var(--f-hud);font-size:12px;letter-spacing:.14em;color:var(--dim)}
 .lbTabs{display:grid;grid-template-columns:repeat(4,1fr);margin-bottom:10px}
 .lbMe{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;width:100%;margin:0 0 8px;padding:9px 12px;background:#2c3d22;border:2px solid var(--amber);color:var(--chalk);font:inherit;text-align:left;cursor:pointer}
@@ -7103,9 +7103,20 @@ async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=a
  ACC.busy=true;ACC.msg=kind==='up'?'Creating your account…':kind==='in'?'Signing in…':'Sending…';acRender();
  try{const c=await supaClient(),back=location.origin+location.pathname;
   if(kind==='forgot'){const {error}=await c.auth.resetPasswordForEmail(email,{redirectTo:back});if(error)throw error;ACC.msg='Check your email for a link to set a new password.'}
-  else if(kind==='up'){const un=$('acUser').value.trim(),bad=nameBad(un);if(bad)throw{message:bad};
+  else if(kind==='up'){const un=$('acUser').value.trim();
+   // this email may already have an account: with the right password, just sign in (keeping the username they typed
+   // for an account that has none yet); an account that never confirmed gets its link again
+   const si=await c.auth.signInWithPassword({email,password});
+   if(!si.error){ACC.wantName=un;ACC.msg='You already had an account with this email, so you’re signed in.';ACC.busy=false;acRender();return}
+   if(/not confirmed/i.test(si.error.message||'')){await c.auth.resend({type:'signup',email,options:{emailRedirectTo:back}}).catch(()=>{});
+    throw{message:'This email signed up but was never confirmed. We sent the confirmation link again: open it, then sign in.'}}
+   const bad=nameBad(un);if(bad)throw{message:bad};
    const free=await nameFree(un);if(free===false)throw{message:`${un} is taken. Try another username.`};
-   const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:back,data:{username:un}}});if(error)throw error;track('account_created');
+   const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:back,data:{username:un}}});if(error)throw error;
+   // (Supabase answers a sign-up for an existing email as if it worked, but the new user has no identities)
+   if(data&&data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length)
+    throw{message:'There’s already an account with this email, and that password doesn’t match it. Sign in with your password, or tap Forgot password.'};
+   track('account_created');
    ACC.msg=data.session?'':'Almost there: open the confirmation link we just emailed you, then sign in.'}
   else{const {error}=await c.auth.signInWithPassword({email,password});if(error)throw error;ACC.msg=''}
  }catch(e){ACC.msg=(e&&e.message)||'Something went wrong. Try again.'}
@@ -7142,7 +7153,7 @@ async function accProfile(){const c=await supaClient(),u=ACC.user;if(!u)return;
  const {data,error}=await c.from('profiles').select('username').eq('user_id',u.id).maybeSingle();
  if(error){if(!noProfiles(error)){const m=accMeta();if(m.uid===u.id&&m.name)ACC.name=m.name}acRender();return}
  if(data){ACC.name=data.username;ACC.pick=false;const m=accMeta();m.name=data.username;accSetMeta(m);acRender();return}
- const want=(u.user_metadata&&u.user_metadata.username)||'';
+ const want=(u.user_metadata&&u.user_metadata.username)||ACC.wantName||'';ACC.wantName='';
  if(want&&!nameBad(want)){const err=await nameClaim(want);if(!err){ACC.pick=false;acRender();return}ACC.msg=err}
  ACC.pick=true;$('acNewName').value=want;$('acNameHint').textContent='3-16 letters, numbers or _';$('acNameHint').className='acHint';acRender();showScreen('scrAcct')}
 function acNameHint(el,hint){const n=el.value.trim(),h=$(hint);clearTimeout(el._t);h.className='acHint';
@@ -7219,7 +7230,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='309e129cfc',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='e2c1a40abd',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8996,6 +9007,17 @@ fontsReady.then(()=>{
 document.addEventListener('pointerdown',e=>{if(!(S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null)||overlayOpen())return;
  if(e.target.closest('.pauseBtn,#penPanel,.autoBtn,.infoBtn,.zoomCtl,.lsHot,.board'))return;ensureAudio();releaseTap()},true);
 requestAnimationFrame(frame);
+// Esc on a menu page does what its back arrow does (after closing any pop-up on top of it). In a game, Esc pauses.
+addEventListener('keydown',e=>{if(e.key!=='Escape'||e.repeat||$('title').hidden)return;
+ if(!$('lbProf').hidden||!$('tsInfo').hidden)return;// those pop-ups close themselves
+ const shown=el=>!!el&&!el.hidden&&el.getClientRects().length>0;// (works for pinned elements too)
+ let act=null;
+ if(shown($('zoomCard')))act=()=>{$('zoomCard').hidden=true;ZOOM=null};
+ else if(shown($('reveal'))){if(shown($('rvDone')))act=()=>$('rvDone').click()}
+ else{const card=[...document.querySelectorAll('#title .card')].find(shown);
+  const b=card&&([...card.querySelectorAll(':scope>.xClose,.mbtn.back,#qCancel')].find(shown));if(b)act=()=>b.click()}
+ if(act){e.preventDefault();e.stopPropagation();act()}},true);
+
 })();
 
 // every menu card goes back from an arrow in its top-left corner instead of a Back button at the bottom of a long scroll

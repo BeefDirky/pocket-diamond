@@ -52,9 +52,20 @@ async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=a
  ACC.busy=true;ACC.msg=kind==='up'?'Creating your account…':kind==='in'?'Signing in…':'Sending…';acRender();
  try{const c=await supaClient(),back=location.origin+location.pathname;
   if(kind==='forgot'){const {error}=await c.auth.resetPasswordForEmail(email,{redirectTo:back});if(error)throw error;ACC.msg='Check your email for a link to set a new password.'}
-  else if(kind==='up'){const un=$('acUser').value.trim(),bad=nameBad(un);if(bad)throw{message:bad};
+  else if(kind==='up'){const un=$('acUser').value.trim();
+   // this email may already have an account: with the right password, just sign in (keeping the username they typed
+   // for an account that has none yet); an account that never confirmed gets its link again
+   const si=await c.auth.signInWithPassword({email,password});
+   if(!si.error){ACC.wantName=un;ACC.msg='You already had an account with this email, so you’re signed in.';ACC.busy=false;acRender();return}
+   if(/not confirmed/i.test(si.error.message||'')){await c.auth.resend({type:'signup',email,options:{emailRedirectTo:back}}).catch(()=>{});
+    throw{message:'This email signed up but was never confirmed. We sent the confirmation link again: open it, then sign in.'}}
+   const bad=nameBad(un);if(bad)throw{message:bad};
    const free=await nameFree(un);if(free===false)throw{message:`${un} is taken. Try another username.`};
-   const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:back,data:{username:un}}});if(error)throw error;track('account_created');
+   const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:back,data:{username:un}}});if(error)throw error;
+   // (Supabase answers a sign-up for an existing email as if it worked, but the new user has no identities)
+   if(data&&data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length)
+    throw{message:'There’s already an account with this email, and that password doesn’t match it. Sign in with your password, or tap Forgot password.'};
+   track('account_created');
    ACC.msg=data.session?'':'Almost there: open the confirmation link we just emailed you, then sign in.'}
   else{const {error}=await c.auth.signInWithPassword({email,password});if(error)throw error;ACC.msg=''}
  }catch(e){ACC.msg=(e&&e.message)||'Something went wrong. Try again.'}
@@ -91,7 +102,7 @@ async function accProfile(){const c=await supaClient(),u=ACC.user;if(!u)return;
  const {data,error}=await c.from('profiles').select('username').eq('user_id',u.id).maybeSingle();
  if(error){if(!noProfiles(error)){const m=accMeta();if(m.uid===u.id&&m.name)ACC.name=m.name}acRender();return}
  if(data){ACC.name=data.username;ACC.pick=false;const m=accMeta();m.name=data.username;accSetMeta(m);acRender();return}
- const want=(u.user_metadata&&u.user_metadata.username)||'';
+ const want=(u.user_metadata&&u.user_metadata.username)||ACC.wantName||'';ACC.wantName='';
  if(want&&!nameBad(want)){const err=await nameClaim(want);if(!err){ACC.pick=false;acRender();return}ACC.msg=err}
  ACC.pick=true;$('acNewName').value=want;$('acNameHint').textContent='3-16 letters, numbers or _';$('acNameHint').className='acHint';acRender();showScreen('scrAcct')}
 function acNameHint(el,hint){const n=el.value.trim(),h=$(hint);clearTimeout(el._t);h.className='acHint';
