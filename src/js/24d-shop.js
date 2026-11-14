@@ -41,6 +41,6 @@ for(const b of document.querySelectorAll('.shopBuy'))b.addEventListener('click',
 $('shopOpenOwn').addEventListener('click',()=>{ensureAudio();openPack('fa',false);shopRender()});
 $('shopToInv').addEventListener('click',()=>invOpen('scrShop'));
 $('goShop').addEventListener('click',()=>{ensureAudio();shopOpen('scrMain')});
-$('goInv').addEventListener('click',()=>{ensureAudio();teamOpen('scrMain')});/* the TEAM button: your lineup */
+$('goInv').addEventListener('click',()=>{ensureAudio();if(!MYTEAM){brandOpen(true);return}teamOpen('scrMain')});/* the TEAM button: your lineup */
 // the single-player Cards tile opens the inventory, and comes back to single player
 for(const t of document.querySelectorAll('#scrSingle .tile[data-go="scrCards"]'))t.addEventListener('click',()=>{$('invBack').dataset.go='scrSingle'});

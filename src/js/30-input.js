@@ -87,7 +87,7 @@ $('snd').addEventListener('click',()=>{muted=!muted;ensureAudio();applyVolumes()
 
 document.addEventListener('pointerdown',e=>{if(e.button>0||overlayOpen()||e.target===cv)return;if(e.target.closest('button,input,select,textarea,a,label,.book,.zoomCtl,.pauseBtn'))return;if(S.phase==='title'||S.phase==='over')return;swing()});
 addEventListener('pointerdown',ensureAudio,{once:true});addEventListener('keydown',ensureAudio,{once:true});
-if(!TEAMS[S.you])S.you='busan';if(S.opp===S.you)S.opp=TS_ORDER.find(k=>k!==S.you);document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();myTeamApply();buildCardDB();migrateCards();applySignings();applyLevels();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');if(!MYTEAM)setTimeout(()=>brandOpen(true),400);/* first visit: choose your club */
+if(!TEAMS[S.you])S.you='busan';if(S.opp===S.you)S.opp=TS_ORDER.find(k=>k!==S.you);document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();myTeamApply();buildCardDB();migrateCards();applySignings();applyLevels();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');$('goInv').classList.toggle('mmNew',!MYTEAM);/* new player: TEAM glows until they choose a club */
 const fontsReady=Promise.race([
  Promise.all([document.fonts.load('12px "Pixelify Sans"'),document.fonts.load('12px Jua'),document.fonts.load('bold 10px "Silkscreen"'),document.fonts.load('12px "Press Start 2P"'),document.fonts.load('40px "Yellowtail"')]),
  new Promise(r=>setTimeout(r,2500))]).catch(()=>{});

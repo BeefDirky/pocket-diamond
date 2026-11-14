@@ -78,7 +78,8 @@ function rollCard(minR,set){set=set||'fa';const w=set==='bl'?[0,70,24,6]:[60,28,
  const all=CARDS.filter(c=>c.set===set);let pool=all.filter(c=>c.r===r);if(!pool.length)pool=all;return pick(pool)}
 function openPack(set,paid){set=set||'fa';
  if(!paid&&COL.packs<=0)return;if(!CARDS.length)buildCardDB();
- if(!paid)COL.packs--;const got=[];for(let i=0;i<5;i++)got.push(rollCard(i===4&&!got.some(c=>c.r>=1)?1:0,set));
+ if(!paid)COL.packs--;const got=[],n=set==='bl'?1:5;/* a Big League pack is one star (they rate ~90 OVR vs ~69 for free agents) */
+ for(let i=0;i<n;i++)got.push(rollCard(set!=='bl'&&i===4&&!got.some(c=>c.r>=1)?1:0,set));
  got.sort((a,b)=>a.r-b.r);
  const fresh=got.map(c=>{const n=!COL.owned[c.id];COL.owned[c.id]=(COL.owned[c.id]|0)+1;return n});saveCol();
  track('pack_opened',{set,paid:!!paid,rarities:got.map(c=>c.r),new_cards:fresh.filter(Boolean).length});
@@ -86,7 +87,7 @@ function openPack(set,paid){set=set||'fa';
  setTimeout(()=>{if(pk)pk.classList.remove('shake');
   $('rvTitle').textContent=got.some(c=>c.r===3)?'LEGEND PULL!':got.some(c=>c.r===2)?'EPIC PULL!':'PACK OPENED';
   $('rvCards').innerHTML=got.map((c,i)=>`<button type="button" class="flip r${c.r}" data-i="${i}"><div class="in"><div class="bk">POCKET<br>DIAMOND<br>★</div><div class="fr">${cardHTML(c,{isNew:fresh[i],noCount:true})}</div></div></button>`).join('');
-  $('reveal').hidden=false;$('rvAll').hidden=false;renderBinder();shopRender()},650)}
+  $('reveal').hidden=false;$('rvAll').hidden=got.length<2;$('rvHint').textContent=got.length<2?'Tap the card to flip it':'Tap each card to flip it';renderBinder();shopRender()},650)}
 function flipCard(b){if(!b||b.classList.contains('on'))return;b.classList.add('on');const r=+(b.className.match(/r(\d)/)||[0,0])[1];sfx(r>=2?'bigcheer':'glove');
  if([...document.querySelectorAll('#rvCards .flip')].every(x=>x.classList.contains('on')))$('rvAll').hidden=true}
 $('rvCards').addEventListener('click',e=>flipCard(e.target.closest('.flip')));

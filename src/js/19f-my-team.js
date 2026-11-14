@@ -6,7 +6,7 @@
 //   MYTEAM = {club: the brand you play as, base: the club whose roster you own (your first club)}
 const MYTEAM=(()=>{try{const m=JSON.parse(localStorage.getItem('pd-myteam')||'null');if(m&&/^[a-z]+$/.test(m.club)&&/^[a-z]+$/.test(m.base))return m}catch(e){}return null})();
 const saveMyTeam=()=>{try{localStorage.setItem('pd-myteam',JSON.stringify(MYTEAM))}catch(e){}};
-const CLUB_SWITCH_COST=1000;
+const CLUB_SWITCH_COST=0;// free for now (the code still handles a price)
 // every club's own roster exactly as built (before any swap), so either phone online can rebuild anyone's team
 const PRISTINE={},BASE_OF={};
 if(MYTEAM)S.you=MYTEAM.club;
@@ -22,23 +22,22 @@ const myRosterSpec=()=>rosterSpec(MYTEAM?MYTEAM.club:S.you);
 function myTeamRestore(){if(MYTEAM&&S.you!==MYTEAM.club){S.you=MYTEAM.club;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==S.you);syncPicker();applyCustom();parkDirty();tsFlush();updateHUD()}}
 // ---- choosing (first time, free) or switching (costs coins) your club, on the club-select screen ----
 let brandFirst=false,brandArm=0;
-function brandOpen(first){brandFirst=!!first;brandArm=0;pendingMode='brand';$('playGo').hidden=false;$('scrTeams').querySelector('.mbtn.back').dataset.go='scrLineup';
+function brandOpen(first){brandFirst=!!first;brandArm=0;pendingMode='brand';$('playGo').hidden=false;$('scrTeams').querySelector('.mbtn.back').dataset.go=first?'scrMain':'scrLineup';
  document.querySelector('#scrTeams h1').innerHTML=first?'YOUR CLUB<small>CHOOSE THE CLUB YOU PLAY AS</small>':'CHANGE CLUB<small>YOUR PLAYERS COME WITH YOU</small>';
  showScreen('scrTeams');brandSync()}
 function brandSync(){if(pendingMode!=='brand')return;const T=TEAMS[S.you],same=MYTEAM&&S.you===MYTEAM.club;
- $('oppLine').innerHTML=brandFirst?`You get <b>${T.city} ${T.name}</b>: their name, colors, ballpark and current players. You can switch clubs later for ${coinFmt(CLUB_SWITCH_COST)} coins.`
+ $('oppLine').innerHTML=brandFirst?`You get <b>${T.city} ${T.name}</b>: their name, colors, ballpark and current players. You can switch clubs later${CLUB_SWITCH_COST?` for ${coinFmt(CLUB_SWITCH_COST)} coins`:''}; your players stay with you.`
   :same?'This is your club now.':`Play as <b>${T.city} ${T.name}</b> from now on: their name, colors and ballpark. Your players and cards stay with you.`;
  $('playGo').disabled=!brandFirst&&same;
- $('playGo').textContent=brandFirst?`THIS IS MY CLUB`:same?'YOUR CLUB':brandArm?'TAP AGAIN TO CONFIRM':`SWITCH · ${coinFmt(CLUB_SWITCH_COST)} COINS`;
+ $('playGo').textContent=brandFirst?`THIS IS MY CLUB`:same?'YOUR CLUB':brandArm?'TAP AGAIN TO CONFIRM':CLUB_SWITCH_COST?`SWITCH · ${coinFmt(CLUB_SWITCH_COST)} COINS`:`SWITCH TO ${T.name.toUpperCase()}`;
  // the back arrow and Back only exist when you already have a club to go back to
- const card=$('scrTeams');for(const b of card.querySelectorAll(':scope>.xClose,.mbtn.back'))if(b.classList.contains('xClose')||!card.classList.contains('hasX'))b.hidden=brandFirst;
  $('tsOvr').hidden=true}// (a club's rating would describe its players, not yours)
 function brandDone(){$('playGo').disabled=false;$('tsOvr').hidden=false;const card=$('scrTeams');for(const b of card.querySelectorAll(':scope>.xClose'))b.hidden=false}
 function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON.stringify({club:S.you,base:S.you}));localStorage.setItem('pd-club',S.you)}catch(e){}
   track('club_chosen',{club:S.you});pendingMode=null;brandDone();location.reload();return}
  if(S.you===MYTEAM.club)return;
- if(WAL.coins<CLUB_SWITCH_COST){$('oppLine').innerHTML=`Switching clubs costs ${coinFmt(CLUB_SWITCH_COST)} coins. You have ${coinFmt(WAL.coins)}: win some games first.`;return}
- if(!brandArm){brandArm=1;brandSync();clearTimeout(brandConfirm.t);brandConfirm.t=setTimeout(()=>{brandArm=0;brandSync()},4000);return}
+ if(CLUB_SWITCH_COST&&WAL.coins<CLUB_SWITCH_COST){$('oppLine').innerHTML=`Switching clubs costs ${coinFmt(CLUB_SWITCH_COST)} coins. You have ${coinFmt(WAL.coins)}: win some games first.`;return}
+ if(CLUB_SWITCH_COST&&!brandArm){brandArm=1;brandSync();clearTimeout(brandConfirm.t);brandConfirm.t=setTimeout(()=>{brandArm=0;brandSync()},4000);return}
  // pay, carry your signed cards to the new club, and rebuild everything around your new brand
  WAL.coins-=CLUB_SWITCH_COST;saveWal();const from=MYTEAM.club,to=S.you;
  if(SIGN[from]){SIGN[to]=SIGN[from];delete SIGN[from];saveSign()}

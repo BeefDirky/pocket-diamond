@@ -105,13 +105,27 @@ function rkClaimLoop(o){clearTimeout(RK.claimT);const t0=Date.now();
 const Q={on:false,t0:0,tick:0,gen:0};
 const fmtClock=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 function qSay(status,info){$('qStatus').textContent=status;if(info!=null)$('qInfo').textContent=info}
-async function qStart(){const gen=++Q.gen;Q.on=true;Q.t0=Date.now();track('queue_joined',{club:S.you});qSay('FINDING AN OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
- showScreen('scrQueue');clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000)},250);$('qTime').textContent='0:00';
+// the estimated wait: the median of recent matches' waits (from the server), counting down from when you joined
+function qEst(r){if(r&&r.queue==='waiting'){Q.est=r.est_secs==null?null:r.est_secs;Q.n=r.waiting|0}
+ const el=$('qEst');if(!el)return;const left=Q.est==null?null:Math.max(0,Q.est-(Date.now()-Q.t0)/1000);
+ el.textContent=Q.est==null?(Q.n>1?'EST. WAIT UNDER 0:10':'EST. WAIT: UNKNOWN'):left>0?`EST. WAIT ~${fmtClock(Q.est)}`:'EST. WAIT ANY MOMENT NOW'}
+// the queue's ball: a 16-pixel baseball spinning forward (top toward you) as it bounces. Each frame every pixel of the
+// disc is found on the sphere, turned back by the spin, and colored white, edge-shaded or seam-red from where it lands.
+function qBallDraw(t){const cv=$('qBall');if(!cv)return;const g=cv.getContext('2d'),R=7.2,c=7.5,id=g.createImageData(16,16),d=id.data,th=t/1000*5.2;
+ for(let py=0;py<16;py++)for(let px=0;px<16;px++){const x=px-c,y=py-c,rr=x*x+y*y,i=(py*16+px)*4;if(rr>R*R)continue;
+  const z=Math.sqrt(R*R-rr),ps=Math.atan2(y,z)-th,ux=x/R;// spin about the horizontal axis
+  const seam=Math.abs(ux-.62*Math.sin(2*ps))<.17,stitch=seam&&((Math.floor((ps+20*Math.PI)*5)&1)===0),edge=rr>(R-1.2)*(R-1.2),shade=z/R;
+  let col=edge?[27,31,36]:stitch?[200,50,44]:seam?[232,170,160]:shade<.45?[201,196,181]:[244,241,232];
+  d[i]=col[0];d[i+1]=col[1];d[i+2]=col[2];d[i+3]=255}
+ g.putImageData(id,0,0)}
+function qBallLoop(t){if(!$('scrQueue')||$('scrQueue').hidden||$('title').hidden){Q.raf=0;return}qBallDraw(t);qEst();Q.raf=requestAnimationFrame(qBallLoop)}
+async function qStart(){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=Date.now();track('queue_joined',{club:S.you});qSay('LOOKING FOR OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
+ showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop);clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000)},250);$('qTime').textContent='0:00';
  rpc('my_rating').then(r=>{if(Q.gen===gen&&r)$('qRate').textContent=`YOUR RATING ${r.rating}${r.games?` · ${r.wins}-${r.losses}`:''}`}).catch(()=>{});
  try{let r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});
   while(Q.on&&Q.gen===gen){if(r&&r.queue==='matched'){qMatched(r.info,gen);return}
    if(r&&r.queue==='gone'){r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});continue}
-   if(r&&r.waiting>1)qSay('FINDING AN OPPONENT',`3 innings · you bat and pitch · ${r.waiting} in the queue`);
+   if(r&&r.waiting>1)qSay('LOOKING FOR OPPONENT',`3 innings · you bat and pitch · ${r.waiting} in the queue`);qEst(r);
    await new Promise(res=>setTimeout(res,2000));if(!Q.on||Q.gen!==gen)return;r=await rpc('queue_poll')}}
  catch(e){if(Q.gen!==gen)return;Q.on=false;clearInterval(Q.tick);qSay('COULDN\u2019T JOIN THE QUEUE',rkErr(e))}}
 function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick)}

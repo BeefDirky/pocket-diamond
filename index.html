@@ -550,12 +550,12 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 .pcard.signed{box-shadow:inset 0 0 0 2px #ffbf3c}
 /* close X in the top-right of every menu card */
 .card{position:relative}
-.xClose{position:absolute;top:8px;right:8px;z-index:4;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);font-size:16px;line-height:1;cursor:pointer}
+.xClose{position:absolute;top:8px;right:8px;z-index:4;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);font-size:16px;line-height:1;cursor:pointer}
 .shHead .xClose{position:static}
 .xClose:hover{border-color:var(--amber);color:var(--amber)}
-.card.hasX>h1,.card.hasX>.ckTop,.card.hasX>.lnTop{padding-left:44px;padding-right:44px}
+.card.hasX>h1,.card.hasX>.ckTop,.card.hasX>.lnTop{padding-left:58px;padding-right:58px;min-height:46px}
 .xClose.xBack{right:auto;left:8px}
-.xBack svg{width:16px;height:16px;display:block;shape-rendering:crispEdges}
+.xBack svg{width:24px;height:24px;display:block;shape-rendering:crispEdges}
 .mbtn.back[hidden]{display:none}
 
 /* card finishes: epic holo, legend gold foil, big-league frame */
@@ -724,7 +724,8 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .qBox .qTime{font-family:var(--f-hud);font-size:28px;color:var(--amber);letter-spacing:.08em}
 .qBox small{font-size:12px;color:var(--dim);letter-spacing:.06em}
 .qBox .qRate{color:var(--chalk)}
-.qBall{width:22px;height:22px;border-radius:50%;background:#f4f1e8;box-shadow:inset -4px -3px 0 rgba(0,0,0,.18);animation:qBounce .9s ease-in-out infinite}
+.qBall{width:48px;height:48px;image-rendering:pixelated;animation:qBounce .9s ease-in-out infinite}
+.qBox .qEst{color:var(--amber);letter-spacing:.12em}
 @keyframes qBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 @media (prefers-reduced-motion:reduce){.qBall{animation:none}}
 /* leaderboard + player profiles */
@@ -758,6 +759,10 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .lbpEmpty{font-size:12px;color:var(--dim);margin:4px 0}
 .lbpClose{display:block;width:100%;margin-top:14px}
 /* the TEAM screen: your lineup with the inventory and club switch; no scouting tab */
+/* a new player's TEAM button glows yellow until they've chosen a club */
+#scrMain .mmSm.mmNew{background:var(--amber);color:#14110a !important;border-color:#0b130e;animation:mmNew 1.6s ease-in-out infinite}
+@keyframes mmNew{0%,100%{box-shadow:0 0 0 0 rgba(242,190,85,.0)}50%{box-shadow:0 0 0 5px rgba(242,190,85,.35)}}
+@media (prefers-reduced-motion:reduce){.mmSm.mmNew{animation:none}}
 .lnTeamBar{display:none;gap:8px;margin:2px 0 8px}.lnTeamBar .mbtn{flex:1}
 body.lnTeam .lnTeamBar{display:flex}body.lnTeam .lnTop .seg{display:none}
 .mpNote{margin:10px 0 0;font-size:12px;color:var(--amber);text-align:center;line-height:1.5}
@@ -1388,7 +1393,7 @@ canvas.shake{animation:packShake .6s steps(6)}
         <div class="shopRow">
           <div class="shopItem"><canvas id="shopCvK" width="48" height="64"></canvas><div class="shopTxt"><b>FREE AGENT PACK</b><p>Five free agents, at least one Rare or better. Sign them to any club; duplicates level them up.</p>
             <button class="big shopBuy" type="button" data-set="fa"><i class="coinIc"></i>200 · BUY</button></div></div>
-          <div class="shopItem bl"><canvas id="shopCvB" width="48" height="64"></canvas><div class="shopTxt"><b>BIG LEAGUE PACK</b><p>Five cards from the 60 parody big-league stars, every one Rare or better.</p>
+          <div class="shopItem bl"><canvas id="shopCvB" width="48" height="64"></canvas><div class="shopTxt"><b>BIG LEAGUE PACK</b><p>One big-league star, Rare or better, rated well above the free agents.</p>
             <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>500 · BUY</button></div></div>
         </div>
         <div class="shopOwn" id="shopOwn" hidden><span id="shopOwnTxt"></span><button class="mbtn" type="button" id="shopOpenOwn">OPEN ONE</button></div>
@@ -1439,9 +1444,10 @@ canvas.shake{animation:packShake .6s steps(6)}
       <div class="card" id="scrQueue" hidden>
         <h1>RANKED</h1>
         <div class="qBox">
-          <div class="qBall" aria-hidden="true"></div>
-          <b id="qStatus">FINDING AN OPPONENT</b>
+          <canvas class="qBall" id="qBall" width="16" height="16" aria-hidden="true"></canvas>
+          <b id="qStatus">LOOKING FOR OPPONENT</b>
           <span class="qTime" id="qTime">0:00</span>
+          <small class="qEst" id="qEst">EST. WAIT …</small>
           <small id="qInfo">3 innings · you bat and pitch</small>
           <small class="qRate" id="qRate"></small>
         </div>
@@ -6710,7 +6716,7 @@ $('cards').addEventListener('click',e=>{
 //   MYTEAM = {club: the brand you play as, base: the club whose roster you own (your first club)}
 const MYTEAM=(()=>{try{const m=JSON.parse(localStorage.getItem('pd-myteam')||'null');if(m&&/^[a-z]+$/.test(m.club)&&/^[a-z]+$/.test(m.base))return m}catch(e){}return null})();
 const saveMyTeam=()=>{try{localStorage.setItem('pd-myteam',JSON.stringify(MYTEAM))}catch(e){}};
-const CLUB_SWITCH_COST=1000;
+const CLUB_SWITCH_COST=0;// free for now (the code still handles a price)
 // every club's own roster exactly as built (before any swap), so either phone online can rebuild anyone's team
 const PRISTINE={},BASE_OF={};
 if(MYTEAM)S.you=MYTEAM.club;
@@ -6726,23 +6732,22 @@ const myRosterSpec=()=>rosterSpec(MYTEAM?MYTEAM.club:S.you);
 function myTeamRestore(){if(MYTEAM&&S.you!==MYTEAM.club){S.you=MYTEAM.club;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==S.you);syncPicker();applyCustom();parkDirty();tsFlush();updateHUD()}}
 // ---- choosing (first time, free) or switching (costs coins) your club, on the club-select screen ----
 let brandFirst=false,brandArm=0;
-function brandOpen(first){brandFirst=!!first;brandArm=0;pendingMode='brand';$('playGo').hidden=false;$('scrTeams').querySelector('.mbtn.back').dataset.go='scrLineup';
+function brandOpen(first){brandFirst=!!first;brandArm=0;pendingMode='brand';$('playGo').hidden=false;$('scrTeams').querySelector('.mbtn.back').dataset.go=first?'scrMain':'scrLineup';
  document.querySelector('#scrTeams h1').innerHTML=first?'YOUR CLUB<small>CHOOSE THE CLUB YOU PLAY AS</small>':'CHANGE CLUB<small>YOUR PLAYERS COME WITH YOU</small>';
  showScreen('scrTeams');brandSync()}
 function brandSync(){if(pendingMode!=='brand')return;const T=TEAMS[S.you],same=MYTEAM&&S.you===MYTEAM.club;
- $('oppLine').innerHTML=brandFirst?`You get <b>${T.city} ${T.name}</b>: their name, colors, ballpark and current players. You can switch clubs later for ${coinFmt(CLUB_SWITCH_COST)} coins.`
+ $('oppLine').innerHTML=brandFirst?`You get <b>${T.city} ${T.name}</b>: their name, colors, ballpark and current players. You can switch clubs later${CLUB_SWITCH_COST?` for ${coinFmt(CLUB_SWITCH_COST)} coins`:''}; your players stay with you.`
   :same?'This is your club now.':`Play as <b>${T.city} ${T.name}</b> from now on: their name, colors and ballpark. Your players and cards stay with you.`;
  $('playGo').disabled=!brandFirst&&same;
- $('playGo').textContent=brandFirst?`THIS IS MY CLUB`:same?'YOUR CLUB':brandArm?'TAP AGAIN TO CONFIRM':`SWITCH · ${coinFmt(CLUB_SWITCH_COST)} COINS`;
+ $('playGo').textContent=brandFirst?`THIS IS MY CLUB`:same?'YOUR CLUB':brandArm?'TAP AGAIN TO CONFIRM':CLUB_SWITCH_COST?`SWITCH · ${coinFmt(CLUB_SWITCH_COST)} COINS`:`SWITCH TO ${T.name.toUpperCase()}`;
  // the back arrow and Back only exist when you already have a club to go back to
- const card=$('scrTeams');for(const b of card.querySelectorAll(':scope>.xClose,.mbtn.back'))if(b.classList.contains('xClose')||!card.classList.contains('hasX'))b.hidden=brandFirst;
  $('tsOvr').hidden=true}// (a club's rating would describe its players, not yours)
 function brandDone(){$('playGo').disabled=false;$('tsOvr').hidden=false;const card=$('scrTeams');for(const b of card.querySelectorAll(':scope>.xClose'))b.hidden=false}
 function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON.stringify({club:S.you,base:S.you}));localStorage.setItem('pd-club',S.you)}catch(e){}
   track('club_chosen',{club:S.you});pendingMode=null;brandDone();location.reload();return}
  if(S.you===MYTEAM.club)return;
- if(WAL.coins<CLUB_SWITCH_COST){$('oppLine').innerHTML=`Switching clubs costs ${coinFmt(CLUB_SWITCH_COST)} coins. You have ${coinFmt(WAL.coins)}: win some games first.`;return}
- if(!brandArm){brandArm=1;brandSync();clearTimeout(brandConfirm.t);brandConfirm.t=setTimeout(()=>{brandArm=0;brandSync()},4000);return}
+ if(CLUB_SWITCH_COST&&WAL.coins<CLUB_SWITCH_COST){$('oppLine').innerHTML=`Switching clubs costs ${coinFmt(CLUB_SWITCH_COST)} coins. You have ${coinFmt(WAL.coins)}: win some games first.`;return}
+ if(CLUB_SWITCH_COST&&!brandArm){brandArm=1;brandSync();clearTimeout(brandConfirm.t);brandConfirm.t=setTimeout(()=>{brandArm=0;brandSync()},4000);return}
  // pay, carry your signed cards to the new club, and rebuild everything around your new brand
  WAL.coins-=CLUB_SWITCH_COST;saveWal();const from=MYTEAM.club,to=S.you;
  if(SIGN[from]){SIGN[to]=SIGN[from];delete SIGN[from];saveSign()}
@@ -7315,7 +7320,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='bbca125455',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='493f7e0369',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7414,13 +7419,27 @@ function rkClaimLoop(o){clearTimeout(RK.claimT);const t0=Date.now();
 const Q={on:false,t0:0,tick:0,gen:0};
 const fmtClock=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 function qSay(status,info){$('qStatus').textContent=status;if(info!=null)$('qInfo').textContent=info}
-async function qStart(){const gen=++Q.gen;Q.on=true;Q.t0=Date.now();track('queue_joined',{club:S.you});qSay('FINDING AN OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
- showScreen('scrQueue');clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000)},250);$('qTime').textContent='0:00';
+// the estimated wait: the median of recent matches' waits (from the server), counting down from when you joined
+function qEst(r){if(r&&r.queue==='waiting'){Q.est=r.est_secs==null?null:r.est_secs;Q.n=r.waiting|0}
+ const el=$('qEst');if(!el)return;const left=Q.est==null?null:Math.max(0,Q.est-(Date.now()-Q.t0)/1000);
+ el.textContent=Q.est==null?(Q.n>1?'EST. WAIT UNDER 0:10':'EST. WAIT: UNKNOWN'):left>0?`EST. WAIT ~${fmtClock(Q.est)}`:'EST. WAIT ANY MOMENT NOW'}
+// the queue's ball: a 16-pixel baseball spinning forward (top toward you) as it bounces. Each frame every pixel of the
+// disc is found on the sphere, turned back by the spin, and colored white, edge-shaded or seam-red from where it lands.
+function qBallDraw(t){const cv=$('qBall');if(!cv)return;const g=cv.getContext('2d'),R=7.2,c=7.5,id=g.createImageData(16,16),d=id.data,th=t/1000*5.2;
+ for(let py=0;py<16;py++)for(let px=0;px<16;px++){const x=px-c,y=py-c,rr=x*x+y*y,i=(py*16+px)*4;if(rr>R*R)continue;
+  const z=Math.sqrt(R*R-rr),ps=Math.atan2(y,z)-th,ux=x/R;// spin about the horizontal axis
+  const seam=Math.abs(ux-.62*Math.sin(2*ps))<.17,stitch=seam&&((Math.floor((ps+20*Math.PI)*5)&1)===0),edge=rr>(R-1.2)*(R-1.2),shade=z/R;
+  let col=edge?[27,31,36]:stitch?[200,50,44]:seam?[232,170,160]:shade<.45?[201,196,181]:[244,241,232];
+  d[i]=col[0];d[i+1]=col[1];d[i+2]=col[2];d[i+3]=255}
+ g.putImageData(id,0,0)}
+function qBallLoop(t){if(!$('scrQueue')||$('scrQueue').hidden||$('title').hidden){Q.raf=0;return}qBallDraw(t);qEst();Q.raf=requestAnimationFrame(qBallLoop)}
+async function qStart(){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=Date.now();track('queue_joined',{club:S.you});qSay('LOOKING FOR OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
+ showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop);clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000)},250);$('qTime').textContent='0:00';
  rpc('my_rating').then(r=>{if(Q.gen===gen&&r)$('qRate').textContent=`YOUR RATING ${r.rating}${r.games?` · ${r.wins}-${r.losses}`:''}`}).catch(()=>{});
  try{let r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});
   while(Q.on&&Q.gen===gen){if(r&&r.queue==='matched'){qMatched(r.info,gen);return}
    if(r&&r.queue==='gone'){r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});continue}
-   if(r&&r.waiting>1)qSay('FINDING AN OPPONENT',`3 innings · you bat and pitch · ${r.waiting} in the queue`);
+   if(r&&r.waiting>1)qSay('LOOKING FOR OPPONENT',`3 innings · you bat and pitch · ${r.waiting} in the queue`);qEst(r);
    await new Promise(res=>setTimeout(res,2000));if(!Q.on||Q.gen!==gen)return;r=await rpc('queue_poll')}}
  catch(e){if(Q.gen!==gen)return;Q.on=false;clearInterval(Q.tick);qSay('COULDN\u2019T JOIN THE QUEUE',rkErr(e))}}
 function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick)}
@@ -7657,7 +7676,8 @@ function rollCard(minR,set){set=set||'fa';const w=set==='bl'?[0,70,24,6]:[60,28,
  const all=CARDS.filter(c=>c.set===set);let pool=all.filter(c=>c.r===r);if(!pool.length)pool=all;return pick(pool)}
 function openPack(set,paid){set=set||'fa';
  if(!paid&&COL.packs<=0)return;if(!CARDS.length)buildCardDB();
- if(!paid)COL.packs--;const got=[];for(let i=0;i<5;i++)got.push(rollCard(i===4&&!got.some(c=>c.r>=1)?1:0,set));
+ if(!paid)COL.packs--;const got=[],n=set==='bl'?1:5;/* a Big League pack is one star (they rate ~90 OVR vs ~69 for free agents) */
+ for(let i=0;i<n;i++)got.push(rollCard(set!=='bl'&&i===4&&!got.some(c=>c.r>=1)?1:0,set));
  got.sort((a,b)=>a.r-b.r);
  const fresh=got.map(c=>{const n=!COL.owned[c.id];COL.owned[c.id]=(COL.owned[c.id]|0)+1;return n});saveCol();
  track('pack_opened',{set,paid:!!paid,rarities:got.map(c=>c.r),new_cards:fresh.filter(Boolean).length});
@@ -7665,7 +7685,7 @@ function openPack(set,paid){set=set||'fa';
  setTimeout(()=>{if(pk)pk.classList.remove('shake');
   $('rvTitle').textContent=got.some(c=>c.r===3)?'LEGEND PULL!':got.some(c=>c.r===2)?'EPIC PULL!':'PACK OPENED';
   $('rvCards').innerHTML=got.map((c,i)=>`<button type="button" class="flip r${c.r}" data-i="${i}"><div class="in"><div class="bk">POCKET<br>DIAMOND<br>★</div><div class="fr">${cardHTML(c,{isNew:fresh[i],noCount:true})}</div></div></button>`).join('');
-  $('reveal').hidden=false;$('rvAll').hidden=false;renderBinder();shopRender()},650)}
+  $('reveal').hidden=false;$('rvAll').hidden=got.length<2;$('rvHint').textContent=got.length<2?'Tap the card to flip it':'Tap each card to flip it';renderBinder();shopRender()},650)}
 function flipCard(b){if(!b||b.classList.contains('on'))return;b.classList.add('on');const r=+(b.className.match(/r(\d)/)||[0,0])[1];sfx(r>=2?'bigcheer':'glove');
  if([...document.querySelectorAll('#rvCards .flip')].every(x=>x.classList.contains('on')))$('rvAll').hidden=true}
 $('rvCards').addEventListener('click',e=>flipCard(e.target.closest('.flip')));
@@ -7866,7 +7886,7 @@ for(const b of document.querySelectorAll('.shopBuy'))b.addEventListener('click',
 $('shopOpenOwn').addEventListener('click',()=>{ensureAudio();openPack('fa',false);shopRender()});
 $('shopToInv').addEventListener('click',()=>invOpen('scrShop'));
 $('goShop').addEventListener('click',()=>{ensureAudio();shopOpen('scrMain')});
-$('goInv').addEventListener('click',()=>{ensureAudio();teamOpen('scrMain')});/* the TEAM button: your lineup */
+$('goInv').addEventListener('click',()=>{ensureAudio();if(!MYTEAM){brandOpen(true);return}teamOpen('scrMain')});/* the TEAM button: your lineup */
 // the single-player Cards tile opens the inventory, and comes back to single player
 for(const t of document.querySelectorAll('#scrSingle .tile[data-go="scrCards"]'))t.addEventListener('click',()=>{$('invBack').dataset.go='scrSingle'});
 // ---------- the Free Agent set: general players who belong to no club ----------
@@ -9085,7 +9105,7 @@ $('snd').addEventListener('click',()=>{muted=!muted;ensureAudio();applyVolumes()
 
 document.addEventListener('pointerdown',e=>{if(e.button>0||overlayOpen()||e.target===cv)return;if(e.target.closest('button,input,select,textarea,a,label,.book,.zoomCtl,.pauseBtn'))return;if(S.phase==='title'||S.phase==='over')return;swing()});
 addEventListener('pointerdown',ensureAudio,{once:true});addEventListener('keydown',ensureAudio,{once:true});
-if(!TEAMS[S.you])S.you='busan';if(S.opp===S.you)S.opp=TS_ORDER.find(k=>k!==S.you);document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();myTeamApply();buildCardDB();migrateCards();applySignings();applyLevels();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');if(!MYTEAM)setTimeout(()=>brandOpen(true),400);/* first visit: choose your club */
+if(!TEAMS[S.you])S.you='busan';if(S.opp===S.you)S.opp=TS_ORDER.find(k=>k!==S.you);document.body.classList.add('inMenu');S.night=OPT.time==='night'||(OPT.time==='random'&&Math.random()<.55);setStadium();buildRosters();myTeamApply();buildCardDB();migrateCards();applySignings();applyLevels();applyCustom();addCloseX();buildPicker();updatePackBadge();syncOpts();updateHUD();showScreen('scrMain');$('goInv').classList.toggle('mmNew',!MYTEAM);/* new player: TEAM glows until they choose a club */
 const fontsReady=Promise.race([
  Promise.all([document.fonts.load('12px "Pixelify Sans"'),document.fonts.load('12px Jua'),document.fonts.load('bold 10px "Silkscreen"'),document.fonts.load('12px "Press Start 2P"'),document.fonts.load('40px "Yellowtail"')]),
  new Promise(r=>setTimeout(r,2500))]).catch(()=>{});

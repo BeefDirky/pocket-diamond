@@ -20,3 +20,5 @@ G=$($P -tA -d pd_test -c "select games from public.ratings where user_id='333333
 $P -tA -d pd_test -f supabase/tests/ranked_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"
 # migration 003: the queue and the flat rating
 $P -tA -d pd_test -f supabase/tests/queue_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"
+# migration 004: the queue's estimated wait
+$P -tA -d pd_test -f supabase/tests/queue_wait_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"

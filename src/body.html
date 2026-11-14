@@ -195,7 +195,7 @@
         <div class="shopRow">
           <div class="shopItem"><canvas id="shopCvK" width="48" height="64"></canvas><div class="shopTxt"><b>FREE AGENT PACK</b><p>Five free agents, at least one Rare or better. Sign them to any club; duplicates level them up.</p>
             <button class="big shopBuy" type="button" data-set="fa"><i class="coinIc"></i>200 · BUY</button></div></div>
-          <div class="shopItem bl"><canvas id="shopCvB" width="48" height="64"></canvas><div class="shopTxt"><b>BIG LEAGUE PACK</b><p>Five cards from the 60 parody big-league stars, every one Rare or better.</p>
+          <div class="shopItem bl"><canvas id="shopCvB" width="48" height="64"></canvas><div class="shopTxt"><b>BIG LEAGUE PACK</b><p>One big-league star, Rare or better, rated well above the free agents.</p>
             <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>500 · BUY</button></div></div>
         </div>
         <div class="shopOwn" id="shopOwn" hidden><span id="shopOwnTxt"></span><button class="mbtn" type="button" id="shopOpenOwn">OPEN ONE</button></div>
@@ -246,9 +246,10 @@
       <div class="card" id="scrQueue" hidden>
         <h1>RANKED</h1>
         <div class="qBox">
-          <div class="qBall" aria-hidden="true"></div>
-          <b id="qStatus">FINDING AN OPPONENT</b>
+          <canvas class="qBall" id="qBall" width="16" height="16" aria-hidden="true"></canvas>
+          <b id="qStatus">LOOKING FOR OPPONENT</b>
           <span class="qTime" id="qTime">0:00</span>
+          <small class="qEst" id="qEst">EST. WAIT …</small>
           <small id="qInfo">3 innings · you bat and pitch</small>
           <small class="qRate" id="qRate"></small>
         </div>

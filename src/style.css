@@ -527,12 +527,12 @@ body:has(.app.wideApp){height:100dvh;overflow:hidden;box-sizing:border-box}
 .pcard.signed{box-shadow:inset 0 0 0 2px #ffbf3c}
 /* close X in the top-right of every menu card */
 .card{position:relative}
-.xClose{position:absolute;top:8px;right:8px;z-index:4;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);font-size:16px;line-height:1;cursor:pointer}
+.xClose{position:absolute;top:8px;right:8px;z-index:4;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--edge);border:2px solid var(--panel-hi);color:var(--chalk);font-size:16px;line-height:1;cursor:pointer}
 .shHead .xClose{position:static}
 .xClose:hover{border-color:var(--amber);color:var(--amber)}
-.card.hasX>h1,.card.hasX>.ckTop,.card.hasX>.lnTop{padding-left:44px;padding-right:44px}
+.card.hasX>h1,.card.hasX>.ckTop,.card.hasX>.lnTop{padding-left:58px;padding-right:58px;min-height:46px}
 .xClose.xBack{right:auto;left:8px}
-.xBack svg{width:16px;height:16px;display:block;shape-rendering:crispEdges}
+.xBack svg{width:24px;height:24px;display:block;shape-rendering:crispEdges}
 .mbtn.back[hidden]{display:none}
 
 /* card finishes: epic holo, legend gold foil, big-league frame */
@@ -701,7 +701,8 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .qBox .qTime{font-family:var(--f-hud);font-size:28px;color:var(--amber);letter-spacing:.08em}
 .qBox small{font-size:12px;color:var(--dim);letter-spacing:.06em}
 .qBox .qRate{color:var(--chalk)}
-.qBall{width:22px;height:22px;border-radius:50%;background:#f4f1e8;box-shadow:inset -4px -3px 0 rgba(0,0,0,.18);animation:qBounce .9s ease-in-out infinite}
+.qBall{width:48px;height:48px;image-rendering:pixelated;animation:qBounce .9s ease-in-out infinite}
+.qBox .qEst{color:var(--amber);letter-spacing:.12em}
 @keyframes qBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 @media (prefers-reduced-motion:reduce){.qBall{animation:none}}
 /* leaderboard + player profiles */
@@ -735,6 +736,10 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .lbpEmpty{font-size:12px;color:var(--dim);margin:4px 0}
 .lbpClose{display:block;width:100%;margin-top:14px}
 /* the TEAM screen: your lineup with the inventory and club switch; no scouting tab */
+/* a new player's TEAM button glows yellow until they've chosen a club */
+#scrMain .mmSm.mmNew{background:var(--amber);color:#14110a !important;border-color:#0b130e;animation:mmNew 1.6s ease-in-out infinite}
+@keyframes mmNew{0%,100%{box-shadow:0 0 0 0 rgba(242,190,85,.0)}50%{box-shadow:0 0 0 5px rgba(242,190,85,.35)}}
+@media (prefers-reduced-motion:reduce){.mmSm.mmNew{animation:none}}
 .lnTeamBar{display:none;gap:8px;margin:2px 0 8px}.lnTeamBar .mbtn{flex:1}
 body.lnTeam .lnTeamBar{display:flex}body.lnTeam .lnTop .seg{display:none}
 .mpNote{margin:10px 0 0;font-size:12px;color:var(--amber);text-align:center;line-height:1.5}
