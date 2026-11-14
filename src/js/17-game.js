@@ -58,6 +58,7 @@ function gameOver(win){if(S.olMenu){S.olMenu=false;$('title').hidden=true;showSc
  awardPacks(win);coinGameOver(win);
  $('toLobby').hidden=!onl;if(onl){resumeClear();$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false;const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;$('again').textContent=se?(se.done?'NEW SERIES':`GAME ${se.w+se.l+1}`):'PLAY AGAIN'}
+ if(S.rkBot){$('again').hidden=true;$('toLobby').hidden=false;$('toLobby').textContent='BACK TO MULTIPLAYER'}
  if(S.celebr){const gid=S.overGid=(S.overGid||0)+1;setTimeout(()=>{if(S.phase==='over'&&S.overGid===gid&&$('title').hidden)$('over').hidden=false},3400)}else $('over').hidden=false;/* the results card always follows the celebration */updateHUD();
 }
 

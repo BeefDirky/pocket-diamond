@@ -190,16 +190,18 @@ function render(now){
   if(!moving&&live){legs='ready';arms='ready'}
   if(!moving&&!live&&!inPlay&&Math.sin(now/700+i*1.7)>.85)legs='ready';
   if(!moving&&inPlay&&ph!=='result'){const bb=Math.sin(now/170+i*1.9);legs=bb>-.2?'ready':'stand';arms='ready'}
-  let thr=null,lean=0;
+  let thr=null,lean=0,recvFlip=null;
   if(inPlay&&ph!=='result')for(const sg of play.segs){
    if(sg.thr&&t>=sg.t0-.2&&t<sg.t0+.2&&dist(sg.from,p)<7){// a real throw: arm back, step toward the target, whip through and follow
     const u=t<sg.t0?.72*clamp((t-(sg.t0-.2))/.2,0,1)*.6+.72*.4*clamp((t-(sg.t0-.2))/.2,0,1):.72+.28*clamp((t-sg.t0)/.2,0,1),fa=toPx(sg.from.x,sg.from.y),ta=toPx(sg.to.x,sg.to.y);
     arms='proc';legs=u<.36?'ready':u<.8?'stride':'follow';thr={arm:armPath(u,false),gloveAt:gloveAt(u),ball:u<.72,flip:ta.x>fa.x};lean=u>.6&&u<.95?1:0;break}
-   if(sg.air&&!sg.thr&&!play.foul&&t>sg.t1-.4&&t<=sg.t1+.15&&dist(sg.to,p)<9){arms='catch'}
+   if(sg.thr&&t>sg.t1-.45&&t<=sg.t1+.12&&dist(sg.to,p)<9){arms='recv';recvFlip=toPx(sg.from.x,sg.from.y).x>q.x}
+   else if(sg.air&&!sg.thr&&!play.foul&&t>sg.t1-.4&&t<=sg.t1+.15&&dist(sg.to,p)<9){arms='catch'}
    else if(sg.hold===i&&t>=sg.t0&&t<=sg.t1&&arms!=='catch')arms='ready';
   }
   const skin=S.fpl?skinOf(S.fpl[i].name):SKINS[hash(S.opp+i)%2];
-  let flip=true,armO=null,pT=null;if(thr){armO={arm:thr.arm,gloveAt:thr.gloveAt,ball:thr.ball};flip=thr.flip}
+  let flip=true,armO=null,pT=null;if(thr){armO={arm:thr.arm,gloveAt:thr.gloveAt,ball:thr.ball};flip=thr.flip}else if(arms==='recv'&&recvFlip!=null)flip=recvFlip;
+  FGL[i]=pT!=null?null:gloveScr(q.x,q.y+lean,{legs,arms,frame:fr+i,flip,...(armO||{})});
   if(i===0&&!inPlay&&ph!=='reset'){
    flip=pitcher().hand==='R';
    const side=pitcher().slot==='side';
@@ -209,6 +211,7 @@ function render(now){
    else if(ph==='ready'){legs='stand';arms=S.pt>350?'set':'down'}
   }
   const dv=inPlay&&play.dive&&play.dive.i===i&&t>=play.dive.t-.24&&t<=play.dive.t+.95?play.dive:null;
+  if(dv||(inPlay&&play.jump&&play.jump.i===i&&t>play.jump.t-.32&&t<play.jump.t+.3))FGL[i]=null;/* (a dive or leap draws its own glove) */
   if(dv){const lf=t<dv.t?Math.sin((t-(dv.t-.24))/.24*Math.PI/2)*4:0;add(q.y,()=>drawDiver(wg,q.x,q.y,fld,{skin,pants:fldPants},dv.dir,lf));continue}
   const jp=inPlay&&play.jump&&play.jump.i===i&&t>play.jump.t-.32&&t<play.jump.t+.3?play.jump:null;
   if(jp){const u=(t-(jp.t-.32))/.62,hgt=Math.sin(clamp(u,0,1)*Math.PI)*11;
@@ -218,6 +221,7 @@ function render(now){
    add(1e6,()=>{wg.fillStyle='#14181c';wg.fillRect(ex-2,ey-1,5,11);wg.fillStyle='#ff3b30';wg.fillRect(ex-1,ey,3,6);wg.fillRect(ex-1,ey+7,3,2);wg.fillStyle='#ffd0c8';wg.fillRect(ex-1,ey,1,2)})}
   if(i===1&&!moving){let reach=null,held=false;const ck=ph==='pitch'&&S.pitch&&S.pitch.releaseAt&&!S.pitch.wild&&S.mode!=='bp'?catchPt(S.pitch):null;
    if(ck){const el=now-S.pitch.releaseAt,k=ease(clamp((el/S.pitch.travel-.5)/.45,0,1)),G=ck.scr;reach={x:lerp(-.5,(G.x-q.x)/1.2,k),y:lerp(-9.5,(G.y-q.y)/1.2,k)};held=el>=S.pitch.travel*CATCH_U}
+   FGL[1]={x:Math.round(q.x)-1,y:Math.round(q.y)-11};
    add(q.y,()=>drawCatcher(wg,q.x,q.y,fld,{skin,pants:fldPants,target:ph==='windup'||ph==='pitch',reach,held}))}
   else add(q.y,()=>{if(i===0&&now<S.wildUntil){wg.fillStyle='#1b1f24';wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-38,5,11);wg.fillRect(Math.round(q.x)-2,Math.round(q.y)-25,5,5);wg.fillStyle='#ff4a3d';wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-37,3,9);wg.fillRect(Math.round(q.x)-1,Math.round(q.y)-24,3,3)}if(pT!=null)drawPitcher(wg,q.x,q.y,fld,{skin,pants:fldPants,flip,side:pitcher().slot==='side'},pT);else drawPlayer(wg,q.x,q.y+lean,fld,{legs,arms,frame:fr+i,skin,pants:fldPants,flip,glove:true,...(armO||{})});if(i===0&&!inPlay)drawSweat(wg,q.x,q.y,now)});
  }
@@ -384,7 +388,10 @@ function render(now){
  if(false){}else if(inPlay&&!play.hide&&!(ph==='result'&&!play.foul&&!(play.res&&play.res.hr))){const p=ballAt(play,t);if(p){let q=toPx(p.x,p.y),hh=p.h;const dv=play.dive,sg=play.curSeg;
   const inGlove=dv&&!play.bobble&&t>=dv.t-.03&&t<=dv.t+.95&&(!sg||sg.hold===dv.i||(!sg.thr&&sg.hold==null&&t>=sg.t1-.03));
   if(inGlove){const f=fpos(play,dv.i,t),fq=toPx(f.x,f.y),lf=t<dv.t?4:0;q={x:fq.x+dv.dir*15,y:fq.y-6-lf};hh=0}
-  else if(sg&&sg.hold!=null&&t>=sg.t0&&t<=sg.t1){const f=fpos(play,sg.hold,t),fq=toPx(f.x,f.y);q={x:fq.x+4,y:fq.y-9};hh=0}
+  else if(sg&&sg.hold!=null&&t>=sg.t0&&t<=sg.t1){const G=FGL[sg.hold];if(G){q={x:G.x,y:G.y+1};hh=0}else{const f=fpos(play,sg.hold,t),fq=toPx(f.x,f.y);q={x:fq.x+4,y:fq.y-9};hh=0}}
+  else if(sg&&sg.air&&!play.foul&&!(play.res&&play.res.hr)&&t>=sg.t0&&t<=sg.t1){/* the last stretch of a throw or a catchable fly bends into the receiver's glove */
+   const rc=rcvOf(play,sg,t);const u=(t-sg.t0)/Math.max(.01,sg.t1-sg.t0);
+   if(rc!=null&&FGL[rc]){const e=ease(clamp((u-.72)/.28,0,1));if(e>0){const d=drawnBall(q,hh);q={x:lerp(d.x,FGL[rc].x,e),y:lerp(d.y,FGL[rc].y+1,e)};hh=0}}}
   if(!play.foul||true)dustAt(play,p.x,p.y,p.h);drawBall(wg,q.x,q.y,hh)}}
  drawGulls(wg,now);
  drawDust(wg,now);
@@ -442,3 +449,11 @@ function render(now){
  drawBallCam(now);
 }
 
+// ---- the ball finds the glove ----
+// FGL[i]: where fielder i's glove is drawn this frame (screen px). A throw or catchable ball ends in it, and a held ball sits in it.
+const FGL=[];
+// who's receiving this ball: the fielder standing where it's going, at the moment it gets there
+function rcvOf(play,sg,t){if(sg.rcv!==undefined)return sg.rcv;let best=null,bd=9;
+ for(let i=0;i<9;i++){const p=fpos(play,i,sg.t1),d=dist(p,sg.to);if(d<bd){bd=d;best=i}}return sg.rcv=best}
+// the screen point drawBall would put a ball at (its height lifts it up and a touch left)
+function drawnBall(q,h){const lift=h/FT;return{x:q.x-lift*.2,y:q.y-lift*.5}}

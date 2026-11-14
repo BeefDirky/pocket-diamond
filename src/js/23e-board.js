@@ -37,13 +37,13 @@ async function lbLoad(kind){LB.kind=kind;const K=LB_KINDS[kind],tok=++LB.tok;$('
 $('lbList').addEventListener('click',e=>{const b=e.target.closest('button[data-u]');if(b)lbProfile(b.dataset.u)});
 $('lbMe').addEventListener('click',()=>{if($('lbMe').dataset.u)lbProfile($('lbMe').dataset.u)});
 // ---- a player's profile ----
-const LB_MODE={ranked_stock:'Ranked',casual:'Custom 1v1',full:'Full game vs CPU',arcade:'Arcade',playoffs:'Playoffs'};
+const LB_MODE={ranked_stock:'Ranked',ranked_bot:'Ranked vs CPU',casual:'Custom 1v1',full:'Full game vs CPU',arcade:'Arcade',playoffs:'Playoffs'};
 async function lbProfile(uid){const box=$('lbProf'),card=$('lbpCard');box.hidden=false;card.innerHTML='<p class="lbpEmpty">Loading…</p>';
  try{const c=await supaClient(),sid=await lbSeason(c);
   const [rk,lines,games]=await Promise.all([
    c.from('leaderboard_ranked').select('username,rank,rating,peak,games,wins,losses,win_pct').eq('season_id',sid).eq('user_id',uid).maybeSingle(),
    c.from('player_stat_lines').select('*').eq('user_id',uid),
-   c.from('matches').select('id,home_user,away_user,home_club,away_club,home_score,away_score,winner_side,status,ended_at').eq('mode','ranked_stock').in('status',['final','forfeit']).or(`home_user.eq.${uid},away_user.eq.${uid}`).order('ended_at',{ascending:false}).limit(10)]);
+   c.from('matches').select('id,home_user,away_user,home_club,away_club,home_score,away_score,winner_side,status,ended_at,mode,bot_level').in('mode',['ranked_stock','ranked_bot']).in('status',['final','forfeit']).or(`home_user.eq.${uid},away_user.eq.${uid}`).order('ended_at',{ascending:false}).limit(10)]);
   for(const r of [rk,lines,games])if(r.error)throw r.error;
   const L=lines.data||[],G=games.data||[];
   let name=(rk.data&&rk.data.username)||(L[0]&&L[0].username);
@@ -64,7 +64,7 @@ async function lbProfile(uid){const box=$('lbProf'),card=$('lbpCard');box.hidden
    ${career.some(l=>l.outs_pitched)?`<h3>PITCHING · CAREER</h3><table class="lbpTbl"><thead><tr><th>MODE</th><th>IP</th><th>RA/9</th><th>SO</th><th>BB</th><th>HR</th></tr></thead><tbody>${career.filter(l=>l.outs_pitched).map(pit).join('')}</tbody></table>`:''}
    <h3>LAST RANKED GAMES</h3>${G.length?`<ul class="lbpGames">${G.map(g=>{const side=g.home_user===uid?'home':'away',won=g.winner_side===side,o=side==='home'?g.away_user:g.home_user,
      us=side==='home'?g.home_score:g.away_score,them=side==='home'?g.away_score:g.home_score,d=dr[g.id];
-     return`<li><b class="${won?'w':'l'}">${won?'W':'L'}</b><span>${g.status==='forfeit'?'forfeit':`${us??'?'}-${them??'?'}`} vs ${esc(nm[o]||'?')} <em>${new Date(g.ended_at).toLocaleDateString()}</em></span><span>${d==null?'':(d>=0?'+':'')+d}</span></li>`}).join('')}</ul>`:'<p class="lbpEmpty">No ranked games yet.</p>'}
+     return`<li><b class="${won?'w':'l'}">${won?'W':'L'}</b><span>${g.status==='forfeit'?'forfeit':`${us??'?'}-${them??'?'}`} vs ${esc(o?nm[o]||'?':g.bot_level?'CPU · LV '+g.bot_level:'?')} <em>${new Date(g.ended_at).toLocaleDateString()}</em></span><span>${d==null?'':(d>=0?'+':'')+d}</span></li>`}).join('')}</ul>`:'<p class="lbpEmpty">No ranked games yet.</p>'}
    <p class="lbpEmpty">Vs-CPU and Custom lines are reported by the player's own game; only ranked results are verified.</p>
    <button class="mbtn lbpClose" type="button" id="lbpClose">Close</button>`;
   card.focus({preventScroll:true})}

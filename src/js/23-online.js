@@ -198,7 +198,7 @@ function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o
 $('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp||o.inGame)return;netPresence({rdy:o.mine.rdy==='L'?null:'L'});lobbyRender()});
 $('olNext').addEventListener('click',()=>{const o=S.online,se=o&&o.series;if(!se||se.done||o.inGame)return;const tok='N'+se.gn;netPresence({rdy:o.mine.rdy===tok?null:tok});nextRender()});
 $('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}const md=o&&o.mode;S.online=null;openOnline(md)});
-$('toLobby').addEventListener('click',()=>{$('over').hidden=true;toTitle();const o=S.online;if(o&&o.queued){qDone(o);return}if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
+$('toLobby').addEventListener('click',()=>{const bot=!!S.rkBot;$('over').hidden=true;toTitle();if(bot){mpOpen();return}const o=S.online;if(o&&o.queued){qDone(o);return}if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
 
 // the connection pill: shown during an online game; green when live, amber while it reconnects (tap to retry now)
 function netPill(){const o=S.online,el=$('olNet');const on=!!(o&&o.nr&&o.inGame);el.hidden=!on;if(!on)return;

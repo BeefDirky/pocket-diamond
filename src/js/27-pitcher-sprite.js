@@ -85,6 +85,7 @@ function drawPlayerRaw(g,X,Y,T,o){
   case'run':if(fr<2){R(sk,-5,-11,1,3,1);R(sk,4,-9,1,3,1);if(o.glove)R(GLOVE,-6,-12,2,2,1)}else{R(sk,-4,-9,1,3,1);R(sk,5,-11,1,3,1);if(o.glove)R(GLOVE,-5,-7,2,2,1)}break;
   case'ready':R(sk,-3,-9,1,2,1);R(sk,3,-9,1,2,1);if(o.glove)R(GLOVE,-3,-8,2,2,1);break;
   case'catch':R(sk,-4,-15,1,4,1);R(sk,4,-15,1,4,1);if(o.glove)R(GLOVE,-5,-17,2,2,1);break;
+  case'recv':R(sk,-5,-11,2,1,1);R(sk,-7,-12,1,1,1);R(sk,3,-11,1,2,1);R(GLOVE,-8,-13,2,3,1);break;
   case'throw':R(sk,4,-16,1,5,1);R('#ffffff',4,-17,1,1,1);R(sk,-5,-11,1,2,1);if(o.glove)R(GLOVE,-7,-12,2,2,1);break;
   case'cockside':R(sk,4,-11,5,1,1);R(sk,9,-12,1,2,1);R(sk,-5,-11,1,2,1);R(GLOVE,-7,-12,2,2,1);break;
   case'relside':R(sk,-4,-10,8,1,1);R(sk,-5,-11,1,2,1);R(GLOVE,-6,-9,2,2,1);break;
@@ -173,3 +174,9 @@ function drawBatFree(g,cx,cy,ang,col,ls){
  ls=ls==null?1:ls;for(let k=-7;k<=7;k++){const kk=k*ls,xx=Math.round(cx+Math.cos(ang)*kk),yy=Math.round(cy+Math.sin(ang)*kk*.8);g.fillStyle=k<-4?'#2b2420':col;g.fillRect(xx,yy,1,1);if(k>0)g.fillRect(xx,yy+1,1,1)}
 }
 
+// where a fielder's glove is, relative to his feet, for the pose he's drawn in (sprite units; mirrored by flip)
+const GLOVE_AT={ready:[-2,-7],down:[-4,-7],catch:[-4,-16],throw:[-6,-11],recv:[-7,-11.5],set:[.5,-10]};
+function gloveScr(x,y,o){const legs=o.legs||'stand',arms=o.arms||'down',fr=(((o.frame|0)%4)+4)%4,SC=o.sc||1.2,f=o.flip?-1:1;
+ let u=0;if(legs==='ready'||legs==='stride'||legs==='drive'||legs==='follow')u=1;if(legs==='run'&&(fr===1||fr===3))u=-1;
+ let gx,gy;if(arms==='proc'){const gl=o.gloveAt||{x:-6,y:-11};gx=gl.x;gy=gl.y+1}else if(arms==='run'){[gx,gy]=fr<2?[-5,-11]:[-4,-6]}else{const g=GLOVE_AT[arms]||GLOVE_AT.ready;gx=g[0];gy=g[1]}
+ return{x:Math.round(x)+f*gx*SC,y:Math.round(y)+(gy+u)*SC}}

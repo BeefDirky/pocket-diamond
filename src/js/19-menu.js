@@ -78,8 +78,8 @@ function olMenuOpen(){if(!canMenu())return;S.olMenu=true;document.querySelector(
  $('pauseInfo').textContent=`Online games can't pause: the game keeps going while this is open.${S.online.ranked?' Leaving a ranked game is a loss.':''}`;
  $('pQuit').querySelector('span').textContent=S.online.ranked?'Forfeit':'Leave';$('title').hidden=false;showScreen('scrPause')}
 function olMenuClose(){if(!S.olMenu)return;S.olMenu=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain')}
-function pauseGame(){if(canMenu()){olMenuOpen();return}if(!canPause())return;document.querySelector('#scrPause h1').innerHTML='GAME <span>PAUSED</span>';$('pQuit').querySelector('span').textContent='Quit';S.paused=true;pausedAt=performance.now();
- const y=TEAMS[S.you],o=TEAMS[S.opp];$('pauseInfo').textContent=`${S.mode==='full'?'Full game':'Arcade'} · ${o.name} ${S.target||0}, ${y.name} ${S.runs||0} · ${S.mode==='full'?(S.half==='top'?'Top':'Bottom'):'Bottom'} of the ${ord(S.inning||1)}`;
+function pauseGame(){if(canMenu()){olMenuOpen();return}if(!canPause())return;document.querySelector('#scrPause h1').innerHTML='GAME <span>PAUSED</span>';$('pQuit').querySelector('span').textContent=S.rkBot?'Forfeit':'Quit';S.paused=true;pausedAt=performance.now();
+ const y=TEAMS[S.you],o=TEAMS[S.opp];$('pauseInfo').textContent=`${S.rkBot?`Ranked vs CPU level ${S.rkBot.lv} (leaving is a loss)`:S.mode==='full'?'Full game':'Arcade'} · ${o.name} ${S.target||0}, ${y.name} ${S.runs||0} · ${S.mode==='full'?(S.half==='top'?'Top':'Bottom'):'Bottom'} of the ${ord(S.inning||1)}`;
  try{if(AC&&AC.state==='running')AC.suspend()}catch(e){}
  $('title').hidden=false;showScreen('scrPause')}
 function resumeGame(){if(S.olMenu){olMenuClose();return}if(!S.paused)return;const gap=performance.now()-pausedAt;

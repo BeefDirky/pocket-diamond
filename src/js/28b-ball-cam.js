@@ -8,7 +8,10 @@ function drawBallCam(now){const box=$('ballCam'),bp=S.mode==='bp',cam=bp?S.bpCam
  if(!cam||S.phase==='title'||S.paused||OPT.ballCam===false){if(!box.hidden)box.hidden=true;if(!bp)S.gCam=null;return}
  const pl=cam.pl;let tt,done,end=bp?pl.fullEnd:pl.end;
  if(bp){tt=(now-cam.at)/1000*SPEED;done=tt>=end;if(now-cam.at>end/SPEED*1000+(OPT.bpWait?BP_CAM_HOLD:2600)){box.hidden=true;return}}// it holds on the landing spot, then tucks away
- else{done=S.play!==pl||S.phase!=='play';tt=done?end:Math.min(pl.t||0,end);if(done&&!cam.doneAt)cam.doneAt=now;if(cam.doneAt&&now-cam.doneAt>2600){box.hidden=true;S.gCam=null;return}}
+ else{/* in a game it stops the moment a fielder has the ball (or it lands out of play), then tucks away soon after */
+  if(cam.fieldT==null){cam.fieldT=end;for(const sg of pl.segs)if(sg.hold!=null||sg.thr){cam.fieldT=Math.min(cam.fieldT,sg.t0);break}}
+  end=cam.fieldT;const cur=S.play===pl&&S.phase==='play'?pl.t||0:Infinity;done=cur>=end;tt=Math.min(cur,end);
+  if(done&&!cam.doneAt)cam.doneAt=now;if(cam.doneAt&&now-cam.doneAt>1100){box.hidden=true;S.gCam=null;return}}
  const p=bcPos(pl,Math.min(tt,end));if(!p)return;
  if(box.hidden){box.hidden=false;bcPlace(box)}
  const cv=$('ballCamCv'),dpr=Math.min(devicePixelRatio||1,2),cw=Math.round(cv.clientWidth*dpr),ch=Math.round(cv.clientHeight*dpr);if(!cw||!ch)return;
@@ -28,7 +31,7 @@ function drawBallCam(now){const box=$('ballCam'),bp=S.mode==='bp',cam=bp?S.bpCam
  $('ballCamTxt').textContent=done?`${r.hr?'HOME RUN · ':r.code==='FOUL'?'FOUL · ':''}${r.dist||live} FT`:`${live} FT`;
  box.classList.toggle('hr',!!(done&&r.hr))}
 // in a game the scoreboard can sit in the same corner: drop the cam just below it when they'd overlap
-function bcPlace(box){box.style.top='';if(S.mode==='bp')return;const par=box.offsetParent;if(!par)return;
+function bcPlace(box){box.style.top='';box.classList.toggle('inGame',S.mode!=='bp');if(S.mode==='bp'||!document.querySelector('.app.deskApp'))return;/* (on a phone it sits on the left, under the pause button) */const par=box.offsetParent;if(!par)return;
  for(let k=0;k<3;k++){const a=box.getBoundingClientRect();let low=0;
   for(const bd of document.querySelectorAll('.bug,.pcBox')){const b=bd.getBoundingClientRect();if(b.width&&a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top)low=Math.max(low,b.bottom)}
   if(!low)return;box.style.top=`${Math.round(low-par.getBoundingClientRect().top+6)}px`}}

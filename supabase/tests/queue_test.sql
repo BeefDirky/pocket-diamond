@@ -6,6 +6,8 @@ begin if cond is not true then raise exception 'FAIL: %', what; end if; raise no
 create or replace function pg_temp.fails(sql text, what text) returns void language plpgsql as $$
 begin begin execute sql; exception when others then raise notice 'ok  % (%)', what, sqlerrm; return; end;
   raise exception 'FAIL: % was accepted', what; end $$;
+-- (start A and B level, so the earlier ranked tests' results don't decide who hosts)
+update public.ratings set rating = 1000 where user_id in (:A, :B);
 set role authenticated;
 -- C has no username: can't queue
 set request.jwt.claim.sub = '33333333-3333-3333-3333-333333333333';
@@ -15,9 +17,11 @@ select pg_temp.ok((public.my_rating()->>'rating')::int >= 0, 'my_rating answers'
 select pg_temp.ok((public.queue_join('seoul', '{seoul,busan,daegu}', 'v1')->>'queue') = 'waiting', 'A waits alone');
 set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
 select pg_temp.ok((public.queue_join('seoul', '{seoul,busan}', 'v2')->>'queue') = 'waiting', 'B on another build is not paired with A');
+reset role; select (public.pd_rating_of(:B) < public.pd_rating_of(:A)) as b_lower \gset
+set role authenticated;
 select public.queue_join('seoul', '{seoul,busan}', 'v1') as qb \gset
 select pg_temp.ok((:'qb'::jsonb->>'queue') = 'matched', 'B on the same build: paired at once');
-select pg_temp.ok((:'qb'::jsonb->'info'->>'me') = 'away', 'B (joined later) is away');
+select pg_temp.ok((:'qb'::jsonb->'info'->>'me') = case when :'b_lower' then 'home' else 'away' end, 'the lower rating is home (ties: whoever joined later is away)');
 select pg_temp.ok((:'qb'::jsonb->'info'->>'away_club') = 'busan', 'both picked seoul: B plays his next choice');
 select pg_temp.ok((:'qb'::jsonb->'info'->>'innings') = '3' and (:'qb'::jsonb->'info'->>'seed') is not null, '3 innings, server seed');
 select pg_temp.ok((public.queue_poll()->>'queue') = 'gone', 'after being matched B is out of the queue');

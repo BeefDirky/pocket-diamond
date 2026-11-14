@@ -33,3 +33,8 @@ do $$ declare mid uuid; lg jsonb; begin
   perform public.pd_write_log(mid, lg, '00000000-0000-0000-0000-000000000001', null);
   perform public.finalize_match(mid);
 end $$;
+-- and one ranked game against a bot (migration 007): SluggerKim beats a level-5 bot, +100
+insert into public.matches (id, mode, season_id, status, verified, seed, innings, home_user, home_club, away_club, home_score, away_score, winner_side, started_at, ended_at, bot_level)
+values ('b0700000-0000-0000-0000-0000000000aa','ranked_bot',(select id from public.seasons where is_active and ladder='stock'),'final',true,1,3,'00000000-0000-0000-0000-000000000003','incheon','daejeon',4,2,'home',now()-interval '1 hour',now(),5);
+insert into public.match_participants (match_id,side,user_id,club,result) values ('b0700000-0000-0000-0000-0000000000aa','home','00000000-0000-0000-0000-000000000003','incheon','W'),('b0700000-0000-0000-0000-0000000000aa','away',null,'daejeon','L');
+select public.finalize_match('b0700000-0000-0000-0000-0000000000aa');

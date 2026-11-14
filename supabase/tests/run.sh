@@ -22,3 +22,5 @@ $P -tA -d pd_test -f supabase/tests/ranked_test.sql 2>&1 | sed "s/^psql:[^ ]* NO
 $P -tA -d pd_test -f supabase/tests/queue_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"
 # migration 004: the queue's estimated wait
 $P -tA -d pd_test -f supabase/tests/queue_wait_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"
+# migration 007: ranked bots
+$P -tA -d pd_test -f supabase/tests/bot_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"

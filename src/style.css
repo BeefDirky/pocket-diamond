@@ -673,6 +673,10 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .ballCam span{position:absolute;left:0;right:0;bottom:0;text-align:center;white-space:nowrap;overflow:hidden;font-family:var(--f-hud);font-size:clamp(9px,2.6vw,12px);color:var(--chalk);background:rgba(8,20,14,.75);padding:2px 4px}
 .ballCam.hr span{color:var(--edge);background:var(--amber)}
 .app.deskApp .ballCam{top:14px;right:14px;width:280px}
+/* phone, in a game: small, on the left under the pause button, out of the way of the score */
+.app:not(.deskApp) .ballCam.inGame{right:auto;left:6px;top:44px;width:min(26%,120px);border-width:2px}
+.app:not(.deskApp) .ballCam.inGame i{font-size:7px;padding:0 3px;left:3px;top:2px}
+.app:not(.deskApp) .ballCam.inGame span{font-size:8px;padding:1px 2px}
 /* account */
 .mmAcct{text-align:center;font-size:9px;letter-spacing:.2em;color:var(--amber);text-shadow:2px 2px 0 var(--edge)}
 .acPane{display:flex;flex-direction:column;gap:10px}.acPane[hidden]{display:none}

@@ -47,9 +47,9 @@ function cpuDecide(){
  let sw=p.inZone?.58+(b.con-50)*.004-(q>=1?.05:0):.3+((p.k==='SL'||p.k==='SP'||p.k==='KN'||p.k==='CB')?.1:0)-(b.con-50)*.003;
  if(S.strikes===2)sw+=p.inZone?.2:.14;else if(S.balls+S.strikes===0)sw-=.08;if(S.balls===3&&S.strikes===0)sw-=.1;
  if(Math.random()>sw)return;
- const whiff=clamp(.14+{FB:0,SL:.12,CH:.08,SP:.45,KN:.22,CB:.16}[p.k]+q*.1+(p.mph-92)*.012-(b.con-50)*.004+(p.inZone?0:.2),.03,.9);
+ const whiff=clamp(.14+{FB:0,SL:.12,CH:.08,SP:.45,KN:.22,CB:.16}[p.k]+q*.1+(p.mph-92)*.012-(b.con-50)*.004+(p.inZone?0:.2)-.05*(S.cpuEdge||0),.03,.9);
  if(Math.random()<whiff){const at=arr+rand(-90,90);S.swing={at:at-60,err:at-arr,miss:true,cpu:true};return}
- const err=clamp(randn()*WIN*.36*(1.3-b.con/150)*(1+q*.6)*(p.inZone?1:1.5),-WIN*1.1,WIN*1.1);
+ const err=clamp(randn()*WIN*.36*(1.3-b.con/150)*(1+q*.6)*(p.inZone?1:1.5)*(1-.25*(S.cpuEdge||0)),-WIN*1.1,WIN*1.1);
  S.swing={at:arr+err-60,err,cpu:true,contactAt:arr+Math.max(0,err)};
 }
 // a human pitcher's release quality q puts the pitch somewhere (a CPU pitcher's spot was rolled at the windup);

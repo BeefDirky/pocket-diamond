@@ -1,6 +1,7 @@
 # Leaderboard screen test: the real page, reading a seeded local Postgres (supabase/tests/board_seed.sql) through a
 # stand-in for supabase-js whose table queries run as the logged-out visitor role (anon), like Supabase's API does.
-# Usage: python3 tools/build.py && PGHOST=... PGPORT=... PGUSER=postgres python3 tests/board_e2e.py   (needs DB pd_board)
+# Usage: python3 tools/build.py && PGHOST=... PGPORT=... PGUSER=postgres python3 tests/board_e2e.py
+#   (needs DB pd_board: supabase_stub.sql, profiles.sql, every migration, then supabase/tests/board_seed.sql)
 import json, os, re, sys, threading, http.server, functools
 import psycopg2
 from playwright.sync_api import sync_playwright
@@ -89,7 +90,8 @@ with sync_playwright() as p:
         pg.click('#lbTabs [data-k=rating]'); pg.wait_for_timeout(800)
         pg.click('#lbList li:nth-child(2) button'); pg.wait_for_timeout(1500)
         card = pg.inner_text('#lbpCard')
-        check('SluggerKim' in card and '1100' in card and '#2' in card, f'{tag}: profile header and rating')
+        check('SluggerKim' in card and '1200' in card and '#1' in card, f'{tag}: profile header and rating')
+        check('vs CPU · LV 5' in card and 'Ranked vs CPU' in card, f'{tag}: a bot game in the history, and its own stat line')
         check(card.count('vs ') >= 3 and ('+100' in card or '-100' in card), f'{tag}: last ranked games with rating change')
         check('Ranked' in card and 'PITCHING' in card, f'{tag}: batting and pitching lines')
         pg.screenshot(path=f'{OUT}/profile_{tag}.png')

@@ -74,7 +74,7 @@ function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=nul
  if(info.status==='abandoned'){rkShow('NOT COUNTED · the match timed out','bad');return true}
  return false}
 // game over: ranked submits the match record; everything else reports your own line (if you're signed in)
-async function rkGameOver(){const o=S.online,m=ML&&ML.fin?ML:null;$('toLobby').textContent=o&&o.queued?'BACK TO MULTIPLAYER':'BACK TO THE ROOM';if(!m||RK.done)return;RK.done=true;
+async function rkGameOver(){if(S.rkBot){botGameOver();return}const o=S.online,m=ML&&ML.fin?ML:null;$('toLobby').textContent=o&&o.queued?'BACK TO MULTIPLAYER':'BACK TO THE ROOM';if(!m||RK.done)return;RK.done=true;
  if(o&&o.ranked&&o.rk){clearInterval(RK.pingT);rkShow('RANKED · sending the result…');
   try{const h=await mlHash(m);let info=await rpc('ranked_submit',{p_match:o.rk.m,p_hash:h,p_log:mlWire(m),p_flags:o.flags||[],p_version:PD_VER});
    if(rkResult(info))return;rkShow('RANKED · waiting for your opponent’s result…');
@@ -141,6 +141,7 @@ async function qStart(fromLn){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=
   while(Q.on&&Q.gen===gen){if(r&&r.queue==='matched'){qMatched(r.info,gen);return}
    if(r&&r.queue==='gone'){r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});continue}
    if(r&&r.waiting>1)qSay('LOOKING FOR OPPONENT',`3 innings · you bat and pitch · ${r.waiting} in the queue`);qEst(r);
+   if(await qBotTry(gen))return;
    await new Promise(res=>setTimeout(res,2000));if(!Q.on||Q.gen!==gen)return;r=await rpc('queue_poll')}}
  catch(e){if(Q.gen!==gen)return;Q.on=false;clearInterval(Q.tick);qSay('COULDN\u2019T JOIN THE QUEUE',rkErr(e))}}
 function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick);qLnSync()}
