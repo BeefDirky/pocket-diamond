@@ -19,7 +19,7 @@ $('buntBtn').addEventListener('pointerdown',e=>{e.preventDefault();bunt()});
 $('buntBtn').addEventListener('click',e=>{if(e.detail===0)bunt()});
 $('swingBtn').addEventListener('click',e=>{if(e.detail===0)swing()});
 addEventListener('keydown',e=>{
- if((e.key==='p'||e.key==='P'||e.key==='Escape')&&!e.repeat){if(S.paused&&!$('scrPause').hidden){e.preventDefault();resumeGame();return}if(canPause()){e.preventDefault();pauseGame();return}}
+ if((e.key==='p'||e.key==='P'||e.key==='Escape')&&!e.repeat){if((S.paused||S.olMenu)&&!$('scrPause').hidden){e.preventDefault();resumeGame();return}if(canPause()||canMenu()){e.preventDefault();pauseGame();return}}
  if(overlayOpen())return;
  if(e.code==='Space'||e.key===' '||(e.key==='Enter'&&document.activeElement===document.body)){e.preventDefault();if(!e.repeat)swing()}
  else if((e.key==='b'||e.key==='B')&&!e.repeat){if(canPen())togglePen();else bunt()}// B bunts at the plate and opens the bullpen on the mound

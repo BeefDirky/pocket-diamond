@@ -34,7 +34,7 @@ function startCelebration(early){const k=batKey(),T=TEAMS[k],sd=k===S.you?1:-1,n
   const st={x:dug.x+rand(-14,14),y:dug.y+rand(-8,8)};mob.push({sx:st.x,sy:st.y,tx:tg.x,ty:tg.y,d:rand(0,500),dur:rand(1300,1900),ph:rand(0,6),hj:rand(0,4),sk:skinOf(p.name),pants,helmet:false})});
  for(let j=0;j<5;j++){const a=Math.PI*rand(.1,.9),r=rand(18,32),tg=toPx(Math.cos(a)*r,Math.sin(a)*r*.5+4);mob.push({sx:dug.x+rand(-16,16),sy:dug.y+rand(-8,8),tx:tg.x,ty:tg.y,d:rand(300,900),dur:rand(1500,2200),ph:rand(0,6),hj:rand(0,4),sk:SKINS[j%5],pants,helmet:false})}
  S.celebr={k,at:now,mob,early:!!early}}
-function gameOver(win){const onl=onlineGame();mlEnd();phGameEnd(win);rkShow('');rkGameOver();
+function gameOver(win){if(S.olMenu){S.olMenu=false;$('title').hidden=true;showScreen('scrMain')}const onl=onlineGame();mlEnd();phGameEnd(win);rkShow('');rkGameOver();
  if(!(S.celebr&&S.celebr.early&&win)){S.celebr=null;if(win&&(S.mode==='arcade'||S.half==='bot'))startCelebration()}
  setPhase('over');setCam(S.celebr?'pitch':'full');hideBanner();$('tag').hidden=true;
  const you=TEAMS[S.you],opp=TEAMS[S.opp];

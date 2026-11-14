@@ -73,23 +73,28 @@ $('optBpWait').addEventListener('click',e=>{const b=e.target.closest('button');i
 $('optBallCam').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;OPT.ballCam=b.dataset.v==='on';saveOpts();syncOpts()});// batting practice corner camera
 let optsFromGame=false,pausedAt=0,lineFromPause=false;
 const canPause=()=>!(S.online&&S.online.inGame)&&S.phase!=='title'&&S.phase!=='over'&&!S.paused&&$('title').hidden&&$('over').hidden;
-function pauseGame(){if(!canPause())return;S.paused=true;pausedAt=performance.now();
+const canMenu=()=>onlineGame()&&S.phase!=='over'&&!S.olMenu&&$('title').hidden&&$('over').hidden;
+function olMenuOpen(){if(!canMenu())return;S.olMenu=true;document.querySelector('#scrPause h1').innerHTML='GAME <span>MENU</span>';
+ $('pauseInfo').textContent=`Online games can't pause: the game keeps going while this is open.${S.online.ranked?' Leaving a ranked game is a loss.':''}`;
+ $('pQuit').querySelector('span').textContent=S.online.ranked?'Forfeit':'Leave';$('title').hidden=false;showScreen('scrPause')}
+function olMenuClose(){if(!S.olMenu)return;S.olMenu=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain')}
+function pauseGame(){if(canMenu()){olMenuOpen();return}if(!canPause())return;document.querySelector('#scrPause h1').innerHTML='GAME <span>PAUSED</span>';$('pQuit').querySelector('span').textContent='Quit';S.paused=true;pausedAt=performance.now();
  const y=TEAMS[S.you],o=TEAMS[S.opp];$('pauseInfo').textContent=`${S.mode==='full'?'Full game':'Arcade'} · ${o.name} ${S.target||0}, ${y.name} ${S.runs||0} · ${S.mode==='full'?(S.half==='top'?'Top':'Bottom'):'Bottom'} of the ${ord(S.inning||1)}`;
  try{if(AC&&AC.state==='running')AC.suspend()}catch(e){}
  $('title').hidden=false;showScreen('scrPause')}
-function resumeGame(){if(!S.paused)return;const gap=performance.now()-pausedAt;
+function resumeGame(){if(S.olMenu){olMenuClose();return}if(!S.paused)return;const gap=performance.now()-pausedAt;
  if(S.pitch&&S.pitch.releaseAt)S.pitch.releaseAt+=gap;if(S.pitch&&S.meterT0)S.meterT0+=gap;if(S.swing){S.swing.at+=gap;if(S.swing.contactAt)S.swing.contactAt+=gap}
  for(const k of['cheerUntil','fwUntil','umpPunch','flame','wildUntil'])if(S[k])S[k]+=gap;
  S.paused=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}}
 function openOptionsInGame(){if(S.phase==='title'||S.phase==='over'){showScreen('scrOpts');return}if(!S.paused)pauseGame();optsFromGame=true;showScreen('scrOpts')}
-$('optBack').addEventListener('click',()=>{if(optsFromGame&&S.paused){optsFromGame=false;showScreen('scrPause')}else showScreen('scrMain')});
+$('optBack').addEventListener('click',()=>{if(optsFromGame&&(S.paused||S.olMenu)){optsFromGame=false;showScreen('scrPause')}else showScreen('scrMain')});
 $('pauseBtn').addEventListener('click',e=>{e.stopPropagation();pauseGame()});
 $('pauseBtn').addEventListener('pointerdown',e=>e.stopPropagation());
 $('resume').addEventListener('click',resumeGame);
 $('pOpts').addEventListener('click',()=>{optsFromGame=true;showScreen('scrOpts')});
 $('pLine').addEventListener('click',()=>{lineFromPause=true;showScreen('scrLineup')});
-$('pQuit').addEventListener('click',()=>{S.paused=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
-document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
+$('pQuit').addEventListener('click',()=>{S.paused=false;S.olMenu=false;optsFromGame=false;try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}toTitle()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&!onlineGame())pauseGame()});
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const toMenu=b.dataset.go==='scrMain'||b.dataset.go==='scrSingle';if(parkFromBP&&toMenu){backToCage();return}if(lineFromPause&&S.paused&&toMenu){lineFromPause=false;showScreen('scrPause');return}showScreen(b.dataset.go)}));
 // on PC the pitch-type panel is taller than the swing buttons and would cover AUTO and INFO: while it shows, they move to its left
 {const pa=document.querySelector('.app>.pacts'),ib=$('infoBtn'),ab=$('autoBtn');

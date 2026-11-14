@@ -62,8 +62,8 @@ const rkStartOK=(o,st)=>!st.rk||st.gid===o.rkGid;
 // ---- in the game ----
 function rkBegin(o,st){o.ranked=!!st.rk;o.rk=st.rk||null;clearInterval(RK.pingT);RK.done=false;
  /* both full teams (signed cards too) come in the start message, so both phones field the same players */if(o.ranked){applyRosterSpec(st.home,st.hs||stockSpec(st.home,st.hb));applyRosterSpec(st.away,st.as||stockSpec(st.away,st.ab));
-  const ping=()=>{if(S.online===o&&o.inGame)rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{})};ping();RK.pingT=setInterval(ping,30000)}}
-function rkStop(){clearInterval(RK.pingT);clearTimeout(RK.pollT);clearTimeout(RK.claimT)}
+  const ping=()=>{if(S.online===o&&o.inGame)rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{})};ping();RK.pingT=setInterval(ping,15000)}}
+function rkStop(){clearInterval(RK.pingT);clearTimeout(RK.pollT);clearTimeout(RK.claimT);rkGoneClear()}
 // the final screen's ranked line
 function rkShow(t,tone){const el=$('rkRes');el.hidden=!t;el.textContent=t||'';el.dataset.tone=tone||''}
 function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=null?info.rating_after-info.rating_before:null;
@@ -79,24 +79,35 @@ async function rkGameOver(){const o=S.online,m=ML&&ML.fin?ML:null;$('toLobby').t
   try{const h=await mlHash(m);let info=await rpc('ranked_submit',{p_match:o.rk.m,p_hash:h,p_log:mlWire(m),p_flags:o.flags||[],p_version:PD_VER});
    if(rkResult(info))return;rkShow('RANKED · waiting for your opponent’s result…');
    const t0=Date.now(),poll=async()=>{try{info=await rpc('ranked_info',{p_match:o.rk.m});if(rkResult(info))return}catch(e){}
-    if(Date.now()-t0>180000){rkShow('RANKED · still waiting on your opponent. If they left, the win is yours after 3 minutes.');rkClaimLoop(o);return}
-    RK.pollT=setTimeout(poll,3000)};RK.pollT=setTimeout(poll,2000)}
+    if(Date.now()-t0>RK_FORFEIT*1000&&!RK.gone)rkOppGone(o,t0);/* they never sent theirs: the forfeit countdown takes over (and keeps polling) */
+    if(Date.now()-t0<15*60000)RK.pollT=setTimeout(poll,3000)};RK.pollT=setTimeout(poll,2000)}
   catch(e){rkShow('RANKED · '+rkErr(e),'bad')}
   return}
  // your own line: needs an account, and at least one plate appearance you played yourself
  if(!rkReady()||!m.pa.some(c=>!c.auto))return;
  rpc('report_match',{p_log:mlWire(m),p_version:PD_VER}).catch(()=>{})}
-// the opponent left a ranked game: after 3 minutes of silence the server gives you the win
-function rkOppGone(o){if(!o.ranked||!o.rk)return false;banner('OPPONENT LEFT','If they don’t come back within 3 minutes, the win is yours.');rkClaimLoop(o);return true}
-function rkClaimLoop(o){clearTimeout(RK.claimT);const t0=Date.now();
- const go=async()=>{if(S.online!==o)return;if(o.opp&&o.inGame&&!(ML&&ML.fin))return;// they came back
-  try{rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{});const info=await rpc('ranked_claim',{p_match:o.rk.m});
-   if(info.status==='forfeit'||info.status==='final'||info.status==='disputed'){o.inGame=false;rkStop();
-    const d=info.rating_after-info.rating_before,won=info.winner_side===info.me;
-    banner(won?'WIN BY FORFEIT':'MATCH OVER',won?`Your opponent left. Rating ${info.rating_after} (${d>=0?'+':''}${d})`:'');
-    setTimeout(()=>{if(S.online!==o)return;toTitle();openOnline()},5000);return}}catch(e){}
-  if(Date.now()-t0<15*60000)RK.claimT=setTimeout(go,20000)};
- RK.claimT=setTimeout(go,20000)}
+// the opponent left a ranked game: a one-minute countdown on screen, then the server gives you the win (it checks the
+// same minute against their last ping: migration 005). If they come back first, the countdown goes away.
+const RK_FORFEIT=60;
+function rkOppGone(o,since){if(!o.ranked||!o.rk)return false;if(RK.gone&&RK.gone.o===o)return true;
+ RK.gone={o,t0:since||Date.now(),tried:0,busy:false};o.lostBan=false;clearInterval(RK.goneT);RK.goneT=setInterval(rkGoneTick,250);rkGoneTick();return true}
+function rkGoneTick(){const g=RK.gone;if(!g)return;const o=g.o,post=!!(ML&&ML.fin);
+ if(S.online!==o||Date.now()-g.t0>15*60000){rkGoneClear();return}
+ if(!post&&o.opp&&o.inGame&&o.opp.ing===o.gid){rkGoneClear();return}/* they came back */
+ const left=Math.max(0,RK_FORFEIT-(Date.now()-g.t0)/1000),clock=left>0?`WIN BY FORFEIT IN ${fmtClock(Math.ceil(left))}`:'CLAIMING THE WIN…';
+ if(post)rkShow('RANKED · your opponent left · '+clock);else{$('bt').textContent='OPPONENT LEFT';$('bs').textContent=clock;$('banner').dataset.tone='';$('banner').hidden=false}
+ if(left<=0&&!g.busy&&Date.now()-g.tried>3000){g.busy=true;g.tried=Date.now();rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{});
+  rpc('ranked_claim',{p_match:o.rk.m}).then(info=>{if(RK.gone===g&&['forfeit','final','disputed'].includes(info.status))rkForfeitEnd(o,info)}).catch(()=>{}).finally(()=>{g.busy=false})}}
+function rkGoneClear(){const g=RK.gone;clearInterval(RK.goneT);RK.gone=null;if(g&&!(ML&&ML.fin)&&$('bt').textContent==='OPPONENT LEFT')hideBanner()}
+function rkForfeitEnd(o,info){rkGoneClear();rkStop();if(S.phase==='over'&&ML&&ML.fin){rkResult(info);return}
+ const won=info.winner_side===info.me;olEndScreen(o,won?'<span>WIN</span> BY FORFEIT':'MATCH OVER',won?'Your opponent left the game.':'The match was settled without you.');rkResult(info)}
+// any online game that ends early (someone left) still ends on the results card, never straight back to the room
+function olEndScreen(o,title,sub){if(S.olMenu){S.olMenu=false;$('title').hidden=true;showScreen('scrMain')}phGameLeft('opponent_left');o.inGame=false;resumeClear();clearTimeout(o.lostT);netPresence({pt:null,dc:null,ing:null});
+ setPhase('over');hideBanner();$('tag').hidden=true;$('over').hidden=true;
+ const you=TEAMS[S.you],opp=TEAMS[S.opp];$('overT').innerHTML=title;$('overS').textContent=`${sub} Score: ${opp.name} ${S.target||0}, ${you.name} ${S.runs||0} (${S.half==='top'?'top':'bottom'} of the ${ord(S.inning||1)}).`;
+ $('overStats').innerHTML=`<div><b>${S.hits||0}</b><span>HITS</span></div><div><b>${S.hr||0}</b><span>HOME RUNS</span></div><div><b>${S.myK||0}</b><span>K'S PITCHED</span></div>`;
+ for(const id of['olNext','olSeries','again','toBracket','coinEarn','packEarn'])$(id).hidden=true;rkShow('');
+ $('toLobby').hidden=false;$('toLobby').textContent=o.queued?'BACK TO MULTIPLAYER':'BACK TO THE ROOM';$('over').hidden=false;updateHUD()}
 
 // ---- the ranked queue: Ranked on the Multiplayer page finds you an opponent ----
 // You wait on the server (queue_poll every 2 s). When it pairs you, both phones meet in a room named after the match,
