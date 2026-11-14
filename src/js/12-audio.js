@@ -7,8 +7,9 @@ function saveOpts(){try{localStorage.setItem('pd-opts2',JSON.stringify(OPT))}cat
 const inTeamSel=()=>{const t=document.getElementById('title'),c=document.getElementById('scrTeams');return !!(t&&c&&!t.hidden&&!c.hidden)};
 // two tracks share the music channel: the main-menu theme on any menu page, the ballpark organ in a game
 const onMenus=()=>{const t=document.getElementById('title');return !!(t&&!t.hidden)};
+const MENU_VOL=.5;// the menu theme sits about 6 dB under the organ (the Music slider scales both)
 function musicScene(){if(!AC||!BUS.organ)return;const m=onMenus(),t0=AC.currentTime;
- for(const[g,v]of[[BUS.menu.gain,m?1:0],[BUS.organ.gain,m?0:1]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+.9)}}
+ for(const[g,v]of[[BUS.menu.gain,m?MENU_VOL:0],[BUS.organ.gain,m?0:1]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+.9)}}
 function applyVolumes(){if(!AC)return;const bpq=!!S.bpOn,ts=inTeamSel(),t0=AC.currentTime;musicScene();// the club-select screen is quiet: no organ, no crowd
  const mv=(bpq||ts||S.rampSrc||S.musicDuck)?0:OPT.music/100*.7,cv2=(bpq||ts)?0:OPT.crowd/100*.4;
  for(const[g,v]of[[BUS.music.gain,mv],[BUS.crowd.gain,cv2]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+.35)}if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
