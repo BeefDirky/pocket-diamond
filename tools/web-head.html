@@ -7,6 +7,6 @@
 /* leave yourself out of the visitor counts: open the game once with #noanalytics on the end of the address (per browser,
    per address); #analytics turns counting back on */
 try{if(location.hash==='#noanalytics')localStorage.setItem('va-disable','1');if(location.hash==='#analytics')localStorage.removeItem('va-disable')}catch(e){}
-window.va('beforeSend',function(ev){try{if(localStorage.getItem('va-disable'))return null}catch(e){}return ev});</script><script>/* Vercel Analytics lives at the site root, which only this game's own vercel.app address has (on imugilabs.com/pocket-diamond/ the root is the Imugi Labs site) */
-if(/\.vercel\.app$/.test(location.hostname)){const s=document.createElement('script');s.defer=true;s.src='/_vercel/insights/script.js';document.head.appendChild(s)}</script>
+window.va('beforeSend',function(ev){try{if(localStorage.getItem('va-disable'))return null}catch(e){}return ev});</script><script>/* Vercel Analytics lives at the site root, which this game's own addresses have (vercel.app and pocketdiamond.imugilabs.com; on the old imugilabs.com/pocket-diamond/ path the root is the Imugi Labs site) */
+if(/\.vercel\.app$|^pocketdiamond\.imugilabs\.com$/.test(location.hostname)){const s=document.createElement('script');s.defer=true;s.src='/_vercel/insights/script.js';document.head.appendChild(s)}</script>
 </head><body>

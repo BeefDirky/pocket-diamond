@@ -148,7 +148,7 @@ function nextRender(){const o=S.online,se=o&&o.series,b=$('olNext');if(!se||se.b
  b.hidden=false;b.textContent=meR?`READY ✓ · GAME ${se.gn+1}`:`READY FOR GAME ${se.gn+1}`;b.classList.toggle('isReady',meR);
  $('olSeries').textContent=`${se.tally||''} · ${meR&&thR?'Both ready. Starting…':meR?'Waiting for opponent…':thR?'Opponent is ready.':'Press Ready for the next game.'}`;readyCheck()}
 async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.textContent=t;n.style.color='var(--amber)';n.scrollIntoView({block:'nearest'})};
- if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on play.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
+ if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on pocketdiamond.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
  // (a ranked match from the queue meets in a room named after its match id; friends use 4-letter codes)
  if(!/^rk-[0-9a-f-]{36}$/.test(code)){code=code.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4);if(code.length<4){note('Room codes are 4 letters.');return}}
  if(S.online&&S.online.nr)try{await S.online.nr.leave()}catch(e){}

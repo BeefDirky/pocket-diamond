@@ -7,8 +7,8 @@
 /* leave yourself out of the visitor counts: open the game once with #noanalytics on the end of the address (per browser,
    per address); #analytics turns counting back on */
 try{if(location.hash==='#noanalytics')localStorage.setItem('va-disable','1');if(location.hash==='#analytics')localStorage.removeItem('va-disable')}catch(e){}
-window.va('beforeSend',function(ev){try{if(localStorage.getItem('va-disable'))return null}catch(e){}return ev});</script><script>/* Vercel Analytics lives at the site root, which only this game's own vercel.app address has (on imugilabs.com/pocket-diamond/ the root is the Imugi Labs site) */
-if(/\.vercel\.app$/.test(location.hostname)){const s=document.createElement('script');s.defer=true;s.src='/_vercel/insights/script.js';document.head.appendChild(s)}</script>
+window.va('beforeSend',function(ev){try{if(localStorage.getItem('va-disable'))return null}catch(e){}return ev});</script><script>/* Vercel Analytics lives at the site root, which this game's own addresses have (vercel.app and pocketdiamond.imugilabs.com; on the old imugilabs.com/pocket-diamond/ path the root is the Imugi Labs site) */
+if(/\.vercel\.app$|^pocketdiamond\.imugilabs\.com$/.test(location.hostname)){const s=document.createElement('script');s.defer=true;s.src='/_vercel/insights/script.js';document.head.appendChild(s)}</script>
 </head><body>
 <div id="splash" role="status" aria-label="Imugi Labs"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,400;125,800&display=block"><style>#splash{position:fixed;inset:0;z-index:2147483000;background:#07080A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .6s ease}#splash.gone{opacity:0;pointer-events:none}#splash svg{width:170px;max-width:42vw;height:auto;display:block}#splash .spName{font-family:"Archivo","Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;font-stretch:125%;font-size:clamp(26px,6vw,46px);letter-spacing:.14em;line-height:1;white-space:nowrap;padding-left:.14em}#splash .spName b{font-weight:800;color:#E6E4DE}#splash .spName i{font-style:normal;font-weight:400;color:#C8F031}#splash svg,#splash .spName{opacity:0}#splash.shown svg{animation:spIn .9s ease forwards}#splash.named .spName{animation:spIn .9s ease forwards}@keyframes spIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}</style><svg viewBox="0 0 362 173" aria-hidden="true"><path fill="#E6E4DE" fill-rule="evenodd" d="M0 86.5 L110 0 L251 0 L362 86.5 L251 173 L110 173Z M181.0 17.5 L181.6 21.0 L182.5 25.6 L184.0 32.2 L186.0 39.1 L189.0 46.9 L193.0 54.3 L198.0 60.6 L204.0 65.8 L211.0 70.0 L221.0 74.1 L233.0 77.3 L247.0 79.8 L263.0 81.7 L281.0 83.2 L301.0 84.4 L323.0 85.3 L343.0 86.0 L362.0 86.5 L343.0 87.0 L323.0 87.7 L301.0 88.6 L281.0 89.8 L263.0 91.3 L247.0 93.2 L233.0 95.7 L221.0 98.9 L211.0 103.0 L204.0 107.2 L198.0 112.4 L193.0 118.7 L189.0 126.1 L186.0 133.9 L184.0 140.8 L182.5 147.4 L181.6 152.0 L181.0 155.5 L180.4 152.0 L179.5 147.4 L178.0 140.8 L176.0 133.9 L173.0 126.1 L169.0 118.7 L164.0 112.4 L158.0 107.2 L151.0 103.0 L141.0 98.9 L129.0 95.7 L115.0 93.2 L99.0 91.3 L81.0 89.8 L61.0 88.6 L39.0 87.7 L19.0 87.0 L0.0 86.5 L19.0 86.0 L39.0 85.3 L61.0 84.4 L81.0 83.2 L99.0 81.7 L115.0 79.8 L129.0 77.3 L141.0 74.1 L151.0 70.0 L158.0 65.8 L164.0 60.6 L169.0 54.3 L173.0 46.9 L176.0 39.1 L178.0 32.2 L179.5 25.6 L180.4 21.0Z"/></svg><div class="spName"><b>IMUGI</b> <i>LABS</i></div><script>/* the fades start on the first frame the phone actually paints (it can be busy starting the game before that), and
    the name waits for its typeface (or 1.5 s at most) */
@@ -7096,7 +7096,7 @@ function nextRender(){const o=S.online,se=o&&o.series,b=$('olNext');if(!se||se.b
  b.hidden=false;b.textContent=meR?`READY ✓ · GAME ${se.gn+1}`:`READY FOR GAME ${se.gn+1}`;b.classList.toggle('isReady',meR);
  $('olSeries').textContent=`${se.tally||''} · ${meR&&thR?'Both ready. Starting…':meR?'Waiting for opponent…':thR?'Opponent is ready.':'Press Ready for the next game.'}`;readyCheck()}
 async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.textContent=t;n.style.color='var(--amber)';n.scrollIntoView({block:'nearest'})};
- if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on play.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
+ if(!ROOM){note(typeof claude!=='undefined'?'Online play with friends works on pocketdiamond.imugilabs.com. Open the game there and try again.':'Online play is not available here.');return}
  // (a ranked match from the queue meets in a room named after its match id; friends use 4-letter codes)
  if(!/^rk-[0-9a-f-]{36}$/.test(code)){code=code.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4);if(code.length<4){note('Room codes are 4 letters.');return}}
  if(S.online&&S.online.nr)try{await S.online.nr.leave()}catch(e){}
@@ -7336,7 +7336,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='f7bcfe99ad',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='c1b70af00e',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7365,7 +7365,7 @@ function rkLobby(o){const on=rkOn(o),host=o.role==='host';
  return null}
 // the Multiplayer page: Ranked or Custom 1v1
 function mpOpen(){const ok=supaOK();$('goRanked').disabled=!ok;$('mpNote').hidden=ok;
- if(!ok)$('mpNote').textContent='Ranked is played on imugilabs.com/pocket-diamond (it needs the game server).';showScreen('scrMulti')}
+ if(!ok)$('mpNote').textContent='Ranked is played on pocketdiamond.imugilabs.com (it needs the game server).';showScreen('scrMulti')}
 $('goRanked').addEventListener('click',()=>{ensureAudio();if(!rkReady()){$('mpNote').hidden=false;
   $('mpNote').textContent=ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account so your rating can be saved. Sign in on the Account screen (main menu).';return}
  rankedLineup()});
@@ -7562,7 +7562,7 @@ const ipOf=o=>`${Math.floor(o/3)}${o%3?'.'+(o%3):''}`;
 async function lbSeason(c){if(LB.sid)return LB.sid;const {data,error}=await c.from('seasons').select('id,name').eq('ladder','stock').eq('is_active',true).maybeSingle();
  if(error)throw error;if(!data)throw{message:'No ranked season is running.'};LB.sid=data.id;LB.season=data.name;return LB.sid}
 function lbOpen(){showScreen('scrBoard');lbLoad(LB.kind)}
-$('goBoard').addEventListener('click',()=>{ensureAudio();if(!supaOK()){$('mpNote').hidden=false;$('mpNote').textContent='Leaderboards are on imugilabs.com/pocket-diamond (they need the game server).';return}lbOpen()});
+$('goBoard').addEventListener('click',()=>{ensureAudio();if(!supaOK()){$('mpNote').hidden=false;$('mpNote').textContent='Leaderboards are on pocketdiamond.imugilabs.com (they need the game server).';return}lbOpen()});
 $('lbTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const x of $('lbTabs').children)x.setAttribute('aria-pressed',String(x===b));lbLoad(b.dataset.k)});
 async function lbLoad(kind){LB.kind=kind;const K=LB_KINDS[kind],tok=++LB.tok;$('lbMsg').textContent='Loading…';
  try{const c=await supaClient(),sid=await lbSeason(c);$('lbSeason').textContent=`${String(LB.season).toUpperCase()} · RANKED · ${K.label}`;

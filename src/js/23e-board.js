@@ -15,7 +15,7 @@ const ipOf=o=>`${Math.floor(o/3)}${o%3?'.'+(o%3):''}`;
 async function lbSeason(c){if(LB.sid)return LB.sid;const {data,error}=await c.from('seasons').select('id,name').eq('ladder','stock').eq('is_active',true).maybeSingle();
  if(error)throw error;if(!data)throw{message:'No ranked season is running.'};LB.sid=data.id;LB.season=data.name;return LB.sid}
 function lbOpen(){showScreen('scrBoard');lbLoad(LB.kind)}
-$('goBoard').addEventListener('click',()=>{ensureAudio();if(!supaOK()){$('mpNote').hidden=false;$('mpNote').textContent='Leaderboards are on imugilabs.com/pocket-diamond (they need the game server).';return}lbOpen()});
+$('goBoard').addEventListener('click',()=>{ensureAudio();if(!supaOK()){$('mpNote').hidden=false;$('mpNote').textContent='Leaderboards are on pocketdiamond.imugilabs.com (they need the game server).';return}lbOpen()});
 $('lbTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const x of $('lbTabs').children)x.setAttribute('aria-pressed',String(x===b));lbLoad(b.dataset.k)});
 async function lbLoad(kind){LB.kind=kind;const K=LB_KINDS[kind],tok=++LB.tok;$('lbMsg').textContent='Loading…';
  try{const c=await supaClient(),sid=await lbSeason(c);$('lbSeason').textContent=`${String(LB.season).toUpperCase()} · RANKED · ${K.label}`;

@@ -35,7 +35,7 @@ function rkLobby(o){const on=rkOn(o),host=o.role==='host';
  return null}
 // the Multiplayer page: Ranked or Custom 1v1
 function mpOpen(){const ok=supaOK();$('goRanked').disabled=!ok;$('mpNote').hidden=ok;
- if(!ok)$('mpNote').textContent='Ranked is played on imugilabs.com/pocket-diamond (it needs the game server).';showScreen('scrMulti')}
+ if(!ok)$('mpNote').textContent='Ranked is played on pocketdiamond.imugilabs.com (it needs the game server).';showScreen('scrMulti')}
 $('goRanked').addEventListener('click',()=>{ensureAudio();if(!rkReady()){$('mpNote').hidden=false;
   $('mpNote').textContent=ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account so your rating can be saved. Sign in on the Account screen (main menu).';return}
  rankedLineup()});
