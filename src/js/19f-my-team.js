@@ -47,8 +47,12 @@ function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON
 // leaving the club-select screen without switching puts your own club back
 function brandCancel(){if(pendingMode!=='brand')return;pendingMode=null;brandDone();if(MYTEAM&&S.you!==MYTEAM.club){S.you=MYTEAM.club;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==S.you);syncPicker();applyCustom();updateHUD();TS.dirty=false}}
 // ---- the TEAM screen: your lineup (sign cards into it), plus the inventory and the club switch ----
-function teamOpen(from){pregame=false;lnView='mine';lnSel=null;lfFlip=null;$('lnPre').hidden=true;
+function teamOpen(from){$('lnClub').hidden=from==='scrOnline';$('scrLineup').classList.remove('lnRanked');pregame=false;lnView='mine';lnSel=null;lfFlip=null;$('lnPre').hidden=true;
  document.body.classList.add('lnTeam');$('scrLineup').querySelector('.mbtn.back').dataset.go=from||'scrMain';showScreen('scrLineup')}
 $('lnInv').addEventListener('click',()=>invOpen('scrLineup'));
 $('lnClub').addEventListener('click',()=>brandOpen(false));
 for(const t of document.querySelectorAll('#scrSingle .tile[data-go="scrLineup"]'))t.addEventListener('click',e=>{e.stopImmediatePropagation();teamOpen('scrSingle')},true);
+// ---- Custom rooms: EDIT LINEUP opens your lineup; coming back sends the room your new roster (and un-readies you) ----
+$('olEdit').addEventListener('click',()=>{const o=S.online;if(!o||o.inGame)return;o.kit=S.you;if(MYTEAM)S.you=MYTEAM.club;o.editLn=true;teamOpen('scrOnline')});
+function roomLineupBack(id){const o=S.online;if(!o||!o.editLn||id==='scrLineup'||id==='scrCards')return;o.editLn=false;if(o.kit)S.you=o.kit;$('lnClub').hidden=false;
+ if(!o.inGame){netPresence({ros:myRosterSpec(),rdy:null});lobbyRender()}}

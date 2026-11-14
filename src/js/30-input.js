@@ -66,12 +66,12 @@ $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;const se=S
 // ---- arcade game day: series length and the lineup, on the lineup screen, before the first pitch ----
 // (arcade and full games come straight here from Single Player: your club is set, the opponent is drawn at random)
 let pregame=false,pregameMode='arcade';
-function openPregame(m){pregameMode=m||'arcade';pregame=true;$('scrLineup').querySelector('.mbtn.back').dataset.go='scrSingle';$('lnPre').classList.toggle('noSeries',pregameMode!=='arcade');lnView='mine';lnSel=null;lfFlip=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=`vs ${o.city} ${o.name}`;
+function openPregame(m){pregameMode=m||'arcade';pregame=true;$('scrLineup').classList.remove('lnRanked');$('lnPlay').textContent='PLAY BALL';$('lnQ').hidden=true;$('scrLineup').querySelector('.mbtn.back').dataset.go='scrSingle';$('lnPre').classList.toggle('noSeries',pregameMode!=='arcade');lnView='mine';lnSel=null;lfFlip=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=`vs ${o.city} ${o.name}`;
  const n=(S.series&&S.series.len)||1;for(const b of $('lnSeries').children)b.setAttribute('aria-pressed',String(+b.dataset.n===n));$('lnPre').hidden=false;showScreen('scrLineup')}
 $('lnSeries').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const c of $('lnSeries').children)c.setAttribute('aria-pressed',String(c===b))});
-$('lnPlay').addEventListener('click',()=>{if(pregameMode==='full'){pregame=false;$('lnPre').hidden=true;S.series=null;S.auto=false;syncAuto();withLoading(()=>{tsFlush();startGame('full');render(performance.now())});return}const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
+$('lnPlay').addEventListener('click',()=>{if(pregameMode==='ranked'){if(Q.on)qCancelQuiet();else qStart(true);return}if(pregameMode==='full'){pregame=false;$('lnPre').hidden=true;S.series=null;S.auto=false;syncAuto();withLoading(()=>{tsFlush();startGame('full');render(performance.now())});return}const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
  S.series={len:n,w:0,l:0};pregame=false;$('lnPre').hidden=true;S.auto=false;syncAuto();withLoading(()=>{startGame('arcade');render(performance.now())})});
-document.querySelector('#scrLineup .mbtn.back').addEventListener('click',e=>{if(!pregame)return;e.stopImmediatePropagation();pregame=false;$('lnPre').hidden=true;pendingMode=null;showScreen('scrSingle')},true);
+document.querySelector('#scrLineup .mbtn.back').addEventListener('click',e=>{if(!pregame)return;e.stopImmediatePropagation();pregame=false;$('lnPre').hidden=true;pendingMode=null;const to=pregameMode==='ranked'?'scrMulti':'scrSingle';$('scrLineup').classList.remove('lnRanked');showScreen(to)},true);
 $('change').addEventListener('click',toTitle);
 $('quit').addEventListener('click',toTitle);
 $('optsBtn').addEventListener('click',openOptionsInGame);

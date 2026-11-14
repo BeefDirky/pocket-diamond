@@ -77,9 +77,9 @@ with sync_playwright() as p:
         if cheat:  # the guest's phone lies: one extra run for itself (away) in every snapshot it sends while pitching
             PB.evaluate("__x(\"const _ss=snapState;snapState=()=>{const z=_ss();if(pitching())z.t+=1;return z}\")")
         # both press Ranked: the queue pairs them (A waited longer, so A hosts)
-        PA.click('#goMulti'); PA.click('#goRanked'); PA.wait_for_timeout(2500)
-        print(label, '| A queue:', PA.inner_text('#qStatus'), PA.inner_text('#qRate'))
-        PB.click('#goMulti'); PB.click('#goRanked'); PB.wait_for_timeout(6000)
+        PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#lnPlay'); PA.wait_for_timeout(2500)
+        print(label, '| A:', PA.inner_text('#lnPlay'), PA.inner_text('#lnQ'))
+        PB.click('#goMulti'); PB.click('#goRanked'); PB.click('#lnPlay'); PB.wait_for_timeout(6000)
         if not (PA.evaluate("__x('onlineGame()')") and PB.evaluate("__x('onlineGame()')")):
             print('  ranked game did not start:', PA.inner_text('#olStatus'), '|', PB.inner_text('#olStatus')); ok = False; return None
         mid = PA.evaluate("__x('S.online.rk.m')"); print('  match', mid, 'started; ranked on both:', PA.evaluate("__x('S.online.ranked')"), PB.evaluate("__x('S.online.ranked')"))

@@ -26,10 +26,9 @@ function rkLobby(o){const on=rkOn(o),host=o.role==='host';
  rkHead(o);
  const nt=$('olRkNote'),odd=!host&&o.mode==='ranked'&&!!o.opp&&!on;nt.hidden=!on&&!odd;
  if(odd)nt.textContent='This is a Custom 1v1 room, so it won\u2019t count for rating.';
- if(on)nt.textContent=`RANKED · ${ACC.name||'you'} vs ${(o.opp&&o.opp.acct)||'?'} · stock rosters, one game, counts for rating`;
- if(host&&o.mine.rk!==(on?1:0))netPresence({rk:on?1:0,ros:on?null:myRosterSpec()});
- if(!host&&on&&o.mine.ros)netPresence({ros:null});
- if(!on&&!o.mine.ros&&o.mine.team)netPresence({ros:myRosterSpec()});// back to casual: your signed cards count again
+ if(on)nt.textContent=`RANKED · ${ACC.name||'you'} vs ${(o.opp&&o.opp.acct)||'?'} · your full teams, one game, counts for rating`;
+ if(host&&o.mine.rk!==(on?1:0))netPresence({rk:on?1:0});
+ if(!o.mine.ros&&o.mine.team)netPresence({ros:myRosterSpec()});
  if(!on)return null;
  if(!rkReady())return ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account. Sign in on the Account screen (main menu), then come back.';
  if(o.opp&&!o.opp.acct)return'Your opponent needs to sign in to play ranked.';
@@ -39,7 +38,7 @@ function mpOpen(){const ok=supaOK();$('goRanked').disabled=!ok;$('mpNote').hidde
  if(!ok)$('mpNote').textContent='Ranked is played on imugilabs.com/pocket-diamond (it needs the game server).';showScreen('scrMulti')}
 $('goRanked').addEventListener('click',()=>{ensureAudio();if(!rkReady()){$('mpNote').hidden=false;
   $('mpNote').textContent=ACC.user?'Ranked needs a username. Choose one on the Account screen.':'Ranked needs an account so your rating can be saved. Sign in on the Account screen (main menu).';return}
- qStart()});
+ rankedLineup()});
 $('goCustom').addEventListener('click',()=>{ensureAudio();openOnline('custom')});
 // host: open the match on the server, wait for the guest to join it, then start with the server's seed
 async function rkHostStart(inn){const o=S.online;if(o.rkBusy)return;o.rkBusy=true;
@@ -62,7 +61,7 @@ async function rkGuestJoin(o,m){if(o.rkJoining===m)return;o.rkJoining=m;
 const rkStartOK=(o,st)=>!st.rk||st.gid===o.rkGid;
 // ---- in the game ----
 function rkBegin(o,st){o.ranked=!!st.rk;o.rk=st.rk||null;clearInterval(RK.pingT);RK.done=false;
- if(o.ranked){applyRosterSpec(st.home,stockSpec(st.home,st.hb));applyRosterSpec(st.away,stockSpec(st.away,st.ab));
+ /* both full teams (signed cards too) come in the start message, so both phones field the same players */if(o.ranked){applyRosterSpec(st.home,st.hs||stockSpec(st.home,st.hb));applyRosterSpec(st.away,st.as||stockSpec(st.away,st.ab));
   const ping=()=>{if(S.online===o&&o.inGame)rpc('ranked_ping',{p_match:o.rk.m}).catch(()=>{})};ping();RK.pingT=setInterval(ping,30000)}}
 function rkStop(){clearInterval(RK.pingT);clearTimeout(RK.pollT);clearTimeout(RK.claimT)}
 // the final screen's ranked line
@@ -119,8 +118,15 @@ function qBallDraw(t){const cv=$('qBall');if(!cv)return;const g=cv.getContext('2
   d[i]=col[0];d[i+1]=col[1];d[i+2]=col[2];d[i+3]=255}
  g.putImageData(id,0,0)}
 function qBallLoop(t){if(!$('scrQueue')||$('scrQueue').hidden||$('title').hidden){Q.raf=0;return}qBallDraw(t);qEst();Q.raf=requestAnimationFrame(qBallLoop)}
-async function qStart(){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=Date.now();track('queue_joined',{club:S.you});qSay('LOOKING FOR OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
- showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop);clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000)},250);$('qTime').textContent='0:00';
+// Ranked → your lineup with PLAY; PLAY joins the queue right there (the button says IN QUEUE; tap it again to cancel)
+function rankedLineup(){openPregame('ranked');$('scrLineup').querySelector('.mbtn.back').dataset.go='scrMulti';$('scrLineup').classList.add('lnRanked');
+ $('lnPreVs').textContent='RANKED · 3 INNINGS · YOU BAT AND PITCH';qLnSync()}
+function qLnSync(){const on=!!(Q.on&&Q.fromLn);$('lnPlay').textContent=on?'IN QUEUE':pregameMode==='ranked'?'PLAY':'PLAY BALL';$('lnPlay').classList.toggle('inQ',on);$('lnQ').hidden=!on;
+ if(on){const est=$('qEst')?$('qEst').textContent:'';$('lnQ').textContent=`LOOKING FOR OPPONENT · ${fmtClock((Date.now()-Q.t0)/1000)}${est?' · '+est:''} · TAP TO CANCEL`}}
+function qCancelQuiet(){if(!Q.on)return;track('queue_cancelled',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});qStop();rpc('queue_leave').catch(()=>{})}
+function qLeaving(id){if(Q.on&&Q.fromLn&&id!=='scrLineup'&&id!=='scrQueue')qCancelQuiet()}
+async function qStart(fromLn){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=Date.now();Q.fromLn=!!fromLn;track('queue_joined',{club:S.you});qSay('LOOKING FOR OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
+ if(!Q.fromLn){showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop)}clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000);qEst();qLnSync()},250);qLnSync();$('qTime').textContent='0:00';
  rpc('my_rating').then(r=>{if(Q.gen===gen&&r)$('qRate').textContent=`YOUR RATING ${r.rating}${r.games?` · ${r.wins}-${r.losses}`:''}`}).catch(()=>{});
  try{let r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});
   while(Q.on&&Q.gen===gen){if(r&&r.queue==='matched'){qMatched(r.info,gen);return}
@@ -128,11 +134,11 @@ async function qStart(){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=Date.n
    if(r&&r.waiting>1)qSay('LOOKING FOR OPPONENT',`3 innings · you bat and pitch · ${r.waiting} in the queue`);qEst(r);
    await new Promise(res=>setTimeout(res,2000));if(!Q.on||Q.gen!==gen)return;r=await rpc('queue_poll')}}
  catch(e){if(Q.gen!==gen)return;Q.on=false;clearInterval(Q.tick);qSay('COULDN\u2019T JOIN THE QUEUE',rkErr(e))}}
-function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick)}
+function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick);qLnSync()}
 $('qCancel').addEventListener('click',()=>{const was=Q.on;if(was)track('queue_cancelled',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});qStop();if(was)rpc('queue_leave').catch(()=>{});
  const o=S.online;if(o&&o.queued){if(o.nr)o.nr.leave().catch(()=>{});S.online=null}mpOpen()});
 // paired: meet the opponent in the match's room
-async function qMatched(info,gen){Q.on=false;track('queue_matched',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});const opp=info.me==='home'?info.away_name:info.home_name,mine=info.me==='home'?info.home_club:info.away_club;
+async function qMatched(info,gen){Q.on=false;if(Q.fromLn){Q.fromLn=false;qLnSync();showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop)}track('queue_matched',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});const opp=info.me==='home'?info.away_name:info.home_name,mine=info.me==='home'?info.home_club:info.away_club;
  qSay(`OPPONENT FOUND: ${String(opp||'?').toUpperCase()}`,`You play as ${TEAMS[mine]?TEAMS[mine].city+' '+TEAMS[mine].name:mine} · connecting…`);
  S.online={mine:{},opp:null,mode:'ranked'};
  await joinRoom('rk-'+info.match_id,info.me==='home'?'host':'guest');
@@ -144,7 +150,7 @@ async function qMatched(info,gen){Q.on=false;track('queue_matched',{wait_secs:Ma
  setTimeout(()=>{if(S.online===o&&!o.inGame&&Q.gen===gen){o.nr.leave().catch(()=>{});S.online=null;qSay('OPPONENT DIDN\u2019T CONNECT','Back in the queue…');setTimeout(()=>{if(Q.gen===gen)qStart()},1200)}},25000)}
 // host: the guest is here: start with the match the server set up
 function qStartGame(o){const i=o.qInfo;if(!i)return;o.qStarted=true;clearInterval(Q.tick);
- const st={gid:o.rkGid,home:i.home_club,away:i.away_club,hb:MYTEAM?MYTEAM.base:i.home_club,ab:(o.opp&&o.opp.base)||i.away_club,inn:3,night:Math.random()<.55,bo:1,sid:i.match_id,gn:1,sw:[0,0],rk:{m:i.match_id,home:i.home_name,away:i.away_name}};
+ const st={gid:o.rkGid,home:i.home_club,away:i.away_club,hb:MYTEAM?MYTEAM.base:i.home_club,ab:(o.opp&&o.opp.base)||i.away_club,hs:myRosterSpec(),as:(o.opp&&o.opp.ros)||null,inn:3,night:Math.random()<.55,bo:1,sid:i.match_id,gn:1,sw:[0,0],rk:{m:i.match_id,home:i.home_name,away:i.away_name}};
  netPresence({start:st});startOnline(st)}
 // after the game: leave the match room and go back to the Multiplayer page
 function qDone(o){resumeClear();if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null;mpOpen()}

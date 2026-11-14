@@ -31,7 +31,7 @@ function mlDone(code,rbi){if(mlCur())mlClose(code,rbi)}
 function mlClose(code,rbi,outs){const c=ML&&ML.cur;if(!c)return;ML.cur=null;ML.lp=null;
  c.r=code;c.rbi=Math.max(0,Math.min(4,rbi|0));c.om=Math.max(0,Math.min(3,outs!=null?outs:S.outs-c.ob));
  if(S.lastBB&&ML_RES[code]!=null&&code!=='OTHER'){c.ev=r1(S.lastBB.EV);c.la=r1(S.lastBB.L);c.sp=r1(S.lastBB.s)}
- ML.pa.push(c);phPA(c)}
+ ML.pa.push(c);phPA(c);stamResult(code,c.bs==='home'?S.opp:S.you)}
 // a ball in play finished: turn the play's own result code into a scorebook one
 function mlInPlay(r,runs){let code=ML_RES[r.code]||'OTHER';if(code==='GO'&&/^Sacrifice bunt/.test(r.desc||''))code='SH';
  mlDone(code,code==='E'||code==='DP'?0:runs)}

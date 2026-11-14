@@ -22,17 +22,20 @@ try:
   for pg in (A,B):pg.goto('http://localhost:8768/index.html#dbg')
   A.wait_for_timeout(4000)
   # the host signs two card players on its own phone only: the guest must learn them from the lobby
-  A.click('#goSingle');A.click('[data-go=scrLineup]');A.wait_for_timeout(300)
-  # new lineup screen: tap the player on the field (his card flips), flip a card in your tray, press SIGN IN on its back
-  for slot in ('3','-1'):
-   A.click('#cards .lfField .lfc[data-i="%s"]'%slot);A.click('#cards .lfTray .lfc.deck:not(.used)');A.wait_for_timeout(450);A.click('#cards .lfTray .lfc.flip [data-sign]');A.wait_for_timeout(200)
-  A.evaluate("document.querySelector('#scrLineup .xClose').click()");A.evaluate("document.querySelector('#scrSingle .xClose').click()")
   A.click('#goMulti');A.click('#goCustom');A.click('#olCreate');A.wait_for_timeout(600);A.click('#olPick [data-t=seoul]')
   code=A.inner_text('#olCodeShow')
   B.click('#goMulti');B.click('#goCustom');B.fill('#olCode',code);B.click('#olJoin');B.wait_for_timeout(800)
   B.click('#olPick [data-t=seoul]');B.wait_for_timeout(300);print('same-club warning:',B.inner_text('#olStatus')[:70])
   B.evaluate("__pd.S.you='seoul'");B.click('#olPick [data-t=busan]');B.wait_for_timeout(800)
   print('A:',A.inner_text('#olStatus'),'| B:',B.inner_text('#olStatus'))
+  # the host readies, then signs two card players from the room's EDIT LINEUP: that un-readies it and the guest must learn them
+  A.click('#olGo');A.wait_for_timeout(500)
+  A.click('#olEdit');A.wait_for_timeout(400);assert A.is_visible('#scrLineup') and not A.is_visible('#lnClub'),'EDIT LINEUP did not open the lineup'
+  for slot in ('3','-1'):
+   A.click('#cards .lfField .lfc[data-i="%s"]'%slot);A.click('#cards .lfTray .lfc.deck:not(.used)');A.wait_for_timeout(450);A.click('#cards .lfTray .lfc.flip [data-sign]');A.wait_for_timeout(200)
+  A.keyboard.press('Escape');A.wait_for_timeout(800)
+  assert A.is_visible('#olRoom') and A.evaluate("__pd.S.you")=='seoul','not back in the room'
+  assert A.inner_text('#olGo').strip()=='READY','editing the lineup should un-ready you'
   A.click('#olInn [data-v="3"]')
   # ready-up: nobody is ready to begin with; one ready waits, both ready starts
   assert A.inner_text('#olGo').strip()=='READY' and B.inner_text('#olGo').strip()=='READY','someone started out ready'

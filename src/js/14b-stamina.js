@@ -19,6 +19,10 @@ function stamSpend(p){if(S.mode==='bp'||!p)return;const k=fldKey();
  const q=p.q!=null?p.q:clamp(.45+pitcher().ctl*.004+randn()*.2,0,1);
  const t=.5+1.4*(1-q);// PERFECT .5x, GOOD ~.7-1.1x, over the plate ~1.3x, missed or late ~1.6-1.9x
  S.stamOf=S.stamOf||{};S.stamOf[k]=Math.max(0,stamOf(k)-.8*(STAM_K[p.k]||1.3)*t);stamHUD()}
+// what the at-bat did to the pitcher: hits wear him down (more for extra bases), a strikeout gives him a little back
+const STAM_PA={'1B':-2,'2B':-4,'3B':-6,HR:-9,K:2,KL:2};
+function stamResult(code,k){const d=STAM_PA[code];if(S.mode==='bp'||!d||!k||!TEAMS[k])return;S.stamOf=S.stamOf||{};
+ const mx=stamMax(staffOf(k)[S.pIdxOf[k]||0]);S.stamOf[k]=clamp(stamOf(k)+d,0,mx);stamHUD()}
 function stamHUD(){const el=$('pStam');if(!el)return;const bp=S.mode==='bp'||S.phase==='title';el.hidden=bp;if(bp)return;
  const f=clamp(stamFrac(),0,1);el.firstElementChild.style.width=`${Math.round(f*100)}%`;
  el.className='stam'+(f<=0?' out':f<.25?' low':f<.5?' mid':'');el.title=`Stamina ${Math.round(f*100)}%`}

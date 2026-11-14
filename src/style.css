@@ -741,6 +741,11 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 @keyframes mmNew{0%,100%{box-shadow:0 0 0 0 rgba(242,190,85,.0)}50%{box-shadow:0 0 0 5px rgba(242,190,85,.35)}}
 @media (prefers-reduced-motion:reduce){.mmSm.mmNew{animation:none}}
 #lnPre.noSeries #lnSeries,#lnPre.noSeries .lnPreTop>span{display:none}
+/* ranked: your lineup, then PLAY → IN QUEUE (no scouting: the opponent isn't known yet) */
+#scrLineup.lnRanked .lnTop .seg{display:none}
+#lnPlay.inQ{background:var(--chalk);color:#14110a;animation:mmNew 1.6s ease-in-out infinite}
+.lnQ{margin:8px 0 0;text-align:center;font-family:var(--f-hud);font-size:11px;letter-spacing:.1em;color:var(--amber)}
+#olEdit{width:100%;margin-bottom:8px}
 .lnTeamBar{display:none;gap:8px;margin:2px 0 8px}.lnTeamBar .mbtn{flex:1}
 body.lnTeam .lnTeamBar{display:flex}body.lnTeam .lnTop .seg{display:none}
 .mpNote{margin:10px 0 0;font-size:12px;color:var(--amber);text-align:center;line-height:1.5}
