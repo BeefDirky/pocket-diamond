@@ -68,7 +68,7 @@ function snapState(){const T=TEAMS[batKey()];return JSON.parse(JSON.stringify({i
 
 function applySnap(z){const fk0=fldKey(),was=S.pIdxOf[fk0]||0;S.usedOf=JSON.parse(JSON.stringify(z.u||{}));S.pIdxOf={...z.pi};S.orderOf={...z.or};S.inning=z.i;S.half=z.h;setSides();S.outs=z.o;S.balls=z.b;S.strikes=z.s;S.runs=z.r;S.target=z.t;
  [S.hits,S.oppHits,S.errs,S.myErrs]=z.hs;const T=TEAMS[batKey()];S.bases=z.bs.map(i=>i>=0?T.lineup[i]:null);S.pcOf={...z.pc};if(z.sm)S.stamOf={...z.sm};S.pRunsOf={...z.pr};S.pBFOf={...z.pb};S.youLine=[...z.yl];S.oppLine=[...z.ol];S.totalInn=z.n;applyDefense();{const fk=fldKey();if(fk===fk0&&(S.pIdxOf[fk]||0)!==was){const np=pitcher();banner('PITCHING CHANGE',`#${np.no} ${np.name} in from the pen · ${arsOf(np).map(a=>PITCHES[a].name.toLowerCase()).join(', ')}`);S.jumbo={text:'NEW PITCHER',kr:'투수 교체',until:performance.now()+3200}}}updateHUD()}
-const PITCH_KEYS=['k','name','mph','travel','side','slot','h0','relX','plateX','mov','inZone','kn','wind','hbp','pid'];
+const PITCH_KEYS=['k','name','mph','travel','side','slot','h0','relX','plateX','plateY','mov','inZone','kn','wind','hbp','pid'];
 function pitchData(){const d={};for(const k of PITCH_KEYS)if(S.pitch[k]!==undefined)d[k]=S.pitch[k];return d}
 function netWindup(){const o=S.online;o.n=(o.n||0)+1;S.pitch.pid=o.role[0]+o.n;netPresence({pt:{id:S.pitch.pid,st:'w',p:pitchData(),z:snapState()}})}
 function netRelease(){const o=S.online,p=S.pitch;netPresence({pt:{id:p.pid,st:'r',p:{...pitchData(),q:p.q,wild:!!p.wild},z:o.mine.pt?o.mine.pt.z:snapState()}})}
@@ -79,8 +79,8 @@ function applyWindup(pt){const o=S.online;o.seenW=pt.id;netCheckSnap(pt.z,'state
   if(canon(pick(mine))!==canon(pick(pt.p)))netFlag('pitch',{mine:pick(mine),theirs:pick(pt.p)})}
  unduckMusic();S.pitch={...pt.p,releaseAt:0,trail:[],remote:true};WIN=winOf(curBatter())*Math.pow(95/S.pitch.mph,1.3);S.swing=null;o.waitMsg=false;setPhase('windup');updateHUD()}
 function applyRelease(pt){const o=S.online;o.seenR=pt.id;
- {const c={...S.pitch,q:pt.p.q==null?null:pt.p.q};relRoll(c);const pick=q=>({inZone:q.inZone,plateX:q.plateX,wild:!!q.wild,hbp:!!q.hbp});if(canon(pick(c))!==canon(pick(pt.p)))netFlag('release',{mine:pick(c),theirs:pick(pt.p)})}
- Object.assign(S.pitch,{plateX:pt.p.plateX,inZone:pt.p.inZone,q:pt.p.q,wild:pt.p.wild,hbp:pt.p.hbp,relRecv:true});
+ {const c={...S.pitch,q:pt.p.q==null?null:pt.p.q};relRoll(c);const pick=q=>({inZone:q.inZone,plateX:q.plateX,plateY:q.plateY,wild:!!q.wild,hbp:!!q.hbp});if(canon(pick(c))!==canon(pick(pt.p)))netFlag('release',{mine:pick(c),theirs:pick(pt.p)})}
+ Object.assign(S.pitch,{plateX:pt.p.plateX,plateY:pt.p.plateY,_he:null,inZone:pt.p.inZone,q:pt.p.q,wild:pt.p.wild,hbp:pt.p.hbp,relRecv:true});
  if(S.phase==='windup'&&S.pt<S.pitch.wind)S.pt=S.pitch.wind}
 // pitcher side: the batter swung, bunted or took
 function applyDecision(dc){const p=S.pitch;if(!p||p.decided||dc.id!==p.pid)return;p.decided=true;

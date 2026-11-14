@@ -21,7 +21,7 @@ function pitchRoll(kf,pt,bpm,dmn,knk){
  if(bpm){p.relX=0;p.h0=4.2;p.wind=1400;p.side=1}
  else if(!p.inZone&&Math.random()<.0045+tiredness()*.006&&k!=='KN')/* fresh arms rarely plunk anyone; tired ones lose the handle */{p.hbp=true;p.plateX=(effHand(curBatter())==='R'?-1:1)*2.6}
  if(!bpm&&!p.inZone&&!p.hbp)p.plateX=(Math.random()<.5?-1:1)*rand(1.05,1.6);// a ball misses the plate, so you can read it
- return p}
+ zoneSpot(p,bpm);return p}
 function startWindup(kf){closePen();unduckMusic();
  const bpm=S.mode==='bp';if(bpm)kf=S.bpPitch==='RND'?pick(['FB','SL','CH','SP','CB','KN']):(S.bpPitch||'FB');
  const pt=bpm?{vel:70,mov:72,ctl:99,slot:'over',hand:'R'}:pitcher(),dmn=!bpm&&pt.type==='demon',knk=!bpm&&pt.type==='knuckle';
@@ -57,7 +57,7 @@ function cpuDecide(){
 function relRoll(p){
  if(p.q!=null)netSeedPid(p.pid,'r',()=>{const edge=p.q>=1||p.q>.55,inP=p.q>=1?.55:p.q>.55?.66:p.q>=.3?.95:0;
   p.inZone=Math.random()<inP&&(p.k!=='SP'||Math.random()<(p.q>=1?.3:.15));// a splitter dives out of the zone 80% of the time
-  const sg=Math.random()<.5?-1:1;p.plateX=p.inZone?(edge?sg*rand(.5,.68):rand(-.35,.35)):edge&&p.q>=.3?sg*rand(.82,1.05):sg*rand(1.2,1.8)});
+  const sg=Math.random()<.5?-1:1;p.plateX=p.inZone?(edge?sg*rand(.5,.68):rand(-.35,.35)):edge&&p.q>=.3?sg*rand(.95,1.1):sg*rand(1.2,1.8);zoneSpot(p,false)});
  p.wild=S.mode!=='bp'&&netSeedPid(p.pid,'x',()=>Math.random()<(.0032+tiredness()*.003+(gassed()?.002:0)+(p.q!=null&&p.q<.15?.035:0)))}
 function release(now){S.pitch.releaseAt=now;setPhase('pitch');const _rel=()=>{if(S.online&&S.online.inGame&&pitching())netRelease()};setTimeout(_rel,0);
  {const f=fldKey();S.pcOf[f]=(S.pcOf[f]||0)+1}
@@ -77,6 +77,19 @@ function release(now){S.pitch.releaseAt=now;setPhase('pitch');const _rel=()=>{if
  else sfx('woosh',{FB:1.06,SL:1,CH:.92,CB:.95}[S.pitch.k]);
  const tg=$('tag');tg.style.borderLeftColor=PITCHES[S.pitch.k].trail;spawnFlash(4);$('tagTxt').innerHTML=`${S.pitch.name} <em>${S.pitch.mph}</em> MPH`;tg.hidden=false;
  if(S.pitch.mph>94){S.flame=now;tg.classList.add('hot')}else{S.flame=0;tg.classList.remove('hot')}}
+// ---- where a pitch crosses the plate, and the strike zone ----
+// The zone: the plate's width plus the ball (±0.83 ft), knees to letters (1.6 to 3.4 ft up). A strike crosses inside it
+// (on the corners or the edges when the pitcher hits his spot); a ball misses it by a readable margin: wide of the plate,
+// or high or low. Splitters and curveballs that miss mostly miss low; heaters that miss are as often high.
+const ZONE={x:.83,lo:1.6,hi:3.4};
+function zoneSpot(p,bpm){
+ if(p.hbp){p.plateY=rand(2.4,4);return}
+ if(p.inZone){const ed=Math.abs(p.plateX)>.48;p.plateY=ed?rand(1.75,3.25):Math.random()<.35?(Math.random()<.5?rand(1.72,1.95):rand(3.05,3.28)):rand(2,3);return}
+ if(bpm){p.plateY=rand(1.8,3.2);return}
+ const lowish=p.k==='SP'||p.k==='CB'||p.k==='CH',r=Math.random();
+ // a third of misses (most splitters) go over the plate but too high or too low instead of wide
+ if(r<(p.k==='SP'?.85:.38)){p.plateX=rand(-.6,.6);p.plateY=(lowish?Math.random()<.85:Math.random()<.45)?rand(.55,1.3):rand(3.75,4.5)}
+ else p.plateY=rand(1.7,3.3)}
 // each pitch has its own flight shape (x = lateral feet, h = height feet)
 function pitchPos(p,el){
  const u=el/p.travel;
@@ -90,8 +103,10 @@ function pitchPos(p,el){
   else if(p.k==='SP'){x+=-p.side*.4*uc*(1-uc);h=Math.max(.3,lerp(h0,3.4,uc)-4.6*mv*Math.pow(uc,4))}
   else{x+=p.side*(sd?6.5:5)*mv*uc*Math.pow(1-uc,1.5);h=lerp(h0-.2,1.8,uc)+(sd?3:4.5)*Math.sin(Math.PI*uc)}
   return{x,h}};
- if(u<=1){const r=f(u);return{x:r.x,y:54-52*u,h:r.h}}
- const a=f(1),b=f(.97),dx=(a.x-b.x)/.03;
+ // (bent at the end so it crosses the plate at its height)
+ const g=uc=>{const r=f(uc);if(p.plateY!=null){if(p._he==null)p._he=f(1).h;r.h+=(p.plateY-p._he)*uc*uc*uc}return r};
+ if(u<=1){const r=g(u);return{x:r.x,y:54-52*u,h:r.h}}
+ const a=g(1),b=g(.97),dx=(a.x-b.x)/.03;
  return{x:a.x+dx*(u-1),y:54-52*u,h:Math.max(.3,a.h-(u-1)*4)};
 }
 // does a swing in the timing window still miss? (under the pitch's shared seed, so the pitcher's phone can check it)
@@ -202,5 +217,5 @@ function bbWalkStart(b,delay){if(S.mode==='bp')return;const B=S.bases,mv=[{who:b
  // a runner who was leading off starts the jog from where he stands
  for(const m of mv)if(!m.box){let L=0;try{L=clamp(leadNow(m.f,S.phase,performance.now())/LEG,0,.9)}catch(e){}m.L=L}
  S.bbWalk={at:performance.now(),mv,hand:effHand(b),bat:b.bat,hold:(delay|0)+BB_JOG}}
-function nextBatter(){const f=fldKey(),b=batKey();S.pBFOf[f]=(S.pBFOf[f]||0)+1;S.orderOf[b]=((S.orderOf[b]||0)+1)%9;S.balls=0;S.strikes=0}
+function nextBatter(){S.kz=[];const f=fldKey(),b=batKey();S.pBFOf[f]=(S.pBFOf[f]||0)+1;S.orderOf[b]=((S.orderOf[b]||0)+1)%9;S.balls=0;S.strikes=0}
 

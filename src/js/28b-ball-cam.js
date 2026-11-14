@@ -35,3 +35,32 @@ function bcPlace(box){box.style.top='';box.classList.toggle('inGame',S.mode!=='b
  for(let k=0;k<3;k++){const a=box.getBoundingClientRect();let low=0;
   for(const bd of document.querySelectorAll('.bug,.pcBox')){const b=bd.getBoundingClientRect();if(b.width&&a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top)low=Math.max(low,b.bottom)}
   if(!low)return;box.style.top=`${Math.round(low-par.getBoundingClientRect().top+6)}px`}}
+
+// ---------- the strike zone, from behind the plate ----------
+// The live pitch comes in as a dot that grows as it nears the plate; where it crosses stays marked (red = strike,
+// green = ball) with the call under it, and every earlier pitch of this at-bat stays as a small numbered dot.
+const KZ_PX=17;// px per foot
+function drawZone(now){const box=$('kz');
+ const show=S.phase&&['choose','windup','pitch','result','play'].includes(S.phase)&&S.mode!=='bp'&&OPT.zone!==false;
+ if(!show){if(!box.hidden)box.hidden=true;return}if(box.hidden)box.hidden=false;
+ const c=$('kzC'),g=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,gy=H-6,X=x=>Math.round(cx+x*KZ_PX),Y=h=>Math.round(gy-h*KZ_PX);
+ g.clearRect(0,0,W,H);
+ // plate and zone (3x3)
+ g.fillStyle='rgba(240,232,210,.9)';g.fillRect(X(-.71),gy+1,X(.71)-X(-.71),2);
+ const zl=X(-ZONE.x),zr=X(ZONE.x),zt=Y(ZONE.hi),zb=Y(ZONE.lo);
+ g.fillStyle='rgba(240,232,210,.07)';g.fillRect(zl,zt,zr-zl,zb-zt);
+ g.fillStyle='rgba(240,232,210,.22)';for(let i=1;i<3;i++){g.fillRect(Math.round(zl+(zr-zl)*i/3),zt,1,zb-zt);g.fillRect(zl,Math.round(zt+(zb-zt)*i/3),zr-zl,1)}
+ g.strokeStyle='rgba(240,232,210,.9)';g.lineWidth=1;g.strokeRect(zl+.5,zt+.5,zr-zl-1,zb-zt-1);
+ const cl=v=>clamp(v,2,W-3),ch=v=>clamp(v,2,H-3);
+ // earlier pitches of the at-bat
+ const L=S.kz||[];g.font='5px monospace';
+ L.forEach((d,i)=>{const x=cl(X(d.x)),y=ch(Y(d.y));g.fillStyle=d.z?'#ff6b5e':'#7be38a';g.globalAlpha=.5;g.fillRect(x-2,y-2,5,5);g.globalAlpha=1});
+ // this pitch
+ const p=S.pitch;let txt='',cls='';
+ if(p&&p.plateY!=null&&p.releaseAt){const el=(S.phase==='pitch'?now-p.releaseAt:p.travel+1)*1;const u=Math.min(1,el/p.travel);
+  if(u>0){const pp=pitchPos(p,Math.min(el,p.travel)),x=cl(X(pp.x)),y=ch(Y(pp.h)),r=u>=1?3:Math.max(1,Math.round(u*3));
+   const fin=u>=1;g.fillStyle=fin?(p.inZone?'#ff6b5e':'#7be38a'):'#f4f1e8';g.globalAlpha=fin?1:.35+.65*u;g.fillRect(x-r,y-r,r*2+1,r*2+1);g.globalAlpha=1;
+   if(fin){g.strokeStyle='#14110a';g.strokeRect(x-r+.5,y-r+.5,r*2,r*2);
+    if(!p._kzLogged){p._kzLogged=true;(S.kz=S.kz||[]).push({x:p.plateX,y:p.plateY,z:!!p.inZone});if(S.kz.length>12)S.kz.shift()}
+    const sw=S.swing&&!S.swing.bunt?S.swing:S.swing;txt=p.hbp?'HIT BY PITCH':sw?(sw.miss?'SWING & MISS':S.play&&S.play.foul?'FOUL':'IN PLAY'):p.inZone?'STRIKE':'BALL';cls=p.hbp||(sw&&!sw.miss)?'':p.inZone||(sw&&sw.miss)?'s':'b'}}}
+ const t=$('kzT');if(t.textContent!==txt)t.textContent=txt;if(t.className!==cls)t.className=cls}

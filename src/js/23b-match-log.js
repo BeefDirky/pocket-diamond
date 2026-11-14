@@ -18,7 +18,7 @@ function mlCur(){if(!ML||S.mode==='bp')return null;let c=ML.cur;
  return c}
 // at release (after the arm has paid for it)
 function mlPitch(){const c=mlCur();if(!c)return;const p=S.pitch;S.lastBB=null;
- ML.lp={k:p.k,mph:p.mph,x:r2(p.plateX),z:p.inZone?1:0,q:r2(p.q),w:p.wild?1:0,st:r2(stamFrac()),o:null,e:null};c.p.push(ML.lp)}
+ ML.lp={k:p.k,mph:p.mph,x:r2(p.plateX),y:r2(p.plateY),z:p.inZone?1:0,q:r2(p.q),w:p.wild?1:0,st:r2(stamFrac()),o:null,e:null};c.p.push(ML.lp)}
 // the pitch reached the plate with no ball in play
 function mlPitchEnd(){const lp=ML&&ML.lp;if(!lp)return;const sw=S.swing;
  lp.o=S.pitch.hbp&&!sw?'hbp':sw?'swinging_strike':S.pitch.inZone?'called_strike':'ball';if(sw&&!sw.bunt)lp.e=Math.round(sw.err||0)}

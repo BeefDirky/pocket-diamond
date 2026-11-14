@@ -23,6 +23,7 @@
       </div>
     </div>
     <button class="skipBtn" id="skipBtn" type="button" hidden>SKIP TROT ▸</button>
+    <div class="kz" id="kz" hidden><canvas id="kzC" width="76" height="98"></canvas><b id="kzT"></b></div>
     <button class="autoBtn" id="autoBtn" type="button" aria-pressed="false" title="Let the game play itself">AUTO <b>OFF</b></button>
     <button class="infoBtn" id="infoBtn" type="button" aria-pressed="true" title="Show or hide hit info">INFO <b>ON</b></button>
     <div class="pcBox" aria-label="Inning and pitch count"><span id="bugInn"></span><span>PITCHES <b id="pcV">0</b></span><span id="clkS" hidden>CLOCK <b id="clkV">15</b></span></div>
@@ -288,6 +289,7 @@
         <div class="opt"><span>Share gameplay stats</span><div class="seg" id="optStats"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
         <div class="opt"><span>Game time</span><div class="seg" id="optTime"><button type="button" data-v="day">Day</button><button type="button" data-v="night">Night</button><button type="button" data-v="random">Random</button></div><b></b></div>
         <div class="opt" id="optBpWaitRow" hidden><span>Next pitch</span><div class="seg" id="optBpWait"><button type="button" data-v="now">Right away</button><button type="button" data-v="wait">After the ball stops</button></div><b></b></div>
+        <div class="opt"><span>Strike zone</span><div class="seg" id="optZone"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
         <div class="opt"><span>Ball cam</span><div class="seg" id="optBallCam"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
         <button class="mbtn back" type="button" id="optBack">Back</button>
       </div>
