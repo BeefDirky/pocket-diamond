@@ -1,5 +1,5 @@
 // ---------- trading cards: every player in the league is a collectible card ----------
-const RARITY=['COMMON','RARE','EPIC','LEGEND'];
+const RARITY=['COMMON','RARE','EPIC','LEGEND'],FA_POW_CAP=[70,80,85,95];
 let CARDS=[],CARD_BY={};
 let COL={packs:3,owned:{},seen:{},lv:{},mig:1};
 try{const v=JSON.parse(localStorage.getItem('pd-cards')||'null');if(v&&typeof v==='object')COL={packs:v.packs|0,owned:v.owned||{},seen:v.seen||{},lv:v.lv||{},mig:v.mig|0}}catch(e){}
@@ -12,7 +12,9 @@ function buildCardDB(){
  const L=cut(.08),E=cut(.25),Rr=cut(.55);
  for(const c of CARDS){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};const o=ovr(c.p);c.o=o;c.r=o>=L?3:o>=E?2:o>=Rr?1:0;if(c.p.type&&c.r<2)c.r=2;CARD_BY[c.id]=c}
  for(const c of buildFreeAgents()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};c.o=ovr(c.p);CARDS.push(c);CARD_BY[c.id]=c}
- {const F=CARDS.filter(c=>c.set==='fa'),s=F.map(c=>c.o).sort((a,b)=>b-a),cut=f=>s[Math.floor(s.length*f)],L=cut(.08),E=cut(.25),R=cut(.55);for(const c of F){c.r=c.o>=L?3:c.o>=E?2:c.o>=R?1:0;if(c.p.type&&c.r<2)c.r=2}}
+ {const F=CARDS.filter(c=>c.set==='fa'),s=F.map(c=>c.o).sort((a,b)=>b-a),cut=f=>s[Math.floor(s.length*f)],L=cut(.08),E=cut(.25),R=cut(.55);for(const c of F){c.r=c.o>=L?3:c.o>=E?2:c.o>=R?1:0;if(c.p.type&&c.r<2)c.r=2}
+  /* a free agent's power tops out by rarity: common 70, rare 80, epic 85, legend 95 (a ceiling, not a target) */
+  for(const c of F){const cap=FA_POW_CAP[c.r];if(c.p.pow!=null&&c.p.pow>cap){c.p.pow=c.b.pow=cap;c.o=ovr(c.p)}}}
  for(const c of buildBigLeague()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};CARDS.push(c);CARD_BY[c.id]=c}
 }
 const ART={};

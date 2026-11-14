@@ -235,20 +235,20 @@ function render(now){
    if(r.out&&tw>offAt){const o=r.slide&&!r.slide.back&&r.slide.p0?(()=>{const bb=BASES[r.slide.b%4],p0=r.slide.p0;return{x:lerp(bb.x,p0.x,.12),y:lerp(bb.y,p0.y,.12)}})():runnerPos(r,offAt),sd=batKey()===S.you?1:-1,D={x:sd*84,y:14},dd=dist(o,D),k=Math.min(1,(tw-offAt)*6.5/Math.max(1,dd));
     if(k>=1)continue;const w={x:lerp(o.x,D.x,k),y:lerp(o.y,D.y,k)},q=toPx(w.x,w.y);
     add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:'run',arms:'down',frame:Math.floor(now/190)+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants,flip:D.x<w.x}));continue}
-   const p=runnerPos(r,t);const q=toPx(p.x,p.y);
+   const p=runnerPos(r,tw);const q=toPx(p.x,p.y);
    if(r.tagAt!=null&&r.dest>r.from&&t>=r.start-.05&&t<r.start+.35){const bq=toPx(baseP(r.from).x,baseP(r.from).y),k2=(t-r.start+.05)/.4;
     add(1e6,()=>{wg.globalAlpha=1-k2;wg.strokeStyle='#ffffff';wg.lineWidth=1;wg.beginPath();wg.arc(bq.x,bq.y,4+k2*10,0,Math.PI*2);wg.stroke();
      wg.font='bold 11px "Pixelify Sans", monospace';wg.textAlign='center';wg.fillStyle='#ffbf3c';wg.fillText('TAG!',bq.x,bq.y-24-k2*6);wg.globalAlpha=1})}
-   if(r.slide&&t>=r.slide.t0&&t<r.slide.t1+.55&&!(r.out&&t>offAt)){const bb=BASES[r.slide.b%4],pv=r.slide.back?baseP(r.slide.b+1):baseP(r.slide.b-1),dir=Math.sign(bb.x-pv.x)||1;
-    const u=clamp((t-r.slide.t0)/(r.slide.t1-r.slide.t0),0,1);
+   if(r.slide&&tw>=r.slide.t0&&tw<r.slide.t1+.55&&!(r.out&&tw>offAt)){const bb=BASES[r.slide.b%4],pv=r.slide.back?baseP(r.slide.b+1):baseP(r.slide.b-1),dir=Math.sign(bb.x-pv.x)||1;
+    const u=clamp((tw-r.slide.t0)/(r.slide.t1-r.slide.t0),0,1);
     // one continuous glide from where he left his feet to the bag (a tagged-out runner comes up a foot short)
     if(!r.slide.p0)r.slide.p0=runnerPos(r,r.slide.t0);const p0=r.slide.p0,E=r.out?{x:lerp(bb.x,p0.x,.12),y:lerp(bb.y,p0.y,.12)}:bb,k3=1-(1-u)*(1-u);
     const sp={x:lerp(p0.x,E.x,k3),y:lerp(p0.y,E.y,k3)},sq=toPx(sp.x,sp.y);
     // a rooster tail of dirt kicked up along the slide, and a puff at the bag when he gets there
-    if(t<r.slide.t1){for(let n=0;n<6;n++)if(Math.random()<.9)DUST.push({x:sq.x+rand(-7,7),y:sq.y+rand(-2,1),vx:rand(-34,34)-dir*18,vy:rand(-42,-8),life:rand(.35,.85),m:0,s:Math.random()<.35?3:2,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a','#ead2ae'])})}
+    if(tw<r.slide.t1){for(let n=0;n<6;n++)if(Math.random()<.9)DUST.push({x:sq.x+rand(-7,7),y:sq.y+rand(-2,1),vx:rand(-34,34)-dir*18,vy:rand(-42,-8),life:rand(.35,.85),m:0,s:Math.random()<.35?3:2,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a','#ead2ae'])})}
     else if(!r.slide.puff){r.slide.puff=true;const bq2=toPx(bb.x,bb.y);for(let n=0;n<34;n++)DUST.push({x:bq2.x+rand(-8,8),y:bq2.y+rand(-3,2),vx:rand(-55,55),vy:rand(-46,-6),life:rand(.45,1.1),m:0,s:Math.random()<.4?3:2,c:pick(['#d6a46e','#c48c56','#e2bd8f','#b8804a','#ead2ae'])})}
-    const back=dir*(r.slide.head?14:16)*K/1.333*(t<r.slide.t1+.25?1:1-clamp((t-r.slide.t1-.25)/.3,0,1));// the lead hand or spikes reach exactly the bag// keep the leading hand (or spikes) on the bag, then get up onto it
-    const dn=t-r.slide.t0,upT=t-(r.slide.t1+.3),trans=dn<.09?1:dn<.18?2:upT>.14?1:upT>0?2:0;// in-between frames going down and getting back up
+    const back=dir*(r.slide.head?14:16)*K/1.333*(tw<r.slide.t1+.25?1:1-clamp((tw-r.slide.t1-.25)/.3,0,1));// the lead hand or spikes reach exactly the bag// keep the leading hand (or spikes) on the bag, then get up onto it
+    const dn=tw-r.slide.t0,upT=tw-(r.slide.t1+.3),trans=dn<.09?1:dn<.18?2:upT>.14?1:upT>0?2:0;// in-between frames going down and getting back up
     add(sq.y,()=>drawDiver(wg,sq.x-back,sq.y,bat,{skin:runSkin(r.who),pants:batPants,noGlove:true,head:r.slide.head,trans},dir,u<1?(1-u)*3:0));continue}
    add(q.y,()=>drawPlayer(wg,q.x+2,q.y,bat,{legs:p.moving?'run':'ready',arms:p.moving?'run':(r.dest===4&&!p.moving?'catch':'down'),frame:fr+(hash(r.who.name)&3),skin:runSkin(r.who),helmet:true,pants:batPants}));
   }
