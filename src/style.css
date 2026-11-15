@@ -1379,3 +1379,15 @@ body.lfDragging .lfc.dropHover.dropNo .lfF{box-shadow:0 0 0 3px #e2603a}
 /* a flipped card hides its OVR tab (it would show through mirrored); the back already shows the rating */
 .lfc .lfOvr{backface-visibility:hidden;-webkit-backface-visibility:hidden}.lfc.flip .lfF .lfOvr{visibility:hidden}
 .lfPen,.lfTray{scroll-snap-type:none!important}
+/* legendary cards in the lineup glow: a rainbow halo that cycles, and a shine that sweeps across the front */
+.lfc.r3 .lfF{position:relative;animation:lgGlow 3s linear infinite}
+.lfc.r3 .lfF::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;mix-blend-mode:screen;
+ background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 45%,rgba(255,236,170,.35) 50%,transparent 62%) no-repeat;background-size:250% 100%;animation:lgShine 2.6s ease-in-out infinite}
+.lfc.r3 .lfOvr{animation:lgGlow 3s linear infinite}
+@keyframes lgGlow{0%{box-shadow:0 0 0 2px #ff6b9a,0 0 12px 2px #ff6b9a}25%{box-shadow:0 0 0 2px #ffd23f,0 0 12px 2px #ffd23f}50%{box-shadow:0 0 0 2px #5fe0a0,0 0 12px 2px #5fe0a0}75%{box-shadow:0 0 0 2px #6fb8ff,0 0 12px 2px #6fb8ff}100%{box-shadow:0 0 0 2px #ff6b9a,0 0 12px 2px #ff6b9a}}
+@keyframes lgShine{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
+.lfc.r3.flip .lfF::after{display:none}
+@media (prefers-reduced-motion:reduce){.lfc.r3 .lfF,.lfc.r3 .lfOvr,.lfc.r3 .lfF::after{animation:none}.lfc.r3 .lfF{box-shadow:0 0 0 2px #ffd23f,0 0 12px 2px #ffd23f}}
+/* no scrollbar down the right side of the lineup page (it still scrolls) */
+#title:has(#scrLineup:not([hidden])),#title:has(#scrPlay:not([hidden])){scrollbar-width:none}
+#title:has(#scrLineup:not([hidden]))::-webkit-scrollbar,#title:has(#scrPlay:not([hidden]))::-webkit-scrollbar{display:none}
