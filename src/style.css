@@ -355,7 +355,8 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .st i{height:6px;background:#ddd5bf;display:block}
 .st u{display:block;height:100%}
 .st b{text-align:right;font-variant-numeric:tabular-nums}
-.opt{display:grid;grid-template-columns:70px 1fr 34px;gap:10px;align-items:center;font-size:12px;color:var(--dim)}
+.opt{display:grid;grid-template-columns:96px 1fr 34px;gap:10px;align-items:center;font-size:13px;color:var(--chalk)}
+.opt .seg button{font-size:12px}
 .opt input{width:100%;accent-color:var(--amber)}
 .opt b{font-weight:400;color:var(--chalk);text-align:right;font-variant-numeric:tabular-nums}
 .optChk{display:flex;gap:10px;align-items:flex-start;font-size:12px;cursor:pointer}
@@ -861,7 +862,11 @@ body.inMenu .olNet{display:none!important}
 /* sponsor preview screen */
 .mmFb{color:var(--chalk)}
 #scrFb{display:flex;flex-direction:column;gap:10px}#scrFb[hidden]{display:none}
-.fbKind{display:grid;grid-template-columns:repeat(3,1fr)}
+.fbKind{display:grid;grid-template-columns:repeat(3,1fr)}.fbKind button{font-size:14px;padding:10px 6px}
+.fbLead{font-size:15px}
+/* PC: menu pages grow with the screen (about 1.4x on 1080p), text, buttons and spacing together; the main menu,
+   the lineup and the club picker have their own full-screen layouts */
+.app.deskApp #title>.card:not(.menuMain):not(#scrLineup):not(#scrTeams){zoom:var(--uiZ,1)}
 .fbText{resize:vertical;min-height:120px;font-size:14px;line-height:1.4}
 .pFb{display:block;width:100%;margin-top:10px}
 /* new version: a bar across the top, on the menus (never in the middle of a game) */

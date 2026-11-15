@@ -1,7 +1,7 @@
 // ---------- analytics: gameplay events to PostHog (see ANALYTICS_EVENTS.md) ----------
 // Only the website build sends anything (the key is stamped in by tools/build.py from tools/config.json; the claude.ai
 // build has none). Players are known by their account's UUID only: no email, no username, and the PostHog project
-// discards IPs. Options → "Share gameplay stats" turns it all off. The authoritative baseball record (ranked results)
+// discards IPs. Options → "Share stats" turns it all off. The authoritative baseball record (ranked results)
 // lives in Supabase; this is for how people play: sessions, retention, funnels, popularity, balance samples, errors.
 const PH={key:'__PH_KEY__',host:'__PH_HOST__',ready:false,q:[],sample:false};
 const phOn=()=>/^phc_/.test(PH.key)&&OPT.stats!==false&&typeof window.claude==='undefined';

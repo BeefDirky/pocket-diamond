@@ -378,7 +378,8 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .st i{height:6px;background:#ddd5bf;display:block}
 .st u{display:block;height:100%}
 .st b{text-align:right;font-variant-numeric:tabular-nums}
-.opt{display:grid;grid-template-columns:70px 1fr 34px;gap:10px;align-items:center;font-size:12px;color:var(--dim)}
+.opt{display:grid;grid-template-columns:96px 1fr 34px;gap:10px;align-items:center;font-size:13px;color:var(--chalk)}
+.opt .seg button{font-size:12px}
 .opt input{width:100%;accent-color:var(--amber)}
 .opt b{font-weight:400;color:var(--chalk);text-align:right;font-variant-numeric:tabular-nums}
 .optChk{display:flex;gap:10px;align-items:flex-start;font-size:12px;cursor:pointer}
@@ -884,7 +885,11 @@ body.inMenu .olNet{display:none!important}
 /* sponsor preview screen */
 .mmFb{color:var(--chalk)}
 #scrFb{display:flex;flex-direction:column;gap:10px}#scrFb[hidden]{display:none}
-.fbKind{display:grid;grid-template-columns:repeat(3,1fr)}
+.fbKind{display:grid;grid-template-columns:repeat(3,1fr)}.fbKind button{font-size:14px;padding:10px 6px}
+.fbLead{font-size:15px}
+/* PC: menu pages grow with the screen (about 1.4x on 1080p), text, buttons and spacing together; the main menu,
+   the lineup and the club picker have their own full-screen layouts */
+.app.deskApp #title>.card:not(.menuMain):not(#scrLineup):not(#scrTeams){zoom:var(--uiZ,1)}
 .fbText{resize:vertical;min-height:120px;font-size:14px;line-height:1.4}
 .pFb{display:block;width:100%;margin-top:10px}
 /* new version: a bar across the top, on the menus (never in the middle of a game) */
@@ -1356,7 +1361,7 @@ canvas.shake{animation:packShake .6s steps(6)}
             <p><b>Account.</b> If you make one: your email (to sign in) and your username (other players see it).</p>
             <p><b>Gameplay stats.</b> Games you play and how they go (results, pitches, swings, screens you visit), to balance the game and fix bugs. Ranked results are kept for ratings and leaderboards.</p>
             <p><b>Connection.</b> Your IP address and country, for analytics and to stop cheating in ranked.</p>
-            <p>We don't sell your data or use it for ads. You can turn gameplay stats off any time in <b>Options → Share gameplay stats</b>. To delete your account and its data, contact Imugi Labs at imugilabs.com.</p>
+            <p>We don't sell your data or use it for ads. You can turn gameplay stats off any time in <b>Options → Share stats</b>. To delete your account and its data, contact Imugi Labs at imugilabs.com.</p>
           </section>
           <p class="abFoot">© Imugi Labs · imugilabs.com</p>
         </div>
@@ -1515,11 +1520,10 @@ canvas.shake{animation:packShake .6s steps(6)}
       </div>
       <div class="card" id="scrFb" hidden>
         <h1><span>FEEDBACK</span></h1>
-        <p class="acLead">Found a bug or have an idea? Tell us. Your game version and device are sent along so we can reproduce it.</p>
-        <div class="seg fbKind" id="fbKind" role="radiogroup" aria-label="Kind"><button type="button" data-v="bug" aria-pressed="true">Bug</button><button type="button" data-v="idea" aria-pressed="false">Idea</button><button type="button" data-v="other" aria-pressed="false">Other</button></div>
+        <p class="acLead fbLead">Found a bug or have a suggestion? Tell us.</p>
+        <div class="seg fbKind" id="fbKind" role="radiogroup" aria-label="Kind"><button type="button" data-v="bug" aria-pressed="true">Bug</button><button type="button" data-v="idea" aria-pressed="false">Suggestion</button><button type="button" data-v="other" aria-pressed="false">Other</button></div>
         <textarea class="acIn fbText" id="fbText" maxlength="2000" rows="6" placeholder="What happened? What did you expect? (For a bug: what were you doing right before?)"></textarea>
         <input class="acIn" id="fbContact" type="text" maxlength="200" placeholder="EMAIL OR REDDIT NAME (OPTIONAL)" autocomplete="email" spellcheck="false">
-        <p class="acHint">Only if you'd like a reply.</p>
         <button class="big" id="fbSend" type="button">SEND</button>
         <p class="acMsg" id="fbMsg" aria-live="polite"></p>
         <button class="mbtn back" id="fbBack" type="button" data-go="scrMain">Back</button>
@@ -1529,7 +1533,7 @@ canvas.shake{animation:packShake .6s steps(6)}
         <label class="opt" for="vMusic"><span>Music</span><input type="range" id="vMusic" min="0" max="100" step="5"><b id="vMusicV"></b></label>
         <label class="opt" for="vCrowd"><span>Crowd</span><input type="range" id="vCrowd" min="0" max="100" step="5"><b id="vCrowdV"></b></label>
         <label class="opt" for="vSfx"><span>Effects</span><input type="range" id="vSfx" min="0" max="100" step="5"><b id="vSfxV"></b></label>
-        <div class="opt"><span>Share gameplay stats</span><div class="seg" id="optStats"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
+        <div class="opt"><span>Share stats</span><div class="seg" id="optStats"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
         <div class="opt"><span>Game time</span><div class="seg" id="optTime"><button type="button" data-v="day">Day</button><button type="button" data-v="night">Night</button><button type="button" data-v="random">Random</button></div><b></b></div>
         <div class="opt" id="optBpWaitRow" hidden><span>Next pitch</span><div class="seg" id="optBpWait"><button type="button" data-v="now">Right away</button><button type="button" data-v="wait">After the ball stops</button></div><b></b></div>
         <div class="opt"><span>Strike zone</span><div class="seg" id="optZone"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
@@ -6497,7 +6501,10 @@ function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){qLeaving(id);roomLineupBack(id);if(pendingMode==='watch'&&id!=='scrTeams'){pendingMode=null;myTeamRestore()}/* backed out of picking a team to watch: your own club again */if(pendingMode==='brand'&&id!=='scrTeams')brandCancel();if(id==='scrTeams'&&pendingMode==='brand'){$('tsPrev').hidden=$('tsNext').hidden=false}
  document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds','scrShop','scrMulti','scrQueue','scrBoard','scrFb'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
-const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
+const isDesk=()=>isLandscape();
+// PC menu scale: 1 at about 680 px tall (1.6 on 1080p), up to 1.75 on big screens (never wider than the screen allows)
+function uiZoom(){const z=Math.max(1,Math.min(1.75,innerHeight/680,innerWidth/1050));document.documentElement.style.setProperty('--uiZ',z.toFixed(3))}
+uiZoom();addEventListener('resize',uiZoom);// any landscape screen: the park fills it, controls float on top
 {let lastK=null;const chk=()=>{const k=isWide()+'|'+isDesk()+'|'+isPhoneLand();if(k!==lastK){lastK=k;applyWide()}};addEventListener('resize',chk);addEventListener('resize',()=>requestAnimationFrame(bpLayout));addEventListener('orientationchange',chk);if(window.visualViewport)visualViewport.addEventListener('resize',chk)}
 /* full-screen batting practice: measure where the pitch buttons end and stack AUTO/INFO, then the info boxes, above them */
 function bpLayout(){const bar=document.querySelector('.acts .bpBar');if(!document.body.classList.contains('bpMode')||!isDesk()||isPhoneLand()||!bar)return;
@@ -7404,7 +7411,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='5bfd0b7c34',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='50568c4269',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7565,7 +7572,7 @@ function qDone(o){resumeClear();if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCust
 // ---------- analytics: gameplay events to PostHog (see ANALYTICS_EVENTS.md) ----------
 // Only the website build sends anything (the key is stamped in by tools/build.py from tools/config.json; the claude.ai
 // build has none). Players are known by their account's UUID only: no email, no username, and the PostHog project
-// discards IPs. Options → "Share gameplay stats" turns it all off. The authoritative baseball record (ranked results)
+// discards IPs. Options → "Share stats" turns it all off. The authoritative baseball record (ranked results)
 // lives in Supabase; this is for how people play: sessions, retention, funnels, popularity, balance samples, errors.
 const PH={key:'phc_z8oJnqc58NLReHVy6FjvNeF7xryp7DuyitZjpXyxo664',host:'https://us.i.posthog.com',ready:false,q:[],sample:false};
 const phOn=()=>/^phc_/.test(PH.key)&&OPT.stats!==false&&typeof window.claude==='undefined';
