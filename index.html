@@ -1479,6 +1479,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 .tnBracket{align-items:stretch}.tnCol{display:flex;flex-direction:column;justify-content:flex-start;gap:0}
 .tnStack{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
 @media (max-width:640px){.tnStack{gap:6px}}
+/* Press Start 2P sets its T with extra room on the left, so in "CUSTOM" it looks like a gap: pull it in */.kT{font-style:normal;margin-left:-.14em}
 </style>
 
 <div class="app">
@@ -1801,7 +1802,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
         <h1>MULTI<span>PLAYER</span></h1>
         <div class="mpPick">
           <button class="mode" id="goRanked" type="button"><b>RANKED</b></button>
-          <button class="mode alt" id="goCustom" type="button"><b>CUSTOM</b></button>
+          <button class="mode alt" id="goCustom" type="button"><b>CUS<i class="kT">T</i>OM</b></button>
         </div>
         <button class="mbtn mpBoard mpPO" id="goTourney" type="button">FRIENDS PLAYOFF<span class="frBadge" id="tnBadge" hidden>!</span></button>
         <div class="mpRow"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button></div>
@@ -7918,7 +7919,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='db4796cc1a',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='b23e0530c7',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7929,7 +7930,7 @@ function stockSpec(k,base){const R=PRISTINE[base]||PRISTINE[k];return{base:PRIST
 // is this room playing ranked? (the host chose Ranked on the Multiplayer page; a guest plays whatever room it joined)
 const rkOn=o=>!!o&&(o.role==='guest'?!!(o.opp&&o.opp.rk):o.mode==='ranked');
 // the room's heading and blurb follow its kind
-function rkHead(o){const on=rkOn(o);$('olHead').innerHTML=on?'RANKED <span>1v1</span>':'CUSTOM <span>1v1</span>';
+function rkHead(o){const on=rkOn(o);$('olHead').innerHTML=on?'RANKED <span>1v1</span>':'CUS<i class="kT">T</i>OM <span>1v1</span>';
  $('olNote').textContent=on?'A rated game against a friend. One of you creates a room and shares the code, the other joins with it. Each club plays its own roster, one game, and the result counts for both ratings.'
   :''}
 // the lobby: who may ready up, and what the room needs to hear about it

@@ -17,7 +17,7 @@ function stockSpec(k,base){const R=PRISTINE[base]||PRISTINE[k];return{base:PRIST
 // is this room playing ranked? (the host chose Ranked on the Multiplayer page; a guest plays whatever room it joined)
 const rkOn=o=>!!o&&(o.role==='guest'?!!(o.opp&&o.opp.rk):o.mode==='ranked');
 // the room's heading and blurb follow its kind
-function rkHead(o){const on=rkOn(o);$('olHead').innerHTML=on?'RANKED <span>1v1</span>':'CUSTOM <span>1v1</span>';
+function rkHead(o){const on=rkOn(o);$('olHead').innerHTML=on?'RANKED <span>1v1</span>':'CUS<i class="kT">T</i>OM <span>1v1</span>';
  $('olNote').textContent=on?'A rated game against a friend. One of you creates a room and shares the code, the other joins with it. Each club plays its own roster, one game, and the result counts for both ratings.'
   :''}
 // the lobby: who may ready up, and what the room needs to hear about it
