@@ -901,15 +901,15 @@ body.inMenu .olNet{display:none!important}
 /* new version: a bar across the top, on the menus (never in the middle of a game) */
 .upd{position:fixed;left:0;right:0;top:0;z-index:50;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));padding-top:max(8px,env(safe-area-inset-top,0px));background:var(--amber);color:#14110a;font-family:var(--f-hud);font-size:12px;letter-spacing:.04em;box-shadow:0 3px 0 rgba(0,0,0,.35)}
 .upd[hidden]{display:none}.upd button{font-family:var(--f-hud);font-size:12px;padding:6px 12px;background:#14110a;color:var(--amber);border:2px solid #14110a;cursor:pointer}
-.mmAds{width:100%;color:var(--amber)}.mmAds small{font-size:8px;color:var(--dim);margin-left:6px}
-#scrAds{max-width:min(1100px,96vw);width:96vw}
-#scrAds h1 small{display:block;font-size:11px;color:var(--dim);letter-spacing:.14em;margin-top:4px}
-.adsWrap{max-height:62vh;overflow:auto;text-align:left;padding:4px 2px 10px;margin-bottom:12px}
-.adsH{font-family:var(--f-hud);font-size:14px;letter-spacing:.12em;color:var(--amber);margin:16px 0 8px}
-.adsH small{display:block;color:var(--dim);font-size:11px;letter-spacing:.04em;margin-top:2px}
-.adsRow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
-.adCv{image-rendering:pixelated;width:auto;height:auto;zoom:1.5;display:block}
-@media (max-width:600px){.adCv{zoom:1.15}}
+.mmSpons{width:100%;color:var(--amber)}.mmSpons small{font-size:8px;color:var(--dim);margin-left:6px}
+#scrSpons{max-width:min(1100px,96vw);width:96vw}
+#scrSpons h1 small{display:block;font-size:11px;color:var(--dim);letter-spacing:.14em;margin-top:4px}
+.spWrap{max-height:62vh;overflow:auto;text-align:left;padding:4px 2px 10px;margin-bottom:12px}
+.spHd{font-family:var(--f-hud);font-size:14px;letter-spacing:.12em;color:var(--amber);margin:16px 0 8px}
+.spHd small{display:block;color:var(--dim);font-size:11px;letter-spacing:.04em;margin-top:2px}
+.spRow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.spCv{image-rendering:pixelated;width:auto;height:auto;zoom:1.5;display:block}
+@media (max-width:600px){.spCv{zoom:1.15}}
 /* ---- lineup: the club on a field, cards at each position, the collection tray below ---- */
 #scrLineup .cards{display:block}
 .lfWrap{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px;align-items:start}
@@ -1262,10 +1262,10 @@ canvas.shake{animation:packShake .6s steps(6)}
 .app.deskApp #title .card .acLead{font-size:15px}.app.deskApp #title .card .acHint{font-size:14px}.app.deskApp #title .card .acSwap{font-size:15px}
 .app.deskApp #title .card .mode.bp small{font-size:14px}.app.deskApp #title .card .mpBoard{font-size:21px}
 /* the sponsors preview under the PC menu zoom: keep the card inside the screen so its list scrolls instead of running off the bottom */
-.app.deskApp #title>#scrAds{width:calc(96vw / var(--uiZ,1));max-width:calc(min(1100px,96vw) / var(--uiZ,1) * 1.25)}
-.adsWrap{flex:0 0 auto;min-height:120px}/* (Safari collapses a scrolling flex child to nothing; never let it shrink) */
-.app.deskApp #scrAds .adsWrap{height:calc((100vh - 190px) / var(--uiZ,1));height:calc((100dvh - 190px) / var(--uiZ,1));max-height:none;overscroll-behavior:contain}
-.adsErr{color:#e2603a;font-size:14px;margin:12px 0}
+.app.deskApp #title>#scrSpons{width:calc(96vw / var(--uiZ,1));max-width:calc(min(1100px,96vw) / var(--uiZ,1) * 1.25)}
+.spWrap{flex:0 0 auto;min-height:120px}/* (Safari collapses a scrolling flex child to nothing; never let it shrink) */
+.app.deskApp #scrSpons .spWrap{height:calc((100vh - 190px) / var(--uiZ,1));height:calc((100dvh - 190px) / var(--uiZ,1));max-height:none;overscroll-behavior:contain}
+.spErr{color:#e2603a;font-size:14px;margin:12px 0}
 </style>
 
 <div class="app">
@@ -1316,7 +1316,7 @@ canvas.shake{animation:packShake .6s steps(6)}
           <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">TEAM</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
-          <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button></div>
+          <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmSpons" type="button" data-go="scrSpons">SPONSORS <small>PREVIEW</small></button></div>
         </nav>
         <div class="coinBal" id="coinBal" title="Coins: win games and hit home runs to earn them"><i class="coinIc"></i><b>0</b> COINS</div>
         <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
@@ -1370,9 +1370,9 @@ canvas.shake{animation:packShake .6s steps(6)}
         </div>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
-      <div class="card" id="scrAds" hidden>
+      <div class="card" id="scrSpons" hidden>
         <h1><span>SPONSORS</span><small>SAMPLE SIGNS · PREVIEW ONLY</small></h1>
-        <div class="adsWrap" id="adsWrap"></div>
+        <div class="spWrap" id="spWrap"></div>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="privBar" id="privBar" role="region" aria-label="Privacy notice" hidden>
@@ -6532,7 +6532,7 @@ let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createEle
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){qLeaving(id);roomLineupBack(id);if(pendingMode==='watch'&&id!=='scrTeams'){pendingMode=null;myTeamRestore()}/* backed out of picking a team to watch: your own club again */if(pendingMode==='brand'&&id!=='scrTeams')brandCancel();if(id==='scrTeams'&&pendingMode==='brand'){$('tsPrev').hidden=$('tsNext').hidden=false}
- document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds','scrShop','scrMulti','scrQueue','scrBoard','scrFb'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+ document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();
 // PC menu scale: 1 at about 720 px tall (1.5 on 1080p), up to 1.65 on big screens (never wider than the screen allows);
 // the main menu grows a fifth as much (1.1 on 1080p)
@@ -6667,7 +6667,7 @@ const AD_ICON={plane:['...X....','...XX...','XXXXXXXX','.XXXXXX.','...XX...','..
  cup:['.X.X....','..X.X...','XXXXXX..','X....XXX','X....X.X','X....XXX','.XXXX...','XXXXXXX.'],
  chick:['..XX....','.XXXX...','XXX.XXX.','.XXXXXXX','.XXXXXX.','..XXXX..','..X..X..','.XX.XX..']};
 function adIcon(g,x,y,ic,c,s){g.fillStyle=c;(AD_ICON[ic]||[]).forEach((r,j)=>{for(let i=0;i<8;i++)if(r[i]==='X')g.fillRect(x+i*s,y+j*s,s,s)})}
-function adCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;c.className='adCv';const g=c.getContext('2d');g.imageSmoothingEnabled=false;return[c,g]}
+function adCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;c.className='spCv';const g=c.getContext('2d');g.imageSmoothingEnabled=false;return[c,g]}
 // 1. outfield wall pad: the sponsor painted on the padded panel, with the yellow home-run line on top
 function adWall(sp){const[c,g]=adCanvas(240,44);g.fillStyle='#ffd23f';g.fillRect(0,0,240,3);g.fillStyle=sp.bg;g.fillRect(0,3,240,38);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(0,35,240,6);
  for(let x=0;x<240;x+=60){g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x,3,1,38)}adIcon(g,10,10,sp.ic,sp.ac,3);
@@ -6694,16 +6694,16 @@ function adFan(sp){const[c,g]=adCanvas(150,40);g.fillStyle='rgba(0,0,0,.3)';g.fi
 function adBackstop(sp){const[c,g]=adCanvas(240,26);g.fillStyle='#1b1f24';g.fillRect(0,0,240,26);g.fillStyle=sp.bg;g.fillRect(2,2,236,22);g.fillStyle=sp.ac;g.fillRect(2,2,4,22);g.fillRect(234,2,4,22);
  adIcon(g,12,5,sp.ic,sp.fg,2);adIcon(g,212,5,sp.ic,sp.fg,2);g.fillStyle=sp.fg;g.font='bold 13px "Pixelify Sans", monospace';g.textBaseline='middle';g.textAlign='center';g.fillText(`${sp.n} · ${sp.k}`,120,14,180);return c}
 let ADS_RAF=0;
-function adsRender(){try{adsRender0()}catch(e){const W=$('adsWrap');const p=document.createElement('p');p.className='adsErr';p.textContent='Some signs couldn\u2019t be drawn ('+(e&&e.message||e)+').';W.appendChild(p);if(typeof console!=='undefined')console.error('[pd] sponsors',e)}}
-function adsRender0(){const W=$('adsWrap');W.innerHTML='';const live=[];
- const sec=(t,d)=>{const h=document.createElement('h3');h.className='adsH';h.innerHTML=`${t}<small>${d}</small>`;W.appendChild(h);const r=document.createElement('div');r.className='adsRow';W.appendChild(r);return r};
+function adsRender(){try{adsRender0()}catch(e){const W=$('spWrap');const p=document.createElement('p');p.className='spErr';p.textContent='Some signs couldn\u2019t be drawn ('+(e&&e.message||e)+').';W.appendChild(p);if(typeof console!=='undefined')console.error('[pd] sponsors',e)}}
+function adsRender0(){const W=$('spWrap');W.innerHTML='';const live=[];
+ const sec=(t,d)=>{const h=document.createElement('h3');h.className='spHd';h.innerHTML=`${t}<small>${d}</small>`;W.appendChild(h);const r=document.createElement('div');r.className='spRow';W.appendChild(r);return r};
  let r=sec('OUTFIELD WALL PADS','Painted on the padded wall between the yellow line and the warning track');AD_SPONSORS.forEach(sp=>r.appendChild(adWall(sp)));
- r=sec('UPPER-DECK LED RIBBON','Scrolls along the fascia between the decks');AD_SPONSORS.slice(0,4).forEach(sp=>{const box=document.createElement('div');box.className='adLive';r.appendChild(box);live.push([box,now=>adRibbon(sp,now)])});
+ r=sec('UPPER-DECK LED RIBBON','Scrolls along the fascia between the decks');AD_SPONSORS.slice(0,4).forEach(sp=>{const box=document.createElement('div');box.className='spLive';r.appendChild(box);live.push([box,now=>adRibbon(sp,now)])});
  r=sec('BILLBOARDS','On legs above the outfield seats and the concourse');AD_SPONSORS.forEach(sp=>r.appendChild(adBoard(sp)));
- r=sec('JUMBOTRON SPOTS','Between innings and during pitching changes');AD_SPONSORS.slice(0,6).forEach(sp=>{const box=document.createElement('div');box.className='adLive';r.appendChild(box);live.push([box,now=>adJumbo(sp,now)])});
+ r=sec('JUMBOTRON SPOTS','Between innings and during pitching changes');AD_SPONSORS.slice(0,6).forEach(sp=>{const box=document.createElement('div');box.className='spLive';r.appendChild(box);live.push([box,now=>adJumbo(sp,now)])});
  r=sec('BACKSTOP BOARDS','The rotating board behind home plate, seen on every pitch');AD_SPONSORS.forEach(sp=>r.appendChild(adBackstop(sp)));
  r=sec('FAN BANNERS','Hand-held in the stands');AD_SPONSORS.forEach(sp=>r.appendChild(adFan(sp)));
- cancelAnimationFrame(ADS_RAF);const tick=now=>{if($('scrAds').hidden)return;for(const[b,f]of live){const c=f(now);b.replaceChildren(c)}ADS_RAF=setTimeout(()=>requestAnimationFrame(tick),80)};requestAnimationFrame(tick)}
+ cancelAnimationFrame(ADS_RAF);const tick=now=>{if($('scrSpons').hidden)return;for(const[b,f]of live){const c=f(now);b.replaceChildren(c)}ADS_RAF=setTimeout(()=>requestAnimationFrame(tick),80)};requestAnimationFrame(tick)}
 // ---------- lineup screen: the club laid out on a field, a card at every position, your card collection in a tray below.
 // Tap a player on the field to pick him up; tap a card in the tray to sign it into his spot, or tap another hitter on the
 // field to swap their places in the batting order. Uses the signings layer (19a) for the actual roster changes. ----------
@@ -7456,7 +7456,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='ba5fbef330',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='0f1d674313',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

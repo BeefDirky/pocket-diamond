@@ -22,7 +22,7 @@ const AD_ICON={plane:['...X....','...XX...','XXXXXXXX','.XXXXXX.','...XX...','..
  cup:['.X.X....','..X.X...','XXXXXX..','X....XXX','X....X.X','X....XXX','.XXXX...','XXXXXXX.'],
  chick:['..XX....','.XXXX...','XXX.XXX.','.XXXXXXX','.XXXXXX.','..XXXX..','..X..X..','.XX.XX..']};
 function adIcon(g,x,y,ic,c,s){g.fillStyle=c;(AD_ICON[ic]||[]).forEach((r,j)=>{for(let i=0;i<8;i++)if(r[i]==='X')g.fillRect(x+i*s,y+j*s,s,s)})}
-function adCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;c.className='adCv';const g=c.getContext('2d');g.imageSmoothingEnabled=false;return[c,g]}
+function adCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;c.className='spCv';const g=c.getContext('2d');g.imageSmoothingEnabled=false;return[c,g]}
 // 1. outfield wall pad: the sponsor painted on the padded panel, with the yellow home-run line on top
 function adWall(sp){const[c,g]=adCanvas(240,44);g.fillStyle='#ffd23f';g.fillRect(0,0,240,3);g.fillStyle=sp.bg;g.fillRect(0,3,240,38);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(0,35,240,6);
  for(let x=0;x<240;x+=60){g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x,3,1,38)}adIcon(g,10,10,sp.ic,sp.ac,3);
@@ -49,13 +49,13 @@ function adFan(sp){const[c,g]=adCanvas(150,40);g.fillStyle='rgba(0,0,0,.3)';g.fi
 function adBackstop(sp){const[c,g]=adCanvas(240,26);g.fillStyle='#1b1f24';g.fillRect(0,0,240,26);g.fillStyle=sp.bg;g.fillRect(2,2,236,22);g.fillStyle=sp.ac;g.fillRect(2,2,4,22);g.fillRect(234,2,4,22);
  adIcon(g,12,5,sp.ic,sp.fg,2);adIcon(g,212,5,sp.ic,sp.fg,2);g.fillStyle=sp.fg;g.font='bold 13px "Pixelify Sans", monospace';g.textBaseline='middle';g.textAlign='center';g.fillText(`${sp.n} · ${sp.k}`,120,14,180);return c}
 let ADS_RAF=0;
-function adsRender(){try{adsRender0()}catch(e){const W=$('adsWrap');const p=document.createElement('p');p.className='adsErr';p.textContent='Some signs couldn\u2019t be drawn ('+(e&&e.message||e)+').';W.appendChild(p);if(typeof console!=='undefined')console.error('[pd] sponsors',e)}}
-function adsRender0(){const W=$('adsWrap');W.innerHTML='';const live=[];
- const sec=(t,d)=>{const h=document.createElement('h3');h.className='adsH';h.innerHTML=`${t}<small>${d}</small>`;W.appendChild(h);const r=document.createElement('div');r.className='adsRow';W.appendChild(r);return r};
+function adsRender(){try{adsRender0()}catch(e){const W=$('spWrap');const p=document.createElement('p');p.className='spErr';p.textContent='Some signs couldn\u2019t be drawn ('+(e&&e.message||e)+').';W.appendChild(p);if(typeof console!=='undefined')console.error('[pd] sponsors',e)}}
+function adsRender0(){const W=$('spWrap');W.innerHTML='';const live=[];
+ const sec=(t,d)=>{const h=document.createElement('h3');h.className='spHd';h.innerHTML=`${t}<small>${d}</small>`;W.appendChild(h);const r=document.createElement('div');r.className='spRow';W.appendChild(r);return r};
  let r=sec('OUTFIELD WALL PADS','Painted on the padded wall between the yellow line and the warning track');AD_SPONSORS.forEach(sp=>r.appendChild(adWall(sp)));
- r=sec('UPPER-DECK LED RIBBON','Scrolls along the fascia between the decks');AD_SPONSORS.slice(0,4).forEach(sp=>{const box=document.createElement('div');box.className='adLive';r.appendChild(box);live.push([box,now=>adRibbon(sp,now)])});
+ r=sec('UPPER-DECK LED RIBBON','Scrolls along the fascia between the decks');AD_SPONSORS.slice(0,4).forEach(sp=>{const box=document.createElement('div');box.className='spLive';r.appendChild(box);live.push([box,now=>adRibbon(sp,now)])});
  r=sec('BILLBOARDS','On legs above the outfield seats and the concourse');AD_SPONSORS.forEach(sp=>r.appendChild(adBoard(sp)));
- r=sec('JUMBOTRON SPOTS','Between innings and during pitching changes');AD_SPONSORS.slice(0,6).forEach(sp=>{const box=document.createElement('div');box.className='adLive';r.appendChild(box);live.push([box,now=>adJumbo(sp,now)])});
+ r=sec('JUMBOTRON SPOTS','Between innings and during pitching changes');AD_SPONSORS.slice(0,6).forEach(sp=>{const box=document.createElement('div');box.className='spLive';r.appendChild(box);live.push([box,now=>adJumbo(sp,now)])});
  r=sec('BACKSTOP BOARDS','The rotating board behind home plate, seen on every pitch');AD_SPONSORS.forEach(sp=>r.appendChild(adBackstop(sp)));
  r=sec('FAN BANNERS','Hand-held in the stands');AD_SPONSORS.forEach(sp=>r.appendChild(adFan(sp)));
- cancelAnimationFrame(ADS_RAF);const tick=now=>{if($('scrAds').hidden)return;for(const[b,f]of live){const c=f(now);b.replaceChildren(c)}ADS_RAF=setTimeout(()=>requestAnimationFrame(tick),80)};requestAnimationFrame(tick)}
+ cancelAnimationFrame(ADS_RAF);const tick=now=>{if($('scrSpons').hidden)return;for(const[b,f]of live){const c=f(now);b.replaceChildren(c)}ADS_RAF=setTimeout(()=>requestAnimationFrame(tick),80)};requestAnimationFrame(tick)}
