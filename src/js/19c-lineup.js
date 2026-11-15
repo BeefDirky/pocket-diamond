@@ -79,7 +79,9 @@ function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria
 function lfKeepScroll(){const at={};for(const c of['lfPen','lfTray','boRow']){const e=document.querySelector('#cards .'+c);if(e)at[c]=[e.scrollLeft,e.scrollTop]}
  return()=>{for(const c in at){const e=document.querySelector('#cards .'+c);if(e){e.style.scrollBehavior='auto';e.scrollLeft=at[c][0];e.scrollTop=at[c][1];e.style.scrollBehavior=''}}}}
 /* a long name (HWANG M.U.) on a narrow card was cut to HWANG M...: step the type down until the whole name fits */
-function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.style.fontSize='';let fs=parseFloat(getComputedStyle(e).fontSize),n=0;while(e.scrollWidth>e.clientWidth+.5&&fs>7.5&&n++<8){fs-=.75;e.style.fontSize=fs+'px'}}}
+function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.style.fontSize='';e.style.lineHeight='';const h=e.clientHeight,cs=getComputedStyle(e),pad=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
+ let fs=parseFloat(cs.fontSize),n=0;while(e.scrollWidth>e.clientWidth+.5&&fs>7.5&&n++<8){fs-=.75;e.style.fontSize=fs+'px'}
+ if(n)e.style.lineHeight=(h-pad)+'px'}}/* (the smaller type keeps the row's height, so a long-named card is as tall as the rest) */
 $('cards').addEventListener('click',e=>{
  if(lfDrag.eat>performance.now()){e.stopImmediatePropagation();return}
  const bo=e.target.closest('.lfc.bo');if(bo){const i=+bo.dataset.o,L=TEAMS[S.you].lineup;
