@@ -186,7 +186,7 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
  netPresence({v:1,role,team:S.you,ros:myRosterSpec(),base:MYTEAM?MYTEAM.base:S.you,rdy:null,acct:rkReady()?ACC.name:null,...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
- S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:myRosterSpec(),rdy:null});/* (a kit for this room only: your players stay yours) */lobbyRender()});
+ S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);restoreNetRosters();if(MYTEAM&&t!==MYTEAM.club)applyRosterSpec(t,myRosterSpec());/* (your lineup in whatever kit you pick) */syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:myRosterSpec(),rdy:null});/* (a kit for this room only: your players stay yours) */lobbyRender()});
 // ranked never shows the room lobby: a ranked room left over from a finished or abandoned match is closed here
 function rkLeftover(o){return !!o&&(o.queued||o.mode==='ranked'||/^rk-/.test(o.code||''))}
 function rkDrop(o){resumeClear();if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}if(S.online===o)S.online=null}
@@ -218,3 +218,6 @@ function netPill(){const o=S.online,el=$('olNet');const on=!!(o&&o.nr&&o.inGame)
 $('olNet').addEventListener('click',()=>{const o=S.online;if(o&&o.nr&&o.nr.reconnect)o.nr.reconnect()});
 setInterval(netPill,1000);
 $('olRejoin').addEventListener('click',()=>{const r=resumeGet();if(!r)return;S.you=r.team;syncPicker();applyCustom();joinRoom(r.code,r.role,r)});
+
+/* leaving a room's lobby for the menus: the club you wore goes back to its own players */
+function roomKitRestore(id){if((id==='scrMulti'||id==='scrMain'||id==='scrSingle')&&!(S.online&&S.online.inGame)&&!onlineGame())restoreNetRosters()}

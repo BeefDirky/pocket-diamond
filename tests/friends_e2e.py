@@ -30,7 +30,7 @@ def rpc(fn, args, user):
             c.execute('begin'); c.execute('set local role authenticated'); c.execute("select set_config('request.jwt.claim.sub', %s, true)", (user,))
             names = list(args.keys())
             sql = f"select public.{fn}(" + ','.join(f'{k} => %s' for k in names) + ")"
-            if fn in ('friends_list',):   # (a table function: Supabase returns its rows as a JSON list)
+            if fn in ('friends_list', 'friend_invites_inbox'):   # (a table function: Supabase returns its rows as a JSON list)
                 sql = f"select coalesce(json_agg(t), '[]'::json) from public.{fn}(" + ','.join(f'{k} => %s' for k in names) + ") t"
             # (Supabase turns a JSON list into a Postgres array for text[] parameters like p_clubs; jsonb ones stay JSON)
             vals = [v if k == 'p_clubs' else json.dumps(v) if isinstance(v, (dict, list)) else v for k, v in args.items()]
@@ -88,9 +88,16 @@ with sync_playwright() as p:
     check(PA.evaluate("document.querySelector('[data-inv]').disabled"), 'an offline friend can\'t be invited')
     for pg, other in ((PA, B), (PB, A)): pg.evaluate(f"__x(\"LIVE.who={{'{other}':'m'}};frRender()\")")
     check('ONLINE' in PA.text_content('#frList') and not PA.evaluate("document.querySelector('[data-inv]').disabled"), 'an online friend shows ONLINE and can be invited')
+    # first an invite that gets NOT NOW: the sender's room says so
+    PA.click('[data-inv]'); PA.wait_for_timeout(1500)
+    PB.wait_for_selector('#frInvite:not([hidden])', timeout=9000); PB.click('#frInvNo')
+    PA.wait_for_function("document.getElementById('olNote').textContent.includes('can')", timeout=12000)
+    check('can’t play' in PA.text_content('#olNote'), 'NOT NOW reaches the sender: ' + PA.text_content('#olNote'))
+    PA.evaluate("__x(\"if(S.online&&S.online.nr)S.online.nr.leave();S.online=null;frOpen()\")"); PA.wait_for_timeout(600)
+    PA.evaluate(f"__x(\"LIVE.who={{'{B}':'m'}};frRender()\")")
     PA.click('[data-inv]'); PA.wait_for_timeout(1500)
     check(PA.is_visible('#scrOnline') and PA.evaluate("__x('!!(S.online&&S.online.nr)')"), 'inviting opens a custom room')
-    PB.wait_for_selector('#frInvite:not([hidden])', timeout=5000)
+    PB.wait_for_selector('#frInvite:not([hidden])', timeout=9000)
     check('BeefDirky' in PB.text_content('#frInvTxt'), 'the friend gets the invite: ' + PB.text_content('#frInvTxt'))
     PB.click('#frInvGo'); PB.wait_for_timeout(2500)
     check(PB.is_visible('#scrOnline') and PA.evaluate("__x('!!(S.online&&S.online.opp)')") and PB.evaluate("__x('!!(S.online&&S.online.opp)')"), 'JOIN: both in the same room')

@@ -129,7 +129,7 @@ $('cards').addEventListener('pointerdown',e=>{if(lnView!=='mine'||lfTab!=='field
 addEventListener('pointermove',e=>{const d=lfDrag;if(!d.st||e.pointerId!==d.st.pid)return;const dx=e.clientX-d.st.x,dy=e.clientY-d.st.y;
  /* the tray cards take every touch themselves (touch-action:none), so the browser never grabs the gesture and cancels the drag
     halfway up the screen; a sideways swipe scrolls the tray by hand instead */
- if(d.st.pan){e.preventDefault();d.st.tr.scrollLeft=d.st.sl-dx;return}
+ if(d.st.pan){e.preventDefault();d.st.tr.scrollLeft=d.st.sl-dx;const now=performance.now(),dt=now-(d.st.lt||now)||16;d.st.v=.7*(d.st.v||0)+.3*((e.clientX-(d.st.lx??e.clientX))/dt);d.st.lt=now;d.st.lx=e.clientX;return}
  if(!d.on){if(Math.hypot(dx,dy)<8)return;if(Math.abs(dx)>Math.abs(dy)*1.2&&e.pointerType!=='mouse'&&d.st.tr){d.st.pan=true;d.eat=performance.now()+350;return}lfDragStart(e)}
  if(!d.on)return;e.preventDefault();d.ghost.style.transform=`translate(${e.clientX-d.gw/2}px,${e.clientY-d.gh*.4}px) rotate(-4deg)`;
  const el=document.elementFromPoint(e.clientX,e.clientY),t=el&&el.closest('.lfField .lfc[data-i],.lfPen .lfc[data-i]');
@@ -141,7 +141,7 @@ function lfDragStart(e){const d=lfDrag,c=CARD_BY[d.st.id];d.on=true;d.card=c;con
  d.st.b.classList.add('dragSrc');document.body.classList.add('lfDragging');
  const T=TEAMS[S.you];for(const t of document.querySelectorAll('.lfField .lfc[data-i],.lfPen .lfc[data-i]')){const i=+t.dataset.i,p=i>=0?T.lineup[i]:T.staff[-1-i];t.classList.add(lfFitWhy(c,i,p)?'dropNo':'dropOk')}
  try{d.st.b.setPointerCapture(e.pointerId)}catch(_){}}
-function lfDragEnd(e,cancel){const d=lfDrag;if(!d.st)return;const was=d.on;if(d.st.pan)d.eat=performance.now()+300;
+function lfDragEnd(e,cancel){const d=lfDrag;if(!d.st)return;const was=d.on;if(d.st.pan){d.eat=performance.now()+300;lfGlide(d.st.tr,d.st.v||0)}
  if(was){d.eat=performance.now()+350;const t=d.over;if(d.ghost)d.ghost.remove();d.ghost=null;d.st.b.classList.remove('dragSrc');document.body.classList.remove('lfDragging');
   for(const x of document.querySelectorAll('.dropOk,.dropNo,.dropHover'))x.classList.remove('dropOk','dropNo','dropHover');
   if(t&&!cancel){const T=TEAMS[S.you],i=+t.dataset.i,pit=i<0,p=pit?T.staff[-1-i]:T.lineup[i],why=lfFitWhy(d.card,i,p);
@@ -170,3 +170,7 @@ function boDragEnd(e,cancel){const d=boDrag;if(!d.st)return;if(d.on){if(d.g)d.g.
   boSel=null;boRender(TEAMS[S.you],S.you)}
  d.st=null;d.on=false;d.g=null}
 addEventListener('pointerup',e=>boDragEnd(e,false));addEventListener('pointercancel',e=>boDragEnd(e,true));
+
+/* a swipe on the card tray keeps gliding after you let go, slowing down like a normal scroll */
+function lfGlide(tr,v){if(!tr||Math.abs(v)<.05)return;let last=performance.now();const step=t=>{const dt=Math.min(32,t-last);last=t;tr.scrollLeft-=v*dt;v*=Math.pow(.994,dt);
+ if(Math.abs(v)>.02&&tr.isConnected&&!lfDrag.st)requestAnimationFrame(step)};requestAnimationFrame(step)}

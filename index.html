@@ -1443,6 +1443,11 @@ html,body,#title,#title .card{scrollbar-width:none;-ms-overflow-style:none}
 html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title .card::-webkit-scrollbar{display:none;width:0;height:0}
 #title{scrollbar-gutter:auto;overflow-x:hidden}
 #title{touch-action:pan-y;overscroll-behavior-x:none}html,body{overflow-x:hidden;overscroll-behavior-x:none}
+#olNote:empty{display:none}
+.olCodeBox{font-size:13px}.olCodeBox b{font-size:40px}.app.deskApp .olCodeBox b{font-size:46px}
+/* PC: the lineup page isn't zoomed like the other menus, so its back button and title are scaled to match theirs */
+.app.deskApp #scrLineup>.xBack{transform:scale(var(--uiZ,1));transform-origin:top left;left:10px;top:10px}
+.app.deskApp #scrLineup>.lnTop{min-height:calc(46px * var(--uiZ,1))}.app.deskApp #scrLineup .lnTop h1{font-size:calc(20px * var(--uiZ,1))}
 </style>
 
 <div class="app">
@@ -1805,7 +1810,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
       </div>
       <div class="card wide" id="scrOnline" hidden>
         <h1 id="olHead">ONLINE <span>1v1</span></h1>
-        <p id="olNote">Play a friend in real time. One of you creates a room and shares the code, the other joins with it. Then you each pick a club. The host is the home team.</p>
+        <p id="olNote"></p>
         <div id="olStart" class="olStart">
           <button class="big" id="olRejoin" type="button" hidden>REJOIN GAME</button>
           <button class="big" id="olCreate" type="button">CREATE ROOM</button>
@@ -6819,7 +6824,7 @@ $('lnOpp').addEventListener('click',()=>{lnView='opp';lnSel=null;lfFlip=null;ren
 let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.fillStyle='#1b1f24';g.beginPath();g.arc(48,48,44,0,Math.PI*2);g.fill();g.strokeStyle='#3a4048';g.lineWidth=6;g.stroke();g.fillStyle='#ffbf3c';g.font='48px "Press Start 2P", monospace';g.textAlign='center';g.textBaseline='middle';g.fillText('?',50,52);return Q_URL=c.toDataURL()}
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
-function showScreen(id){qLeaving(id);roomLineupBack(id);if(pendingMode==='watch'&&id!=='scrTeams'){pendingMode=null;myTeamRestore()}/* backed out of picking a team to watch: your own club again */if(pendingMode==='brand'&&id!=='scrTeams')brandCancel();if(id==='scrTeams'&&pendingMode==='brand'){$('tsPrev').hidden=$('tsNext').hidden=false}
+function showScreen(id){qLeaving(id);roomLineupBack(id);roomKitRestore(id);if(pendingMode==='watch'&&id!=='scrTeams'){pendingMode=null;myTeamRestore()}/* backed out of picking a team to watch: your own club again */if(pendingMode==='brand'&&id!=='scrTeams')brandCancel();if(id==='scrTeams'&&pendingMode==='brand'){$('tsPrev').hidden=$('tsNext').hidden=false}
  document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb','scrLegal','scrPlay','scrFriends'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();
 // PC menu scale: 1 at about 720 px tall (1.5 on 1080p), up to 1.65 on big screens (never wider than the screen allows);
@@ -7123,7 +7128,7 @@ $('cards').addEventListener('pointerdown',e=>{if(lnView!=='mine'||lfTab!=='field
 addEventListener('pointermove',e=>{const d=lfDrag;if(!d.st||e.pointerId!==d.st.pid)return;const dx=e.clientX-d.st.x,dy=e.clientY-d.st.y;
  /* the tray cards take every touch themselves (touch-action:none), so the browser never grabs the gesture and cancels the drag
     halfway up the screen; a sideways swipe scrolls the tray by hand instead */
- if(d.st.pan){e.preventDefault();d.st.tr.scrollLeft=d.st.sl-dx;return}
+ if(d.st.pan){e.preventDefault();d.st.tr.scrollLeft=d.st.sl-dx;const now=performance.now(),dt=now-(d.st.lt||now)||16;d.st.v=.7*(d.st.v||0)+.3*((e.clientX-(d.st.lx??e.clientX))/dt);d.st.lt=now;d.st.lx=e.clientX;return}
  if(!d.on){if(Math.hypot(dx,dy)<8)return;if(Math.abs(dx)>Math.abs(dy)*1.2&&e.pointerType!=='mouse'&&d.st.tr){d.st.pan=true;d.eat=performance.now()+350;return}lfDragStart(e)}
  if(!d.on)return;e.preventDefault();d.ghost.style.transform=`translate(${e.clientX-d.gw/2}px,${e.clientY-d.gh*.4}px) rotate(-4deg)`;
  const el=document.elementFromPoint(e.clientX,e.clientY),t=el&&el.closest('.lfField .lfc[data-i],.lfPen .lfc[data-i]');
@@ -7135,7 +7140,7 @@ function lfDragStart(e){const d=lfDrag,c=CARD_BY[d.st.id];d.on=true;d.card=c;con
  d.st.b.classList.add('dragSrc');document.body.classList.add('lfDragging');
  const T=TEAMS[S.you];for(const t of document.querySelectorAll('.lfField .lfc[data-i],.lfPen .lfc[data-i]')){const i=+t.dataset.i,p=i>=0?T.lineup[i]:T.staff[-1-i];t.classList.add(lfFitWhy(c,i,p)?'dropNo':'dropOk')}
  try{d.st.b.setPointerCapture(e.pointerId)}catch(_){}}
-function lfDragEnd(e,cancel){const d=lfDrag;if(!d.st)return;const was=d.on;if(d.st.pan)d.eat=performance.now()+300;
+function lfDragEnd(e,cancel){const d=lfDrag;if(!d.st)return;const was=d.on;if(d.st.pan){d.eat=performance.now()+300;lfGlide(d.st.tr,d.st.v||0)}
  if(was){d.eat=performance.now()+350;const t=d.over;if(d.ghost)d.ghost.remove();d.ghost=null;d.st.b.classList.remove('dragSrc');document.body.classList.remove('lfDragging');
   for(const x of document.querySelectorAll('.dropOk,.dropNo,.dropHover'))x.classList.remove('dropOk','dropNo','dropHover');
   if(t&&!cancel){const T=TEAMS[S.you],i=+t.dataset.i,pit=i<0,p=pit?T.staff[-1-i]:T.lineup[i],why=lfFitWhy(d.card,i,p);
@@ -7164,6 +7169,10 @@ function boDragEnd(e,cancel){const d=boDrag;if(!d.st)return;if(d.on){if(d.g)d.g.
   boSel=null;boRender(TEAMS[S.you],S.you)}
  d.st=null;d.on=false;d.g=null}
 addEventListener('pointerup',e=>boDragEnd(e,false));addEventListener('pointercancel',e=>boDragEnd(e,true));
+
+/* a swipe on the card tray keeps gliding after you let go, slowing down like a normal scroll */
+function lfGlide(tr,v){if(!tr||Math.abs(v)<.05)return;let last=performance.now();const step=t=>{const dt=Math.min(32,t-last);last=t;tr.scrollLeft-=v*dt;v*=Math.pow(.994,dt);
+ if(Math.abs(v)>.02&&tr.isConnected&&!lfDrag.st)requestAnimationFrame(step)};requestAnimationFrame(step)}
 // ---------- the Imugi Labs mark on the main menu: a fixed pixel bitmap (the logo put through a pixel filter at 49x23, with the
 // middle line one pixel longer at each end), so it looks the same on every device. Each '#' is one lit pixel ----------
 {const P=['..............#####################..............',
@@ -7259,7 +7268,7 @@ $('lnClub').addEventListener('click',()=>brandOpen(false));
 for(const t of document.querySelectorAll('#scrSingle .tile[data-go="scrLineup"]'))t.addEventListener('click',e=>{e.stopImmediatePropagation();teamOpen('scrSingle')},true);
 // ---- Custom rooms: EDIT LINEUP opens your lineup; coming back sends the room your new roster (and un-readies you) ----
 $('olEdit').addEventListener('click',()=>{const o=S.online;if(!o||o.inGame)return;o.kit=S.you;if(MYTEAM)S.you=MYTEAM.club;o.editLn=true;teamOpen('scrOnline')});
-function roomLineupBack(id){const o=S.online;if(!o||!o.editLn||id==='scrLineup'||id==='scrCards')return;o.editLn=false;if(o.kit)S.you=o.kit;$('lnClub').hidden=false;
+function roomLineupBack(id){const o=S.online;if(!o||!o.editLn||id==='scrLineup'||id==='scrCards')return;o.editLn=false;if(o.kit){S.you=o.kit;restoreNetRosters();if(MYTEAM&&o.kit!==MYTEAM.club)applyRosterSpec(o.kit,myRosterSpec())}$('lnClub').hidden=false;
  if(!o.inGame){netPresence({ros:myRosterSpec(),rdy:null});lobbyRender()}}
 // ---------- title picker ----------
 function buildPicker(){
@@ -7617,7 +7626,7 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
  netPresence({v:1,role,team:S.you,ros:myRosterSpec(),base:MYTEAM?MYTEAM.base:S.you,rdy:null,acct:rkReady()?ACC.name:null,...(resume?{ing:resume.gid,start:role==='host'?resume.start:undefined}:{})});lobbyRender()}
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
- S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:myRosterSpec(),rdy:null});/* (a kit for this room only: your players stay yours) */lobbyRender()});
+ S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);restoreNetRosters();if(MYTEAM&&t!==MYTEAM.club)applyRosterSpec(t,myRosterSpec());/* (your lineup in whatever kit you pick) */syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:myRosterSpec(),rdy:null});/* (a kit for this room only: your players stay yours) */lobbyRender()});
 // ranked never shows the room lobby: a ranked room left over from a finished or abandoned match is closed here
 function rkLeftover(o){return !!o&&(o.queued||o.mode==='ranked'||/^rk-/.test(o.code||''))}
 function rkDrop(o){resumeClear();if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}if(S.online===o)S.online=null}
@@ -7649,6 +7658,9 @@ function netPill(){const o=S.online,el=$('olNet');const on=!!(o&&o.nr&&o.inGame)
 $('olNet').addEventListener('click',()=>{const o=S.online;if(o&&o.nr&&o.nr.reconnect)o.nr.reconnect()});
 setInterval(netPill,1000);
 $('olRejoin').addEventListener('click',()=>{const r=resumeGet();if(!r)return;S.you=r.team;syncPicker();applyCustom();joinRoom(r.code,r.role,r)});
+
+/* leaving a room's lobby for the menus: the club you wore goes back to its own players */
+function roomKitRestore(id){if((id==='scrMulti'||id==='scrMain'||id==='scrSingle')&&!(S.online&&S.online.inGame)&&!onlineGame())restoreNetRosters()}
 // ---------- accounts + cloud saves (Supabase email/password; guests keep playing on this device) ----------
 // What's saved: every pd-* progress key in local storage (cards, signings, playoff run, custom lineup, options).
 // The device keeps working offline exactly as before; each change is pushed to the player's row in `saves` a few
@@ -7864,7 +7876,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='2c3de8935d',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='4e5cb98d4b',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7877,7 +7889,7 @@ const rkOn=o=>!!o&&(o.role==='guest'?!!(o.opp&&o.opp.rk):o.mode==='ranked');
 // the room's heading and blurb follow its kind
 function rkHead(o){const on=rkOn(o);$('olHead').innerHTML=on?'RANKED <span>1v1</span>':'CUSTOM <span>1v1</span>';
  $('olNote').textContent=on?'A rated game against a friend. One of you creates a room and shares the code, the other joins with it. Each club plays its own roster, one game, and the result counts for both ratings.'
-  :'Play a friend in real time. One of you creates a room and shares the code, the other joins with it. Then you each pick a club. The host is the home team.'}
+  :''}
 // the lobby: who may ready up, and what the room needs to hear about it
 function rkLobby(o){const on=rkOn(o),host=o.role==='host';
  $('olBoRow').hidden=!host||on;
@@ -8325,8 +8337,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-legal]');i
 // ---------- friends: add players by username, see who's online, invite a friend straight into a custom game ----------
 // The list lives on the server (migration 011: friend_request / friend_respond / friend_remove / friends_list).
 // Online status comes from the 'pd-live' presence channel (signed-in players say their id there). An invite is a
-// broadcast on the friend's own channel (pd-u-<id>) carrying a fresh custom room code; the friend's game only shows
-// invites from people on its friends list, and joining puts both phones in that room.
+// row on the server with a fresh custom room code (see frInvite below); joining puts both phones in that room.
 const FR={list:[],at:0,busy:false,ch:null,chFor:null,inv:null,invT:0};
 const frSignedIn=()=>!!(typeof ACC!=='undefined'&&ACC.user&&supaOK());
 const frErr=e=>{const m=(e&&e.message)||'';return/friends_list|friend_request|function .* does not exist|schema cache/i.test(m)?'Friends aren’t set up on the server yet.':m||'Could not reach the server.'};
@@ -8373,23 +8384,33 @@ async function frChannel(){const u=frSignedIn()&&ACC.user.id;if(FR.chFor===u)ret
 async function frSend(to,event,payload){const c=await supaClient(),ch=c.channel('pd-u-'+to);
  await new Promise(res=>{const t=setTimeout(res,4000);ch.subscribe(s=>{if(s==='SUBSCRIBED'){ch.send({type:'broadcast',event,payload}).finally(()=>{clearTimeout(t);res()})}})});
  setTimeout(()=>{try{c.removeChannel(ch)}catch(e){}},500)}
+// An invite is a row on the server (migration 013), so it can't be missed: the friend's game checks its inbox every few
+// seconds on the menus and also gets a live nudge to check at once. The sender's game polls the invite's status.
 async function frInvite(id){const f=FR.list.find(x=>x.user_id===id&&x.state==='friend');if(!f)return;
  const L='abcdefghjkmnpqrstuvwxyz';let code='';for(let i=0;i<4;i++)code+=L[Math.floor(Math.random()*L.length)];
- frSay(`Inviting ${f.username}…`);try{await frSend(id,'invite',{from:ACC.user.id,name:ACC.name||'A friend',code,t:Date.now()})}catch(e){frSay(frErr(e),true);return}
- track('friend_invite');openOnline('custom');joinRoom(code,'host');FR.waitFor=f.username;
- setTimeout(()=>{const n=$('olNote');if(n&&S.online&&S.online.code===code&&!S.online.opp){n.textContent=`Invite sent to ${f.username}. Waiting for them to join…`;n.style.color='var(--amber)'}},900)}
-function frGotInvite(p){if(!p.code||!/^[a-z]{4}$/.test(p.code)||Date.now()-(p.t||0)>120000)return;
- const f=FR.list.find(x=>x.user_id===p.from&&x.state==='friend');if(!f){frLoad();return}/* (only friends can invite you) */
- const busy=$('title').hidden||onlineGame()||Q.on||(S.online&&S.online.nr);
- if(busy){frSend(p.from,'reply',{from:ACC.user.id,name:ACC.name,ok:false,why:'busy'}).catch(()=>{});return}
- FR.inv={...p,name:f.username};$('frInvTxt').innerHTML=`<b>${esc(f.username)}</b> invited you to a game`;$('frInvite').hidden=false;try{sfx('pop')}catch(e){}
+ frSay(`Inviting ${f.username}…`);let iid;try{iid=await rpc('friend_invite',{p_to:id,p_code:code})}catch(e){frSay(frErr(e),true);return}
+ frSend(id,'invite',{from:ACC.user.id,id:iid}).catch(()=>{});
+ track('friend_invite');openOnline('custom');joinRoom(code,'host');FR.sent={id:iid,code,name:f.username,st:'open'};
+ setTimeout(()=>frSentNote(`Invite sent to ${f.username}. Waiting for them to join…`),900)}
+function frSentNote(t){const n=$('olNote'),o=S.online;if(n&&FR.sent&&o&&o.code===FR.sent.code&&!o.opp){n.textContent=t;n.style.color='var(--amber)'}}
+async function frSentPoll(){const sd=FR.sent;if(!sd)return;const o=S.online;
+ if(!o||o.code!==sd.code||o.opp){if(!o||o.code!==sd.code)rpc('friend_invite_answer',{p_id:sd.id,p_answer:'cancelled'}).catch(()=>{});FR.sent=null;return}
+ try{const st=await rpc('friend_invite_status',{p_id:sd.id});if(st&&st!==sd.st){sd.st=st;
+  if(st==='declined')frSentNote(`${sd.name} can’t play right now.`);else if(st==='expired')frSentNote(`${sd.name} didn’t answer.`);else if(st==='joined')frSentNote(`${sd.name} is joining…`)}}catch(e){}}
+function frBusy(){return $('title').hidden||onlineGame()||Q.on||!!(S.online&&S.online.inGame)}
+async function frInbox(){if(!frSignedIn()||FR.inv||frBusy()||FR.inboxBusy)return;FR.inboxBusy=true;
+ try{const r=await rpc('friend_invites_inbox');const list=Array.isArray(r)?r:[];FR.seen=FR.seen||{};
+  const p=list.find(x=>!FR.seen[x.id]&&!(FR.sent&&FR.sent.code===x.code));if(p)frShowInvite(p)}catch(e){}FR.inboxBusy=false}
+function frGotInvite(){frInbox()}/* (the live message only says "check your inbox now") */
+function frShowInvite(p){FR.seen[p.id]=1;FR.inv=p;$('frInvTxt').innerHTML=`<b>${esc(p.username)}</b> invited you to a game`;$('frInvite').hidden=false;try{sfx('pop')}catch(e){}
  clearTimeout(FR.invT);FR.invT=setTimeout(()=>frInvClose(false),60000)}
-function frInvClose(reply){const p=FR.inv;$('frInvite').hidden=true;clearTimeout(FR.invT);FR.inv=null;if(p&&reply)frSend(p.from,'reply',{from:ACC.user.id,name:ACC.name,ok:false,why:'no'}).catch(()=>{})}
+function frInvClose(reply){const p=FR.inv;$('frInvite').hidden=true;clearTimeout(FR.invT);FR.inv=null;if(p&&reply)rpc('friend_invite_answer',{p_id:p.id,p_answer:'declined'}).catch(()=>{})}
 $('frInvNo').addEventListener('click',()=>frInvClose(true));
-$('frInvGo').addEventListener('click',()=>{const p=FR.inv;frInvClose(false);if(!p)return;ensureAudio();track('friend_invite_join');openOnline('custom');joinRoom(p.code,'guest')});
-function frGotReply(p){if(p.ok!==false)return;const o=S.online;if(!o||!o.nr||o.opp)return;const n=$('olNote');if(n){n.textContent=`${p.name||'Your friend'} ${p.why==='busy'?'is busy right now':'can’t play right now'}.`;n.style.color='var(--amber)'}}
+$('frInvGo').addEventListener('click',()=>{const p=FR.inv;frInvClose(false);if(!p)return;ensureAudio();track('friend_invite_join');rpc('friend_invite_answer',{p_id:p.id,p_answer:'joined'}).catch(()=>{});
+ if(S.online&&S.online.nr&&!S.online.inGame){try{S.online.nr.leave()}catch(e){}S.online=null}openOnline('custom');joinRoom(p.code,'guest')});
+function frGotReply(){}
 // keep the invite channel and the list in step with sign-in; refresh the list now and then while on the menus
-setInterval(()=>{frChannel().catch(()=>{});if(frSignedIn()&&!$('title').hidden&&Date.now()-FR.at>60000)frLoad()},3000);
+setInterval(()=>{frChannel().catch(()=>{});if(frSignedIn()&&!$('title').hidden&&Date.now()-FR.at>60000)frLoad();FR.tick=(FR.tick||0)+1;if(FR.tick%2===0){frInbox();frSentPoll()}},3000);
 // "+ ADD FRIEND" on a leaderboard profile
 $('lbpCard').addEventListener('click',async e=>{const b=e.target.closest('[data-add]');if(!b)return;b.disabled=true;b.textContent='SENDING…';
  try{const r=await rpc('friend_request',{p_username:b.dataset.add});b.textContent=r.status==='accepted'?'FRIENDS':'REQUEST SENT';track('friend_request',{result:r.status,from:'profile'});frLoad()}catch(err){b.textContent=frErr(err);b.disabled=false}});

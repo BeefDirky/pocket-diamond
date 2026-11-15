@@ -54,5 +54,5 @@ $('lnClub').addEventListener('click',()=>brandOpen(false));
 for(const t of document.querySelectorAll('#scrSingle .tile[data-go="scrLineup"]'))t.addEventListener('click',e=>{e.stopImmediatePropagation();teamOpen('scrSingle')},true);
 // ---- Custom rooms: EDIT LINEUP opens your lineup; coming back sends the room your new roster (and un-readies you) ----
 $('olEdit').addEventListener('click',()=>{const o=S.online;if(!o||o.inGame)return;o.kit=S.you;if(MYTEAM)S.you=MYTEAM.club;o.editLn=true;teamOpen('scrOnline')});
-function roomLineupBack(id){const o=S.online;if(!o||!o.editLn||id==='scrLineup'||id==='scrCards')return;o.editLn=false;if(o.kit)S.you=o.kit;$('lnClub').hidden=false;
+function roomLineupBack(id){const o=S.online;if(!o||!o.editLn||id==='scrLineup'||id==='scrCards')return;o.editLn=false;if(o.kit){S.you=o.kit;restoreNetRosters();if(MYTEAM&&o.kit!==MYTEAM.club)applyRosterSpec(o.kit,myRosterSpec())}$('lnClub').hidden=false;
  if(!o.inGame){netPresence({ros:myRosterSpec(),rdy:null});lobbyRender()}}

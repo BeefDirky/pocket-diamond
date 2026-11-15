@@ -47,4 +47,16 @@ set request.jwt.claim.sub = '11000000-0000-0000-0000-000000000003';
 select pg_temp.ok((public.friend_request('bat_two')->>'user_id')='11000000-0000-0000-0000-000000000004', 'bat_two (lower case) is a different player from Bat_Two');
 reset role;
 select pg_temp.fails($$insert into public.profiles(user_id,username) values ('11000000-0000-0000-0000-000000000003','Bat_Two')$$, 'the exact same username can''t be taken twice');
+-- invites (migration 013): only to friends, the friend sees it in the inbox, answers, the sender sees the answer
+set role authenticated;
+set request.jwt.claim.sub = '11000000-0000-0000-0000-000000000001';
+select pg_temp.fails($$select public.friend_invite('11000000-0000-0000-0000-000000000003','abcd')$$, 'inviting someone who isn''t your friend');
+reset role;create temp table iv(id bigint);grant all on iv to authenticated;set role authenticated;set request.jwt.claim.sub = '11000000-0000-0000-0000-000000000001';insert into iv select public.friend_invite('11000000-0000-0000-0000-000000000002','wxyz') as id;
+set request.jwt.claim.sub = '11000000-0000-0000-0000-000000000002';
+select pg_temp.ok((select count(*) from public.friend_invites_inbox() where username='Ace_One' and code='wxyz')=1, 'the friend finds the invite in the inbox');
+select pg_temp.ok(public.friend_invite_answer((select id from iv),'declined')='declined', 'decline');
+select pg_temp.ok((select count(*) from public.friend_invites_inbox())=0, 'a declined invite leaves the inbox');
+set request.jwt.claim.sub = '11000000-0000-0000-0000-000000000001';
+select pg_temp.ok(public.friend_invite_status((select id from iv))='declined', 'the sender sees it was declined');
+reset role;
 \echo ALL FRIENDS TESTS PASSED

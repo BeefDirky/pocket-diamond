@@ -19,7 +19,7 @@ const rkOn=o=>!!o&&(o.role==='guest'?!!(o.opp&&o.opp.rk):o.mode==='ranked');
 // the room's heading and blurb follow its kind
 function rkHead(o){const on=rkOn(o);$('olHead').innerHTML=on?'RANKED <span>1v1</span>':'CUSTOM <span>1v1</span>';
  $('olNote').textContent=on?'A rated game against a friend. One of you creates a room and shares the code, the other joins with it. Each club plays its own roster, one game, and the result counts for both ratings.'
-  :'Play a friend in real time. One of you creates a room and shares the code, the other joins with it. Then you each pick a club. The host is the home team.'}
+  :''}
 // the lobby: who may ready up, and what the room needs to hear about it
 function rkLobby(o){const on=rkOn(o),host=o.role==='host';
  $('olBoRow').hidden=!host||on;

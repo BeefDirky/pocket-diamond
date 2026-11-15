@@ -1420,3 +1420,8 @@ html,body,#title,#title .card{scrollbar-width:none;-ms-overflow-style:none}
 html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title .card::-webkit-scrollbar{display:none;width:0;height:0}
 #title{scrollbar-gutter:auto;overflow-x:hidden}
 #title{touch-action:pan-y;overscroll-behavior-x:none}html,body{overflow-x:hidden;overscroll-behavior-x:none}
+#olNote:empty{display:none}
+.olCodeBox{font-size:13px}.olCodeBox b{font-size:40px}.app.deskApp .olCodeBox b{font-size:46px}
+/* PC: the lineup page isn't zoomed like the other menus, so its back button and title are scaled to match theirs */
+.app.deskApp #scrLineup>.xBack{transform:scale(var(--uiZ,1));transform-origin:top left;left:10px;top:10px}
+.app.deskApp #scrLineup>.lnTop{min-height:calc(46px * var(--uiZ,1))}.app.deskApp #scrLineup .lnTop h1{font-size:calc(20px * var(--uiZ,1))}
