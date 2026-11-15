@@ -1,5 +1,6 @@
 // ---------- audio ----------
 const SND_B64=/*@AUDIO:sad,homer,charge,klost,bpthrow,fworks,chant,csingle,boo,slide,ramp,fence1,clang,grass,horn,echo1,echo2,echo3,amb,woosh,weak,drop,mitt,cheer,crowd,bat,organ,roar,menu,uiclick,uitoggle*/{};
+let AUD_STARTED=false,AUD_FADE_UNTIL=0;
 let AC=null,muted=false,MASTER=null,organSrc=null,menuSrc=null,crowdSrc=null,ambSrc=null;const BUF={},BUS={};
 const OPT={music:45,crowd:35,sfx:85,cam:'broadcast',time:'random',info:true};
 try{Object.assign(OPT,JSON.parse(localStorage.getItem('pd-opts2')||'{}'))}catch(e){}
@@ -12,7 +13,8 @@ function musicScene(){if(!AC||!BUS.organ)return;const m=onMenus(),t0=AC.currentT
  for(const[g,v]of[[BUS.menu.gain,m?MENU_VOL:0],[BUS.organ.gain,m?0:1]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+.9)}}
 function applyVolumes(){if(!AC)return;const bpq=!!S.bpOn,ts=inTeamSel(),t0=AC.currentTime;musicScene();// the club-select screen is quiet: no organ, no crowd
  const mv=(bpq||ts||S.rampSrc||S.musicDuck)?0:OPT.music/100*.7,cv2=(bpq||ts)?0:OPT.crowd/100*.4;
- for(const[g,v]of[[BUS.music.gain,mv],[BUS.crowd.gain,cv2]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+.35)}if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
+ const fd=(AC.state!=='running'||performance.now()<AUD_FADE_UNTIL)?2.2:.35;// the first time sound starts, music and crowd fade in slowly
+ for(const[g,v]of[[BUS.music.gain,mv],[BUS.crowd.gain,cv2]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+fd)}if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
 function b64buf(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer}
 function loopOn(k,bus){if(!BUF[k]||!AC)return null;const src=AC.createBufferSource();src.buffer=BUF[k];src.loop=true;src.connect(bus);src.start();return src}
 function startOrgan(){if(!organSrc)organSrc=loopOn('organ',BUS.organ)}
@@ -23,7 +25,12 @@ function ensureAudio(){
  if(!AC){
   try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){AC=null}
   if(AC){MASTER=AC.createGain();MASTER.connect(AC.destination);
-   for(const k of['music','crowd','sfx','amb']){BUS[k]=AC.createGain();BUS[k].connect(MASTER)}
+   // every channel starts silent: your volumes are reached by fading up, never by fading down from full (no burst of
+   // sound on the first tap, even with music and crowd turned off)
+   for(const k of['music','crowd','sfx','amb']){BUS[k]=AC.createGain();BUS[k].gain.value=0;BUS[k].connect(MASTER)}
+   MASTER.gain.value=muted?0:1;
+   const onRun=()=>{if(AC.state==='running'&&!AUD_STARTED){AUD_STARTED=true;AUD_FADE_UNTIL=performance.now()+2500;applyVolumes()}};
+   try{AC.addEventListener('statechange',onRun)}catch(e){}setTimeout(onRun,0);
    for(const k of['organ','menu']){BUS[k]=AC.createGain();BUS[k].gain.value=0;BUS[k].connect(BUS.music)}
    applyVolumes();
    for(const k in SND_B64){try{AC.decodeAudioData(b64buf(SND_B64[k]),bf=>{BUF[k]=bf;if(k==='organ')startOrgan();if(k==='menu')startMenuMusic();if(k==='crowd')startCrowd();if(k==='amb'&&!ambSrc)ambSrc=loopOn('amb',BUS.amb)},()=>{})}catch(e){}}}
