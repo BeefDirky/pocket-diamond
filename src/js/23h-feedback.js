@@ -21,7 +21,7 @@ $('fbSend').addEventListener('click',async()=>{const msg=$('fbText').value.trim(
 // ---- a new version: compare this build with the one the site serves now (version.json, never cached) ----
 const UPD={seen:null,shownFor:null};
 async function updCheck(){if(typeof window.claude!=='undefined'||!/^https?:/.test(location.protocol))return;
- try{const r=await fetch(`version.json?t=${Date.now()}`,{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v,mine=String(PD_VER).split('+').pop();/* (PD_VER is 2.0.3+<build>) */if(v&&v!==mine){UPD.seen=v;updShow()}}catch(e){}}
+ try{const r=await fetch(`version.json?t=${Date.now()}`,{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v,mine=String(PD_VER).split('+').pop();/* (PD_VER is <version>+<build>) */if(v&&v!==mine){UPD.seen=v;updShow()}}catch(e){}}
 // only where it can't interrupt anything: the menus and the results card, never mid-game
 function updShow(){if(!UPD.seen)return;const busy=S.phase&&S.phase!=='title'&&S.phase!=='over'&&$('over').hidden;$('upd').hidden=busy}
 $('updGo').addEventListener('click',async()=>{$('updGo').disabled=true;$('updGo').textContent='LOADING…';track('update_refresh',{from:PD_VER,to:UPD.seen});

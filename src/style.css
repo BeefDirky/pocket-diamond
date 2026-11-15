@@ -356,7 +356,8 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .st u{display:block;height:100%}
 .st b{text-align:right;font-variant-numeric:tabular-nums}
 .opt{display:grid;grid-template-columns:96px 1fr 34px;gap:10px;align-items:center;font-size:13px;color:var(--chalk)}
-.opt .seg button{font-size:12px}
+.opt .seg button{font-size:12px;width:74px;padding-left:4px;padding-right:4px;text-align:center}/* every toggle box the same size */
+.about dd.abIL{display:flex;align-items:center;gap:10px}.about dd.abIL img{width:50px;height:24px;image-rendering:pixelated}
 .opt input{width:100%;accent-color:var(--amber)}
 .opt b{font-weight:400;color:var(--chalk);text-align:right;font-variant-numeric:tabular-nums}
 .optChk{display:flex;gap:10px;align-items:flex-start;font-size:12px;cursor:pointer}

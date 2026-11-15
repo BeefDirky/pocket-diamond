@@ -25,4 +25,4 @@
  '..............#####################..............'];
  const W=P[0].length,H=P.length,o=document.createElement('canvas');o.width=W+1;o.height=H+1;const q=o.getContext('2d');q.fillStyle='#f4f1e8';
  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(P[y][x]==='#')q.fillRect(x,y,1,1);
- const el=document.getElementById('ilMark');if(el)el.src=o.toDataURL()}
+ const u=o.toDataURL();for(const id of['ilMark','ilMark2']){const el=document.getElementById(id);if(el)el.src=u}}
