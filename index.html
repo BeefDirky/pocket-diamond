@@ -764,6 +764,10 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .lbMsg{min-height:1em;margin:10px 0 0;text-align:center;font-size:12px;color:var(--dim)}
 .lbYou{display:inline-block;margin-left:6px;padding:0 4px;font-size:10px;background:var(--amber);color:#14110a;vertical-align:2px}
 .lbProf{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(6,10,8,.72)}
+.lbpCard{font-weight:600}
+/* PC: the profile grows like the menu pages, and its small print is bigger everywhere */
+.app.deskApp .lbpCard{zoom:var(--uiZ,1)}
+.lbpTbl{font-size:13px!important}.lbpGames{font-size:14px!important}.lbpHead h2{font-size:22px!important}
 .lbpCard{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:16px 16px 12px;background:#17261d;border:3px solid #0b130e;box-shadow:0 6px 0 #0b130e;color:var(--chalk);font-family:var(--f-hud)}
 .lbpHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}.lbpHead h2{margin:0;font-size:20px;letter-spacing:.08em;color:var(--amber);overflow-wrap:anywhere}
 .lbpHead span{font-size:12px;color:var(--dim);letter-spacing:.08em;white-space:nowrap}
@@ -1242,6 +1246,7 @@ canvas.shake{animation:packShake .6s steps(6)}
 .lbName{font-size:17px}.lbName small{margin-top:2px}
 .about dt{font-size:12px}.abPriv p{font-size:13px}
 #title .card h1,#title .card .mode b,#title .card .about dd,#title .card .abLogo b,#title .card .mpPick .mode b{font-weight:400}/* (the title font has no bold: a faked one is wider) */
+.lbpCard h3{font-size:13px!important}.lbpTbl th{font-size:12px!important}.lbpKpis small,.lbpKpi small{font-size:12px!important}
 </style>
 
 <div class="app">
@@ -7420,7 +7425,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='d6ce43081a',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='ec5f730aac',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7705,8 +7710,8 @@ async function lbProfile(uid){const box=$('lbProf'),card=$('lbpCard');box.hidden
    ${career.some(l=>l.outs_pitched)?`<h3>PITCHING · CAREER</h3><table class="lbpTbl"><thead><tr><th>MODE</th><th>IP</th><th>RA/9</th><th>SO</th><th>BB</th><th>HR</th></tr></thead><tbody>${career.filter(l=>l.outs_pitched).map(pit).join('')}</tbody></table>`:''}
    <h3>LAST RANKED GAMES</h3>${G.length?`<ul class="lbpGames">${G.map(g=>{const side=g.home_user===uid?'home':'away',won=g.winner_side===side,o=side==='home'?g.away_user:g.home_user,
      us=side==='home'?g.home_score:g.away_score,them=side==='home'?g.away_score:g.home_score,d=dr[g.id];
-     return`<li><b class="${won?'w':'l'}">${won?'W':'L'}</b><span>${g.status==='forfeit'?'forfeit':`${us??'?'}-${them??'?'}`} vs ${esc(o?nm[o]||'?':g.bot_level?'CPU · LV '+g.bot_level:'?')} <em>${new Date(g.ended_at).toLocaleDateString()}</em></span><span>${d==null?'':(d>=0?'+':'')+d}</span></li>`}).join('')}</ul>`:'<p class="lbpEmpty">No ranked games yet.</p>'}
-   <p class="lbpEmpty">Vs-CPU and Custom lines are reported by the player's own game; only ranked results are verified.</p>
+     return`<li><b class="${won?'w':'l'}">${won?'W':'L'}</b><span>${g.status==='forfeit'?'forfeit':`${us??'?'}-${them??'?'}`} vs ${esc(o?nm[o]||'?':g.bot_level?'CPU · LV '+g.bot_level:'?')}</span><span>${d==null?'':(d>=0?'+':'')+d}</span></li>`}).join('')}</ul>`:'<p class="lbpEmpty">No ranked games yet.</p>'}
+
    <button class="mbtn lbpClose" type="button" id="lbpClose">Close</button>`;
   card.focus({preventScroll:true})}
  catch(e){card.innerHTML=`<p class="lbpEmpty">Couldn’t load this profile: ${esc(rkErr(e))}</p><button class="mbtn lbpClose" type="button" id="lbpClose">Close</button>`}}

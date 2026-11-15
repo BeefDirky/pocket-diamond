@@ -64,8 +64,8 @@ async function lbProfile(uid){const box=$('lbProf'),card=$('lbpCard');box.hidden
    ${career.some(l=>l.outs_pitched)?`<h3>PITCHING · CAREER</h3><table class="lbpTbl"><thead><tr><th>MODE</th><th>IP</th><th>RA/9</th><th>SO</th><th>BB</th><th>HR</th></tr></thead><tbody>${career.filter(l=>l.outs_pitched).map(pit).join('')}</tbody></table>`:''}
    <h3>LAST RANKED GAMES</h3>${G.length?`<ul class="lbpGames">${G.map(g=>{const side=g.home_user===uid?'home':'away',won=g.winner_side===side,o=side==='home'?g.away_user:g.home_user,
      us=side==='home'?g.home_score:g.away_score,them=side==='home'?g.away_score:g.home_score,d=dr[g.id];
-     return`<li><b class="${won?'w':'l'}">${won?'W':'L'}</b><span>${g.status==='forfeit'?'forfeit':`${us??'?'}-${them??'?'}`} vs ${esc(o?nm[o]||'?':g.bot_level?'CPU · LV '+g.bot_level:'?')} <em>${new Date(g.ended_at).toLocaleDateString()}</em></span><span>${d==null?'':(d>=0?'+':'')+d}</span></li>`}).join('')}</ul>`:'<p class="lbpEmpty">No ranked games yet.</p>'}
-   <p class="lbpEmpty">Vs-CPU and Custom lines are reported by the player's own game; only ranked results are verified.</p>
+     return`<li><b class="${won?'w':'l'}">${won?'W':'L'}</b><span>${g.status==='forfeit'?'forfeit':`${us??'?'}-${them??'?'}`} vs ${esc(o?nm[o]||'?':g.bot_level?'CPU · LV '+g.bot_level:'?')}</span><span>${d==null?'':(d>=0?'+':'')+d}</span></li>`}).join('')}</ul>`:'<p class="lbpEmpty">No ranked games yet.</p>'}
+
    <button class="mbtn lbpClose" type="button" id="lbpClose">Close</button>`;
   card.focus({preventScroll:true})}
  catch(e){card.innerHTML=`<p class="lbpEmpty">Couldn’t load this profile: ${esc(rkErr(e))}</p><button class="mbtn lbpClose" type="button" id="lbpClose">Close</button>`}}

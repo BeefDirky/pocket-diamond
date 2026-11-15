@@ -741,6 +741,10 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .lbMsg{min-height:1em;margin:10px 0 0;text-align:center;font-size:12px;color:var(--dim)}
 .lbYou{display:inline-block;margin-left:6px;padding:0 4px;font-size:10px;background:var(--amber);color:#14110a;vertical-align:2px}
 .lbProf{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(6,10,8,.72)}
+.lbpCard{font-weight:600}
+/* PC: the profile grows like the menu pages, and its small print is bigger everywhere */
+.app.deskApp .lbpCard{zoom:var(--uiZ,1)}
+.lbpTbl{font-size:13px!important}.lbpGames{font-size:14px!important}.lbpHead h2{font-size:22px!important}
 .lbpCard{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:16px 16px 12px;background:#17261d;border:3px solid #0b130e;box-shadow:0 6px 0 #0b130e;color:var(--chalk);font-family:var(--f-hud)}
 .lbpHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}.lbpHead h2{margin:0;font-size:20px;letter-spacing:.08em;color:var(--amber);overflow-wrap:anywhere}
 .lbpHead span{font-size:12px;color:var(--dim);letter-spacing:.08em;white-space:nowrap}
@@ -1219,3 +1223,4 @@ canvas.shake{animation:packShake .6s steps(6)}
 .lbName{font-size:17px}.lbName small{margin-top:2px}
 .about dt{font-size:12px}.abPriv p{font-size:13px}
 #title .card h1,#title .card .mode b,#title .card .about dd,#title .card .abLogo b,#title .card .mpPick .mode b{font-weight:400}/* (the title font has no bold: a faked one is wider) */
+.lbpCard h3{font-size:13px!important}.lbpTbl th{font-size:12px!important}.lbpKpis small,.lbpKpi small{font-size:12px!important}
