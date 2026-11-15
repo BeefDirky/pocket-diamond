@@ -1415,3 +1415,8 @@ div.frWho{display:flex;flex-direction:column;align-items:flex-start;cursor:defau
 .frInvite[hidden]{display:none}.frInvite span{flex:1 1 100%;text-align:center}.frInvite b{color:#ffd23f}.frInvite .big{margin:0;width:auto;padding:10px 22px}.frInvite .mbtn{padding:10px 14px}
 @keyframes frIn{from{transform:translate(-50%,-20px);opacity:0}}
 .app.deskApp .frWho b{font-size:17px}.app.deskApp .frWho small{font-size:12px}
+/* menus never show a page scrollbar (they still scroll): a scrollbar appearing mid-swipe would push the centered box sideways */
+html,body,#title,#title .card{scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title .card::-webkit-scrollbar{display:none;width:0;height:0}
+#title{scrollbar-gutter:auto;overflow-x:hidden}
+#title{touch-action:pan-y;overscroll-behavior-x:none}html,body{overflow-x:hidden;overscroll-behavior-x:none}
