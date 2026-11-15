@@ -1367,3 +1367,4 @@ body.lfDragging .lfc.dropHover.dropNo .lfF{box-shadow:0 0 0 3px #e2603a}
 .lfField .lfc .lfOvr{padding:4px 4px 1px}
 .lfc .lfOvr{padding:4px 5px 2px}.lfc .lfOvr small{top:0}
 .lfField .lfc .lfOvr{padding:3px 4px 2px}
+.app.deskApp #title>#scrOpts{max-width:none;width:auto;min-width:min(500px,calc(94vw / var(--uiZ,1)))}
