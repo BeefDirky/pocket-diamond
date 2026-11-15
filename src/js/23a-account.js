@@ -95,7 +95,7 @@ function nameBad(n){if(!n)return'Choose a username.';if(n.length<3)return'Userna
  if(!NAME_RE.test(n))return'Use only letters, numbers and _ in your username.';if(NAME_RES.test(n))return'That username is reserved. Try another.';if(nameOffensive(n))return'That username isn\u2019t allowed. Pick another.';return''}
 const noProfiles=e=>/profiles|relation|schema cache/i.test((e&&e.message)||'');
 // true = free, false = taken, null = couldn't check
-async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.from('profiles').select('user_id').eq('uname_lc',n.toLowerCase()).limit(1);if(error)return null;
+async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.from('profiles').select('user_id').eq('username',n).limit(1);if(error)return null;
  return!data.length||!!(ACC.user&&data[0].user_id===ACC.user.id)}catch(e){return null}}
 async function nameClaim(n){const c=await supaClient(),{error}=await c.from('profiles').upsert({user_id:ACC.user.id,username:n});
  if(!error){track('username_set',{first:!ACC.name});if(ACC.name)ACC.nameAt=new Date().toISOString();ACC.name=n;phIdent();const m=accMeta();m.name=n;accSetMeta(m);return''}

@@ -9,7 +9,8 @@ insert into public.profiles(user_id,username) values ('11000000-0000-0000-0000-0
 set role authenticated;
 select pg_temp.fails($$select * from public.friendships$$, 'reading the table directly');
 set request.jwt.claim.sub = '11000000-0000-0000-0000-000000000001';
-select pg_temp.ok((public.friend_request('bat_two')->>'status')='sent', 'a request by username (any capitals)');
+select pg_temp.fails($$select public.friend_request('bat_two')$$, 'the wrong capitals don''t find anyone');
+select pg_temp.ok((public.friend_request('Bat_Two')->>'status')='sent', 'a request by exact username');
 select pg_temp.ok((public.friend_request('Bat_Two')->>'status')='sent', 'asking twice is harmless');
 select pg_temp.fails($$select public.friend_request('Nobody_Here')$$, 'a username that doesn''t exist');
 select pg_temp.fails($$select public.friend_request('Ace_One')$$, 'friending yourself');
@@ -38,4 +39,12 @@ select pg_temp.ok(not exists(select 1 from public.friends_list() where username=
 reset role;
 select pg_temp.fails($$set role anon; select public.friends_list()$$, 'a guest can''t use friends');
 reset role;
+-- case-sensitive usernames: Bat_Two and bat_two can both exist, and each is found only by its own capitals
+insert into auth.users(id,email) values ('11000000-0000-0000-0000-000000000004','f4@x.co') on conflict do nothing;
+insert into public.profiles(user_id,username) values ('11000000-0000-0000-0000-000000000004','bat_two');
+set role authenticated;
+set request.jwt.claim.sub = '11000000-0000-0000-0000-000000000003';
+select pg_temp.ok((public.friend_request('bat_two')->>'user_id')='11000000-0000-0000-0000-000000000004', 'bat_two (lower case) is a different player from Bat_Two');
+reset role;
+select pg_temp.fails($$insert into public.profiles(user_id,username) values ('11000000-0000-0000-0000-000000000003','Bat_Two')$$, 'the exact same username can''t be taken twice');
 \echo ALL FRIENDS TESTS PASSED
