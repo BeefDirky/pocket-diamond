@@ -1242,3 +1242,4 @@ canvas.shake{animation:packShake .6s steps(6)}
 .app.deskApp #title>#scrAds{width:calc(96vw / var(--uiZ,1));max-width:calc(min(1100px,96vw) / var(--uiZ,1) * 1.25)}
 .adsWrap{flex:0 0 auto;min-height:120px}/* (Safari collapses a scrolling flex child to nothing; never let it shrink) */
 .app.deskApp #scrAds .adsWrap{height:calc((100vh - 190px) / var(--uiZ,1));height:calc((100dvh - 190px) / var(--uiZ,1));max-height:none;overscroll-behavior:contain}
+.adsErr{color:#e2603a;font-size:14px;margin:12px 0}

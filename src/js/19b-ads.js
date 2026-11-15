@@ -49,7 +49,8 @@ function adFan(sp){const[c,g]=adCanvas(150,40);g.fillStyle='rgba(0,0,0,.3)';g.fi
 function adBackstop(sp){const[c,g]=adCanvas(240,26);g.fillStyle='#1b1f24';g.fillRect(0,0,240,26);g.fillStyle=sp.bg;g.fillRect(2,2,236,22);g.fillStyle=sp.ac;g.fillRect(2,2,4,22);g.fillRect(234,2,4,22);
  adIcon(g,12,5,sp.ic,sp.fg,2);adIcon(g,212,5,sp.ic,sp.fg,2);g.fillStyle=sp.fg;g.font='bold 13px "Pixelify Sans", monospace';g.textBaseline='middle';g.textAlign='center';g.fillText(`${sp.n} · ${sp.k}`,120,14,180);return c}
 let ADS_RAF=0;
-function adsRender(){const W=$('adsWrap');W.innerHTML='';const live=[];
+function adsRender(){try{adsRender0()}catch(e){const W=$('adsWrap');const p=document.createElement('p');p.className='adsErr';p.textContent='Some signs couldn\u2019t be drawn ('+(e&&e.message||e)+').';W.appendChild(p);if(typeof console!=='undefined')console.error('[pd] sponsors',e)}}
+function adsRender0(){const W=$('adsWrap');W.innerHTML='';const live=[];
  const sec=(t,d)=>{const h=document.createElement('h3');h.className='adsH';h.innerHTML=`${t}<small>${d}</small>`;W.appendChild(h);const r=document.createElement('div');r.className='adsRow';W.appendChild(r);return r};
  let r=sec('OUTFIELD WALL PADS','Painted on the padded wall between the yellow line and the warning track');AD_SPONSORS.forEach(sp=>r.appendChild(adWall(sp)));
  r=sec('UPPER-DECK LED RIBBON','Scrolls along the fascia between the decks');AD_SPONSORS.slice(0,4).forEach(sp=>{const box=document.createElement('div');box.className='adLive';r.appendChild(box);live.push([box,now=>adRibbon(sp,now)])});
