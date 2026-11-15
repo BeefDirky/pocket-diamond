@@ -1459,3 +1459,6 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 /* Press Start 2P sets its T with extra room on the left, so in "CUSTOM" it looks like a gap: pull it in */.kT{font-style:normal;margin-left:-.14em}
 .tnTeam.cpu .tnNm{color:var(--dim)}.tnNote{margin:2px 0 0;font-size:12px;color:var(--dim);text-align:center}
 .tnNote{align-self:stretch;max-width:none!important;width:100%}
+/* club logos in the bracket */
+.tnTeam{grid-template-columns:18px 24px 1fr auto}.tnLogo{width:24px;height:24px;image-rendering:pixelated;display:block}
+.app.deskApp .tnTeam{grid-template-columns:20px 30px 1fr auto}.app.deskApp .tnLogo{width:30px;height:30px}

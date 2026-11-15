@@ -32,15 +32,16 @@ function tnLobbyHtml(st){const J=st.players.filter(p=>p.status==='joined'),I=st.
  return html}
 /* the lobby's bracket: players seeded by rating as they join (1 v 8, 4 v 5, 2 v 7, 3 v 6), CPU clubs in the open spots.
    (The CPU clubs get their ratings at START, so the seeds can still shift then.) */
+const tnLogo=k=>k&&LOGO_URL[k]?`<img class="tnLogo" alt="" src="${LOGO_URL[k]}">`:'<i class="tnLogo"></i>';
 function tnPreviewHtml(J){const P=[...J].sort((a,b)=>b.rating-a.rating||a.name.localeCompare(b.name)),at=seed=>P[seed-1];
- const team=seed=>{const p=at(seed);return `<div class="tnTeam${p&&p.me?' me':''}${p?'':' cpu'}"><span class="tnSeed">${seed}</span><span class="tnNm">${p?esc(p.name):'CPU'}</span><b>${p?p.rating:''}</b></div>`};
- const tbd='<div class="tnSer tbd"><div class="tnTeam"><span class="tnSeed"></span><span class="tnNm">TBD</span></div><div class="tnTeam"><span class="tnSeed"></span><span class="tnNm">TBD</span></div></div>';
+ const team=seed=>{const p=at(seed);return `<div class="tnTeam${p&&p.me?' me':''}${p?'':' cpu'}"><span class="tnSeed">${seed}</span>${tnLogo(p&&p.club)}<span class="tnNm">${p?esc(p.name):'CPU'}</span><b>${p?p.rating:''}</b></div>`};
+ const tbd='<div class="tnSer tbd"><div class="tnTeam"><span class="tnSeed"></span><i class="tnLogo"></i><span class="tnNm">TBD</span></div><div class="tnTeam"><span class="tnSeed"></span><i class="tnLogo"></i><span class="tnNm">TBD</span></div></div>';
  const qf=[[1,8],[4,5],[2,7],[3,6]].map(([a,b])=>`<div class="tnSer">${team(a)}${team(b)}<small>BEST OF 3</small></div>`).join('');
  return `<div class="tnBracket"><div class="tnCol"><h4>QUARTERFINALS</h4><div class="tnStack">${qf}</div></div><div class="tnCol"><h4>SEMIFINALS</h4><div class="tnStack">${tbd}${tbd}</div></div><div class="tnCol"><h4>FINAL</h4><div class="tnStack">${tbd}</div></div></div><p class="tnNote">Seeds follow ranked rating and update as players join. CPU clubs get their ratings at start, so seeds can still shift.</p>`}
 function tnSeriesBox(s,st){const me=tnMe(),a=tnP(s.seed_a),b=tnP(s.seed_b),mine=me&&(s.seed_a===me.seed||s.seed_b===me.seed);
- const row=(p,seed,w)=>`<div class="tnTeam${s.winner===seed?' won':s.winner?' lost':''}${p&&p.me?' me':''}"><span class="tnSeed">${seed}</span><span class="tnNm">${tnLabel(p)}</span><b>${w}</b></div>`;
+ const row=(p,seed,w)=>`<div class="tnTeam${s.winner===seed?' won':s.winner?' lost':''}${p&&p.me?' me':''}"><span class="tnSeed">${seed}</span>${tnLogo(p&&p.club)}<span class="tnNm">${tnLabel(p)}</span><b>${w}</b></div>`;
  return `<div class="tnSer${mine?' mine':''}${s.status==='done'?' done':''}">${row(a,s.seed_a,s.wins_a)}${row(b,s.seed_b,s.wins_b)}<small>BEST OF ${s.need*2-1}</small></div>`}
-function tnBracketHtml(st){const col=r=>{const ss=st.series.filter(s=>s.round===r),n=[4,2,1][r-1];const boxes=ss.map(s=>tnSeriesBox(s,st)).join('')+Array.from({length:n-ss.length},()=>'<div class="tnSer tbd"><div class="tnTeam"><span class="tnSeed"></span><span class="tnNm">TBD</span></div><div class="tnTeam"><span class="tnSeed"></span><span class="tnNm">TBD</span></div></div>').join('');
+function tnBracketHtml(st){const col=r=>{const ss=st.series.filter(s=>s.round===r),n=[4,2,1][r-1];const boxes=ss.map(s=>tnSeriesBox(s,st)).join('')+Array.from({length:n-ss.length},()=>'<div class="tnSer tbd"><div class="tnTeam"><span class="tnSeed"></span><i class="tnLogo"></i><span class="tnNm">TBD</span></div><div class="tnTeam"><span class="tnSeed"></span><i class="tnLogo"></i><span class="tnNm">TBD</span></div></div>').join('');
   return `<div class="tnCol r${r}"><h4>${TN_ROUND[r]}</h4><div class="tnStack">${boxes}</div></div>`};return `<div class="tnBracket">${col(1)}${col(2)}${col(3)}</div>`}
 function tnYouHtml(st){const me=tnMe(),s=tnMySeries();
  if(st.status==='done'){const c=tnP(st.champion);return `<div class="tnYou champ"><small>CHAMPION</small><b>${tnLabel(c)}</b>${c&&c.me?'<p>You won the playoff!</p>':''}</div>`}
