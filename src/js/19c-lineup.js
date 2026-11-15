@@ -28,19 +28,21 @@ function lfCard(k,p){if(!CARDS.length)buildCardDB();if(p.signed&&CARD_BY[p.signe
 /* the back of a card: his ratings as bars */
 function lfStats(p,pit){const rows=pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
  return rows.map(([l,v])=>`<span class="lfSt"><i>${l}</i><b style="color:${rcol(v)}">${v}</b><u><s style="width:${v}%;background:${rcol(v)}"></s></u></span>`).join('')}
-function lfFace(art,o,nm,pos,order){return `<span class="lfF"><span class="lfOvr">${o}</span>${order?`<span class="lfOrd">${order}</span>`:''}<img alt="" src="${art}"><span class="lfNm">${nm}</span><span class="lfPos">${pos}</span></span>`}
-function lfBackFace(p,pit,o,pos,extra){return `<span class="lfB"><span class="lfBNm">${p.name}</span><span class="lfBSub">${pos} · ${p.hand||p.thr||'R'}${p.slot==='side'?' · SIDEARM':''}</span><span class="lfBOvr" style="color:${rcol(o)}">${o}<small>OVR</small></span>${lfStats(p,pit)}${extra||''}</span>`}
-let lfFlip=null,lfMove=false;
+function lfFace(art,o,nm,pos){return `<span class="lfF"><span class="lfOvr" style="--oc:${rcol(o)}"><small>OVR</small>${o}</span><img alt="" src="${art}"><span class="lfNm">${nm}</span><span class="lfPos">${pos}</span></span>`}
+function lfBackFace(p,pit,o,pos,extra,order){return `<span class="lfB"><span class="lfBNm">${p.name}</span><span class="lfBSub">${pos} · ${p.hand||p.thr||'R'}${p.slot==='side'?' · SIDEARM':''}${order?` · BATS ${order}${['','ST','ND','RD'][order]||'TH'}`:''}</span><span class="lfBOvr" style="color:${rcol(o)}">${o}<small>OVR</small></span>${lfStats(p,pit)}${extra||''}</span>`}
+let lfFlip=null,lfMove=false;const lfFlips=new Set();let lfFlipsOf='';
 function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c,k):portrait(T,p,k===S.you),o=ovr(p),pit=opt.i<0,fk='f'+opt.i;
- return `<button type="button" class="lfc r${r}${lfFlip===fk?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
-  ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'?' · SIDE':''),opt.order)}${lfBackFace(p,pit,o,opt.pos)}</span></button>`}
+ return `<button type="button" class="lfc r${r}${lfFlips.has(fk)?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
+  ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'?' · SIDE':''))}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
 function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
  if(!mine)lfMove=false;
+ if(lfFlipsOf!==lnView+key){lfFlipsOf=lnView+key;lfFlips.clear();lfFlip=null}
+ if(lfFlip&&!lfFlips.has(lfFlip))lfFlip=null;
  lnSel=lfFlip&&lfFlip[0]==='f'?+lfFlip.slice(1):null;
  const selPit=lnSel!=null&&lnSel<0,selBat=lnSel!=null&&lnSel>=0;
  let field='';
  const LP=lfMob()?LF_POS_M:LF_POS;
- T.lineup.forEach((p,i)=>{const pos=LP[p.pos]?p.pos:'DH',[x,y]=LP[pos];field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i,order:i+1,pos})}</div>`});
+ T.lineup.forEach((p,i)=>{const pos=LP[p.pos]?p.pos:'DH',[x,y]=LP[pos];field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i,pos})}</div>`});
  {const p=T.staff[0],[x,y]=LP.SP;if(p)field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i:-1,pos:'SP'})}</div>`}
  const pen=T.staff.slice(1).map((p,j)=>lfMini(T,key,p,{i:-2-j,pos:p.pos||'RP'})).join('');
  let tray='';
@@ -49,7 +51,7 @@ function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=
   const own=CARDS.filter(c=>COL.owned[c.id]&&c.pit===(lfDeck==='pit')).sort((a,b)=>b.o-a.o);
   tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':'RP'):q.pos;
     const can=lnSel!=null&&!inUse&&(lnSel<0)===c.pit;
-    return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlip===fk?' flip':''}" data-id="${c.id}"><span class="lfIn">
+    return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlips.has(fk)?' flip':''}" data-id="${c.id}"><span class="lfIn">
      ${lfFace(cardArt(c),c.o,q.name,pos+(c.pit&&q.slot==='side'?' · SIDE':'')+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,can?`<span class="lfSign" data-sign="${c.id}">SIGN IN</span>`:'')}</span></button>`}).join('')
    :`<p class="lfEmpty">No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Card Collection to get players.</p>`}
  const sel=lnSel==null?null:lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];
@@ -61,20 +63,20 @@ function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=
 /* a long name (HWANG M.U.) on a narrow card was cut to HWANG M...: step the type down until the whole name fits */
 function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.style.fontSize='';let fs=parseFloat(getComputedStyle(e).fontSize),n=0;while(e.scrollWidth>e.clientWidth+.5&&fs>7.5&&n++<8){fs-=.75;e.style.fontSize=fs+'px'}}}
 $('cards').addEventListener('click',e=>{
- const tab=e.target.closest('.lfTabs button');if(tab){lfDeck=tab.dataset.d;lfFlip=null;lfMove=false;lineupRender();return}
+ const tab=e.target.closest('.lfTabs button');if(tab){lfDeck=tab.dataset.d;for(const k of[...lfFlips])if(k[0]==='d')lfFlips.delete(k);lfMove=false;lineupRender();return}
  const T=TEAMS[S.you];
  if(lnView==='mine'){
-  if(e.target.closest('.lfRestore')){const p=lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];if(p){const real=p.custom?T.benched||p:p;releasePlayer(S.you,real.signedFor||real.name,lnSel<0);applyDefense();updateHUD()}lfFlip=null;lineupRender();return}
+  if(e.target.closest('.lfRestore')){const p=lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];if(p){const real=p.custom?T.benched||p:p;releasePlayer(S.you,real.signedFor||real.name,lnSel<0);applyDefense();updateHUD()}lfFlips.delete(lfFlip);lfFlip=null;lineupRender();return}
   if(e.target.closest('.lfMoveB')){lfMove=!lfMove;lineupRender();return}
   const sg=e.target.closest('[data-sign]');
   if(sg&&lnSel!=null){const pit=lnSel<0,p=pit?T.staff[-1-lnSel]:T.lineup[lnSel],real=p.custom?T.benched||p:p;
-   if(signPlayer(S.you,real.signedFor||real.name,sg.dataset.sign,pit)){applyDefense();updateHUD();try{sfx('glove')}catch(_){}}lfFlip=null;lfMove=false;lineupRender();return}}
+   if(signPlayer(S.you,real.signedFor||real.name,sg.dataset.sign,pit)){applyDefense();updateHUD();try{sfx('glove')}catch(_){}}lfFlips.delete(lfFlip);lfFlips.delete('d'+sg.dataset.sign);lfFlip=null;lfMove=false;lineupRender();return}}
  const b=e.target.closest('.lfc');if(!b)return;
  if(b.classList.contains('deck')){const fk='d'+b.dataset.id;
-  /* a tray card flips on its own, keeping the picked-up field player's card turned too */
-  b.classList.toggle('flip');document.querySelectorAll('.lfTray .lfc.flip').forEach(x=>{if(x!==b)x.classList.remove('flip')});return}
+  /* a tray card flips on its own; every other turned card stays turned */
+  if(lfFlips.has(fk))lfFlips.delete(fk);else lfFlips.add(fk);b.classList.toggle('flip',lfFlips.has(fk));return}
  const i=+b.dataset.i;
- if(lnView==='mine'&&lfMove&&lnSel!=null&&lnSel>=0&&i>=0&&i!==lnSel){const L=T.lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}applyDefense();updateHUD();lfMove=false;lfFlip=null;lineupRender();return}
- const fk='f'+i;lfFlip=lfFlip===fk?null:fk;lfMove=false;lineupRender()});
+ if(lnView==='mine'&&lfMove&&lnSel!=null&&lnSel>=0&&i>=0&&i!==lnSel){const L=T.lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];for(const k of[...lfFlips])if(k[0]==='f'&&k!=='f-1'&&!k.startsWith('f-'))lfFlips.delete(k);const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}applyDefense();updateHUD();lfMove=false;lfFlip=null;lineupRender();return}
+ const fk='f'+i;if(lfFlips.has(fk)){lfFlips.delete(fk);if(lfFlip===fk)lfFlip=[...lfFlips].reverse().find(k=>k[0]==='f')||null}else{lfFlips.add(fk);lfFlip=fk}lfMove=false;lineupRender()});
 /* rotating a phone or resizing across the phone breakpoint redraws the field to match */
 {let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}else if(!$('scrLineup').hidden)lfFit()})}
