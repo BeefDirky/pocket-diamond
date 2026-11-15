@@ -3,8 +3,8 @@
 
 src/style.css carries a small @font-face per weight (family 'Pixelify Sans', unicode-range limited to the patched
 characters) holding square pixel versions of 5, C and H. This script adds the lowercase a and the 2 (whose bottom right pixel sits one up, so its base isn't flat): Pixelify's a has a notch
-between its right stem and its foot, so the stem looks like it stops short of the baseline; here the notch is
-filled, so the stem runs down to the baseline and into the foot.
+between its right stem and its foot, so the stem looks like it stops short of the baseline; here the right side
+is one straight stem from the top of the bowl to the baseline, and the foot is dropped.
 
   python3 tools/glyph_fix.py <dir with fontsource pixelify-sans-latin-{400,500,600,700}-normal.woff2>
 """
@@ -17,7 +17,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FACE = re.compile(r"(@font-face\{font-family:'Pixelify Sans';font-weight:(\d+);font-style:normal;unicode-range:)([^;]+)(;src:url\(data:font/ttf;base64,)([^)]+)(\))")
 
 def straight_a(src):
-    """the source a's outline with the notch under its right stem filled: the stem runs down to the baseline, into the foot"""
+    """the source a with a straight right side: the stem runs from the top of the bowl straight down to the baseline,
+    square at both ends (so it can't be read as an o), and the foot that kicked out past it is gone"""
     gs = src.getGlyphSet(); rec = RecordingPen(); gs['a'].draw(rec)
     contours, cur = [], []
     for op, args in rec.value:
@@ -25,14 +26,16 @@ def straight_a(src):
         elif op == 'lineTo': cur.append(args[0])
         elif op == 'closePath': contours.append(cur)
     outer, inner = contours[0], contours[1:]
-    # outer runs ... (tailR, footTop) (tailR, bottom) (notchR, bottom) (notchR, y) (notchL, y) (notchL, bottom) back to the start:
-    # stop at the foot's bottom right corner and close straight back along the baseline
-    bottom = outer[0][1]; tail_r = max(x for x, _ in outer)
-    k = outer.index((tail_r, bottom)); assert len(outer) - k - 1 == 4, outer
+    # outer: (bowlL,bottom) (bowlL,y) (left,y) (left,y2) (bowlL,y2) (bowlL,top) (stemL,top) (stemL,y3) (stemR,y3) ...
+    bottom = outer[0][1]; top = max(y for _, y in outer); tail_r = max(x for x, _ in outer)
+    i = next(k for k in range(1, len(outer)) if outer[k][1] == top and outer[k - 1][1] == top)  # (stemL, top)
+    stem_r = outer[i + 2][0]
+    pts = outer[:i] + [(stem_r, top), (stem_r, bottom)]
     pen = TTGlyphPen(None)
-    for c in [outer[:k + 1]] + inner:
+    for c in [pts] + inner:
         pen.moveTo(c[0]); [pen.lineTo(p) for p in c[1:]]; pen.closePath()
-    return (pen.glyph(),) + tuple(src['hmtx']['a'])
+    adv, lsb = src['hmtx']['a']
+    return pen.glyph(), adv - (tail_r - stem_r), lsb
 
 def square_two(src):
     """the source 2 with its bottom right corner squared: the base runs flat out to the right edge"""
