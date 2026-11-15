@@ -1485,6 +1485,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 /* club logos in the bracket */
 .tnTeam{grid-template-columns:18px 24px 1fr auto}.tnLogo{width:24px;height:24px;image-rendering:pixelated;display:block}
 .app.deskApp .tnTeam{grid-template-columns:20px 30px 1fr auto}.app.deskApp .tnLogo{width:30px;height:30px}
+.tnFoot{gap:10px;flex-wrap:wrap}.tnFoot .big{margin:0;min-width:220px}
 </style>
 
 <div class="app">
@@ -7924,7 +7925,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='2e5eb0501a',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='1474920a78',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8476,7 +8477,10 @@ const tnMe=()=>TN.st&&TN.st.players.find(p=>p.me);
 const tnClubName=k=>TEAMS[k]?`${TEAMS[k].city} ${TEAMS[k].name}`:(k||'');
 function tnLabel(p){if(!p)return'—';return p.user_id?esc(p.name):`CPU · ${esc(TEAMS[p.club]?TEAMS[p.club].name:p.club)}`}
 function tnMySeries(){const me=tnMe();if(!me||!me.seed||!TN.st)return null;return TN.st.series.filter(s=>s.seed_a===me.seed||s.seed_b===me.seed).sort((a,b)=>b.round-a.round)[0]||null}
-async function tnLoad(){if(!frSignedIn())return;try{TN.st=await rpc('tourney_state',{p_tid:null});tnBadge();if(!$('scrTourney').hidden)tnRender()}catch(e){if(!$('scrTourney').hidden)tnSay(tnErr(e),true)}}
+/* a finished playoff stays up until you've seen it: DONE (or NEW PLAYOFF) clears it, and it won't come back */
+const tnGone=()=>{try{return JSON.parse(localStorage.getItem('pd-tn-done')||'[]')}catch(e){return[]}};
+function tnDismiss(id){try{localStorage.setItem('pd-tn-done',JSON.stringify([...tnGone(),id].slice(-20)))}catch(e){}}
+async function tnLoad(){if(!frSignedIn())return;try{TN.st=await rpc('tourney_state',{p_tid:null});if(TN.st&&TN.st.status==='done'&&tnGone().includes(TN.st.id))TN.st=null;tnBadge();if(!$('scrTourney').hidden)tnRender()}catch(e){if(!$('scrTourney').hidden)tnSay(tnErr(e),true)}}
 function tnBadge(){const s=tnMySeries(),st=TN.st;$('tnBadge').hidden=!(st&&st.status==='running'&&s&&s.status==='open')}
 async function tnOpen(){showScreen('scrTourney');tnSay('');$('tnBody').innerHTML=frSignedIn()?'<p class="tnLead">Loading…</p>':'';tnRender();await tnLoad();tnRender()}
 $('goTourney').addEventListener('click',()=>{ensureAudio();tnOpen()});
@@ -8485,7 +8489,7 @@ function tnRender(){const B=$('tnBody');if(!frSignedIn()){B.innerHTML=`<p class=
  const st=TN.st;
  if(!st){B.innerHTML=`<p class="tnLead">An 8-club bracket you play live with your friends. Invite up to 7; CPU clubs fill the empty spots. Seeds come from ranked ratings. Quarterfinals and semifinals are best of 3, the final best of 5, every game 3 innings. It doesn’t change your rating.</p><button class="big" type="button" data-tn="create">CREATE A PLAYOFF</button>`;return}
  if(st.status==='lobby'){B.innerHTML=tnLobbyHtml(st);return}
- B.innerHTML=tnYouHtml(st)+tnBracketHtml(st)+`<div class="tnFoot">${st.status==='done'?`<button class="mbtn" type="button" data-tn="close">DONE</button>`:`<button class="mbtn" type="button" data-tn="leave">LEAVE PLAYOFF</button>`}</div>`}
+ B.innerHTML=tnYouHtml(st)+tnBracketHtml(st)+`<div class="tnFoot">${st.status==='done'?`<button class="big" type="button" data-tn="again">NEW PLAYOFF</button><button class="mbtn" type="button" data-tn="close">DONE</button>`:`<button class="mbtn" type="button" data-tn="leave">LEAVE PLAYOFF</button>`}</div>`}
 function tnLobbyHtml(st){const J=st.players.filter(p=>p.status==='joined'),I=st.players.filter(p=>p.status==='invited');
  const rows=J.map(p=>`<li><b>${esc(p.name)}</b><small>${p.rating} · ${esc(tnClubName(p.club))}</small></li>`).join('')+I.map(p=>`<li class="inv"><b>${esc(p.name)}</b><small>INVITED…</small></li>`).join('')+Array.from({length:Math.max(0,8-J.length-I.length)},()=>'<li class="cpu"><b>CPU</b><small>FILLS IN AT START</small></li>').join('');
  let html=`<p class="tnLead">${st.host?'Invite your friends, then start. Empty spots become CPU clubs.':`Waiting for <b>${esc(st.host_name)}</b> to start the playoff…`}</p><h4>PLAYERS · ${J.length} / 8${I.length?` · ${I.length} INVITED`:''}</h4>${tnPreviewHtml(J)}`;
@@ -8518,7 +8522,8 @@ function tnYouHtml(st){const me=tnMe(),s=tnMySeries();
   <button class="big" type="button" data-tn="play">PLAY GAME ${g}</button>${claim?`<button class="mbtn" type="button" data-tn="claim">${esc(opp.name)} DIDN’T SHOW · CLAIM THE SERIES</button>`:''}</div>`}
 $('tnBody').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b||TN.busy)return;const d=b.dataset,st=TN.st;
  if(d.tn==='acct'){showScreen('scrAcct');return}
- if(d.tn==='close'){TN.st=null;tnRender();mpOpen();return}
+ if(d.tn==='close'){if(st)tnDismiss(st.id);TN.st=null;tnRender();mpOpen();return}
+ if(d.tn==='again'){if(st)tnDismiss(st.id);TN.st=null;tnRender();return}
  if(d.tn==='play'){tnPlay();return}
  if(d.tn==='leave'&&!b.classList.contains('sure')){b.classList.add('sure');b.textContent=st&&st.status==='running'?'TAP AGAIN: YOUR SERIES IS LOST':'TAP AGAIN TO CONFIRM';return}
  TN.busy=true;tnSay('');try{

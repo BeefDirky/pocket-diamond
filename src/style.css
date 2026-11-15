@@ -1462,3 +1462,4 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 /* club logos in the bracket */
 .tnTeam{grid-template-columns:18px 24px 1fr auto}.tnLogo{width:24px;height:24px;image-rendering:pixelated;display:block}
 .app.deskApp .tnTeam{grid-template-columns:20px 30px 1fr auto}.app.deskApp .tnLogo{width:30px;height:30px}
+.tnFoot{gap:10px;flex-wrap:wrap}.tnFoot .big{margin:0;min-width:220px}
