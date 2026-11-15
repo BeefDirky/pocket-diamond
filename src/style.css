@@ -1302,3 +1302,4 @@ canvas.shake{animation:packShake .6s steps(6)}
 .acRenameBtn{display:inline;padding:0 0 0 6px;font-size:13px;color:var(--amber);border:0;background:none;text-decoration:underline;cursor:pointer}.acRenameBtn:disabled{color:var(--dim);text-decoration:none;cursor:default}
 .acBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acBtns .mbtn{text-align:center}
 .app.deskApp .acInfo{font-size:16px}.app.deskApp .acTiles span{font-size:12px}.app.deskApp .acTiles b{font-size:18px}.app.deskApp .acRenameBtn{font-size:15px}
+html,body{touch-action:manipulation}

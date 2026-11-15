@@ -12,15 +12,15 @@ const tiredness=()=>clamp((.5-stamFrac())/.5,0,1);// 0 while above half, 1 when 
 const gassed=()=>S.mode!=='bp'&&stamNow()<=0;
 function stamReset(k){S.stamOf=S.stamOf||{};S.stamOf[k]=stamMax(staffOf(k)[S.pIdxOf[k]||0])}
 // release meter geometry: pz = half-width of PERFECT, gw = how fast quality falls off past it (GOOD is q > .55)
-function meterZones(){const g=gassed();return{pz:g?0:.05+pitcher().ctl*.0006,gw:g?.2:.45}}
+function meterZones(){const g=gassed();return{pz:g?0:.028+pitcher().ctl*.00035,gw:g?.13:.28}}
 const goodHalf=z=>z.pz+z.gw*(1-.55/.85);
 function stamSpend(p){if(S.mode==='bp'||!p)return;const k=fldKey();
  // q: the meter's release quality when you pitch; a CPU arm (or AUTO) gets one from his control
  const q=p.q!=null?p.q:clamp(.45+pitcher().ctl*.004+randn()*.2,0,1);
  const t=.5+1.4*(1-q);// PERFECT .5x, GOOD ~.7-1.1x, over the plate ~1.3x, missed or late ~1.6-1.9x
- S.stamOf=S.stamOf||{};S.stamOf[k]=Math.max(0,stamOf(k)-.8*(STAM_K[p.k]||1.3)*t);stamHUD()}
+ S.stamOf=S.stamOf||{};S.stamOf[k]=Math.max(0,stamOf(k)-1.3*(STAM_K[p.k]||1.3)*t);stamHUD()}
 // what the at-bat did to the pitcher: hits wear him down (more for extra bases), a strikeout gives him a little back
-const STAM_PA={'1B':-2,'2B':-4,'3B':-6,HR:-9,K:2,KL:2};
+const STAM_PA={'1B':-3,IFH:-3,'2B':-6,'3B':-9,HR:-14,IPHR:-14,BB:-2,HBP:-2,K:2,KL:2};
 function stamResult(code,k){const d=STAM_PA[code];if(S.mode==='bp'||!d||!k||!TEAMS[k])return;S.stamOf=S.stamOf||{};
  const mx=stamMax(staffOf(k)[S.pIdxOf[k]||0]);S.stamOf[k]=clamp(stamOf(k)+d,0,mx);stamHUD()}
 function stamHUD(){const el=$('pStam');if(!el)return;const bp=S.mode==='bp'||S.phase==='title';el.hidden=bp;if(bp)return;

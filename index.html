@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#14241b"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>*,*::before,*::after{box-sizing:border-box}</style>
 <!-- Vercel Web Analytics (counts visits once Analytics is enabled for the project in the Vercel dashboard) -->
@@ -1325,6 +1325,7 @@ canvas.shake{animation:packShake .6s steps(6)}
 .acRenameBtn{display:inline;padding:0 0 0 6px;font-size:13px;color:var(--amber);border:0;background:none;text-decoration:underline;cursor:pointer}.acRenameBtn:disabled{color:var(--dim);text-decoration:none;cursor:default}
 .acBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acBtns .mbtn{text-align:center}
 .app.deskApp .acInfo{font-size:16px}.app.deskApp .acTiles span{font-size:12px}.app.deskApp .acTiles b{font-size:18px}.app.deskApp .acRenameBtn{font-size:15px}
+html,body{touch-action:manipulation}
 </style>
 
 <div class="app">
@@ -5871,15 +5872,15 @@ const tiredness=()=>clamp((.5-stamFrac())/.5,0,1);// 0 while above half, 1 when 
 const gassed=()=>S.mode!=='bp'&&stamNow()<=0;
 function stamReset(k){S.stamOf=S.stamOf||{};S.stamOf[k]=stamMax(staffOf(k)[S.pIdxOf[k]||0])}
 // release meter geometry: pz = half-width of PERFECT, gw = how fast quality falls off past it (GOOD is q > .55)
-function meterZones(){const g=gassed();return{pz:g?0:.05+pitcher().ctl*.0006,gw:g?.2:.45}}
+function meterZones(){const g=gassed();return{pz:g?0:.028+pitcher().ctl*.00035,gw:g?.13:.28}}
 const goodHalf=z=>z.pz+z.gw*(1-.55/.85);
 function stamSpend(p){if(S.mode==='bp'||!p)return;const k=fldKey();
  // q: the meter's release quality when you pitch; a CPU arm (or AUTO) gets one from his control
  const q=p.q!=null?p.q:clamp(.45+pitcher().ctl*.004+randn()*.2,0,1);
  const t=.5+1.4*(1-q);// PERFECT .5x, GOOD ~.7-1.1x, over the plate ~1.3x, missed or late ~1.6-1.9x
- S.stamOf=S.stamOf||{};S.stamOf[k]=Math.max(0,stamOf(k)-.8*(STAM_K[p.k]||1.3)*t);stamHUD()}
+ S.stamOf=S.stamOf||{};S.stamOf[k]=Math.max(0,stamOf(k)-1.3*(STAM_K[p.k]||1.3)*t);stamHUD()}
 // what the at-bat did to the pitcher: hits wear him down (more for extra bases), a strikeout gives him a little back
-const STAM_PA={'1B':-2,'2B':-4,'3B':-6,HR:-9,K:2,KL:2};
+const STAM_PA={'1B':-3,IFH:-3,'2B':-6,'3B':-9,HR:-14,IPHR:-14,BB:-2,HBP:-2,K:2,KL:2};
 function stamResult(code,k){const d=STAM_PA[code];if(S.mode==='bp'||!d||!k||!TEAMS[k])return;S.stamOf=S.stamOf||{};
  const mx=stamMax(staffOf(k)[S.pIdxOf[k]||0]);S.stamOf[k]=clamp(stamOf(k)+d,0,mx);stamHUD()}
 function stamHUD(){const el=$('pStam');if(!el)return;const bp=S.mode==='bp'||S.phase==='title';el.hidden=bp;if(bp)return;
@@ -7636,7 +7637,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='26e640504d',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='087e492bd3',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -9680,10 +9681,20 @@ fontsReady.then(()=>{
  for(const k of ORDER){LOGO[k]=makeLogo(k,128);LOGO_URL[k]=LOGO[k].toDataURL()}
  document.querySelectorAll('.chip').forEach(c=>{const im=c.querySelector('img');if(im)im.src=LOGO_URL[c.dataset.t]});
  updateHUD();refreshMenu();rebuildPark()});
-// pitching: once the windup starts, a tap anywhere on the screen releases the pitch (not just on the field). The
-// pause button, bullpen panel and auto/info/zoom controls keep their own taps.
-document.addEventListener('pointerdown',e=>{if(!(S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null)||overlayOpen())return;
- if(e.target.closest('.pauseBtn,#penPanel,.autoBtn,.infoBtn,.zoomCtl,.lsHot,.board'))return;ensureAudio();releaseTap()},true);
+/* while the release meter is up, the whole screen is the release button: any tap anywhere releases the pitch and
+   nothing under it (pause, bullpen, AUTO, zoom, menus) reacts, including the click that follows the tap */
+let relEat=0;
+function relActive(){return S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null&&!overlayOpen()&&!S.auto}
+for(const ev of ['pointerdown','mousedown','touchstart'])document.addEventListener(ev,e=>{if(!relActive()&&performance.now()>relEat)return;
+ e.preventDefault();e.stopImmediatePropagation();if(ev==='pointerdown'&&relActive()){ensureAudio();releaseTap();relEat=performance.now()+700}},{capture:true,passive:false});
+for(const ev of ['pointerup','mouseup','touchend','click','dblclick','contextmenu'])document.addEventListener(ev,e=>{if(performance.now()>relEat&&!relActive())return;
+ e.preventDefault();e.stopImmediatePropagation()},{capture:true,passive:false});
+/* the page never zooms: no pinch (iOS ignores user-scalable=no, so its gesture events are cancelled too), no double-tap
+   zoom (touch-action in the CSS), no ctrl+wheel or ctrl +/-. The game's own +/- field zoom still works */
+for(const ev of ['gesturestart','gesturechange','gestureend'])document.addEventListener(ev,e=>e.preventDefault(),{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+addEventListener('wheel',e=>{if(e.ctrlKey)e.preventDefault()},{passive:false});
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&['+','=','-','_','0'].includes(e.key))e.preventDefault()});
 requestAnimationFrame(frame);
 // Esc on a menu page does what its back arrow does (after closing any pop-up on top of it). In a game, Esc pauses.
 addEventListener('keydown',e=>{if(e.key!=='Escape'||e.repeat||$('title').hidden)return;

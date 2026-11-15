@@ -99,10 +99,20 @@ fontsReady.then(()=>{
  for(const k of ORDER){LOGO[k]=makeLogo(k,128);LOGO_URL[k]=LOGO[k].toDataURL()}
  document.querySelectorAll('.chip').forEach(c=>{const im=c.querySelector('img');if(im)im.src=LOGO_URL[c.dataset.t]});
  updateHUD();refreshMenu();rebuildPark()});
-// pitching: once the windup starts, a tap anywhere on the screen releases the pitch (not just on the field). The
-// pause button, bullpen panel and auto/info/zoom controls keep their own taps.
-document.addEventListener('pointerdown',e=>{if(!(S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null)||overlayOpen())return;
- if(e.target.closest('.pauseBtn,#penPanel,.autoBtn,.infoBtn,.zoomCtl,.lsHot,.board'))return;ensureAudio();releaseTap()},true);
+/* while the release meter is up, the whole screen is the release button: any tap anywhere releases the pitch and
+   nothing under it (pause, bullpen, AUTO, zoom, menus) reacts, including the click that follows the tap */
+let relEat=0;
+function relActive(){return S.phase==='windup'&&pitching()&&S.pitch&&S.pitch.q==null&&!overlayOpen()&&!S.auto}
+for(const ev of ['pointerdown','mousedown','touchstart'])document.addEventListener(ev,e=>{if(!relActive()&&performance.now()>relEat)return;
+ e.preventDefault();e.stopImmediatePropagation();if(ev==='pointerdown'&&relActive()){ensureAudio();releaseTap();relEat=performance.now()+700}},{capture:true,passive:false});
+for(const ev of ['pointerup','mouseup','touchend','click','dblclick','contextmenu'])document.addEventListener(ev,e=>{if(performance.now()>relEat&&!relActive())return;
+ e.preventDefault();e.stopImmediatePropagation()},{capture:true,passive:false});
+/* the page never zooms: no pinch (iOS ignores user-scalable=no, so its gesture events are cancelled too), no double-tap
+   zoom (touch-action in the CSS), no ctrl+wheel or ctrl +/-. The game's own +/- field zoom still works */
+for(const ev of ['gesturestart','gesturechange','gestureend'])document.addEventListener(ev,e=>e.preventDefault(),{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+addEventListener('wheel',e=>{if(e.ctrlKey)e.preventDefault()},{passive:false});
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&['+','=','-','_','0'].includes(e.key))e.preventDefault()});
 requestAnimationFrame(frame);
 // Esc on a menu page does what its back arrow does (after closing any pop-up on top of it). In a game, Esc pauses.
 addEventListener('keydown',e=>{if(e.key!=='Escape'||e.repeat||$('title').hidden)return;
