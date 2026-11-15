@@ -110,7 +110,7 @@ $('cards').addEventListener('click',e=>{
 
 // ---- drag a card from your tray onto a player on the field (or in the bullpen) to sign it into his spot ----
 // A card only goes where he can play: his own position, any outfield spot for an outfielder (LF, CF and RF are one), and
-// any hitter at DH. Pitchers: a starter for the starter's spot, any pitcher in the bullpen.
+// any hitter at DH. Pitchers: a starter only in the starter's spot, a reliever only in the bullpen.
 const LF_OF=new Set(['LF','CF','RF']);
 /* a club player you replace isn't thrown away: his card goes into YOUR CARDS, so you can put him back (or elsewhere) later */
 function lfBench(p){if(!p||p.signed||p.custom)return'';const c=lfCard(S.you,p);if(!c||COL.owned[c.id])return'';COL.owned[c.id]=1;saveCol();return` ${p.name} went to your cards.`}
@@ -118,7 +118,7 @@ function lfSlotPos(T,i){return i>=0?T.lineup[i].pos:i===-1?'SP':'RP'}
 function lfFitWhy(c,i,p){if(!c)return'That card is gone.';const T=TEAMS[S.you],slot=lfSlotPos(T,i),cp=c.p.pos,nm=c.p.name;
  if(c.pit!==(i<0))return c.pit?`${nm} is a pitcher. Put him on the mound or in the bullpen.`:`${nm} is a hitter. He can't pitch.`;
  if(usedCards(S.you).has(c.id)&&!(p&&p.signed===c.id))return`${nm} is already in your lineup.`;
- if(c.pit)return slot==='SP'&&cp!=='SP'?`${nm} is a reliever. Only a starter can start.`:'';
+ if(c.pit)return slot==='SP'&&cp!=='SP'?`${nm} is a reliever. Only a starter can start.`:slot!=='SP'&&cp==='SP'?`${nm} is a starter. He can only go on the mound, not in the bullpen.`:'';
  if(slot==='DH'||cp===slot||(LF_OF.has(cp)&&LF_OF.has(slot)))return'';
  return`${nm} plays ${cp}. He can't play ${slot}.`}
 function lfSay(t,bad){const m=$('lfMsg');m.textContent=t;m.classList.toggle('bad',!!bad);m.classList.add('on');clearTimeout(lfSay.t);lfSay.t=setTimeout(()=>m.classList.remove('on'),2600)}
