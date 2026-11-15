@@ -1480,6 +1480,8 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 .tnStack{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
 @media (max-width:640px){.tnStack{gap:6px}}
 /* Press Start 2P sets its T with extra room on the left, so in "CUSTOM" it looks like a gap: pull it in */.kT{font-style:normal;margin-left:-.14em}
+.tnTeam.cpu .tnNm{color:var(--dim)}.tnNote{margin:2px 0 0;font-size:12px;color:var(--dim);text-align:center}
+.tnNote{align-self:stretch;max-width:none!important;width:100%}
 </style>
 
 <div class="app">
@@ -7919,7 +7921,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='b23e0530c7',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='eaa4e23646',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8483,12 +8485,19 @@ function tnRender(){const B=$('tnBody');if(!frSignedIn()){B.innerHTML=`<p class=
  B.innerHTML=tnYouHtml(st)+tnBracketHtml(st)+`<div class="tnFoot">${st.status==='done'?`<button class="mbtn" type="button" data-tn="close">DONE</button>`:`<button class="mbtn" type="button" data-tn="leave">LEAVE PLAYOFF</button>`}</div>`}
 function tnLobbyHtml(st){const J=st.players.filter(p=>p.status==='joined'),I=st.players.filter(p=>p.status==='invited');
  const rows=J.map(p=>`<li><b>${esc(p.name)}</b><small>${p.rating} · ${esc(tnClubName(p.club))}</small></li>`).join('')+I.map(p=>`<li class="inv"><b>${esc(p.name)}</b><small>INVITED…</small></li>`).join('')+Array.from({length:Math.max(0,8-J.length-I.length)},()=>'<li class="cpu"><b>CPU</b><small>FILLS IN AT START</small></li>').join('');
- let html=`<p class="tnLead">${st.host?'Invite your friends, then start. Empty spots become CPU clubs.':`Waiting for <b>${esc(st.host_name)}</b> to start the playoff…`}</p><h4>PLAYERS · ${J.length} / 8</h4><ul class="tnSlots">${rows}</ul>`;
+ let html=`<p class="tnLead">${st.host?'Invite your friends, then start. Empty spots become CPU clubs.':`Waiting for <b>${esc(st.host_name)}</b> to start the playoff…`}</p><h4>PLAYERS · ${J.length} / 8${I.length?` · ${I.length} INVITED`:''}</h4>${tnPreviewHtml(J)}`;
  if(st.host){const taken=new Set(st.players.filter(p=>p.status!=='left').map(p=>p.user_id));const fr=(FR.list||[]).filter(f=>f.state==='friend');
   html+=`<h4>INVITE FRIENDS</h4>${fr.length?`<ul class="tnInv">${fr.map(f=>{const[s,l]=frStatus(f.user_id),inv=taken.has(f.user_id);return `<li><i class="frDot ${s}"></i><b>${esc(f.username)}</b><small>${l}</small><button type="button" class="mbtn" data-tninv="${f.user_id}"${inv||J.length>=8?' disabled':''}>${inv?'INVITED':'INVITE'}</button></li>`}).join('')}</ul>`:`<p class="tnLead">Add friends on the Friends page to invite them.</p>`}
    <button class="big" type="button" data-tn="start">START${J.length<8?` · CPU FILLS ${8-J.length}`:''}</button><button class="mbtn tnLeave" type="button" data-tn="leave">CANCEL PLAYOFF</button>`}
  else html+=`<button class="mbtn tnLeave" type="button" data-tn="leave">LEAVE</button>`;
  return html}
+/* the lobby's bracket: players seeded by rating as they join (1 v 8, 4 v 5, 2 v 7, 3 v 6), CPU clubs in the open spots.
+   (The CPU clubs get their ratings at START, so the seeds can still shift then.) */
+function tnPreviewHtml(J){const P=[...J].sort((a,b)=>b.rating-a.rating||a.name.localeCompare(b.name)),at=seed=>P[seed-1];
+ const team=seed=>{const p=at(seed);return `<div class="tnTeam${p&&p.me?' me':''}${p?'':' cpu'}"><span class="tnSeed">${seed}</span><span class="tnNm">${p?esc(p.name):'CPU'}</span><b>${p?p.rating:''}</b></div>`};
+ const tbd='<div class="tnSer tbd"><div class="tnTeam"><span class="tnSeed"></span><span class="tnNm">TBD</span></div><div class="tnTeam"><span class="tnSeed"></span><span class="tnNm">TBD</span></div></div>';
+ const qf=[[1,8],[4,5],[2,7],[3,6]].map(([a,b])=>`<div class="tnSer">${team(a)}${team(b)}<small>BEST OF 3</small></div>`).join('');
+ return `<div class="tnBracket"><div class="tnCol"><h4>QUARTERFINALS</h4><div class="tnStack">${qf}</div></div><div class="tnCol"><h4>SEMIFINALS</h4><div class="tnStack">${tbd}${tbd}</div></div><div class="tnCol"><h4>FINAL</h4><div class="tnStack">${tbd}</div></div></div><p class="tnNote">Seeds follow ranked rating and update as players join. CPU clubs get their ratings at start, so seeds can still shift.</p>`}
 function tnSeriesBox(s,st){const me=tnMe(),a=tnP(s.seed_a),b=tnP(s.seed_b),mine=me&&(s.seed_a===me.seed||s.seed_b===me.seed);
  const row=(p,seed,w)=>`<div class="tnTeam${s.winner===seed?' won':s.winner?' lost':''}${p&&p.me?' me':''}"><span class="tnSeed">${seed}</span><span class="tnNm">${tnLabel(p)}</span><b>${w}</b></div>`;
  return `<div class="tnSer${mine?' mine':''}${s.status==='done'?' done':''}">${row(a,s.seed_a,s.wins_a)}${row(b,s.seed_b,s.wins_b)}<small>BEST OF ${s.need*2-1}</small></div>`}
