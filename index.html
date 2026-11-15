@@ -1311,6 +1311,20 @@ canvas.shake{animation:packShake .6s steps(6)}
 .abLegal{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.abLegal .mbtn{text-align:center;font-size:13px}
 .acAgree{text-align:center}#acSignedOut.login #acAgree{display:none}
 .app.deskApp .lgDoc p{font-size:16px}.app.deskApp .lgDoc h3{font-size:16px}
+/* ---- the signed-in account page ---- */
+#acSignedIn{display:flex;flex-direction:column;gap:12px}#acSignedIn[hidden]{display:none}
+.acHero{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 2px}
+.acHero b{font-family:var(--f-px);font-weight:400;font-size:20px;color:var(--amber);word-break:break-all;text-align:center}
+.acHero small{font-family:var(--f-hud);font-size:12px;letter-spacing:.12em;color:var(--dim)}
+.acTiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.acTiles div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;background:var(--edge);border:2px solid var(--panel-hi);text-align:center;min-width:0}
+.acTiles b{font-family:var(--f-px);font-weight:400;font-size:16px;color:var(--chalk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.acTiles span{font-family:var(--f-hud);font-size:11px;letter-spacing:.1em;color:var(--dim)}.acTiles small{font-size:12px;color:var(--amber)}
+.acInfo{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0;font-size:14px;text-align:left;border-top:1px solid rgba(244,241,232,.12);padding-top:10px}
+.acInfo dt{color:var(--dim)}.acInfo dd{margin:0;color:var(--chalk);word-break:break-all}
+.acRenameBtn{display:inline;padding:0 0 0 6px;font-size:13px;color:var(--amber);border:0;background:none;text-decoration:underline;cursor:pointer}.acRenameBtn:disabled{color:var(--dim);text-decoration:none;cursor:default}
+.acBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acBtns .mbtn{text-align:center}
+.app.deskApp .acInfo{font-size:16px}.app.deskApp .acTiles span{font-size:12px}.app.deskApp .acTiles b{font-size:18px}.app.deskApp .acRenameBtn{font-size:15px}
 </style>
 
 <div class="app">
@@ -1382,10 +1396,20 @@ canvas.shake{animation:packShake .6s steps(6)}
           <button class="ghost acSwap" id="acSwap" type="button"></button>
         </div>
         <div class="acPane" id="acSignedIn" hidden>
-          <p class="acLead">Signed in as <b id="acName"></b><br><small id="acWho"></small></p>
-          <button class="ghost" id="acRename" type="button">Change username</button>
-          <p class="acSync" id="acSync"></p>
-          <button class="mbtn" id="acSignOut" type="button">Sign out</button>
+          <div class="acHero"><b id="acName"></b><small id="acSince"></small></div>
+          <div class="acTiles">
+            <div><b id="acRating">—</b><span>RANKED RATING</span><small id="acRec"></small></div>
+            <div><b id="acCoins">0</b><span>COINS</span></div>
+            <div><b id="acCards">0</b><span>CARDS OWNED</span></div>
+            <div><b id="acClub">—</b><span>CLUB</span></div>
+          </div>
+          <dl class="acInfo">
+            <dt>Email</dt><dd id="acWho"></dd>
+            <dt>Account created</dt><dd id="acCreated"></dd>
+            <dt>Username</dt><dd><span id="acNameDd"></span> <button class="ghost acRenameBtn" id="acRename" type="button">Change</button></dd>
+            <dt>Progress</dt><dd id="acSync"></dd>
+          </dl>
+          <div class="acBtns"><button class="mbtn" id="acProfile" type="button">RANKED PROFILE</button><button class="mbtn" id="acSignOut" type="button">SIGN OUT</button></div>
         </div>
         <div class="acPane" id="acPickName" hidden>
           <p class="acLead" id="acPickTxt">Choose your username. It's how other players see you, and no one else can have it.</p>
@@ -7437,9 +7461,9 @@ function acRender(){const on=!!ACC.user,cf=ACC.state==='conflict',pk=on&&!cf&&AC
   $('acPass').placeholder=li?'PASSWORD':'PASSWORD (6+ CHARACTERS)';$('acPass').autocomplete=li?'current-password':'new-password';
   $('acSwap').innerHTML=li?'New here? <b>Create an account</b>':'Already have an account? <b>Log in</b>';$('scrAcct').querySelector('h1').innerHTML=on?'<span>ACCOUNT</span>':li?'<span>LOG IN</span>':'CREATE <span>ACCOUNT</span>'}$('acSignedIn').hidden=!on||cf||pk;$('acPickName').hidden=!pk;
  if(pk){$('acNameCancel').hidden=!ACC.name;$('acPickTxt').textContent=ACC.name?`Your username is ${ACC.name}. Pick a new one; no one else can have it.`:"Choose your username. It's how other players see you, and no one else can have it."}
- if(on){$('acName').textContent=ACC.name||'(no username yet)';$('acWho').textContent=ACC.user.email;const m=accMeta();$('acSync').textContent=(m.localAt||0)>(m.pushedAt||0)?'Saving your progress…':`Progress saves automatically · last saved ${acWhen(m.syncedAt)}`;
+ if(on){$('acName').textContent=ACC.name||'(no username yet)';$('acNameDd').textContent=ACC.name||'none yet';$('acWho').textContent=ACC.user.email;acDetails();const m=accMeta();$('acSync').textContent=(m.localAt||0)>(m.pushedAt||0)?'Saving…':`Saves automatically · last saved ${acWhen(m.syncedAt)}`;
   const nx=ACC.nameAt?new Date(new Date(ACC.nameAt).getTime()+30*864e5):null,wait=nx&&nx>new Date();$('acRename').disabled=!!wait;
-  $('acRename').textContent=wait?`Change username (again on ${nx.toLocaleDateString(undefined,{month:'short',day:'numeric'})})`:'Change username'}
+  $('acRename').textContent=wait?`change again on ${nx.toLocaleDateString(undefined,{month:'short',day:'numeric'})}`:'Change'}
  if(!supaOK()&&!on){$('acMsg').textContent='Accounts work in the website version of the game.';for(const id of['acSignIn','acSignUp','acForgot'])$(id).disabled=true}else $('acMsg').textContent=ACC.msg}
 const acCreds=()=>({email:$('acEmail').value.trim(),password:$('acPass').value});
 async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=acCreds();
@@ -7520,6 +7544,17 @@ $('acRename').addEventListener('click',()=>{ACC.pick=true;ACC.msg='';$('acNewNam
 // the menu shows the last known username before the network answers
 {const m=accMeta();if(m.name&&Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k)))ACC.name=m.name}
 acRender();
+
+// ---- the signed-in account page: who you are, since when, and what you've built ----
+const acDate=t=>{const d=t?new Date(t):null;return d&&!isNaN(d)?d.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}):'—'};
+function acDetails(){const u=ACC.user;if(!u)return;const made=u.created_at;
+ $('acCreated').textContent=acDate(made);$('acSince').textContent=made?`MEMBER SINCE ${new Date(made).toLocaleDateString(undefined,{year:'numeric',month:'short'}).toUpperCase()}`:'';
+ $('acCoins').textContent=coinFmt(WAL.coins||0);$('acCards').textContent=Object.keys(COL.owned||{}).filter(k=>COL.owned[k]>0).length;
+ const club=MYTEAM&&TEAMS[MYTEAM.club];$('acClub').textContent=club?club.name:'—';
+ if(acDetails.uid!==u.id||Date.now()-(acDetails.at||0)>60000){acDetails.uid=u.id;acDetails.at=Date.now();
+  rpc('my_rating').then(r=>{if(!r||!ACC.user||ACC.user.id!==u.id)return;acDetails.r=r;acRatingShow()}).catch(()=>{})}else acRatingShow()}
+function acRatingShow(){const r=acDetails.r;if(!r)return;$('acRating').textContent=r.rating;$('acRec').textContent=r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet'}
+$('acProfile').addEventListener('click',()=>{if(!ACC.user)return;lbOpen();lbProfile(ACC.user.id)});
 // ---------- the match record: every pitch and plate appearance, written the same way on both online phones ----------
 // Fed by small hooks in the pitching and play code; it never changes the game. At the end it becomes:
 //  * a ranked submission (both phones send theirs; the server compares them and writes the stats), or
@@ -7577,7 +7612,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='bedcb5fab6',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='38b716d1d7',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

@@ -45,9 +45,9 @@ function acRender(){const on=!!ACC.user,cf=ACC.state==='conflict',pk=on&&!cf&&AC
   $('acPass').placeholder=li?'PASSWORD':'PASSWORD (6+ CHARACTERS)';$('acPass').autocomplete=li?'current-password':'new-password';
   $('acSwap').innerHTML=li?'New here? <b>Create an account</b>':'Already have an account? <b>Log in</b>';$('scrAcct').querySelector('h1').innerHTML=on?'<span>ACCOUNT</span>':li?'<span>LOG IN</span>':'CREATE <span>ACCOUNT</span>'}$('acSignedIn').hidden=!on||cf||pk;$('acPickName').hidden=!pk;
  if(pk){$('acNameCancel').hidden=!ACC.name;$('acPickTxt').textContent=ACC.name?`Your username is ${ACC.name}. Pick a new one; no one else can have it.`:"Choose your username. It's how other players see you, and no one else can have it."}
- if(on){$('acName').textContent=ACC.name||'(no username yet)';$('acWho').textContent=ACC.user.email;const m=accMeta();$('acSync').textContent=(m.localAt||0)>(m.pushedAt||0)?'Saving your progress…':`Progress saves automatically · last saved ${acWhen(m.syncedAt)}`;
+ if(on){$('acName').textContent=ACC.name||'(no username yet)';$('acNameDd').textContent=ACC.name||'none yet';$('acWho').textContent=ACC.user.email;acDetails();const m=accMeta();$('acSync').textContent=(m.localAt||0)>(m.pushedAt||0)?'Saving…':`Saves automatically · last saved ${acWhen(m.syncedAt)}`;
   const nx=ACC.nameAt?new Date(new Date(ACC.nameAt).getTime()+30*864e5):null,wait=nx&&nx>new Date();$('acRename').disabled=!!wait;
-  $('acRename').textContent=wait?`Change username (again on ${nx.toLocaleDateString(undefined,{month:'short',day:'numeric'})})`:'Change username'}
+  $('acRename').textContent=wait?`change again on ${nx.toLocaleDateString(undefined,{month:'short',day:'numeric'})}`:'Change'}
  if(!supaOK()&&!on){$('acMsg').textContent='Accounts work in the website version of the game.';for(const id of['acSignIn','acSignUp','acForgot'])$(id).disabled=true}else $('acMsg').textContent=ACC.msg}
 const acCreds=()=>({email:$('acEmail').value.trim(),password:$('acPass').value});
 async function acDo(kind){if(ACC.busy||!supaOK())return;const {email,password}=acCreds();
@@ -128,3 +128,14 @@ $('acRename').addEventListener('click',()=>{ACC.pick=true;ACC.msg='';$('acNewNam
 // the menu shows the last known username before the network answers
 {const m=accMeta();if(m.name&&Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k)))ACC.name=m.name}
 acRender();
+
+// ---- the signed-in account page: who you are, since when, and what you've built ----
+const acDate=t=>{const d=t?new Date(t):null;return d&&!isNaN(d)?d.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}):'—'};
+function acDetails(){const u=ACC.user;if(!u)return;const made=u.created_at;
+ $('acCreated').textContent=acDate(made);$('acSince').textContent=made?`MEMBER SINCE ${new Date(made).toLocaleDateString(undefined,{year:'numeric',month:'short'}).toUpperCase()}`:'';
+ $('acCoins').textContent=coinFmt(WAL.coins||0);$('acCards').textContent=Object.keys(COL.owned||{}).filter(k=>COL.owned[k]>0).length;
+ const club=MYTEAM&&TEAMS[MYTEAM.club];$('acClub').textContent=club?club.name:'—';
+ if(acDetails.uid!==u.id||Date.now()-(acDetails.at||0)>60000){acDetails.uid=u.id;acDetails.at=Date.now();
+  rpc('my_rating').then(r=>{if(!r||!ACC.user||ACC.user.id!==u.id)return;acDetails.r=r;acRatingShow()}).catch(()=>{})}else acRatingShow()}
+function acRatingShow(){const r=acDetails.r;if(!r)return;$('acRating').textContent=r.rating;$('acRec').textContent=r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet'}
+$('acProfile').addEventListener('click',()=>{if(!ACC.user)return;lbOpen();lbProfile(ACC.user.id)});

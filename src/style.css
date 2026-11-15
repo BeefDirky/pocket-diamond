@@ -1288,3 +1288,17 @@ canvas.shake{animation:packShake .6s steps(6)}
 .abLegal{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.abLegal .mbtn{text-align:center;font-size:13px}
 .acAgree{text-align:center}#acSignedOut.login #acAgree{display:none}
 .app.deskApp .lgDoc p{font-size:16px}.app.deskApp .lgDoc h3{font-size:16px}
+/* ---- the signed-in account page ---- */
+#acSignedIn{display:flex;flex-direction:column;gap:12px}#acSignedIn[hidden]{display:none}
+.acHero{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 2px}
+.acHero b{font-family:var(--f-px);font-weight:400;font-size:20px;color:var(--amber);word-break:break-all;text-align:center}
+.acHero small{font-family:var(--f-hud);font-size:12px;letter-spacing:.12em;color:var(--dim)}
+.acTiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.acTiles div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;background:var(--edge);border:2px solid var(--panel-hi);text-align:center;min-width:0}
+.acTiles b{font-family:var(--f-px);font-weight:400;font-size:16px;color:var(--chalk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.acTiles span{font-family:var(--f-hud);font-size:11px;letter-spacing:.1em;color:var(--dim)}.acTiles small{font-size:12px;color:var(--amber)}
+.acInfo{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0;font-size:14px;text-align:left;border-top:1px solid rgba(244,241,232,.12);padding-top:10px}
+.acInfo dt{color:var(--dim)}.acInfo dd{margin:0;color:var(--chalk);word-break:break-all}
+.acRenameBtn{display:inline;padding:0 0 0 6px;font-size:13px;color:var(--amber);border:0;background:none;text-decoration:underline;cursor:pointer}.acRenameBtn:disabled{color:var(--dim);text-decoration:none;cursor:default}
+.acBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acBtns .mbtn{text-align:center}
+.app.deskApp .acInfo{font-size:16px}.app.deskApp .acTiles span{font-size:12px}.app.deskApp .acTiles b{font-size:18px}.app.deskApp .acRenameBtn{font-size:15px}

@@ -68,10 +68,20 @@
           <button class="ghost acSwap" id="acSwap" type="button"></button>
         </div>
         <div class="acPane" id="acSignedIn" hidden>
-          <p class="acLead">Signed in as <b id="acName"></b><br><small id="acWho"></small></p>
-          <button class="ghost" id="acRename" type="button">Change username</button>
-          <p class="acSync" id="acSync"></p>
-          <button class="mbtn" id="acSignOut" type="button">Sign out</button>
+          <div class="acHero"><b id="acName"></b><small id="acSince"></small></div>
+          <div class="acTiles">
+            <div><b id="acRating">—</b><span>RANKED RATING</span><small id="acRec"></small></div>
+            <div><b id="acCoins">0</b><span>COINS</span></div>
+            <div><b id="acCards">0</b><span>CARDS OWNED</span></div>
+            <div><b id="acClub">—</b><span>CLUB</span></div>
+          </div>
+          <dl class="acInfo">
+            <dt>Email</dt><dd id="acWho"></dd>
+            <dt>Account created</dt><dd id="acCreated"></dd>
+            <dt>Username</dt><dd><span id="acNameDd"></span> <button class="ghost acRenameBtn" id="acRename" type="button">Change</button></dd>
+            <dt>Progress</dt><dd id="acSync"></dd>
+          </dl>
+          <div class="acBtns"><button class="mbtn" id="acProfile" type="button">RANKED PROFILE</button><button class="mbtn" id="acSignOut" type="button">SIGN OUT</button></div>
         </div>
         <div class="acPane" id="acPickName" hidden>
           <p class="acLead" id="acPickTxt">Choose your username. It's how other players see you, and no one else can have it.</p>
