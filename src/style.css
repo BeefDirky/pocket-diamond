@@ -1425,3 +1425,34 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 /* PC: the lineup page isn't zoomed like the other menus, so its back button and title are scaled to match theirs */
 .app.deskApp #scrLineup>.xBack{transform:scale(var(--uiZ,1));transform-origin:top left;left:10px;top:10px}
 .app.deskApp #scrLineup>.lnTop{min-height:calc(46px * var(--uiZ,1))}.app.deskApp #scrLineup .lnTop h1{font-size:calc(20px * var(--uiZ,1))}
+/* ---- friends playoff ---- */
+.mpPO{width:100%;margin:0 0 8px;position:relative;background:#173a28;color:#ffd23f;border-color:#ffd23f}
+#scrTourney{display:flex;flex-direction:column;gap:10px;max-width:900px}#scrTourney[hidden]{display:none}
+#scrTourney h4{font-family:var(--f-hud);font-size:12px;letter-spacing:.14em;color:var(--amber);margin:8px 0 6px;text-align:left}
+.tnLead{margin:0;font-size:15px;line-height:1.5;text-align:center}
+#tnBody{display:flex;flex-direction:column;gap:10px}#tnBody>.big{margin:0}
+.tnSlots,.tnInv{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}
+.tnSlots li,.tnInv li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;background:var(--edge);border:2px solid var(--panel-hi);text-align:left;min-width:0}
+.tnSlots li b,.tnInv li b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tnSlots small,.tnInv small{font-family:var(--f-hud);font-size:11px;letter-spacing:.06em;color:var(--dim)}
+.tnSlots li.inv{border-style:dashed}.tnSlots li.cpu{opacity:.5;border-style:dashed}
+.tnInv li{display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:8px;align-items:center}.tnInv .frDot{grid-row:1/span 2}.tnInv small{grid-column:2}.tnInv .mbtn{grid-row:1/span 2;grid-column:3;font-size:11px;padding:6px 8px}
+.tnLeave{align-self:center}.mbtn.sure{color:#ff8f6a;border-color:#ff8f6a}
+.tnYou{padding:12px;background:var(--edge);border:2px solid var(--panel-hi);text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.tnYou.now{border-color:#ffd23f}.tnYou small{font-family:var(--f-hud);font-size:12px;letter-spacing:.12em;color:var(--amber)}.tnYou p{margin:0;font-size:16px}.tnYou .big{margin:4px 0 0;min-width:240px}
+.tnYou.champ{border-color:#ffd23f;box-shadow:0 0 18px rgba(255,210,63,.4)}.tnYou.champ b{font-family:var(--f-px);font-weight:400;font-size:20px;color:#ffd23f}
+.tnLv{font-family:var(--f-hud);font-size:11px;color:var(--dim)}
+.tnBracket{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:center}
+.tnCol{display:flex;flex-direction:column;justify-content:space-around;gap:8px;height:100%}.tnCol h4{text-align:center!important}
+.tnSer{background:#0f1c15;border:2px solid var(--panel-hi);padding:4px 0 2px;display:flex;flex-direction:column}
+.tnSer.mine{border-color:#ffd23f}.tnSer.tbd{opacity:.4}
+.tnSer small{font-family:var(--f-hud);font-size:9px;letter-spacing:.1em;color:var(--dim);text-align:center}
+.tnTeam{display:grid;grid-template-columns:18px 1fr auto;gap:6px;align-items:center;padding:3px 8px;font-size:13px;min-width:0}
+.tnTeam .tnNm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}.tnTeam b{font-family:var(--f-px);font-weight:400;font-size:12px}
+.tnSeed{font-family:var(--f-px);font-size:9px;color:var(--dim)}
+.tnTeam.won{color:#9fdc9a}.tnTeam.won b{color:#ffd23f}.tnTeam.lost{opacity:.45}.tnTeam.me .tnNm{color:#ffd23f}
+.tnFoot{display:flex;justify-content:center}
+@media (max-width:640px){.tnBracket{grid-template-columns:1fr;gap:4px}.tnCol{height:auto}.tnTeam{font-size:14px}}
+.app.deskApp .tnTeam{font-size:15px}.app.deskApp .tnLead{font-size:16px}
+.tnBracket{align-items:stretch}.tnCol{display:flex;flex-direction:column;justify-content:flex-start;gap:0}
+.tnStack{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
+@media (max-width:640px){.tnStack{gap:6px}}

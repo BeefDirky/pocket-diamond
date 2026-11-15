@@ -32,3 +32,5 @@ $P -tA -d pd_test -f supabase/tests/feedback_test.sql 2>&1 | sed "s/^psql:[^ ]* 
 $P -tA -d pd_test -f supabase/tests/username_filter_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$"
 # migration 011: friends
 $P -tA -d pd_test -f supabase/tests/friends_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^{"
+# migration 014: friends playoffs
+$P -tA -d pd_test -f supabase/tests/playoffs_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^{"

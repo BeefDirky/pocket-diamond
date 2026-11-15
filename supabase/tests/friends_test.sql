@@ -46,7 +46,8 @@ set role authenticated;
 set request.jwt.claim.sub = '11000000-0000-0000-0000-000000000003';
 select pg_temp.ok((public.friend_request('bat_two')->>'user_id')='11000000-0000-0000-0000-000000000004', 'bat_two (lower case) is a different player from Bat_Two');
 reset role;
-select pg_temp.fails($$insert into public.profiles(user_id,username) values ('11000000-0000-0000-0000-000000000003','Bat_Two')$$, 'the exact same username can''t be taken twice');
+insert into auth.users(id,email) values ('11000000-0000-0000-0000-000000000005','f5@x.co') on conflict do nothing;
+select pg_temp.fails($$insert into public.profiles(user_id,username) values ('11000000-0000-0000-0000-000000000005','Bat_Two')$$, 'the exact same username can''t be taken twice');
 -- invites (migration 013): only to friends, the friend sees it in the inbox, answers, the sender sees the answer
 set role authenticated;
 set request.jwt.claim.sub = '11000000-0000-0000-0000-000000000001';

@@ -62,11 +62,11 @@ async function frSentPoll(){const sd=FR.sent;if(!sd)return;const o=S.online;
  try{const st=await rpc('friend_invite_status',{p_id:sd.id});if(st&&st!==sd.st){sd.st=st;
   if(st==='declined')frSentNote(`${sd.name} can’t play right now.`);else if(st==='expired')frSentNote(`${sd.name} didn’t answer.`);else if(st==='joined')frSentNote(`${sd.name} is joining…`)}}catch(e){}}
 function frBusy(){return $('title').hidden||onlineGame()||Q.on||!!(S.online&&S.online.inGame)}
-async function frInbox(){if(!frSignedIn()||FR.inv||frBusy()||FR.inboxBusy)return;FR.inboxBusy=true;
+async function frInbox(){if(!frSignedIn()||FR.inv||(typeof TN!=='undefined'&&TN.inv)||frBusy()||FR.inboxBusy)return;FR.inboxBusy=true;
  try{const r=await rpc('friend_invites_inbox');const list=Array.isArray(r)?r:[];FR.seen=FR.seen||{};
   const p=list.find(x=>!FR.seen[x.id]&&!(FR.sent&&FR.sent.code===x.code));if(p)frShowInvite(p)}catch(e){}FR.inboxBusy=false}
-function frGotInvite(){frInbox()}/* (the live message only says "check your inbox now") */
-function frShowInvite(p){FR.seen[p.id]=1;FR.inv=p;$('frInvTxt').innerHTML=`<b>${esc(p.username)}</b> invited you to a game`;$('frInvite').hidden=false;try{sfx('pop')}catch(e){}
+function frGotInvite(p){if(p&&p.kind==='tn'&&typeof tnInbox==='function'){tnInbox();return}frInbox()}/* (the live message only says "check your inbox now") */
+function frShowInvite(p){FR.seen[p.id]=1;FR.inv=p;$('frInvite').dataset.kind='';$('frInvTxt').innerHTML=`<b>${esc(p.username)}</b> invited you to a game`;$('frInvite').hidden=false;try{sfx('pop')}catch(e){}
  clearTimeout(FR.invT);FR.invT=setTimeout(()=>frInvClose(false),60000)}
 function frInvClose(reply){const p=FR.inv;$('frInvite').hidden=true;clearTimeout(FR.invT);FR.inv=null;if(p&&reply)rpc('friend_invite_answer',{p_id:p.id,p_answer:'declined'}).catch(()=>{})}
 $('frInvNo').addEventListener('click',()=>frInvClose(true));

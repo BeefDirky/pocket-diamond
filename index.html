@@ -1448,6 +1448,37 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 /* PC: the lineup page isn't zoomed like the other menus, so its back button and title are scaled to match theirs */
 .app.deskApp #scrLineup>.xBack{transform:scale(var(--uiZ,1));transform-origin:top left;left:10px;top:10px}
 .app.deskApp #scrLineup>.lnTop{min-height:calc(46px * var(--uiZ,1))}.app.deskApp #scrLineup .lnTop h1{font-size:calc(20px * var(--uiZ,1))}
+/* ---- friends playoff ---- */
+.mpPO{width:100%;margin:0 0 8px;position:relative;background:#173a28;color:#ffd23f;border-color:#ffd23f}
+#scrTourney{display:flex;flex-direction:column;gap:10px;max-width:900px}#scrTourney[hidden]{display:none}
+#scrTourney h4{font-family:var(--f-hud);font-size:12px;letter-spacing:.14em;color:var(--amber);margin:8px 0 6px;text-align:left}
+.tnLead{margin:0;font-size:15px;line-height:1.5;text-align:center}
+#tnBody{display:flex;flex-direction:column;gap:10px}#tnBody>.big{margin:0}
+.tnSlots,.tnInv{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}
+.tnSlots li,.tnInv li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;background:var(--edge);border:2px solid var(--panel-hi);text-align:left;min-width:0}
+.tnSlots li b,.tnInv li b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tnSlots small,.tnInv small{font-family:var(--f-hud);font-size:11px;letter-spacing:.06em;color:var(--dim)}
+.tnSlots li.inv{border-style:dashed}.tnSlots li.cpu{opacity:.5;border-style:dashed}
+.tnInv li{display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:8px;align-items:center}.tnInv .frDot{grid-row:1/span 2}.tnInv small{grid-column:2}.tnInv .mbtn{grid-row:1/span 2;grid-column:3;font-size:11px;padding:6px 8px}
+.tnLeave{align-self:center}.mbtn.sure{color:#ff8f6a;border-color:#ff8f6a}
+.tnYou{padding:12px;background:var(--edge);border:2px solid var(--panel-hi);text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.tnYou.now{border-color:#ffd23f}.tnYou small{font-family:var(--f-hud);font-size:12px;letter-spacing:.12em;color:var(--amber)}.tnYou p{margin:0;font-size:16px}.tnYou .big{margin:4px 0 0;min-width:240px}
+.tnYou.champ{border-color:#ffd23f;box-shadow:0 0 18px rgba(255,210,63,.4)}.tnYou.champ b{font-family:var(--f-px);font-weight:400;font-size:20px;color:#ffd23f}
+.tnLv{font-family:var(--f-hud);font-size:11px;color:var(--dim)}
+.tnBracket{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:center}
+.tnCol{display:flex;flex-direction:column;justify-content:space-around;gap:8px;height:100%}.tnCol h4{text-align:center!important}
+.tnSer{background:#0f1c15;border:2px solid var(--panel-hi);padding:4px 0 2px;display:flex;flex-direction:column}
+.tnSer.mine{border-color:#ffd23f}.tnSer.tbd{opacity:.4}
+.tnSer small{font-family:var(--f-hud);font-size:9px;letter-spacing:.1em;color:var(--dim);text-align:center}
+.tnTeam{display:grid;grid-template-columns:18px 1fr auto;gap:6px;align-items:center;padding:3px 8px;font-size:13px;min-width:0}
+.tnTeam .tnNm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}.tnTeam b{font-family:var(--f-px);font-weight:400;font-size:12px}
+.tnSeed{font-family:var(--f-px);font-size:9px;color:var(--dim)}
+.tnTeam.won{color:#9fdc9a}.tnTeam.won b{color:#ffd23f}.tnTeam.lost{opacity:.45}.tnTeam.me .tnNm{color:#ffd23f}
+.tnFoot{display:flex;justify-content:center}
+@media (max-width:640px){.tnBracket{grid-template-columns:1fr;gap:4px}.tnCol{height:auto}.tnTeam{font-size:14px}}
+.app.deskApp .tnTeam{font-size:15px}.app.deskApp .tnLead{font-size:16px}
+.tnBracket{align-items:stretch}.tnCol{display:flex;flex-direction:column;justify-content:flex-start;gap:0}
+.tnStack{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
+@media (max-width:640px){.tnStack{gap:6px}}
 </style>
 
 <div class="app">
@@ -1772,9 +1803,16 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
           <button class="mode" id="goRanked" type="button"><b>RANKED</b></button>
           <button class="mode alt" id="goCustom" type="button"><b>CUSTOM</b></button>
         </div>
+        <button class="mbtn mpBoard mpPO" id="goTourney" type="button">FRIENDS PLAYOFF<span class="frBadge" id="tnBadge" hidden>!</span></button>
         <div class="mpRow"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button></div>
         <p class="mpNote" id="mpNote" hidden></p>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
+      <div class="card wide" id="scrTourney" hidden>
+        <h1>FRIENDS <span>PLAYOFF</span></h1>
+        <p class="frMsg" id="tnMsg" aria-live="polite"></p>
+        <div id="tnBody"></div>
+        <button class="mbtn back" type="button" data-go="scrMulti">Back</button>
       </div>
       <div class="card" id="scrFriends" hidden>
         <h1>FRI<span>ENDS</span></h1>
@@ -6705,6 +6743,7 @@ function gameOver(win){if(S.olMenu){S.olMenu=false;$('title').hidden=true;showSc
  $('toLobby').hidden=!onl;if(onl){resumeClear();$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false;const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;$('again').textContent=se?(se.done?'NEW SERIES':`GAME ${se.w+se.l+1}`):'PLAY AGAIN'}
  if(S.rkBot){$('again').hidden=true;$('toLobby').hidden=false;$('toLobby').textContent='BACK TO MULTIPLAYER'}
+ S.tnBack=tnGameOver();
  if(S.celebr){const gid=S.overGid=(S.overGid||0)+1;setTimeout(()=>{if(S.phase==='over'&&S.overGid===gid&&$('title').hidden)$('over').hidden=false},3400)}else $('over').hidden=false;/* the results card always follows the celebration */updateHUD();
 }
 
@@ -6825,7 +6864,7 @@ let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createEle
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){qLeaving(id);roomLineupBack(id);roomKitRestore(id);if(pendingMode==='watch'&&id!=='scrTeams'){pendingMode=null;myTeamRestore()}/* backed out of picking a team to watch: your own club again */if(pendingMode==='brand'&&id!=='scrTeams')brandCancel();if(id==='scrTeams'&&pendingMode==='brand'){$('tsPrev').hidden=$('tsNext').hidden=false}
- document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb','scrLegal','scrPlay','scrFriends'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+ document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb','scrLegal','scrPlay','scrFriends','scrTourney'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();
 // PC menu scale: 1 at about 720 px tall (1.5 on 1080p), up to 1.65 on big screens (never wider than the screen allows);
 // the main menu grows a fifth as much (1.1 on 1080p)
@@ -7641,15 +7680,15 @@ $('olBo').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)
 function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o.mine.team){lobbyRender();return}
  const se=next&&o.series&&!o.series.done?o.series:null;
  if(!se&&rkOn(o)){rkHostStart(+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v);return}
- const inn=se?se.inn:+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v;
- const bo=se?se.bo:+($('olBo').querySelector('[aria-pressed=true]')||{dataset:{v:1}}).dataset.v;
+ const inn=se?se.inn:o.tn?3:+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v;/* (a playoff game is always 3 innings) */
+ const bo=se?se.bo:o.tn?1:+($('olBo').querySelector('[aria-pressed=true]')||{dataset:{v:1}}).dataset.v;
  const st={gid:Math.random().toString(36).slice(2,8),home:o.mine.team,away:o.opp.team,inn,night:Math.random()<.55,
   bo,sid:se?se.sid:Math.random().toString(36).slice(2,8),gn:se?se.gn+1:1,sw:se?[se.w.host,se.w.guest]:[0,0]};
  netPresence({start:st});startOnline(st)}
 $('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp||o.inGame)return;netPresence({rdy:o.mine.rdy==='L'?null:'L'});lobbyRender()});
 $('olNext').addEventListener('click',()=>{const o=S.online,se=o&&o.series;if(!se||se.done||o.inGame)return;const tok='N'+se.gn;netPresence({rdy:o.mine.rdy===tok?null:tok});nextRender()});
 $('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}const md=o&&o.mode;S.online=null;openOnline(md)});
-$('toLobby').addEventListener('click',()=>{const bot=!!S.rkBot;$('over').hidden=true;toTitle();if(bot){mpOpen();return}const o=S.online;if(o&&o.queued){qDone(o);return}if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
+$('toLobby').addEventListener('click',()=>{if(S.tnBack){S.tnBack=false;$('over').hidden=true;const o=S.online;if(o)o.inGame=false;toTitle();tnBackFromGame();return}const bot=!!S.rkBot;$('over').hidden=true;toTitle();if(bot){mpOpen();return}const o=S.online;if(o&&o.queued){qDone(o);return}if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
 
 // the connection pill: shown during an online game; green when live, amber while it reconnects (tap to retry now)
 function netPill(){const o=S.online,el=$('olNet');const on=!!(o&&o.nr&&o.inGame);el.hidden=!on;if(!on)return;
@@ -7876,7 +7915,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='4e5cb98d4b',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='08f2fc24b9',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8398,11 +8437,11 @@ async function frSentPoll(){const sd=FR.sent;if(!sd)return;const o=S.online;
  try{const st=await rpc('friend_invite_status',{p_id:sd.id});if(st&&st!==sd.st){sd.st=st;
   if(st==='declined')frSentNote(`${sd.name} can’t play right now.`);else if(st==='expired')frSentNote(`${sd.name} didn’t answer.`);else if(st==='joined')frSentNote(`${sd.name} is joining…`)}}catch(e){}}
 function frBusy(){return $('title').hidden||onlineGame()||Q.on||!!(S.online&&S.online.inGame)}
-async function frInbox(){if(!frSignedIn()||FR.inv||frBusy()||FR.inboxBusy)return;FR.inboxBusy=true;
+async function frInbox(){if(!frSignedIn()||FR.inv||(typeof TN!=='undefined'&&TN.inv)||frBusy()||FR.inboxBusy)return;FR.inboxBusy=true;
  try{const r=await rpc('friend_invites_inbox');const list=Array.isArray(r)?r:[];FR.seen=FR.seen||{};
   const p=list.find(x=>!FR.seen[x.id]&&!(FR.sent&&FR.sent.code===x.code));if(p)frShowInvite(p)}catch(e){}FR.inboxBusy=false}
-function frGotInvite(){frInbox()}/* (the live message only says "check your inbox now") */
-function frShowInvite(p){FR.seen[p.id]=1;FR.inv=p;$('frInvTxt').innerHTML=`<b>${esc(p.username)}</b> invited you to a game`;$('frInvite').hidden=false;try{sfx('pop')}catch(e){}
+function frGotInvite(p){if(p&&p.kind==='tn'&&typeof tnInbox==='function'){tnInbox();return}frInbox()}/* (the live message only says "check your inbox now") */
+function frShowInvite(p){FR.seen[p.id]=1;FR.inv=p;$('frInvite').dataset.kind='';$('frInvTxt').innerHTML=`<b>${esc(p.username)}</b> invited you to a game`;$('frInvite').hidden=false;try{sfx('pop')}catch(e){}
  clearTimeout(FR.invT);FR.invT=setTimeout(()=>frInvClose(false),60000)}
 function frInvClose(reply){const p=FR.inv;$('frInvite').hidden=true;clearTimeout(FR.invT);FR.inv=null;if(p&&reply)rpc('friend_invite_answer',{p_id:p.id,p_answer:'declined'}).catch(()=>{})}
 $('frInvNo').addEventListener('click',()=>frInvClose(true));
@@ -8414,6 +8453,91 @@ setInterval(()=>{frChannel().catch(()=>{});if(frSignedIn()&&!$('title').hidden&&
 // "+ ADD FRIEND" on a leaderboard profile
 $('lbpCard').addEventListener('click',async e=>{const b=e.target.closest('[data-add]');if(!b)return;b.disabled=true;b.textContent='SENDING…';
  try{const r=await rpc('friend_request',{p_username:b.dataset.add});b.textContent=r.status==='accepted'?'FRIENDS':'REQUEST SENT';track('friend_request',{result:r.status,from:'profile'});frLoad()}catch(err){b.textContent=frErr(err);b.disabled=false}});
+// ---------- friends playoff: an 8-club bracket played live with your friends (server: migration 014) ----------
+// The host creates it and invites friends; START fills the empty spots with CPU clubs and seeds everyone by ranked
+// rating. Quarterfinals and semifinals are best of 3, the final best of 5, every game 3 innings with the higher seed home.
+// Your series against a CPU club is played on your phone (a CPU at the level its rating gives); against a friend it's a
+// custom room whose code the series keeps. After each game your phone reports the score. Nothing here touches ranked.
+const TN={st:null,busy:false,poll:0,seen:{},inv:null};
+const TN_ROUND=['','QUARTERFINALS','SEMIFINALS','FINAL'];
+const tnErr=e=>{const m=(e&&e.message)||'';return/tourney_|function .* does not exist|schema cache/i.test(m)?'Friends playoffs aren’t set up on the server yet.':m||'Could not reach the server.'};
+function tnSay(t,bad){const m=$('tnMsg');m.textContent=t||'';m.classList.toggle('bad',!!bad)}
+const tnP=seed=>TN.st&&TN.st.players.find(p=>p.seed===seed);
+const tnMe=()=>TN.st&&TN.st.players.find(p=>p.me);
+const tnClubName=k=>TEAMS[k]?`${TEAMS[k].city} ${TEAMS[k].name}`:(k||'');
+function tnLabel(p){if(!p)return'—';return p.user_id?esc(p.name):`CPU · ${esc(TEAMS[p.club]?TEAMS[p.club].name:p.club)}`}
+function tnMySeries(){const me=tnMe();if(!me||!me.seed||!TN.st)return null;return TN.st.series.filter(s=>s.seed_a===me.seed||s.seed_b===me.seed).sort((a,b)=>b.round-a.round)[0]||null}
+async function tnLoad(){if(!frSignedIn())return;try{TN.st=await rpc('tourney_state',{p_tid:null});tnBadge();if(!$('scrTourney').hidden)tnRender()}catch(e){if(!$('scrTourney').hidden)tnSay(tnErr(e),true)}}
+function tnBadge(){const s=tnMySeries(),st=TN.st;$('tnBadge').hidden=!(st&&st.status==='running'&&s&&s.status==='open')}
+async function tnOpen(){showScreen('scrTourney');tnSay('');$('tnBody').innerHTML=frSignedIn()?'<p class="tnLead">Loading…</p>':'';tnRender();await tnLoad();tnRender()}
+$('goTourney').addEventListener('click',()=>{ensureAudio();tnOpen()});
+// ---- the screen ----
+function tnRender(){const B=$('tnBody');if(!frSignedIn()){B.innerHTML=`<p class="tnLead">A friends playoff needs an account, so your friends can find you.</p><button class="big" type="button" data-tn="acct">SIGN IN</button>`;return}
+ const st=TN.st;
+ if(!st){B.innerHTML=`<p class="tnLead">An 8-club bracket you play live with your friends. Invite up to 7; CPU clubs fill the empty spots. Seeds come from ranked ratings. Quarterfinals and semifinals are best of 3, the final best of 5, every game 3 innings. It doesn’t change your rating.</p><button class="big" type="button" data-tn="create">CREATE A PLAYOFF</button>`;return}
+ if(st.status==='lobby'){B.innerHTML=tnLobbyHtml(st);return}
+ B.innerHTML=tnYouHtml(st)+tnBracketHtml(st)+`<div class="tnFoot">${st.status==='done'?`<button class="mbtn" type="button" data-tn="close">DONE</button>`:`<button class="mbtn" type="button" data-tn="leave">LEAVE PLAYOFF</button>`}</div>`}
+function tnLobbyHtml(st){const J=st.players.filter(p=>p.status==='joined'),I=st.players.filter(p=>p.status==='invited');
+ const rows=J.map(p=>`<li><b>${esc(p.name)}</b><small>${p.rating} · ${esc(tnClubName(p.club))}</small></li>`).join('')+I.map(p=>`<li class="inv"><b>${esc(p.name)}</b><small>INVITED…</small></li>`).join('')+Array.from({length:Math.max(0,8-J.length-I.length)},()=>'<li class="cpu"><b>CPU</b><small>FILLS IN AT START</small></li>').join('');
+ let html=`<p class="tnLead">${st.host?'Invite your friends, then start. Empty spots become CPU clubs.':`Waiting for <b>${esc(st.host_name)}</b> to start the playoff…`}</p><h4>PLAYERS · ${J.length} / 8</h4><ul class="tnSlots">${rows}</ul>`;
+ if(st.host){const taken=new Set(st.players.filter(p=>p.status!=='left').map(p=>p.user_id));const fr=(FR.list||[]).filter(f=>f.state==='friend');
+  html+=`<h4>INVITE FRIENDS</h4>${fr.length?`<ul class="tnInv">${fr.map(f=>{const[s,l]=frStatus(f.user_id),inv=taken.has(f.user_id);return `<li><i class="frDot ${s}"></i><b>${esc(f.username)}</b><small>${l}</small><button type="button" class="mbtn" data-tninv="${f.user_id}"${inv||J.length>=8?' disabled':''}>${inv?'INVITED':'INVITE'}</button></li>`}).join('')}</ul>`:`<p class="tnLead">Add friends on the Friends page to invite them.</p>`}
+   <button class="big" type="button" data-tn="start">START${J.length<8?` · CPU FILLS ${8-J.length}`:''}</button><button class="mbtn tnLeave" type="button" data-tn="leave">CANCEL PLAYOFF</button>`}
+ else html+=`<button class="mbtn tnLeave" type="button" data-tn="leave">LEAVE</button>`;
+ return html}
+function tnSeriesBox(s,st){const me=tnMe(),a=tnP(s.seed_a),b=tnP(s.seed_b),mine=me&&(s.seed_a===me.seed||s.seed_b===me.seed);
+ const row=(p,seed,w)=>`<div class="tnTeam${s.winner===seed?' won':s.winner?' lost':''}${p&&p.me?' me':''}"><span class="tnSeed">${seed}</span><span class="tnNm">${tnLabel(p)}</span><b>${w}</b></div>`;
+ return `<div class="tnSer${mine?' mine':''}${s.status==='done'?' done':''}">${row(a,s.seed_a,s.wins_a)}${row(b,s.seed_b,s.wins_b)}<small>BEST OF ${s.need*2-1}</small></div>`}
+function tnBracketHtml(st){const col=r=>{const ss=st.series.filter(s=>s.round===r),n=[4,2,1][r-1];const boxes=ss.map(s=>tnSeriesBox(s,st)).join('')+Array.from({length:n-ss.length},()=>'<div class="tnSer tbd"><div class="tnTeam"><span class="tnSeed"></span><span class="tnNm">TBD</span></div><div class="tnTeam"><span class="tnSeed"></span><span class="tnNm">TBD</span></div></div>').join('');
+  return `<div class="tnCol r${r}"><h4>${TN_ROUND[r]}</h4><div class="tnStack">${boxes}</div></div>`};return `<div class="tnBracket">${col(1)}${col(2)}${col(3)}</div>`}
+function tnYouHtml(st){const me=tnMe(),s=tnMySeries();
+ if(st.status==='done'){const c=tnP(st.champion);return `<div class="tnYou champ"><small>CHAMPION</small><b>${tnLabel(c)}</b>${c&&c.me?'<p>You won the playoff!</p>':''}</div>`}
+ if(!me||me.status==='left')return `<div class="tnYou"><p>You left this playoff. You can still follow the bracket.</p></div>`;
+ if(!s)return `<div class="tnYou"><p>Waiting for the bracket…</p></div>`;
+ const iA=s.seed_a===me.seed,opp=tnP(iA?s.seed_b:s.seed_a),mw=iA?s.wins_a:s.wins_b,tw=iA?s.wins_b:s.wins_a;
+ if(s.status==='done')return `<div class="tnYou"><small>${TN_ROUND[s.round]}</small><p>${s.winner===me.seed?`You beat ${tnLabel(opp)} ${mw}-${tw}. Waiting for the other ${s.round===1?'quarterfinals':'semifinal'} to finish…`:`Out: ${tnLabel(opp)} won ${tw}-${mw}. Follow the rest of the bracket below.`}</p></div>`;
+ const g=mw+tw+1,claim=opp&&opp.user_id&&s.idle_secs>480;
+ return `<div class="tnYou now"><small>${TN_ROUND[s.round]} · GAME ${g} · BEST OF ${s.need*2-1}</small><p>You <b>${mw}</b> – <b>${tw}</b> ${tnLabel(opp)}${opp&&!opp.user_id?` <span class="tnLv">LEVEL ${opp.bot_level}</span>`:''}</p>
+  <button class="big" type="button" data-tn="play">PLAY GAME ${g}</button>${claim?`<button class="mbtn" type="button" data-tn="claim">${esc(opp.name)} DIDN’T SHOW · CLAIM THE SERIES</button>`:''}</div>`}
+$('tnBody').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b||TN.busy)return;const d=b.dataset,st=TN.st;
+ if(d.tn==='acct'){showScreen('scrAcct');return}
+ if(d.tn==='close'){TN.st=null;tnRender();mpOpen();return}
+ if(d.tn==='play'){tnPlay();return}
+ if(d.tn==='leave'&&!b.classList.contains('sure')){b.classList.add('sure');b.textContent=st&&st.status==='running'?'TAP AGAIN: YOUR SERIES IS LOST':'TAP AGAIN TO CONFIRM';return}
+ TN.busy=true;tnSay('');try{
+  if(d.tn==='create'){await rpc('tourney_create',{p_club:MYTEAM?MYTEAM.club:S.you});track('playoff_create');if(!FR.list.length)await frLoad()}
+  else if(d.tninv){await rpc('tourney_invite',{p_tid:st.id,p_user:d.tninv});frSend(d.tninv,'invite',{from:ACC.user.id,kind:'tn'}).catch(()=>{});track('playoff_invite')}
+  else if(d.tn==='start'){await rpc('tourney_start',{p_tid:st.id});track('playoff_start',{humans:st.players.filter(p=>p.status==='joined').length})}
+  else if(d.tn==='leave'){await rpc('tourney_leave',{p_tid:st.id});track('playoff_leave',{status:st.status});TN.st=null}
+  else if(d.tn==='claim'){await rpc('tourney_claim',{p_series:tnMySeries().id})}
+  await tnLoad()}catch(err){tnSay(tnErr(err),true)}TN.busy=false;tnRender()});
+// ---- playing your game ----
+function tnPlay(){const st=TN.st,s=tnMySeries(),me=tnMe();if(!st||!s||s.status!=='open'||!me)return;const iA=s.seed_a===me.seed,opp=tnP(iA?s.seed_b:s.seed_a),g=s.wins_a+s.wins_b+1;
+ const tg={sid:s.id,g,iA,tid:st.id,round:s.round};track('playoff_game_start',{round:s.round,game:g,vs:opp.user_id?'friend':'cpu'});
+ if(!opp.user_id){/* against a CPU club: an ordinary 3-inning game on this phone, the CPU at its level */
+  const lv=opp.bot_level||3;S.tnGame={...tg,bot:true};S.cpuEdge=(lv-3)/7;S.you=MYTEAM?MYTEAM.club:S.you;S.opp=opp.club===S.you?ORDER.find(k=>k!==S.you):opp.club;pendingMode=null;
+  startGame('full');botRoster(S.opp,lv);S.totalInn=3;S.schedInn=3;S.oppLine=[0,0,0];S.youLine=[0,0,0];if(ML){ML.mode='playoff_friends';ML.sched=3}
+  banner(`${TN_ROUND[s.round]} · GAME ${g}`,`CPU LEVEL ${lv} · ${TEAMS[S.opp].name} at ${TEAMS[S.you].name} · 3 innings`);updateHUD();return}
+ /* against a friend: the series' own custom room (the higher seed hosts and is home) */
+ openOnline('custom');joinRoom(s.code,iA?'host':'guest').then(()=>{const o=S.online;if(!o||o.code!==s.code)return;o.tn=tg;
+  const n=$('olNote');if(n){n.textContent=`${TN_ROUND[s.round]} · game ${g} vs ${opp.name}. Pick your clubs, 3 innings, and both press Ready.`;n.style.color='var(--amber)'}})}
+async function tnReport(tg,my,their){if(!tg||my===their)return;try{const r=await rpc('tourney_report',{p_series:tg.sid,p_game:tg.g,p_my_runs:my,p_their_runs:their});track('playoff_game_end',{round:tg.round,game:tg.g,won:my>their});TN.lastReport=r}catch(e){tnSay(tnErr(e),true)}
+ await tnLoad()}
+/* (called by the game-over code) a playoff game ended: report it, and point the results card back at the bracket */
+function tnGameOver(){const t=S.tnGame;if(t&&t.bot){S.tnGame=null;S.cpuEdge=0;tnReport(t,S.runs,S.target);$('again').hidden=true;$('toLobby').hidden=false;$('toLobby').textContent='BACK TO THE PLAYOFF';return true}
+ const o=S.online;if(o&&o.tn&&!o.tnDone){o.tnDone=true;const home=o.me==='home',my=home?S.runs:S.target,their=home?S.target:S.runs;tnReport(o.tn,my,their);$('toLobby').textContent='BACK TO THE PLAYOFF';return true}
+ return false}
+function tnBackFromGame(){const o=S.online;if(o&&o.tn){if(o.nr)try{o.nr.leave()}catch(e){}S.online=null}tnOpen()}
+// leaving a CPU playoff game early (main menu / quit) counts as a loss in that game
+function tnLeaveGame(){const t=S.tnGame;if(!t)return;S.tnGame=null;S.cpuEdge=0;if(S.phase!=='over')tnReport(t,0,1)}
+// ---- invites to a playoff ----
+async function tnInbox(){if(!frSignedIn()||FR.inv||TN.inv||frBusy())return;try{const r=await rpc('tourney_inbox');const p=(Array.isArray(r)?r:[]).find(x=>!TN.seen[x.tid]);if(!p)return;TN.seen[p.tid]=1;TN.inv=p;
+ $('frInvTxt').innerHTML=`<b>${esc(p.host_name)}</b> invited you to a friends playoff (${p.players}/8 in)`;$('frInvite').hidden=false;$('frInvite').dataset.kind='tn';try{sfx('pop')}catch(e){}}catch(e){}}
+$('frInvGo').addEventListener('click',async e=>{const p=TN.inv;if(!p||$('frInvite').dataset.kind!=='tn')return;e.stopImmediatePropagation();TN.inv=null;$('frInvite').hidden=true;$('frInvite').dataset.kind='';
+ try{await rpc('tourney_respond',{p_tid:p.tid,p_accept:true,p_club:MYTEAM?MYTEAM.club:S.you});track('playoff_join')}catch(err){tnOpen().then(()=>tnSay(tnErr(err),true));return}tnOpen()},true);
+$('frInvNo').addEventListener('click',e=>{const p=TN.inv;if(!p||$('frInvite').dataset.kind!=='tn')return;e.stopImmediatePropagation();TN.inv=null;$('frInvite').hidden=true;$('frInvite').dataset.kind='';rpc('tourney_respond',{p_tid:p.tid,p_accept:false,p_club:null}).catch(()=>{})},true);
+// keep the bracket fresh while it's on screen; look for playoff invites (and your turn) on the menus
+setInterval(()=>{if(!frSignedIn())return;TN.poll++;const on=!$('scrTourney').hidden&&!$('title').hidden;if(on&&!TN.busy)tnLoad();else if(TN.poll%4===0&&!$('title').hidden){tnInbox();tnLoad()}},3000);
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'],FA_POW_CAP=[70,80,85,95];
 let CARDS=[],CARD_BY={};
@@ -9930,7 +10054,7 @@ addEventListener('keydown',e=>{
  else if((e.key==='w'||e.key==='W')&&!e.repeat)doPickoff(2)
  else if((e.key==='i'||e.key==='I')&&!e.repeat)doIBB()
 });
-const toTitle=()=>{if(S.rkBot){if(S.phase!=='over')botLeave();botClear()}phGameLeft('menu');setTimeout(myTeamRestore,0);S.series=null;rkStop();if(S.online&&S.online.inGame)resumeClear();$('clkS').hidden=true;unduckMusic();S.celebr=null;restoreNetRosters();if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
+const toTitle=()=>{if(S.rkBot){if(S.phase!=='over')botLeave();botClear()}if(S.tnGame)tnLeaveGame();phGameLeft('menu');setTimeout(myTeamRestore,0);S.series=null;rkStop();if(S.online&&S.online.inGame)resumeClear();$('clkS').hidden=true;unduckMusic();S.celebr=null;restoreNetRosters();if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
 let pendingMode=null;
 const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTING PRACTICE',playoffs:'PLAYOFFS',watch:'WATCH A GAME'};
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}

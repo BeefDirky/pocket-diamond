@@ -201,15 +201,15 @@ $('olBo').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)
 function hostStart(next){const o=S.online;if(!o||!o.opp)return;if(o.opp.team===o.mine.team){lobbyRender();return}
  const se=next&&o.series&&!o.series.done?o.series:null;
  if(!se&&rkOn(o)){rkHostStart(+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v);return}
- const inn=se?se.inn:+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v;
- const bo=se?se.bo:+($('olBo').querySelector('[aria-pressed=true]')||{dataset:{v:1}}).dataset.v;
+ const inn=se?se.inn:o.tn?3:+($('olInn').querySelector('[aria-pressed=true]')||{dataset:{v:3}}).dataset.v;/* (a playoff game is always 3 innings) */
+ const bo=se?se.bo:o.tn?1:+($('olBo').querySelector('[aria-pressed=true]')||{dataset:{v:1}}).dataset.v;
  const st={gid:Math.random().toString(36).slice(2,8),home:o.mine.team,away:o.opp.team,inn,night:Math.random()<.55,
   bo,sid:se?se.sid:Math.random().toString(36).slice(2,8),gn:se?se.gn+1:1,sw:se?[se.w.host,se.w.guest]:[0,0]};
  netPresence({start:st});startOnline(st)}
 $('olGo').addEventListener('click',()=>{const o=S.online;if(!o||!o.opp||o.inGame)return;netPresence({rdy:o.mine.rdy==='L'?null:'L'});lobbyRender()});
 $('olNext').addEventListener('click',()=>{const o=S.online,se=o&&o.series;if(!se||se.done||o.inGame)return;const tok='N'+se.gn;netPresence({rdy:o.mine.rdy===tok?null:tok});nextRender()});
 $('olLeave').addEventListener('click',async()=>{resumeClear();const o=S.online;if(o&&o.nr)try{await o.nr.leave()}catch(e){}if(o&&o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}const md=o&&o.mode;S.online=null;openOnline(md)});
-$('toLobby').addEventListener('click',()=>{const bot=!!S.rkBot;$('over').hidden=true;toTitle();if(bot){mpOpen();return}const o=S.online;if(o&&o.queued){qDone(o);return}if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
+$('toLobby').addEventListener('click',()=>{if(S.tnBack){S.tnBack=false;$('over').hidden=true;const o=S.online;if(o)o.inGame=false;toTitle();tnBackFromGame();return}const bot=!!S.rkBot;$('over').hidden=true;toTitle();if(bot){mpOpen();return}const o=S.online;if(o&&o.queued){qDone(o);return}if(o){netPresence({rdy:null});o.prevCustom!=null&&(CUSTOM.active=o.prevCustom,applyCustom());if(o.role==='host')netPresence({start:null})}openOnline()});
 
 // the connection pill: shown during an online game; green when live, amber while it reconnects (tap to retry now)
 function netPill(){const o=S.online,el=$('olNet');const on=!!(o&&o.nr&&o.inGame);el.hidden=!on;if(!on)return;
