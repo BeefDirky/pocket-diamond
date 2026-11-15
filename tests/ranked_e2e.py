@@ -95,6 +95,11 @@ with sync_playwright() as p:
             c.execute('select status, verified, home_score, away_score, winner_side, dispute_reason from public.matches where id=%s', (mid,)); m = c.fetchone()
             c.execute('select count(*) n from public.plate_appearances where match_id=%s', (mid,)); npa = c.fetchone()['n']
         print('  server:', dict(m), '| plate appearances stored:', npa)
+        # leaving the results by the main menu, then opening Multiplayer, must never show the ranked room lobby
+        PA.evaluate("__x('$(\"over\").hidden=true;toTitle()')"); PA.click('#goMulti'); PA.wait_for_timeout(400)
+        lob = PA.is_visible('#scrOnline'); print('  Multiplayer after a ranked game -> lobby shown:', lob, '| multiplayer page:', PA.is_visible('#scrMulti'))
+        if lob or not PA.is_visible('#scrMulti'):
+            ok = False; print('FAIL: the ranked room lobby showed')
         return m, npa
     r1 = play('GAME 1 (honest)')
     if not r1 or r1[0]['status'] != 'final' or not r1[0]['verified'] or r1[1] < 10: ok = False; print('FAIL: honest ranked game was not settled')

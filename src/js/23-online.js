@@ -57,11 +57,18 @@ function netFlag(why,detail){const o=S.online;if(!o||!o.inGame)return;const d=de
 // before taking the pitcher's snapshot, make sure it is the state this phone already has
 // (a club with no used relievers can be written as [] or left out; both mean the same)
 const stCanon=z=>{const c={...z,u:{}};for(const k in z.u||{})if(z.u[k]&&z.u[k].length)c.u[k]=z.u[k];return canon(c)};
-function netCheckSnap(z,why){if(stCanon(snapState())!==stCanon(z))netFlag(why||'state',{mine:snapState(),theirs:z})}
+// a pitching change rides on the pitcher's next snapshot, so the other phone still has the old pitcher until
+// it applies it: count a legal change (the old arm moved to used, the new one fresh) as agreeing
+function penOK(mine,z){const k=fldKey(),a=(mine.pi||{})[k]||0,b=(z.pi||{})[k]||0;if(a===b)return mine;
+ const ua=(mine.u||{})[k]||[],ub=(z.u||{})[k]||[],P=staffOf(k)[b];
+ if(!P||ua.includes(b)||canon(ub)!==canon([...ua,a])||((z.pc||{})[k]||0)||((z.pr||{})[k]||0)||((z.pb||{})[k]||0)||(z.sm&&z.sm[k]!=null&&Math.abs(z.sm[k]-stamMax(P))>.01))return mine;
+ const m=JSON.parse(JSON.stringify(mine));m.pi[k]=b;(m.u=m.u||{})[k]=[...ub];m.pc[k]=(z.pc||{})[k];m.pr[k]=(z.pr||{})[k];m.pb[k]=(z.pb||{})[k];if(z.sm)(m.sm=m.sm||{})[k]=z.sm[k];
+ for(const f of ['pc','pr','pb'])if(z[f]&&!(k in z[f]))delete m[f][k];return m}
+function netCheckSnap(z,why){const mine=penOK(snapState(),z);if(stCanon(mine)!==stCanon(z))netFlag(why||'state',{mine,theirs:z})}
 function netRand(fn){if(!S.online||!S.online.inGame||!S.pitch||!S.pitch.pid)return fn();const r=Math.random;Math.random=mulberry32(hash(S.online.gid+'|'+S.pitch.pid));try{return fn()}finally{Math.random=r}}
 const RESUME_KEY='pd-olresume';
 function resumeSave(){const o=S.online;if(!o||!o.inGame||!o.code)return;try{localStorage.setItem(RESUME_KEY,JSON.stringify({code:o.code,role:o.role,team:o.mine.team,ros:o.mine.ros,start:o.start,gid:o.gid,z:snapState(),t:Date.now()}))}catch(e){}}
-function resumeGet(){try{const r=JSON.parse(localStorage.getItem(RESUME_KEY)||'null');if(r&&Date.now()-r.t<30*60*1000)return r}catch(e){}return null}
+function resumeGet(){try{const r=JSON.parse(localStorage.getItem(RESUME_KEY)||'null');if(r&&!/^rk-/.test(r.code||'')&&Date.now()-r.t<30*60*1000)return r}catch(e){}return null}
 function resumeClear(){try{localStorage.removeItem(RESUME_KEY)}catch(e){}}
 function netPresence(patch){const o=S.online;if(!o||!o.nr)return;Object.assign(o.mine,patch);o.nr.presence(patch).catch(()=>{})}
 function snapState(){const T=TEAMS[batKey()];return JSON.parse(JSON.stringify({i:S.inning,h:S.half,o:S.outs,b:S.balls,s:S.strikes,r:S.runs,t:S.target,hs:[S.hits,S.oppHits,S.errs||0,S.myErrs||0],bs:S.bases.map(p=>p?T.lineup.indexOf(p):-1),or:S.orderOf,pi:S.pIdxOf,pc:S.pcOf,sm:S.stamOf||{},pr:S.pRunsOf,pb:S.pBFOf,yl:S.youLine,ol:S.oppLine,n:S.totalInn,u:S.usedOf||{}}))}// a copy: later changes (the release counting the pitch) must not reach a snapshot already taken
@@ -180,7 +187,11 @@ async function joinRoom(code,role,resume){const note=t=>{const n=$('olNote');n.t
 $('olPick').addEventListener('click',e=>{const c=e.target.closest('button');const o=S.online;if(!c||!o||!o.nr||o.inGame)return;const t=c.dataset.t;
  if(o.opp&&o.opp.team===t){o.warnUntil=performance.now()+3000;$('olStatus').classList.add('olWarn');$('olStatus').textContent=`Your opponent already has the ${TEAMS[t].name}. Same-club games aren't allowed. Pick another club.`;setTimeout(lobbyRender,3050);return}
  S.you=t;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==t);syncPicker();applyCustom();updateHUD();parkDirty();netPresence({team:t,ros:myRosterSpec(),rdy:null});/* (a kit for this room only: your players stay yours) */lobbyRender()});
-function openOnline(mode){if(!S.online)S.online={mine:{},opp:null,mode:mode||'custom'};else if(mode&&!S.online.nr)S.online.mode=mode;lobbyRender();rkHead(S.online);showScreen('scrOnline')}
+// ranked never shows the room lobby: a ranked room left over from a finished or abandoned match is closed here
+function rkLeftover(o){return !!o&&(o.queued||o.mode==='ranked'||/^rk-/.test(o.code||''))}
+function rkDrop(o){resumeClear();if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}if(S.online===o)S.online=null}
+function openOnline(mode){const o0=S.online;if(rkLeftover(o0)){if(o0.inGame)return;rkDrop(o0);if(mode!=='custom'){mpOpen();return}}
+ if(!S.online)S.online={mine:{},opp:null,mode:mode||'custom'};else if(mode&&!S.online.nr)S.online.mode=mode;lobbyRender();rkHead(S.online);showScreen('scrOnline')}
 $('olCreate').addEventListener('click',()=>{const L='abcdefghjkmnpqrstuvwxyz';let c='';for(let i=0;i<4;i++)c+=L[Math.floor(Math.random()*L.length)];joinRoom(c,'host')});
 $('olJoin').addEventListener('click',()=>joinRoom($('olCode').value,'guest'));
 $('olCode').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')joinRoom($('olCode').value,'guest')});

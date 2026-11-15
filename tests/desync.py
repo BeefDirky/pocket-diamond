@@ -48,6 +48,8 @@ try:
   print('host lineup on guest phone:',B.evaluate("__pd.TEAMS.seoul.lineup[3].name+' / '+__pd.TEAMS.seoul.staff[0].name"),'| on host:',A.evaluate("__pd.TEAMS.seoul.lineup[3].name+' / '+__pd.TEAMS.seoul.staff[0].name"))
   assert A.evaluate("__pd.S.online.inGame") and B.evaluate("__pd.S.online.inGame"),'game did not start'
   bot="""()=>{let last=null;setInterval(()=>{const S=__pd.S;if(!S.online||!S.online.inGame)return;__pd.afkPoke&&__pd.afkPoke();
+   /* a pitching change from the bullpen in the 2nd: it rides on the next windup and must not raise a check flag */
+   if(!window.__pen&&S.phase==='choose'&&S.inning>=2&&__pd.canPen&&__pd.canPen()){document.getElementById('muPit').click();const r=document.querySelector('#penList .penRow:not([disabled])');if(r){r.click();window.__pen=1}}
    if(S.phase==='choose'&&Math.random()<.05){document.dispatchEvent(new KeyboardEvent('keydown',{key:String(1+Math.floor(Math.random()*3)),bubbles:true}))}
    if(S.pitch&&S.pitch!==last&&S.pitch.releaseAt&&S.pitch.remote){last=S.pitch;if(Math.random()<.8)setTimeout(()=>document.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',key:' ',bubbles:true})),(S.pitch.travel+(Math.random()*50-25)-(performance.now()-S.pitch.releaseAt))/3)}
    const sk=document.getElementById('skipBtn');if(!sk.hidden)sk.click()},20)}"""
@@ -71,6 +73,9 @@ try:
   fa=A.evaluate("JSON.stringify((__pd.S.online&&__pd.S.online.flags)||[])");fb=B.evaluate("JSON.stringify((__pd.S.online&&__pd.S.online.flags)||[])")
   print('cross-check flags A:',fa[:1500]);print('B:',fb[:1500])
   if fa!='[]' or fb!='[]': ok=False;print('honest game raised online check flags')
+  pa=A.evaluate("JSON.stringify(__pd.S.pIdxOf)");pb=B.evaluate("JSON.stringify(__pd.S.pIdxOf)");print('pitchers A',pa,'B',pb,'changes made',A.evaluate("!!window.__pen"),B.evaluate("!!window.__pen"))
+  if pa!=pb: ok=False;print('pitchers differ')
+  if not (A.evaluate("!!window.__pen") or B.evaluate("!!window.__pen")): ok=False;print('no pitching change was made')
   if not same: ok=False;print(la[:800]);print('---');print(lb[:800])
   if errs: ok=False;print('\n'.join(errs))
   if not (A.evaluate('__pd.S.phase')=='over' and B.evaluate('__pd.S.phase')=='over'): ok=False;print('game did not finish in time')

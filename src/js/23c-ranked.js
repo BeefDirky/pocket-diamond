@@ -70,7 +70,7 @@ function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=nul
  if(['final','forfeit','disputed','abandoned'].includes(info.status)&&rkResult.sent!==info.match_id){rkResult.sent=info.match_id;track('ranked_result',{status:info.status,won:info.winner_side===info.me,rating_after:info.rating_after,dispute:info.dispute||undefined})}
  if(info.status==='final'||info.status==='forfeit'){const won=info.winner_side===info.me;
   rkShow(`RANKED ${won?'WIN':'LOSS'}${info.status==='forfeit'?' (FORFEIT)':''} · RATING ${info.rating_after!=null?info.rating_after:'?'}${d!=null?` (${d>=0?'+':''}${d})`:''}`,won?'win':'loss');return true}
- if(info.status==='disputed'){rkShow(`NOT COUNTED · ${info.dispute||'the two phones did not agree'}`,'bad');return true}
+ if(info.status==='disputed'){rkShow('NOT COUNTED · the two games got out of sync, so no rating changed','bad');return true}
  if(info.status==='abandoned'){rkShow('NOT COUNTED · the match timed out','bad');return true}
  return false}
 // game over: ranked submits the match record; everything else reports your own line (if you're signed in)
