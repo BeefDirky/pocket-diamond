@@ -146,7 +146,7 @@ body.autoOn .acts,body.autoOn .pacts{opacity:.45}
 .banner[data-tone=ball] b{color:#5aa8ff}
 .overlay{position:absolute;inset:0;background:rgba(8,20,14,.82);display:flex;align-items:safe center;justify-content:center;padding:12px;overflow-y:auto}
 .card{background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--panel-hi),6px 6px 0 rgba(0,0,0,.35);padding:14px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:11px}
-.card h1{font-family:var(--f-px);font-weight:400;font-size:clamp(15px,4.6vw,21px);line-height:1.35;margin:0;text-wrap:balance}
+.card h1{font-family:var(--f-px);font-weight:400;font-size:clamp(14px,4.2vw,18px);line-height:1.35;margin:0;text-wrap:balance}
 .card h1 span{color:var(--amber)}
 .card p{margin:0;color:var(--dim);font-size:12px;max-width:60ch}
 .pick{display:flex;flex-direction:column;gap:6px}
@@ -1233,6 +1233,14 @@ canvas.shake{animation:packShake .6s steps(6)}
 .penRow .st.now{display:flex;flex-direction:column;align-items:flex-end}.penRow .st.now .penStam{width:72px}
 .shopBuy,.shopOwn .mbtn{white-space:nowrap}
 .zoomCard{overflow-y:auto}
+
+/* ---- readable menu text: the pixel font in its bolder weight, and no text below ~13px (×1.5 on PC) ---- */
+#title .card{font-weight:600}
+.lbSeason,.lbTabs button,.seg button,.acHint,.lbName small{font-size:13px}
+.opt{font-size:14px}.acLead{font-size:14px}.lbVal small{font-size:11px}
+.lbName{font-size:17px}.lbName small{margin-top:2px}
+.about dt{font-size:12px}.abPriv p{font-size:13px}
+#title .card h1,#title .card .mode b,#title .card .about dd,#title .card .abLogo b,#title .card .mpPick .mode b{font-weight:400}/* (the title font has no bold: a faked one is wider) */
 </style>
 
 <div class="app">
