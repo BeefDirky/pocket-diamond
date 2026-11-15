@@ -45,7 +45,7 @@
           <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
           <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">TEAM</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
-          <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
+          <div class="mmPair"><button class="mmSm" id="goHow" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
           <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmSpons" type="button" data-go="scrSpons">SPONSORS <small>PREVIEW</small></button></div>
         </nav>
@@ -322,15 +322,10 @@
       </div>
       <div class="card" id="scrHow" hidden>
         <h1>HOW TO <span>PLAY</span></h1>
-        <p>The visitors already posted their runs. You bat the bottom halves and have three innings to beat them.</p>
-        <p>Tap the field, press Swing, or hit Space when the ball reaches the plate. Early pulls the ball, late pushes it the other way. Press Bunt (or B) before the pitch arrives to square around. Press P or Esc (or the pause button) to pause.</p>
-        <div class="howStats">
-          <div><b>CON</b><span>Contact. Widens your timing window, so near-misses still find the barrel.</span></div>
-          <div><b>POW</b><span>Power. More exit velocity and more lift on contact.</span></div>
-          <div><b>SPD</b><span>Speed. Beats out grounders, stretches singles, scores from second.</span></div>
-          <div><b>DEF</b><span>Defense. The visitors' range, reactions and error rate.</span></div>
-          <div><b>VEL · MOV · CTL</b><span>Their pitcher's velocity, break on the slider and changeup, and how often he finds the zone.</span></div>
-        </div>
+        <div class="howStep" id="howStep" aria-live="polite"></div>
+        <div class="howDots" id="howDots" aria-hidden="true"></div>
+        <div class="howNav"><button class="mbtn" id="howPrev" type="button">BACK</button><button class="big" id="howNext" type="button">NEXT</button></div>
+        <button class="ghost howSkip" id="howSkip" type="button">Skip tutorial</button>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
     </div>

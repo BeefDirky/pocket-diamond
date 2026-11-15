@@ -1266,6 +1266,36 @@ canvas.shake{animation:packShake .6s steps(6)}
 .spWrap{flex:0 0 auto;min-height:120px}/* (Safari collapses a scrolling flex child to nothing; never let it shrink) */
 .app.deskApp #scrSpons .spWrap{height:calc((100vh - 190px) / var(--uiZ,1));height:calc((100dvh - 190px) / var(--uiZ,1));max-height:none;overscroll-behavior:contain}
 .spErr{color:#e2603a;font-size:14px;margin:12px 0}
+/* ---- how to play ---- */
+#scrHow{display:flex;flex-direction:column;gap:10px;max-width:440px}#scrHow[hidden]{display:none}
+.howStep{display:flex;flex-direction:column;gap:8px;min-height:340px;text-align:left}
+.howStep h3{margin:4px 0 2px;font-family:var(--f-px);font-weight:400;font-size:15px;color:var(--amber);display:flex;justify-content:space-between;align-items:baseline}
+.howStep h3 small{font-family:var(--f-hud);font-size:12px;color:var(--dim)}
+.howStep p{margin:0;font-size:15px;line-height:1.45;color:var(--chalk)}.howStep p b{color:var(--amber);font-weight:700}
+.howStep b.hG{color:#7fc07a}.howStep b.hP{color:var(--lamp-b)}
+.howStep kbd{display:inline-block;font-family:var(--f-hud);font-size:12px;line-height:1;padding:3px 6px 4px;margin:0 1px;background:var(--edge);border:2px solid var(--panel-hi);border-bottom-width:3px;color:var(--chalk)}
+.howDots{display:flex;justify-content:center;gap:6px}.howDots i{width:8px;height:8px;background:var(--panel-hi)}.howDots i.on{background:var(--amber)}
+.howNav{display:grid;grid-template-columns:1fr 2fr;gap:8px}.howNav .mbtn{text-align:center}.howNav .mbtn:disabled{opacity:.4;cursor:default}.howNav .big{margin:0}
+.howSkip{align-self:center;font-size:14px}.howSkip[hidden]{display:none}
+.hArt{height:96px;background:#0c1a12;border:2px solid var(--edge);position:relative;display:flex;align-items:center;justify-content:center;gap:8px;overflow:hidden}
+.hField::before{content:'';position:absolute;width:64px;height:64px;transform:rotate(45deg);background:#7a5a36;top:22px}
+.hField::after{content:'';position:absolute;width:42px;height:42px;transform:rotate(45deg);background:#2f6b38;top:33px}
+.hField .hb{position:absolute;width:8px;height:8px;background:#f4f1e8;z-index:1;transform:rotate(45deg)}
+.hField .h1{top:50px;left:calc(50% + 28px)}.hField .h2{top:18px;left:calc(50% - 4px)}.hField .h3{top:50px;left:calc(50% - 36px)}.hField .hh{top:82px;left:calc(50% - 4px)}
+.hField b,.hField em{position:absolute;font-family:var(--f-px);font-weight:400;font-style:normal;font-size:10px;bottom:8px}.hField b{left:12px;color:var(--amber)}.hField em{right:12px;color:var(--dim)}
+.hTime span{flex:1;max-width:110px;padding:8px 4px;text-align:center;font-family:var(--f-px);font-size:10px;color:var(--dim);background:var(--edge);border:2px solid var(--panel-hi)}
+.hTime span small{display:block;font-family:var(--f-hud);font-size:12px;margin-top:4px}.hTime span.on{color:#14110a;background:var(--amber);border-color:var(--amber)}
+.hMeter{flex-direction:column;padding:0 24px}.hMeter .rmBar{width:100%}.hMeter .rmBar b{animation:hSweep 1.8s ease-in-out infinite alternate}
+.hMeter small,.hStam small{font-family:var(--f-px);font-size:9px;color:var(--dim);letter-spacing:.08em}
+@keyframes hSweep{from{left:0}to{left:100%}}
+.hStam{flex-direction:column;padding:0 24px;align-items:stretch}.hStam span{font-family:var(--f-px);font-size:10px;color:var(--chalk)}
+.hStam div{height:12px;background:var(--edge);border:2px solid var(--panel-hi)}.hStam div i{display:block;height:100%;background:#e6b93a;animation:hTire 3s steps(12) infinite}
+@keyframes hTire{from{width:100%;background:#5fc25a}60%{background:#e6b93a}to{width:18%;background:#e2603a}}
+.hCards i{width:44px;height:62px;background:linear-gradient(#f2be55 0 30%,#f4f1e8 30%);border:3px solid var(--edge);box-shadow:0 3px 0 var(--edge)}
+.hCards i:nth-child(1){transform:rotate(-8deg)}.hCards i:nth-child(3){transform:rotate(8deg);background:linear-gradient(#b48ff0 0 30%,#f4f1e8 30%)}
+.hModes span{font-family:var(--f-px);font-size:10px;padding:10px 8px;border:2px solid var(--edge)}.hModes .a{background:var(--amber);color:#14110a}.hModes .b{background:#f4f1e8;color:#14110a}.hModes .c{background:var(--edge);color:var(--chalk)}
+@media (prefers-reduced-motion:reduce){.hMeter .rmBar b,.hStam div i{animation:none}.hMeter .rmBar b{left:50%}}
+.app.deskApp .howStep p{font-size:16px}
 </style>
 
 <div class="app">
@@ -1314,7 +1344,7 @@ canvas.shake{animation:packShake .6s steps(6)}
           <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
           <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
           <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">TEAM</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
-          <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
+          <div class="mmPair"><button class="mmSm" id="goHow" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
           <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmSpons" type="button" data-go="scrSpons">SPONSORS <small>PREVIEW</small></button></div>
         </nav>
@@ -1591,15 +1621,10 @@ canvas.shake{animation:packShake .6s steps(6)}
       </div>
       <div class="card" id="scrHow" hidden>
         <h1>HOW TO <span>PLAY</span></h1>
-        <p>The visitors already posted their runs. You bat the bottom halves and have three innings to beat them.</p>
-        <p>Tap the field, press Swing, or hit Space when the ball reaches the plate. Early pulls the ball, late pushes it the other way. Press Bunt (or B) before the pitch arrives to square around. Press P or Esc (or the pause button) to pause.</p>
-        <div class="howStats">
-          <div><b>CON</b><span>Contact. Widens your timing window, so near-misses still find the barrel.</span></div>
-          <div><b>POW</b><span>Power. More exit velocity and more lift on contact.</span></div>
-          <div><b>SPD</b><span>Speed. Beats out grounders, stretches singles, scores from second.</span></div>
-          <div><b>DEF</b><span>Defense. The visitors' range, reactions and error rate.</span></div>
-          <div><b>VEL · MOV · CTL</b><span>Their pitcher's velocity, break on the slider and changeup, and how often he finds the zone.</span></div>
-        </div>
+        <div class="howStep" id="howStep" aria-live="polite"></div>
+        <div class="howDots" id="howDots" aria-hidden="true"></div>
+        <div class="howNav"><button class="mbtn" id="howPrev" type="button">BACK</button><button class="big" id="howNext" type="button">NEXT</button></div>
+        <button class="ghost howSkip" id="howSkip" type="button">Skip tutorial</button>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
     </div>
@@ -7456,7 +7481,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='0f1d674313',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='936e63be67',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7852,6 +7877,62 @@ $('updGo').addEventListener('click',async()=>{$('updGo').disabled=true;$('updGo'
 setTimeout(updCheck,8000);setInterval(updCheck,5*60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck()});
 setInterval(updShow,1500);
+// ---------- how to play: a short paged tutorial. It opens by itself the first time a player starts a game,
+// then continues into that game; the TUTORIAL button on the main menu opens it any time ----------
+const HOW_KEY='pd-how';
+const howSeen=()=>{try{return localStorage.getItem(HOW_KEY)==='1'}catch(e){return true}};
+function howMark(){try{localStorage.setItem(HOW_KEY,'1')}catch(e){}$('goHow').classList.remove('mmNew')}
+const howTouch=()=>!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
+const kb=k=>`<kbd>${k}</kbd>`;
+function howSteps(){const t=howTouch(),or=(a,b)=>t?a:b;return[
+ {t:'THE GAME',art:'field',p:[
+  'Score more runs than the other club.',
+  'When your team is up, you <b>bat</b>. In Full Game and multiplayer you also <b>pitch</b> when they’re up.',
+  'Fielding and running the bases happen on their own. Your job is timing.']},
+ {t:'BATTING',art:'swing',p:[
+  `Swing when the ball reaches the plate: ${or('tap the field or press <b>SWING</b>',kb('Space')+' or click')}.`,
+  'Early pulls the ball, late pushes it the other way. Right on time is where the power is.',
+  `Lay off pitches outside the box. Four balls is a walk. ${or('<b>BUNT</b>',kb('B'))} before the pitch arrives to bunt.`]},
+ {t:'PITCHING',art:'meter',p:[
+  `Pick a pitch from your pitcher’s arsenal: ${or('tap its button','its button or '+kb('1')+'–'+kb('5'))}.`,
+  `A meter swings back and forth. Stop it in the <b class="hG">green</b> with ${or('a tap',kb('Space'))}. The <b class="hP">bright middle</b> is PERFECT and paints the corner.`,
+  'A sloppy release misses the zone, and a tired arm can get away from the catcher. Mix speeds to wreck their timing.']},
+ {t:'ARMS AND RUNNERS',art:'stam',p:[
+  `Every pitch and every hit wears your pitcher down. When he’s tiring, ${or('tap his box','click his box or press '+kb('B'))} to bring in a reliever.`,
+  `Steal by ${or('tapping a runner',kb('S')+' or clicking a runner')}. Pitching, you can throw over to first or second${or('',' with '+kb('Q')+' / '+kb('W'))}.`,
+  `${or('The pause button',kb('Esc'))} pauses the game.`]},
+ {t:'YOUR TEAM',art:'cards',p:[
+  'Win games and hit home runs to earn <b>coins</b>. Spend them on card packs in the <b>SHOP</b>.',
+  'Put your new players in the lineup under <b>TEAM</b>, and level them up as they play.',
+  'Make an <b>ACCOUNT</b> to keep your team on every device.']},
+ {t:'WHERE TO START',art:'modes',p:[
+  '<b>ARCADE</b>: three innings, batting only. The best first game.',
+  '<b>BATTING PRACTICE</b>: an empty park to get your timing down.',
+  '<b>FULL GAME</b> and <b>PLAYOFFS</b> when you’re ready to pitch too, then <b>RANKED</b> against real players.']}]}
+const HOW_ART={
+ field:'<div class="hArt hField"><i class="hb h1"></i><i class="hb h2"></i><i class="hb h3"></i><i class="hb hh"></i><b>YOU</b><em>THEM</em></div>',
+ swing:'<div class="hArt hTime"><span>EARLY<small>pull</small></span><span class="on">ON TIME<small>power</small></span><span>LATE<small>other way</small></span></div>',
+ meter:'<div class="hArt hMeter"><div class="rmBar"><i class="rmG"></i><i class="rmP"></i><b></b></div><small>STOP IT IN THE MIDDLE</small></div>',
+ stam:'<div class="hArt hStam"><span>STAMINA</span><div><i></i></div><small>TIRING: GO TO THE BULLPEN</small></div>',
+ cards:'<div class="hArt hCards"><i></i><i></i><i></i></div>',
+ modes:'<div class="hArt hModes"><span class="a">ARCADE</span><span class="b">FULL GAME</span><span class="c">RANKED</span></div>'};
+const HOW={i:0,then:null};
+function howRender(){const st=howSteps(),i=HOW.i=clamp(HOW.i,0,st.length-1),s=st[i],last=i===st.length-1;
+ $('howStep').innerHTML=`${HOW_ART[s.art]||''}<h3>${s.t}<small>${i+1} / ${st.length}</small></h3>${s.p.map(x=>`<p>${x}</p>`).join('')}`;
+ $('howDots').innerHTML=st.map((_,j)=>`<i class="${j===i?'on':''}"></i>`).join('');
+ $('howPrev').disabled=i===0;$('howNext').textContent=last?(HOW.then?'LET’S PLAY':'GOT IT'):'NEXT';$('howSkip').hidden=last||!HOW.then}
+function howOpen(then){HOW.i=0;HOW.then=then||null;howMark();showScreen('scrHow');howRender();track('tutorial_opened',{auto:!!then})}
+function howDone(){const go=HOW.then;HOW.then=null;track('tutorial_done',{step:HOW.i+1});if(go){showScreen(go.screen);go.btn.click()}else showScreen('scrMain')}
+$('howNext').addEventListener('click',()=>{if(HOW.i>=howSteps().length-1){howDone();return}HOW.i++;howRender()});
+$('howPrev').addEventListener('click',()=>{HOW.i--;howRender()});
+$('howSkip').addEventListener('click',howDone);
+$('goHow').addEventListener('click',()=>{HOW.i=0;HOW.then=null;howMark();howRender()});
+addEventListener('keydown',e=>{if($('scrHow').hidden||$('title').hidden)return;
+ if(e.key==='ArrowRight'){e.preventDefault();$('howNext').click()}else if(e.key==='ArrowLeft'&&HOW.i>0){e.preventDefault();$('howPrev').click()}});
+// a first-timer's first game goes through the tutorial first, then straight on into the game they picked
+for(const [id,screen] of [['go','scrSingle'],['goFull','scrSingle'],['goPO','scrSingle'],['goRanked','scrMulti']]){const b=$(id);if(!b)continue;
+ b.addEventListener('click',e=>{if(howSeen()||HOW.then)return;e.stopImmediatePropagation();e.preventDefault();howOpen({btn:b,screen})},true)}
+if(!howSeen())$('goHow').classList.add('mmNew');
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'],FA_POW_CAP=[70,80,85,95];
 let CARDS=[],CARD_BY={};

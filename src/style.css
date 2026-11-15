@@ -1243,3 +1243,33 @@ canvas.shake{animation:packShake .6s steps(6)}
 .spWrap{flex:0 0 auto;min-height:120px}/* (Safari collapses a scrolling flex child to nothing; never let it shrink) */
 .app.deskApp #scrSpons .spWrap{height:calc((100vh - 190px) / var(--uiZ,1));height:calc((100dvh - 190px) / var(--uiZ,1));max-height:none;overscroll-behavior:contain}
 .spErr{color:#e2603a;font-size:14px;margin:12px 0}
+/* ---- how to play ---- */
+#scrHow{display:flex;flex-direction:column;gap:10px;max-width:440px}#scrHow[hidden]{display:none}
+.howStep{display:flex;flex-direction:column;gap:8px;min-height:340px;text-align:left}
+.howStep h3{margin:4px 0 2px;font-family:var(--f-px);font-weight:400;font-size:15px;color:var(--amber);display:flex;justify-content:space-between;align-items:baseline}
+.howStep h3 small{font-family:var(--f-hud);font-size:12px;color:var(--dim)}
+.howStep p{margin:0;font-size:15px;line-height:1.45;color:var(--chalk)}.howStep p b{color:var(--amber);font-weight:700}
+.howStep b.hG{color:#7fc07a}.howStep b.hP{color:var(--lamp-b)}
+.howStep kbd{display:inline-block;font-family:var(--f-hud);font-size:12px;line-height:1;padding:3px 6px 4px;margin:0 1px;background:var(--edge);border:2px solid var(--panel-hi);border-bottom-width:3px;color:var(--chalk)}
+.howDots{display:flex;justify-content:center;gap:6px}.howDots i{width:8px;height:8px;background:var(--panel-hi)}.howDots i.on{background:var(--amber)}
+.howNav{display:grid;grid-template-columns:1fr 2fr;gap:8px}.howNav .mbtn{text-align:center}.howNav .mbtn:disabled{opacity:.4;cursor:default}.howNav .big{margin:0}
+.howSkip{align-self:center;font-size:14px}.howSkip[hidden]{display:none}
+.hArt{height:96px;background:#0c1a12;border:2px solid var(--edge);position:relative;display:flex;align-items:center;justify-content:center;gap:8px;overflow:hidden}
+.hField::before{content:'';position:absolute;width:64px;height:64px;transform:rotate(45deg);background:#7a5a36;top:22px}
+.hField::after{content:'';position:absolute;width:42px;height:42px;transform:rotate(45deg);background:#2f6b38;top:33px}
+.hField .hb{position:absolute;width:8px;height:8px;background:#f4f1e8;z-index:1;transform:rotate(45deg)}
+.hField .h1{top:50px;left:calc(50% + 28px)}.hField .h2{top:18px;left:calc(50% - 4px)}.hField .h3{top:50px;left:calc(50% - 36px)}.hField .hh{top:82px;left:calc(50% - 4px)}
+.hField b,.hField em{position:absolute;font-family:var(--f-px);font-weight:400;font-style:normal;font-size:10px;bottom:8px}.hField b{left:12px;color:var(--amber)}.hField em{right:12px;color:var(--dim)}
+.hTime span{flex:1;max-width:110px;padding:8px 4px;text-align:center;font-family:var(--f-px);font-size:10px;color:var(--dim);background:var(--edge);border:2px solid var(--panel-hi)}
+.hTime span small{display:block;font-family:var(--f-hud);font-size:12px;margin-top:4px}.hTime span.on{color:#14110a;background:var(--amber);border-color:var(--amber)}
+.hMeter{flex-direction:column;padding:0 24px}.hMeter .rmBar{width:100%}.hMeter .rmBar b{animation:hSweep 1.8s ease-in-out infinite alternate}
+.hMeter small,.hStam small{font-family:var(--f-px);font-size:9px;color:var(--dim);letter-spacing:.08em}
+@keyframes hSweep{from{left:0}to{left:100%}}
+.hStam{flex-direction:column;padding:0 24px;align-items:stretch}.hStam span{font-family:var(--f-px);font-size:10px;color:var(--chalk)}
+.hStam div{height:12px;background:var(--edge);border:2px solid var(--panel-hi)}.hStam div i{display:block;height:100%;background:#e6b93a;animation:hTire 3s steps(12) infinite}
+@keyframes hTire{from{width:100%;background:#5fc25a}60%{background:#e6b93a}to{width:18%;background:#e2603a}}
+.hCards i{width:44px;height:62px;background:linear-gradient(#f2be55 0 30%,#f4f1e8 30%);border:3px solid var(--edge);box-shadow:0 3px 0 var(--edge)}
+.hCards i:nth-child(1){transform:rotate(-8deg)}.hCards i:nth-child(3){transform:rotate(8deg);background:linear-gradient(#b48ff0 0 30%,#f4f1e8 30%)}
+.hModes span{font-family:var(--f-px);font-size:10px;padding:10px 8px;border:2px solid var(--edge)}.hModes .a{background:var(--amber);color:#14110a}.hModes .b{background:#f4f1e8;color:#14110a}.hModes .c{background:var(--edge);color:var(--chalk)}
+@media (prefers-reduced-motion:reduce){.hMeter .rmBar b,.hStam div i{animation:none}.hMeter .rmBar b{left:50%}}
+.app.deskApp .howStep p{font-size:16px}
