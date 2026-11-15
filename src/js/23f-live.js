@@ -5,9 +5,9 @@ const LIVE={ch:null,n:0,q:0,g:0,s:null};
 async function liveJoin(){if(LIVE.ch||LIVE.joining||!supaOK())return;LIVE.joining=true;
  try{const c=await supaClient(),ch=c.channel('pd-live',{config:{presence:{key:'p'+Math.random().toString(36).slice(2,10)}}});
   ch.on('presence',{event:'sync'},()=>{try{const st=ch.presenceState();let n=0,q=0,g=0;
-   for(const k in st){const m=(st[k]&&st[k][0])||{};n++;if(m.s==='q')q++;else if(m.s==='g')g++}LIVE.n=n;LIVE.q=q;LIVE.g=g;if(Q.on)qEst()}catch(e){}});
+   const who={};for(const k in st){const m=(st[k]&&st[k][0])||{};n++;if(m.s==='q')q++;else if(m.s==='g')g++;if(m.u)who[m.u]=who[m.u]==='g'?'g':m.s}LIVE.n=n;LIVE.q=q;LIVE.g=g;LIVE.who=who;if(Q.on)qEst();if(typeof frLive==='function')frLive()}catch(e){}});
   ch.subscribe(s=>{if(s==='SUBSCRIBED'){LIVE.ch=ch;LIVE.s=null;liveSay()}})}catch(e){LIVE.joining=false}}
-function liveSay(){if(!LIVE.ch)return;const s=Q.on?'q':onlineGame()?'g':'m';if(LIVE.s===s)return;LIVE.s=s;try{const r=LIVE.ch.track({s,v:PD_VER});if(r&&r.catch)r.catch(()=>{})}catch(e){}}
+function liveSay(){if(!LIVE.ch)return;const s=Q.on?'q':onlineGame()?'g':'m',u=(typeof ACC!=='undefined'&&ACC.user&&ACC.user.id)||null,key=s+(u||'');if(LIVE.s===key)return;LIVE.s=key;try{const r=LIVE.ch.track(u?{s,v:PD_VER,u}:{s,v:PD_VER});if(r&&r.catch)r.catch(()=>{})}catch(e){}}
 setTimeout(liveJoin,3000);setInterval(liveSay,2000);
 // the estimate: someone else already waiting → any moment; otherwise the more people on the menus, the shorter the
 // wait (blended with how long recent waits actually took, when the server has enough of them)

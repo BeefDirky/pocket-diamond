@@ -12,6 +12,7 @@
     <button type="button" class="parkBtn" id="parkBtn" hidden>PARK ▾</button>
     <div class="zoomCtl"><button type="button" id="zIn" aria-label="Zoom in">+</button><button type="button" id="zOut" aria-label="Zoom out">−</button></div>
     <div class="coinPop" id="coinPop" hidden aria-live="polite"></div>
+    <div class="frInvite" id="frInvite" hidden role="alert"><span id="frInvTxt"></span><button type="button" class="big" id="frInvGo">JOIN</button><button type="button" class="mbtn" id="frInvNo">NOT NOW</button></div>
     <div class="tag" id="tag" hidden><span id="tagTxt"></span><canvas id="flame" width="72" height="26" hidden></canvas></div>
     <div class="bug" aria-label="Score, count, outs and runners">
       <div class="bugSc"><div id="bsA"><i></i><span></span><b></b></div><div id="bsH"><i></i><span></span><b></b></div></div>
@@ -243,9 +244,19 @@
           <button class="mode" id="goRanked" type="button"><b>RANKED</b></button>
           <button class="mode alt" id="goCustom" type="button"><b>CUSTOM</b></button>
         </div>
-        <button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button>
+        <div class="mpRow"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button></div>
         <p class="mpNote" id="mpNote" hidden></p>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
+      </div>
+      <div class="card" id="scrFriends" hidden>
+        <h1>FRI<span>ENDS</span></h1>
+        <div class="frOut" id="frOut"><p>Friends need an account, so they can find you.</p><button class="big" type="button" id="frToAcct">SIGN IN</button></div>
+        <div class="frIn" id="frIn">
+          <div class="frAdd"><input class="acIn" id="frName" type="text" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Add by username"><button class="big" id="frSend" type="button">ADD</button></div>
+          <p class="frMsg" id="frMsg" aria-live="polite"></p>
+          <div class="frList" id="frList"></div>
+        </div>
+        <button class="mbtn back" type="button" data-go="scrMulti">Back</button>
       </div>
       <div class="card wide" id="scrBoard" hidden>
         <h1>LEADER<span>BOARD</span></h1>

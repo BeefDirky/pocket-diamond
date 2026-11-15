@@ -1391,3 +1391,27 @@ body.lfDragging .lfc.dropHover.dropNo .lfF{box-shadow:0 0 0 3px #e2603a}
 /* no scrollbar down the right side of the lineup page (it still scrolls) */
 #title:has(#scrLineup:not([hidden])),#title:has(#scrPlay:not([hidden])){scrollbar-width:none}
 #title:has(#scrLineup:not([hidden]))::-webkit-scrollbar,#title:has(#scrPlay:not([hidden]))::-webkit-scrollbar{display:none}
+/* ---- friends ---- */
+.mpRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mpRow .mpBoard{margin:0;position:relative}
+.frBadge{position:absolute;top:-8px;right:-8px;min-width:20px;height:20px;padding:0 4px;display:grid;place-items:center;background:#e2603a;color:#fff;font-family:var(--f-px);font-size:10px;border:2px solid var(--edge)}
+.frBadge[hidden]{display:none}
+#scrFriends{display:flex;flex-direction:column;gap:10px;max-width:520px}#scrFriends[hidden]{display:none}
+.frOut,.frIn{display:flex;flex-direction:column;gap:10px}.frOut[hidden],.frIn[hidden]{display:none}.frOut p{margin:0;text-align:center;font-size:15px}
+.frAdd{display:grid;grid-template-columns:1fr auto;gap:8px}.frAdd .acIn{margin:0;min-width:0}.frAdd .big{margin:0;width:auto;padding:10px 18px}
+.frMsg{margin:0;min-height:1.2em;font-size:14px;color:#9fdc9a;text-align:center}.frMsg.bad{color:#ff8f6a}
+.frList h4{font-family:var(--f-hud);font-size:12px;letter-spacing:.14em;color:var(--amber);margin:10px 0 6px;text-align:left}
+.frList ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.frRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:8px 10px;background:var(--edge);border:2px solid var(--panel-hi)}
+.frWho{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:left;background:none;border:0;padding:0;color:var(--chalk);font:inherit;cursor:pointer;min-width:0}
+div.frWho{display:flex;flex-direction:column;align-items:flex-start;cursor:default}
+.frWho b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.frWho small{grid-column:2;font-family:var(--f-hud);font-size:11px;letter-spacing:.08em;color:var(--dim)}
+.frDot{grid-row:1/span 2;width:10px;height:10px;background:#55655b;border:2px solid #0b130e}.frDot.m{background:#5fc25a}.frDot.q,.frDot.g{background:#ffd23f}
+.frActs{display:flex;gap:6px}.frActs .big{margin:0;width:auto;padding:8px 12px;font-size:12px}.frActs .big:disabled{opacity:.35}.frActs .mbtn{padding:8px 10px;font-size:12px}
+.frMore{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:6px}.frMore .mbtn{font-size:12px;text-align:center}.frMore .mbtn.sure{color:#ff8f6a}
+.frEmpty{font-size:14px;color:var(--dim);text-align:center;margin:10px 0}
+.lbpAdd{margin:8px auto 0;display:block;font-size:12px}.lbpFr{margin:6px 0 0;font-family:var(--f-hud);font-size:12px;letter-spacing:.1em;color:#9fdc9a;text-align:center}
+.frInvite{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:9000;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
+ width:min(460px,calc(100vw - 24px));box-sizing:border-box;padding:12px 14px;background:#10281c;border:3px solid #ffd23f;box-shadow:0 6px 0 var(--edge),0 0 24px rgba(255,210,63,.35);font-size:15px;color:var(--chalk);animation:frIn .25s ease-out}
+.frInvite[hidden]{display:none}.frInvite span{flex:1 1 100%;text-align:center}.frInvite b{color:#ffd23f}.frInvite .big{margin:0;width:auto;padding:10px 22px}.frInvite .mbtn{padding:10px 14px}
+@keyframes frIn{from{transform:translate(-50%,-20px);opacity:0}}
+.app.deskApp .frWho b{font-size:17px}.app.deskApp .frWho small{font-size:12px}
