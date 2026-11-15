@@ -77,7 +77,7 @@ with sync_playwright() as p:
     PA.goto('http://localhost:8768/index.html'); PA.wait_for_timeout(3000)
     PA.evaluate(f"window.__uid='{A}';__x(\"ACC.user={{id:'{A}',email:'x@x.co'}};ACC.name='BeefDirky';acRender()\")")
     PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#lnPlay'); PA.wait_for_timeout(9000)
-    check(PA.inner_text('#lnPlay') == 'IN QUEUE' and not PA.evaluate("__x('!!S.rkBot')"), 'alone in the queue: still looking at 9 seconds')
+    check(PA.is_visible('#scrQueue') and not PA.is_visible('#scrLineup') and not PA.evaluate("__x('!!S.rkBot')"), 'PLAY opens the queue page (no lineup); alone, still looking at 9 seconds')
     PA.wait_for_timeout(12000)
     check(PA.evaluate("__x('!!S.rkBot')") and PA.evaluate("__x('S.schedInn')") == 3, 'after 15 seconds: a bot game, 3 innings (' + PA.inner_text('#qStatus') + ')')
     mid = PA.evaluate("__x('S.rkBot.m')"); lv = PA.evaluate("__x('S.rkBot.lv')")

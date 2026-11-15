@@ -1469,7 +1469,7 @@ canvas.shake{animation:packShake .6s steps(6)}
       </div>
       <div class="lbProf" id="lbProf" role="dialog" aria-modal="true" aria-labelledby="lbpName" hidden><div class="lbpCard" id="lbpCard" tabindex="-1"></div></div>
       <div class="card" id="scrQueue" hidden>
-        <h1>RANKED</h1>
+        <h1>IN <span>QUEUE</span></h1>
         <div class="qBox">
           <canvas class="qBall" id="qBall" width="16" height="16" aria-hidden="true"></canvas>
           <b id="qStatus">LOOKING FOR OPPONENT</b>
@@ -7397,7 +7397,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='fdcfb4364e',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='c06bdaf8fb',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7537,7 +7537,7 @@ async function qStart(fromLn){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=
  catch(e){if(Q.gen!==gen)return;Q.on=false;clearInterval(Q.tick);qSay('COULDN\u2019T JOIN THE QUEUE',rkErr(e))}}
 function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick);qLnSync()}
 $('qCancel').addEventListener('click',()=>{const was=Q.on;if(was)track('queue_cancelled',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});qStop();if(was)rpc('queue_leave').catch(()=>{});
- const o=S.online;if(o&&o.queued){if(o.nr)o.nr.leave().catch(()=>{});S.online=null}mpOpen()});
+ const o=S.online;if(o&&o.queued){if(o.nr)o.nr.leave().catch(()=>{});S.online=null}rankedLineup()});/* Cancel: back to your lineup, PLAY to queue again */
 // paired: meet the opponent in the match's room
 async function qMatched(info,gen){Q.on=false;if(Q.fromLn){Q.fromLn=false;qLnSync();showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop)}track('queue_matched',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});const opp=info.me==='home'?info.away_name:info.home_name,mine=info.me==='home'?info.home_club:info.away_club;
  qSay(`OPPONENT FOUND: ${String(opp||'?').toUpperCase()}`,`You play as ${TEAMS[mine]?TEAMS[mine].city+' '+TEAMS[mine].name:mine} · connecting…`);
@@ -9348,7 +9348,7 @@ let pregame=false,pregameMode='arcade';
 function openPregame(m){pregameMode=m||'arcade';pregame=true;$('scrLineup').classList.remove('lnRanked');$('lnPlay').textContent='PLAY BALL';$('lnQ').hidden=true;$('scrLineup').querySelector('.mbtn.back').dataset.go='scrSingle';$('lnPre').classList.toggle('noSeries',pregameMode!=='arcade');lnView='mine';lnSel=null;lfFlip=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=pregameMode==='playoffs'?'PLAYOFFS · 8-TEAM BRACKET':`vs ${o.city} ${o.name}`;if(pregameMode==='playoffs')$('lnPlay').textContent='TO THE BRACKET';
  const n=(S.series&&S.series.len)||1;for(const b of $('lnSeries').children)b.setAttribute('aria-pressed',String(+b.dataset.n===n));$('lnPre').hidden=false;showScreen('scrLineup')}
 $('lnSeries').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const c of $('lnSeries').children)c.setAttribute('aria-pressed',String(c===b))});
-$('lnPlay').addEventListener('click',()=>{if(pregameMode==='ranked'){if(Q.on)qCancelQuiet();else qStart(true);return}if(pregameMode==='playoffs'){pregame=false;$('lnPre').hidden=true;tsFlush();openBracket(true);return}if(pregameMode==='full'){pregame=false;$('lnPre').hidden=true;S.series=null;S.auto=false;syncAuto();withLoading(()=>{tsFlush();startGame('full');render(performance.now())});return}const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
+$('lnPlay').addEventListener('click',()=>{if(pregameMode==='ranked'){pregame=false;$('lnPre').hidden=true;$('scrLineup').classList.remove('lnRanked');qStart(false);return}/* PLAY: the queue page */if(pregameMode==='playoffs'){pregame=false;$('lnPre').hidden=true;tsFlush();openBracket(true);return}if(pregameMode==='full'){pregame=false;$('lnPre').hidden=true;S.series=null;S.auto=false;syncAuto();withLoading(()=>{tsFlush();startGame('full');render(performance.now())});return}const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
  S.series={len:n,w:0,l:0};pregame=false;$('lnPre').hidden=true;S.auto=false;syncAuto();withLoading(()=>{startGame('arcade');render(performance.now())})});
 document.querySelector('#scrLineup .mbtn.back').addEventListener('click',e=>{if(!pregame)return;e.stopImmediatePropagation();pregame=false;$('lnPre').hidden=true;pendingMode=null;const to=pregameMode==='ranked'?'scrMulti':'scrSingle';$('scrLineup').classList.remove('lnRanked');showScreen(to)},true);
 $('change').addEventListener('click',toTitle);

@@ -146,7 +146,7 @@ async function qStart(fromLn){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=
  catch(e){if(Q.gen!==gen)return;Q.on=false;clearInterval(Q.tick);qSay('COULDN\u2019T JOIN THE QUEUE',rkErr(e))}}
 function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick);qLnSync()}
 $('qCancel').addEventListener('click',()=>{const was=Q.on;if(was)track('queue_cancelled',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});qStop();if(was)rpc('queue_leave').catch(()=>{});
- const o=S.online;if(o&&o.queued){if(o.nr)o.nr.leave().catch(()=>{});S.online=null}mpOpen()});
+ const o=S.online;if(o&&o.queued){if(o.nr)o.nr.leave().catch(()=>{});S.online=null}rankedLineup()});/* Cancel: back to your lineup, PLAY to queue again */
 // paired: meet the opponent in the match's room
 async function qMatched(info,gen){Q.on=false;if(Q.fromLn){Q.fromLn=false;qLnSync();showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop)}track('queue_matched',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});const opp=info.me==='home'?info.away_name:info.home_name,mine=info.me==='home'?info.home_club:info.away_club;
  qSay(`OPPONENT FOUND: ${String(opp||'?').toUpperCase()}`,`You play as ${TEAMS[mine]?TEAMS[mine].city+' '+TEAMS[mine].name:mine} · connecting…`);
