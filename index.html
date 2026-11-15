@@ -1508,6 +1508,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 .hsStats{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--f-hud);font-size:11px;letter-spacing:.06em;color:var(--dim)}.hsStats b{color:var(--chalk);font-size:13px}
 .hsEmpty{text-align:center;color:var(--dim);font-size:14px;padding:16px}
 .app.deskApp .hsWho b{font-size:17px}.app.deskApp .hsWho small{font-size:12px}
+.acInfo dd{word-break:normal;overflow-wrap:break-word}#acWho{overflow-wrap:anywhere}
 </style>
 
 <div class="app">
@@ -7788,7 +7789,7 @@ function acRender(){const on=!!ACC.user,cf=ACC.state==='conflict',pk=on&&!cf&&AC
   $('acPass').placeholder=li?'PASSWORD':'PASSWORD (6+ CHARACTERS)';$('acPass').autocomplete=li?'current-password':'new-password';
   $('acSwap').innerHTML=li?'New here? <b>Create an account</b>':'Already have an account? <b>Log in</b>';$('scrAcct').querySelector('h1').innerHTML=on?'<span>ACCOUNT</span>':li?'<span>LOG IN</span>':'CREATE <span>ACCOUNT</span>'}$('acSignedIn').hidden=!on||cf||pk;$('acPickName').hidden=!pk;
  if(pk){$('acNameCancel').hidden=!ACC.name;$('acPickTxt').textContent=ACC.name?`Your username is ${ACC.name}. Pick a new one; no one else can have it.`:"Choose your username. It's how other players see you, and no one else can have it."}
- if(on){$('acName').textContent=ACC.name||'(no username yet)';$('acNameDd').textContent=ACC.name||'none yet';$('acWho').textContent=ACC.user.email;acDetails();const m=accMeta();$('acSync').textContent=(m.localAt||0)>(m.pushedAt||0)?'Saving…':`Saves automatically · last saved ${acWhen(m.syncedAt)}`;
+ if(on){$('acName').textContent=ACC.name||'(no username yet)';$('acNameDd').textContent=ACC.name||'none yet';$('acWho').textContent=ACC.user.email;acDetails();const m=accMeta();$('acSync').innerHTML=(m.localAt||0)>(m.pushedAt||0)?'Saving…':`Saves automatically<br>Last saved ${acWhen(m.syncedAt)}`;
   const nx=ACC.nameAt?new Date(new Date(ACC.nameAt).getTime()+30*864e5):null,wait=nx&&nx>new Date();$('acRename').disabled=!!wait;
   $('acRename').textContent=wait?`change again on ${nx.toLocaleDateString(undefined,{month:'short',day:'numeric'})}`:'Change'}
  if(!supaOK()&&!on){$('acMsg').textContent='Accounts work in the website version of the game.';for(const id of['acSignIn','acSignUp','acForgot'])$(id).disabled=true}else $('acMsg').textContent=ACC.msg}
@@ -7956,7 +7957,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='0fbed9e7c6',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='509f7c3d7a',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

@@ -1485,3 +1485,4 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 .hsStats{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--f-hud);font-size:11px;letter-spacing:.06em;color:var(--dim)}.hsStats b{color:var(--chalk);font-size:13px}
 .hsEmpty{text-align:center;color:var(--dim);font-size:14px;padding:16px}
 .app.deskApp .hsWho b{font-size:17px}.app.deskApp .hsWho small{font-size:12px}
+.acInfo dd{word-break:normal;overflow-wrap:break-word}#acWho{overflow-wrap:anywhere}
