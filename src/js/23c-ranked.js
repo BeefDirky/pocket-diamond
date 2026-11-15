@@ -68,7 +68,7 @@ function rkStop(){clearInterval(RK.pingT);clearTimeout(RK.pollT);clearTimeout(RK
 function rkShow(t,tone){const el=$('rkRes');el.hidden=!t;el.textContent=t||'';el.dataset.tone=tone||''}
 function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=null?info.rating_after-info.rating_before:null;
  if(['final','forfeit','disputed','abandoned'].includes(info.status)&&rkResult.sent!==info.match_id){rkResult.sent=info.match_id;track('ranked_result',{status:info.status,won:info.winner_side===info.me,rating_after:info.rating_after,dispute:info.dispute||undefined})}
- if(info.status==='final'||info.status==='forfeit'){const won=info.winner_side===info.me;
+ if(info.status==='final'||info.status==='forfeit'){const won=info.winner_side===info.me;histRating(d,info.match_id);
   rkShow(`RANKED ${won?'WIN':'LOSS'}${info.status==='forfeit'?' (FORFEIT)':''} · RATING ${info.rating_after!=null?info.rating_after:'?'}${d!=null?` (${d>=0?'+':''}${d})`:''}`,won?'win':'loss');return true}
  if(info.status==='disputed'){rkShow('NOT COUNTED · the two games got out of sync, so no rating changed','bad');return true}
  if(info.status==='abandoned'){rkShow('NOT COUNTED · the match timed out','bad');return true}

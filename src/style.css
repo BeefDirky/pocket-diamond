@@ -1463,3 +1463,25 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 .tnTeam{grid-template-columns:18px 24px 1fr auto}.tnLogo{width:24px;height:24px;image-rendering:pixelated;display:block}
 .app.deskApp .tnTeam{grid-template-columns:20px 30px 1fr auto}.app.deskApp .tnLogo{width:30px;height:30px}
 .tnFoot{gap:10px;flex-wrap:wrap}.tnFoot .big{margin:0;min-width:220px}
+/* ---- game history ---- */
+.mpRow.mp3{grid-template-columns:repeat(3,1fr)}.spHist{width:100%;margin-top:4px}.acHistB{width:100%}
+#scrHist{display:flex;flex-direction:column;gap:10px;max-width:560px}#scrHist[hidden]{display:none}
+.hsSum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.hsSum div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:var(--edge);border:2px solid var(--panel-hi)}
+.hsSum b{font-family:var(--f-px);font-weight:400;font-size:16px}.hsSum b.w{color:#5fc25a}.hsSum b.l{color:#e2603a}.hsSum span{font-family:var(--f-hud);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+.hsTabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}.hsTabs::-webkit-scrollbar{display:none}
+.hsTabs button{flex:0 0 auto;padding:8px 10px;font-family:var(--f-hud);font-size:12px;letter-spacing:.06em;background:var(--edge);color:var(--dim);border:2px solid var(--panel-hi);cursor:pointer}
+.hsTabs button[aria-pressed=true]{color:#14110a;background:var(--amber);border-color:var(--amber)}
+.hsList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.hsRow{background:var(--edge);border:2px solid var(--panel-hi);border-left-width:6px}.hsRow.w{border-left-color:#5fc25a}.hsRow.l{border-left-color:#e2603a}
+.hsMain{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;width:100%;padding:8px 10px;background:none;border:0;color:var(--chalk);font:inherit;text-align:left;cursor:pointer}
+.hsWL{font-family:var(--f-px);font-size:14px}.hsRow.w .hsWL{color:#5fc25a}.hsRow.l .hsWL{color:#e2603a}
+.hsWho{display:flex;flex-direction:column;gap:3px;min-width:0}.hsWho small{font-family:var(--f-hud);font-size:11px;letter-spacing:.06em;color:var(--dim)}
+.hsWho b{display:flex;align-items:center;gap:6px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hsWho img{width:22px;height:22px;image-rendering:pixelated;flex:0 0 auto}
+.hsSc{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.hsSc b{font-family:var(--f-px);font-weight:400;font-size:15px}
+.hsRd{font-family:var(--f-hud);font-size:12px}.hsRd.w{color:#5fc25a}.hsRd.l{color:#e2603a}
+.hsMore{padding:0 10px 10px;display:flex;flex-direction:column;gap:8px}
+.hsLine{border-collapse:collapse;font-size:13px;width:100%;table-layout:auto}.hsLine th,.hsLine td{padding:3px 4px;text-align:center;border-bottom:1px solid rgba(244,241,232,.08)}
+.hsLine th{font-family:var(--f-hud);font-size:10px;color:var(--dim);font-weight:400}.hsLine .hsT{text-align:left;white-space:nowrap}.hsLine .hsR{font-weight:700;color:var(--amber)}
+.hsStats{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--f-hud);font-size:11px;letter-spacing:.06em;color:var(--dim)}.hsStats b{color:var(--chalk);font-size:13px}
+.hsEmpty{text-align:center;color:var(--dim);font-size:14px;padding:16px}
+.app.deskApp .hsWho b{font-size:17px}.app.deskApp .hsWho small{font-size:12px}

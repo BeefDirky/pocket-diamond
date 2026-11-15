@@ -82,7 +82,7 @@
             <dt>Username</dt><dd><span id="acNameDd"></span> <button class="ghost acRenameBtn" id="acRename" type="button">Change</button></dd>
             <dt>Progress</dt><dd id="acSync"></dd>
           </dl>
-          <div class="acBtns"><button class="mbtn" id="acProfile" type="button">RANKED PROFILE</button><button class="mbtn" id="acSignOut" type="button">SIGN OUT</button></div>
+          <button class="mbtn acHistB" type="button" data-hist="scrAcct">GAME HISTORY</button><div class="acBtns"><button class="mbtn" id="acProfile" type="button">RANKED PROFILE</button><button class="mbtn" id="acSignOut" type="button">SIGN OUT</button></div>
         </div>
         <div class="acPane" id="acPickName" hidden>
           <p class="acLead" id="acPickTxt">Choose your username. It's how other players see you, and no one else can have it.</p>
@@ -108,6 +108,7 @@
           <button class="mode" id="go" type="button"><b>ARCADE</b><small>3-inning chase. You bat.</small></button>
           <button class="mode alt" id="goFull" type="button"><b>FULL GAME</b><small>9 innings. Bat and pitch.</small></button>
           <button class="mode po" id="goPO" type="button"><b>PLAYOFFS</b><small>8-team bracket. Best-of-3, then a best-of-5 final.</small></button>
+          <button class="mbtn mpBoard spHist" type="button" data-hist="scrSingle">GAME HISTORY</button>
           <button class="mode watch" id="goWatch" type="button"><b>WATCH</b><small>Sit back. A full 9 innings plays itself.</small></button>
           <button class="mode bp" id="goBP" type="button"><b>BATTING PRACTICE</b><small>Empty park, your pitch.</small></button>
         </div>
@@ -245,7 +246,7 @@
           <button class="mode alt" id="goCustom" type="button"><b>CUS<i class="kT">T</i>OM</b></button>
         </div>
         <button class="mbtn mpBoard mpPO" id="goTourney" type="button">FRIENDS PLAYOFF<span class="frBadge" id="tnBadge" hidden>!</span></button>
-        <div class="mpRow"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button></div>
+        <div class="mpRow mp3"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button><button class="mbtn mpBoard" type="button" data-hist="scrMulti">HISTORY</button></div>
         <p class="mpNote" id="mpNote" hidden></p>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
@@ -254,6 +255,13 @@
         <p class="frMsg" id="tnMsg" aria-live="polite"></p>
         <div id="tnBody"></div>
         <button class="mbtn back" type="button" data-go="scrMulti">Back</button>
+      </div>
+      <div class="card" id="scrHist" hidden>
+        <h1>GAME <span>HISTORY</span></h1>
+        <div class="hsSum" id="hsSum"></div>
+        <div class="hsTabs" id="hsTabs"></div>
+        <ul class="hsList" id="hsList"></ul>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="card" id="scrFriends" hidden>
         <h1>FRI<span>ENDS</span></h1>

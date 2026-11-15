@@ -1486,6 +1486,28 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 .tnTeam{grid-template-columns:18px 24px 1fr auto}.tnLogo{width:24px;height:24px;image-rendering:pixelated;display:block}
 .app.deskApp .tnTeam{grid-template-columns:20px 30px 1fr auto}.app.deskApp .tnLogo{width:30px;height:30px}
 .tnFoot{gap:10px;flex-wrap:wrap}.tnFoot .big{margin:0;min-width:220px}
+/* ---- game history ---- */
+.mpRow.mp3{grid-template-columns:repeat(3,1fr)}.spHist{width:100%;margin-top:4px}.acHistB{width:100%}
+#scrHist{display:flex;flex-direction:column;gap:10px;max-width:560px}#scrHist[hidden]{display:none}
+.hsSum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.hsSum div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:var(--edge);border:2px solid var(--panel-hi)}
+.hsSum b{font-family:var(--f-px);font-weight:400;font-size:16px}.hsSum b.w{color:#5fc25a}.hsSum b.l{color:#e2603a}.hsSum span{font-family:var(--f-hud);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+.hsTabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}.hsTabs::-webkit-scrollbar{display:none}
+.hsTabs button{flex:0 0 auto;padding:8px 10px;font-family:var(--f-hud);font-size:12px;letter-spacing:.06em;background:var(--edge);color:var(--dim);border:2px solid var(--panel-hi);cursor:pointer}
+.hsTabs button[aria-pressed=true]{color:#14110a;background:var(--amber);border-color:var(--amber)}
+.hsList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.hsRow{background:var(--edge);border:2px solid var(--panel-hi);border-left-width:6px}.hsRow.w{border-left-color:#5fc25a}.hsRow.l{border-left-color:#e2603a}
+.hsMain{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;width:100%;padding:8px 10px;background:none;border:0;color:var(--chalk);font:inherit;text-align:left;cursor:pointer}
+.hsWL{font-family:var(--f-px);font-size:14px}.hsRow.w .hsWL{color:#5fc25a}.hsRow.l .hsWL{color:#e2603a}
+.hsWho{display:flex;flex-direction:column;gap:3px;min-width:0}.hsWho small{font-family:var(--f-hud);font-size:11px;letter-spacing:.06em;color:var(--dim)}
+.hsWho b{display:flex;align-items:center;gap:6px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hsWho img{width:22px;height:22px;image-rendering:pixelated;flex:0 0 auto}
+.hsSc{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.hsSc b{font-family:var(--f-px);font-weight:400;font-size:15px}
+.hsRd{font-family:var(--f-hud);font-size:12px}.hsRd.w{color:#5fc25a}.hsRd.l{color:#e2603a}
+.hsMore{padding:0 10px 10px;display:flex;flex-direction:column;gap:8px}
+.hsLine{border-collapse:collapse;font-size:13px;width:100%;table-layout:auto}.hsLine th,.hsLine td{padding:3px 4px;text-align:center;border-bottom:1px solid rgba(244,241,232,.08)}
+.hsLine th{font-family:var(--f-hud);font-size:10px;color:var(--dim);font-weight:400}.hsLine .hsT{text-align:left;white-space:nowrap}.hsLine .hsR{font-weight:700;color:var(--amber)}
+.hsStats{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--f-hud);font-size:11px;letter-spacing:.06em;color:var(--dim)}.hsStats b{color:var(--chalk);font-size:13px}
+.hsEmpty{text-align:center;color:var(--dim);font-size:14px;padding:16px}
+.app.deskApp .hsWho b{font-size:17px}.app.deskApp .hsWho small{font-size:12px}
 </style>
 
 <div class="app">
@@ -1571,7 +1593,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
             <dt>Username</dt><dd><span id="acNameDd"></span> <button class="ghost acRenameBtn" id="acRename" type="button">Change</button></dd>
             <dt>Progress</dt><dd id="acSync"></dd>
           </dl>
-          <div class="acBtns"><button class="mbtn" id="acProfile" type="button">RANKED PROFILE</button><button class="mbtn" id="acSignOut" type="button">SIGN OUT</button></div>
+          <button class="mbtn acHistB" type="button" data-hist="scrAcct">GAME HISTORY</button><div class="acBtns"><button class="mbtn" id="acProfile" type="button">RANKED PROFILE</button><button class="mbtn" id="acSignOut" type="button">SIGN OUT</button></div>
         </div>
         <div class="acPane" id="acPickName" hidden>
           <p class="acLead" id="acPickTxt">Choose your username. It's how other players see you, and no one else can have it.</p>
@@ -1597,6 +1619,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
           <button class="mode" id="go" type="button"><b>ARCADE</b><small>3-inning chase. You bat.</small></button>
           <button class="mode alt" id="goFull" type="button"><b>FULL GAME</b><small>9 innings. Bat and pitch.</small></button>
           <button class="mode po" id="goPO" type="button"><b>PLAYOFFS</b><small>8-team bracket. Best-of-3, then a best-of-5 final.</small></button>
+          <button class="mbtn mpBoard spHist" type="button" data-hist="scrSingle">GAME HISTORY</button>
           <button class="mode watch" id="goWatch" type="button"><b>WATCH</b><small>Sit back. A full 9 innings plays itself.</small></button>
           <button class="mode bp" id="goBP" type="button"><b>BATTING PRACTICE</b><small>Empty park, your pitch.</small></button>
         </div>
@@ -1811,7 +1834,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
           <button class="mode alt" id="goCustom" type="button"><b>CUS<i class="kT">T</i>OM</b></button>
         </div>
         <button class="mbtn mpBoard mpPO" id="goTourney" type="button">FRIENDS PLAYOFF<span class="frBadge" id="tnBadge" hidden>!</span></button>
-        <div class="mpRow"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button></div>
+        <div class="mpRow mp3"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button><button class="mbtn mpBoard" type="button" data-hist="scrMulti">HISTORY</button></div>
         <p class="mpNote" id="mpNote" hidden></p>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
@@ -1820,6 +1843,13 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
         <p class="frMsg" id="tnMsg" aria-live="polite"></p>
         <div id="tnBody"></div>
         <button class="mbtn back" type="button" data-go="scrMulti">Back</button>
+      </div>
+      <div class="card" id="scrHist" hidden>
+        <h1>GAME <span>HISTORY</span></h1>
+        <div class="hsSum" id="hsSum"></div>
+        <div class="hsTabs" id="hsTabs"></div>
+        <ul class="hsList" id="hsList"></ul>
+        <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="card" id="scrFriends" hidden>
         <h1>FRI<span>ENDS</span></h1>
@@ -6742,6 +6772,7 @@ function gameOver(win){if(S.olMenu){S.olMenu=false;$('title').hidden=true;showSc
    if(se.done)$('overT').innerHTML=mw>tw?'<span>SERIES</span> WON':'SERIES LOST';
    $('olSeries').hidden=false;se.tally=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw}`;
    netPresence({rdy:null});nextRender()}}
+ histRecord(win,onl);
  if(!onl&&!S.poGame&&S.mode==='arcade'&&S.series&&S.series.len>1){const se=S.series;if(se.counted!==S.gameNo){se.counted=S.gameNo;win?se.w++:se.l++}
   const need=Math.ceil(se.len/2);se.done=se.w>=need||se.l>=need;$('olSeries').hidden=false;
   if(se.done){$('overT').innerHTML=se.w>se.l?'<span>SERIES</span> WON':'SERIES LOST';$('olSeries').textContent=`${se.w>se.l?you.name+' take':opp.name+' take'} the best of ${se.len}, ${Math.max(se.w,se.l)}-${Math.min(se.w,se.l)}.`}
@@ -6871,7 +6902,7 @@ let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createEle
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){qLeaving(id);roomLineupBack(id);roomKitRestore(id);if(pendingMode==='watch'&&id!=='scrTeams'){pendingMode=null;myTeamRestore()}/* backed out of picking a team to watch: your own club again */if(pendingMode==='brand'&&id!=='scrTeams')brandCancel();if(id==='scrTeams'&&pendingMode==='brand'){$('tsPrev').hidden=$('tsNext').hidden=false}
- document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb','scrLegal','scrPlay','scrFriends','scrTourney'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+ document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb','scrLegal','scrPlay','scrFriends','scrTourney','scrHist'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();
 // PC menu scale: 1 at about 720 px tall (1.5 on 1080p), up to 1.65 on big screens (never wider than the screen allows);
 // the main menu grows a fifth as much (1.1 on 1080p)
@@ -7715,7 +7746,7 @@ function roomKitRestore(id){if((id==='scrMulti'||id==='scrMain'||id==='scrSingle
 // The device keeps working offline exactly as before; each change is pushed to the player's row in `saves` a few
 // seconds later. Signing in on a device that already has guest progress uploads it, unless the account already
 // has a different save, in which case the player chooses which one to keep.
-const SAVE_KEYS=['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-opts2','pd-wallet','pd-myteam'];
+const SAVE_KEYS=['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-opts2','pd-wallet','pd-myteam','pd-history'];
 const ACC={user:null,state:'out',msg:'',pushT:0,busy:false,cloud:null,name:'',pick:false,mode:'up',nameAt:null};
 const accMeta=()=>{try{return JSON.parse(localStorage.getItem('pd-acct')||'{}')}catch(e){return{}}};
 const accSetMeta=m=>{try{RAW_SET('pd-acct',JSON.stringify(m))}catch(e){}};
@@ -7925,7 +7956,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='1474920a78',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='0fbed9e7c6',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7987,7 +8018,7 @@ function rkStop(){clearInterval(RK.pingT);clearTimeout(RK.pollT);clearTimeout(RK
 function rkShow(t,tone){const el=$('rkRes');el.hidden=!t;el.textContent=t||'';el.dataset.tone=tone||''}
 function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=null?info.rating_after-info.rating_before:null;
  if(['final','forfeit','disputed','abandoned'].includes(info.status)&&rkResult.sent!==info.match_id){rkResult.sent=info.match_id;track('ranked_result',{status:info.status,won:info.winner_side===info.me,rating_after:info.rating_after,dispute:info.dispute||undefined})}
- if(info.status==='final'||info.status==='forfeit'){const won=info.winner_side===info.me;
+ if(info.status==='final'||info.status==='forfeit'){const won=info.winner_side===info.me;histRating(d,info.match_id);
   rkShow(`RANKED ${won?'WIN':'LOSS'}${info.status==='forfeit'?' (FORFEIT)':''} · RATING ${info.rating_after!=null?info.rating_after:'?'}${d!=null?` (${d>=0?'+':''}${d})`:''}`,won?'win':'loss');return true}
  if(info.status==='disputed'){rkShow('NOT COUNTED · the two games got out of sync, so no rating changed','bad');return true}
  if(info.status==='abandoned'){rkShow('NOT COUNTED · the match timed out','bad');return true}
@@ -8560,6 +8591,51 @@ $('frInvGo').addEventListener('click',async e=>{const p=TN.inv;if(!p||$('frInvit
 $('frInvNo').addEventListener('click',e=>{const p=TN.inv;if(!p||$('frInvite').dataset.kind!=='tn')return;e.stopImmediatePropagation();TN.inv=null;$('frInvite').hidden=true;$('frInvite').dataset.kind='';rpc('tourney_respond',{p_tid:p.tid,p_accept:false,p_club:null}).catch(()=>{})},true);
 // keep the bracket fresh while it's on screen; look for playoff invites (and your turn) on the menus
 setInterval(()=>{if(!frSignedIn())return;TN.poll++;const on=!$('scrTourney').hidden&&!$('title').hidden;if(on&&!TN.busy)tnLoad();else if(TN.poll%4===0&&!$('title').hidden){tnInbox();tnLoad()}},3000);
+// ---------- game history: every game you finish, newest first (kept on this device and in your account's save) ----------
+// Recorded at game over: mode, both clubs, the score from your side, the line score, a few stats, and for online games the
+// opponent's username. Ranked games get their rating change filled in when the server's answer comes back.
+const HIST_KEY='pd-history',HIST_MAX=150;
+const HIST_MODES={arcade:'ARCADE',full:'FULL GAME',playoffs:'PLAYOFFS',ranked:'RANKED',ranked_bot:'RANKED',custom:'CUSTOM',friends_po:'FRIENDS PLAYOFF'};
+const HIST_TABS=[['all','ALL'],['arcade','ARCADE'],['full','FULL'],['playoffs','PLAYOFFS'],['ranked','RANKED'],['online','FRIENDS']];
+function histGet(){try{const h=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');return Array.isArray(h)?h:[]}catch(e){return[]}}
+function histPut(h){try{localStorage.setItem(HIST_KEY,JSON.stringify(h.slice(0,HIST_MAX)));if(typeof accDirty==='function')accDirty()}catch(e){}}
+function histRecord(win,onl){try{const o=S.online,home=onl&&o&&o.me==='home';
+  const m=S.rkBot?'ranked_bot':onl&&o&&rkOn(o)?'ranked':(onl&&o&&o.tn)||S.tnGame?'friends_po':onl?'custom':S.poGame?'playoffs':S.mode==='arcade'?'arcade':'full';
+  const mine=onl?(home?S.you:S.opp):S.you,theirs=onl?(home?S.opp:S.you):S.opp;
+  const my=onl?(home?S.runs:S.target):S.runs,th=onl?(home?S.target:S.runs):S.target;
+  const ln=a=>Array.isArray(a)?a.map(x=>x==null?null:+x):null,yl=ln(S.youLine),ol=ln(S.oppLine);
+  const e={t:Date.now(),m,w:!!win,my,th,club:mine,opp:theirs,inn:S.inning||null,
+   vs:S.rkBot?`CPU · LEVEL ${S.rkBot.lv||''}`.trim():onl&&o&&o.opp?(o.opp.acct||null):null,
+   ln:onl?(home?[yl,ol]:[ol,yl]):[yl,ol],h:S.hits|0,hr:S.hr|0,k:(S.mode==='full'||onl?S.myK:S.ks)|0,
+   gid:S.rkBot?S.rkBot.m:null};
+  const h=histGet();h.unshift(e);histPut(h)}catch(err){}}
+/* a ranked result arrived: put the rating change on that game */
+function histRating(delta,gid){const h=histGet(),e=h.find(x=>gid&&x.gid===gid)||h.find(x=>(x.m==='ranked'||x.m==='ranked_bot')&&Date.now()-x.t<10*60e3&&x.rd==null);if(!e||delta==null)return;e.rd=Math.round(delta);histPut(h)}
+let histTab='all',histOpen=null;
+function histOpenScreen(back){$('scrHist').querySelector('.mbtn.back').dataset.go=back||'scrMain';histTab='all';histOpen=null;showScreen('scrHist');histRender()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-hist]');if(b){histOpenScreen(b.dataset.hist)}});
+function histFilter(h){return histTab==='all'?h:histTab==='ranked'?h.filter(x=>x.m==='ranked'||x.m==='ranked_bot'):histTab==='online'?h.filter(x=>x.m==='custom'||x.m==='friends_po'):h.filter(x=>x.m===histTab)}
+function histWhen(t){const d=new Date(t),now=new Date(),day=86400e3,dd=Math.floor((new Date(now.toDateString())-new Date(d.toDateString()))/day);
+ const tm=d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});return dd===0?`TODAY · ${tm}`:dd===1?`YESTERDAY · ${tm}`:`${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})} · ${tm}`}
+function histRender(){const all=histGet(),h=histFilter(all);
+ const W=h.filter(x=>x.w).length,L=h.length-W;let streak=0,sw=null;for(const x of h){if(sw==null)sw=x.w;if(x.w!==sw)break;streak++}
+ $('hsSum').innerHTML=`<div><b>${h.length}</b><span>GAMES</span></div><div><b>${W}-${L}</b><span>RECORD</span></div><div><b>${h.length?Math.round(W/h.length*100):0}%</b><span>WIN RATE</span></div><div><b class="${sw?'w':'l'}">${h.length?`${sw?'W':'L'}${streak}`:'—'}</b><span>STREAK</span></div>`;
+ $('hsTabs').innerHTML=HIST_TABS.map(([k,n])=>`<button type="button" data-ht="${k}" aria-pressed="${histTab===k}">${n}</button>`).join('');
+ if(!h.length){$('hsList').innerHTML=`<li class="hsEmpty">${all.length?'No games of this kind yet.':'No games yet. Finish a game and it shows up here.'}</li>`;return}
+ $('hsList').innerHTML=h.slice(0,100).map((x,i)=>{const id=x.t,open=histOpen===id,me=TEAMS[x.club],op=TEAMS[x.opp];
+  const name=x.vs?esc(x.vs):op?`${op.city} ${op.name}`:'';
+  const rd=x.rd!=null?`<span class="hsRd ${x.rd>=0?'w':'l'}">${x.rd>=0?'+':''}${x.rd}</span>`:'';
+  return `<li class="hsRow${x.w?' w':' l'}${open?' open':''}"><button type="button" class="hsMain" data-hi="${id}">
+   <span class="hsWL">${x.w?'W':'L'}</span>
+   <span class="hsWho"><small>${HIST_MODES[x.m]||x.m} · ${histWhen(x.t)}</small><b>${op?`<img alt="" src="${LOGO_URL[x.opp]||''}">`:''}vs ${name}</b></span>
+   <span class="hsSc"><b>${x.my}-${x.th}</b>${rd}</span></button>${open?histDetail(x,me,op):''}</li>`}).join('')}
+function histDetail(x,me,op){const[a,b]=x.ln||[];const n=Math.max((a||[]).length,(b||[]).length,x.inn||0);let line='';
+ if(n&&(a||b)){const cells=r=>Array.from({length:n},(_,i)=>`<td>${r&&r[i]!=null?r[i]:'–'}</td>`).join('');
+  line=`<table class="hsLine"><tr><th></th>${Array.from({length:n},(_,i)=>`<th>${i+1}</th>`).join('')}<th>R</th></tr>
+   <tr><td class="hsT">${me?esc(me.name):'YOU'}</td>${cells(a)}<td class="hsR">${x.my}</td></tr><tr><td class="hsT">${op?esc(op.name):'THEM'}</td>${cells(b)}<td class="hsR">${x.th}</td></tr></table>`}
+ return `<div class="hsMore">${line}<div class="hsStats"><span><b>${x.h}</b> HITS</span><span><b>${x.hr}</b> HR</span><span><b>${x.k}</b> K</span>${me?`<span>AS ${esc(me.city+' '+me.name)}</span>`:''}</div></div>`}
+$('hsTabs').addEventListener('click',e=>{const b=e.target.closest('[data-ht]');if(!b)return;histTab=b.dataset.ht;histOpen=null;histRender()});
+$('hsList').addEventListener('click',e=>{const b=e.target.closest('[data-hi]');if(!b)return;const id=+b.dataset.hi;histOpen=histOpen===id?null:id;histRender()});
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'],FA_POW_CAP=[70,80,85,95];
 let CARDS=[],CARD_BY={};
