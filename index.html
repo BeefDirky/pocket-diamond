@@ -903,7 +903,7 @@ body.inMenu .olNet{display:none!important}
 /* new version: a bar across the top, on the menus (never in the middle of a game) */
 .upd{position:fixed;left:0;right:0;top:0;z-index:50;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));padding-top:max(8px,env(safe-area-inset-top,0px));background:var(--amber);color:#14110a;font-family:var(--f-hud);font-size:12px;letter-spacing:.04em;box-shadow:0 3px 0 rgba(0,0,0,.35)}
 .upd[hidden]{display:none}.upd button{font-family:var(--f-hud);font-size:12px;padding:6px 12px;background:#14110a;color:var(--amber);border:2px solid #14110a;cursor:pointer}
-.mmSpons{width:100%;color:var(--amber)}.mmSpons small{font-size:8px;color:var(--dim);margin-left:6px}
+.mmSpons{width:100%}
 #scrSpons{max-width:min(1100px,96vw);width:96vw}
 #scrSpons h1 small{display:block;font-size:11px;color:var(--dim);letter-spacing:.14em;margin-top:4px}
 .spWrap{max-height:62vh;overflow:auto;text-align:left;padding:4px 2px 10px;margin-bottom:12px}
@@ -1376,7 +1376,7 @@ html,body{touch-action:manipulation}
           <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">TEAM</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
           <div class="mmPair"><button class="mmSm" id="goHow" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
-          <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmSpons" type="button" data-go="scrSpons">SPONSORS <small>PREVIEW</small></button></div>
+          <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmSpons" type="button" data-go="scrSpons">SPONSORS</button></div>
         </nav>
         <div class="coinBal" id="coinBal" title="Coins: win games and hit home runs to earn them"><i class="coinIc"></i><b>0</b> COINS</div>
         <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
