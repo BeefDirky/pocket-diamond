@@ -33,6 +33,7 @@
     <div class="ballCam" id="ballCam" hidden><canvas id="ballCamCv"></canvas><span id="ballCamTxt"></span><i>BALL CAM</i></div>
     <div class="netToast" id="netToast" role="status" aria-live="polite" hidden></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
+    <div class="upd" id="upd" hidden role="status"><span>New version available. Please refresh your browser.</span><button type="button" id="updGo">REFRESH</button></div>
     <div class="afk" id="afk" hidden><b>ARE YOU STILL THERE?</b><span id="afkT"></span><small>Tap anywhere to keep playing</small></div>
 
     <div id="loadScr" hidden><div class="ldCard"><img id="loadLogo" alt=""><div id="loadClub"></div><div id="loadPark"></div><div class="ldBar"><i></i></div><div class="ldTxt">LOADING THE PARK<span>...</span></div></div></div>
@@ -46,7 +47,7 @@
           <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">TEAM</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
-          <button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button>
+          <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button></div>
         </nav>
         <div class="coinBal" id="coinBal" title="Coins: win games and hit home runs to earn them"><i class="coinIc"></i><b>0</b> COINS</div>
         <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
@@ -280,6 +281,18 @@
           <button class="tile" type="button" id="pLine"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M2 1h12v14H2z" opacity=".35"/><path fill="currentColor" d="M6 3h4v4H6zM5 8h6v2H5zM4 11h8v1H4zM4 13h6v1H4z"/></svg><span>Lineup</span></button>
           <button class="tile" type="button" id="pQuit"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M2 2h7v2H4v8h5v2H2zM10 5h2v2h3v2h-3v2h-2z"/></svg><span>Quit</span></button>
         </div>
+        <button class="ghost pFb" id="pFb" type="button">Report a bug / send feedback</button>
+      </div>
+      <div class="card" id="scrFb" hidden>
+        <h1><span>FEEDBACK</span></h1>
+        <p class="acLead">Found a bug or have an idea? Tell us. Your game version and device are sent along so we can reproduce it.</p>
+        <div class="seg fbKind" id="fbKind" role="radiogroup" aria-label="Kind"><button type="button" data-v="bug" aria-pressed="true">Bug</button><button type="button" data-v="idea" aria-pressed="false">Idea</button><button type="button" data-v="other" aria-pressed="false">Other</button></div>
+        <textarea class="acIn fbText" id="fbText" maxlength="2000" rows="6" placeholder="What happened? What did you expect? (For a bug: what were you doing right before?)"></textarea>
+        <input class="acIn" id="fbContact" type="text" maxlength="200" placeholder="EMAIL OR REDDIT NAME (OPTIONAL)" autocomplete="email" spellcheck="false">
+        <p class="acHint">Only if you'd like a reply.</p>
+        <button class="big" id="fbSend" type="button">SEND</button>
+        <p class="acMsg" id="fbMsg" aria-live="polite"></p>
+        <button class="mbtn back" id="fbBack" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="card" id="scrOpts" hidden>
         <h1><span>OPTIONS</span></h1>

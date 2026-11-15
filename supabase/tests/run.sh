@@ -26,3 +26,5 @@ $P -tA -d pd_test -f supabase/tests/queue_wait_test.sql 2>&1 | sed "s/^psql:[^ ]
 $P -tA -d pd_test -f supabase/tests/bot_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$" | grep -v "^[0-9a-f-]\{36\}$\|^{\|^$"
 # migration 008: username cooldown
 $P -tA -d pd_test -f supabase/tests/username_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$"
+# migration 009: feedback
+$P -tA -d pd_test -f supabase/tests/feedback_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$"

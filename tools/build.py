@@ -55,7 +55,10 @@ def main():
     js = source_js()
     # the game's own version (same for both builds): ranked submissions carry it, and both phones must match
     assert js.count('__PD_VER__') == 1
-    js = js.replace('__PD_VER__', hashlib.sha1(js.encode()).hexdigest()[:10])
+    pd_ver = hashlib.sha1(js.encode()).hexdigest()[:10]
+    js = js.replace('__PD_VER__', pd_ver)
+    # the running game compares its own version with this file to offer a refresh when a new one is out
+    open(os.path.join(ROOT, 'version.json'), 'w').write(json.dumps({'v': pd_ver}) + '\n')
     cfg = json.loads(rd('tools/config.json'))
     os.makedirs(os.path.join(ROOT, 'dist'), exist_ok=True)
     art = build_artifact(js)
@@ -72,7 +75,7 @@ def main():
           "const put=(n,q,r)=>{if(r&&(r.ok||r.type==='opaque')){const cp=r.clone();caches.open(n).then(c=>c.put(q,cp))}return r};\n"
           "const home=()=>caches.match(new URL('index.html',self.registration.scope).href);\n"
           "self.addEventListener('fetch',e=>{const q=e.request;if(q.method!=='GET')return;const u=new URL(q.url),same=u.origin===location.origin,cdn=/(^|\\.)(fonts\\.googleapis\\.com|fonts\\.gstatic\\.com|cdn\\.jsdelivr\\.net)$/.test(u.hostname);\n"
-          " if(!same&&!cdn)return;if(same&&u.pathname.includes('/_vercel/'))return;\n"
+          " if(!same&&!cdn)return;if(same&&(u.pathname.includes('/_vercel/')||u.pathname.endsWith('/version.json')))return;\n"
           " if(q.mode==='navigate'||(same&&/(\\/|\\.html)$/.test(u.pathname))){e.respondWith(new Promise(res=>{let done=false;const fb=()=>caches.match(q).then(r=>r||home()).then(r=>{if(!done&&r){done=true;res(r)}});\n"
           "  const t=setTimeout(fb,4000);fetch(q).then(r=>{clearTimeout(t);put(C,q,r);if(!done){done=true;res(r)}}).catch(()=>{clearTimeout(t);fb().then(()=>{if(!done){done=true;res(Response.error())}})})}));return}\n"
           " if(cdn){e.respondWith(caches.match(q).then(h=>{const n=fetch(q).then(r=>put(RT,q,r)).catch(()=>h);return h||n}));return}\n"

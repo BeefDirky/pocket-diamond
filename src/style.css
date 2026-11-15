@@ -859,6 +859,14 @@ body.inMenu .olNet{display:none!important}
 /* the loading bar fills from left to right (width is driven by the loader) */
 #loadScr .ldBar i{animation:none;transform:none;width:0;background:repeating-linear-gradient(90deg,var(--tc) 0 10px,transparent 10px 14px)}
 /* sponsor preview screen */
+.mmFb{color:var(--chalk)}
+#scrFb{display:flex;flex-direction:column;gap:10px}#scrFb[hidden]{display:none}
+.fbKind{display:grid;grid-template-columns:repeat(3,1fr)}
+.fbText{resize:vertical;min-height:120px;font-size:14px;line-height:1.4}
+.pFb{display:block;width:100%;margin-top:10px}
+/* new version: a bar across the top, on the menus (never in the middle of a game) */
+.upd{position:fixed;left:0;right:0;top:0;z-index:50;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));padding-top:max(8px,env(safe-area-inset-top,0px));background:var(--amber);color:#14110a;font-family:var(--f-hud);font-size:12px;letter-spacing:.04em;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.upd[hidden]{display:none}.upd button{font-family:var(--f-hud);font-size:12px;padding:6px 12px;background:#14110a;color:var(--amber);border:2px solid #14110a;cursor:pointer}
 .mmAds{width:100%;color:var(--amber)}.mmAds small{font-size:8px;color:var(--dim);margin-left:6px}
 #scrAds{max-width:min(1100px,96vw);width:96vw}
 #scrAds h1 small{display:block;font-size:11px;color:var(--dim);letter-spacing:.14em;margin-top:4px}

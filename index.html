@@ -882,6 +882,14 @@ body.inMenu .olNet{display:none!important}
 /* the loading bar fills from left to right (width is driven by the loader) */
 #loadScr .ldBar i{animation:none;transform:none;width:0;background:repeating-linear-gradient(90deg,var(--tc) 0 10px,transparent 10px 14px)}
 /* sponsor preview screen */
+.mmFb{color:var(--chalk)}
+#scrFb{display:flex;flex-direction:column;gap:10px}#scrFb[hidden]{display:none}
+.fbKind{display:grid;grid-template-columns:repeat(3,1fr)}
+.fbText{resize:vertical;min-height:120px;font-size:14px;line-height:1.4}
+.pFb{display:block;width:100%;margin-top:10px}
+/* new version: a bar across the top, on the menus (never in the middle of a game) */
+.upd{position:fixed;left:0;right:0;top:0;z-index:50;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));padding-top:max(8px,env(safe-area-inset-top,0px));background:var(--amber);color:#14110a;font-family:var(--f-hud);font-size:12px;letter-spacing:.04em;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.upd[hidden]{display:none}.upd button{font-family:var(--f-hud);font-size:12px;padding:6px 12px;background:#14110a;color:var(--amber);border:2px solid #14110a;cursor:pointer}
 .mmAds{width:100%;color:var(--amber)}.mmAds small{font-size:8px;color:var(--dim);margin-left:6px}
 #scrAds{max-width:min(1100px,96vw);width:96vw}
 #scrAds h1 small{display:block;font-size:11px;color:var(--dim);letter-spacing:.14em;margin-top:4px}
@@ -1255,6 +1263,7 @@ canvas.shake{animation:packShake .6s steps(6)}
     <div class="ballCam" id="ballCam" hidden><canvas id="ballCamCv"></canvas><span id="ballCamTxt"></span><i>BALL CAM</i></div>
     <div class="netToast" id="netToast" role="status" aria-live="polite" hidden></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
+    <div class="upd" id="upd" hidden role="status"><span>New version available. Please refresh your browser.</span><button type="button" id="updGo">REFRESH</button></div>
     <div class="afk" id="afk" hidden><b>ARE YOU STILL THERE?</b><span id="afkT"></span><small>Tap anywhere to keep playing</small></div>
 
     <div id="loadScr" hidden><div class="ldCard"><img id="loadLogo" alt=""><div id="loadClub"></div><div id="loadPark"></div><div class="ldBar"><i></i></div><div class="ldTxt">LOADING THE PARK<span>...</span></div></div></div>
@@ -1268,7 +1277,7 @@ canvas.shake{animation:packShake .6s steps(6)}
           <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">TEAM</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
-          <button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button>
+          <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmAds" type="button" data-go="scrAds">SPONSORS <small>PREVIEW</small></button></div>
         </nav>
         <div class="coinBal" id="coinBal" title="Coins: win games and hit home runs to earn them"><i class="coinIc"></i><b>0</b> COINS</div>
         <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>
@@ -1502,6 +1511,18 @@ canvas.shake{animation:packShake .6s steps(6)}
           <button class="tile" type="button" id="pLine"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M2 1h12v14H2z" opacity=".35"/><path fill="currentColor" d="M6 3h4v4H6zM5 8h6v2H5zM4 11h8v1H4zM4 13h6v1H4z"/></svg><span>Lineup</span></button>
           <button class="tile" type="button" id="pQuit"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M2 2h7v2H4v8h5v2H2zM10 5h2v2h3v2h-3v2h-2z"/></svg><span>Quit</span></button>
         </div>
+        <button class="ghost pFb" id="pFb" type="button">Report a bug / send feedback</button>
+      </div>
+      <div class="card" id="scrFb" hidden>
+        <h1><span>FEEDBACK</span></h1>
+        <p class="acLead">Found a bug or have an idea? Tell us. Your game version and device are sent along so we can reproduce it.</p>
+        <div class="seg fbKind" id="fbKind" role="radiogroup" aria-label="Kind"><button type="button" data-v="bug" aria-pressed="true">Bug</button><button type="button" data-v="idea" aria-pressed="false">Idea</button><button type="button" data-v="other" aria-pressed="false">Other</button></div>
+        <textarea class="acIn fbText" id="fbText" maxlength="2000" rows="6" placeholder="What happened? What did you expect? (For a bug: what were you doing right before?)"></textarea>
+        <input class="acIn" id="fbContact" type="text" maxlength="200" placeholder="EMAIL OR REDDIT NAME (OPTIONAL)" autocomplete="email" spellcheck="false">
+        <p class="acHint">Only if you'd like a reply.</p>
+        <button class="big" id="fbSend" type="button">SEND</button>
+        <p class="acMsg" id="fbMsg" aria-live="polite"></p>
+        <button class="mbtn back" id="fbBack" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="card" id="scrOpts" hidden>
         <h1><span>OPTIONS</span></h1>
@@ -6468,7 +6489,7 @@ let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createEle
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){qLeaving(id);roomLineupBack(id);if(pendingMode==='watch'&&id!=='scrTeams'){pendingMode=null;myTeamRestore()}/* backed out of picking a team to watch: your own club again */if(pendingMode==='brand'&&id!=='scrTeams')brandCancel();if(id==='scrTeams'&&pendingMode==='brand'){$('tsPrev').hidden=$('tsNext').hidden=false}
- document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds','scrShop','scrMulti','scrQueue','scrBoard'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+ document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrAds','scrShop','scrMulti','scrQueue','scrBoard','scrFb'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrAds')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();// any landscape screen: the park fills it, controls float on top
 {let lastK=null;const chk=()=>{const k=isWide()+'|'+isDesk()+'|'+isPhoneLand();if(k!==lastK){lastK=k;applyWide()}};addEventListener('resize',chk);addEventListener('resize',()=>requestAnimationFrame(bpLayout));addEventListener('orientationchange',chk);if(window.visualViewport)visualViewport.addEventListener('resize',chk)}
 /* full-screen batting practice: measure where the pitch buttons end and stack AUTO/INFO, then the info boxes, above them */
@@ -7376,7 +7397,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.0.3',PD_BUILD='645727e084',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.0.3',PD_BUILD='fdcfb4364e',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7740,6 +7761,38 @@ async function botGameOver(){const b=S.rkBot,m=ML&&ML.fin?ML:null;if(!b||b.done)
 // leaving early (Quit / Forfeit / Main Menu mid-game): a loss
 function botLeave(){const b=S.rkBot;if(!b)return;if(!b.done){b.done=true;clearInterval(RK.pingT);rpc('ranked_concede',{p_match:b.m}).catch(()=>{});track('ranked_bot_forfeit',{level:b.lv})}}
 function botClear(){S.rkBot=null;S.cpuEdge=0}
+// ---------- feedback / bug reports, and "a new version is available" ----------
+// FEEDBACK on the main menu and "Report a bug" in the pause menu open one page. It goes to the server's feedback table
+// (migration 009: anyone can send, nobody can read it back from the game) and, as a backup, to the stats service.
+let fbFrom='scrMain',fbKindV='bug';
+function fbOpen(from){fbFrom=from||'scrMain';$('fbBack').dataset.go=fbFrom;$('fbMsg').textContent='';$('fbSend').disabled=false;showScreen('scrFb');setTimeout(()=>$('fbText').focus(),60)}
+$('goFb').addEventListener('click',()=>fbOpen('scrMain'));
+$('pFb').addEventListener('click',()=>fbOpen('scrPause'));
+for(const b of $('fbKind').children)b.addEventListener('click',()=>{fbKindV=b.dataset.v;for(const c of $('fbKind').children)c.setAttribute('aria-pressed',String(c===b))});
+for(const id of['fbText','fbContact'])$(id).addEventListener('keydown',e=>e.stopPropagation());// (typing never reaches the game's keys)
+function fbDevice(){const o=S.online;return{ua:navigator.userAgent.slice(0,300),screen:`${innerWidth}x${innerHeight}@${devicePixelRatio||1}`,layout:document.querySelector('.app.deskApp')?'pc':'phone',
+ standalone:!!(matchMedia&&matchMedia('(display-mode: standalone)').matches),lang:navigator.language,mode:S.mode||null,phase:S.phase||null,inning:S.phase&&S.phase!=='title'?`${S.half||''} ${S.inning||''}`.trim():null,
+ online:!!(o&&o.inGame),ranked:!!((o&&o.ranked)||S.rkBot),club:S.you||null,auto:!!(S.auto||S.olAuto)}}
+$('fbSend').addEventListener('click',async()=>{const msg=$('fbText').value.trim(),contact=$('fbContact').value.trim()||null;
+ if(msg.length<3){$('fbMsg').textContent='Write a few words first.';return}
+ $('fbSend').disabled=true;$('fbMsg').textContent='Sending…';const dev=fbDevice();
+ track('feedback_sent',{kind:fbKindV,message:msg.slice(0,2000),contact,...dev});
+ let ok=false,why='';
+ if(supaOK())try{const c=await supaClient();const {error}=await c.from('feedback').insert({kind:fbKindV,message:msg.slice(0,2000),contact,username:ACC.name||null,version:PD_VER,device:dev});if(error)throw error;ok=true}catch(e){why=String(e&&e.message||e)}
+ if(ok||phOn()){$('fbMsg').textContent='Thanks! Sent.';$('fbText').value='';setTimeout(()=>{if(!$('scrFb').hidden)$('fbBack').click()},1400)}
+ else{$('fbSend').disabled=false;$('fbMsg').textContent=/many messages/i.test(why)?why:'Couldn\'t send it right now. Check your connection and try again.'}});
+// ---- a new version: compare this build with the one the site serves now (version.json, never cached) ----
+const UPD={seen:null,shownFor:null};
+async function updCheck(){if(typeof window.claude!=='undefined'||!/^https?:/.test(location.protocol))return;
+ try{const r=await fetch(`version.json?t=${Date.now()}`,{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v,mine=String(PD_VER).split('+').pop();/* (PD_VER is 2.0.3+<build>) */if(v&&v!==mine){UPD.seen=v;updShow()}}catch(e){}}
+// only where it can't interrupt anything: the menus and the results card, never mid-game
+function updShow(){if(!UPD.seen)return;const busy=S.phase&&S.phase!=='title'&&S.phase!=='over'&&$('over').hidden;$('upd').hidden=busy}
+$('updGo').addEventListener('click',async()=>{$('updGo').disabled=true;$('updGo').textContent='LOADING…';track('update_refresh',{from:PD_VER,to:UPD.seen});
+ try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg)await reg.update()}catch(e){}
+ location.reload()});
+setTimeout(updCheck,8000);setInterval(updCheck,5*60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck()});
+setInterval(updShow,1500);
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'],FA_POW_CAP=[70,80,85,95];
 let CARDS=[],CARD_BY={};
