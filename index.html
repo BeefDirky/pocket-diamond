@@ -1052,7 +1052,7 @@ body.phOver .pauseBtn{display:none!important}
 .lfc .lfNm{font-size:13px;line-height:1.2;padding:3px 2px;font-weight:700;letter-spacing:-.02em}
 .lfc .lfPos{font-size:12px;line-height:1.25;padding:1px 0}
 @media (max-width:720px){
- .lfField,#scrLineup .lfField{aspect-ratio:100/150!important;max-width:100%!important;width:100%}
+ .lfField,#scrLineup .lfField{aspect-ratio:100/128!important;max-width:100%!important;width:100%}
  .lfField .lfc{width:72px}
  .lfField .lfc img{aspect-ratio:4/3;object-fit:cover;object-position:50% 22%}
  .lfField .lfc .lfNm{font-size:11px;padding:2px 1px;letter-spacing:-.04em}
@@ -1340,7 +1340,7 @@ html,body{touch-action:manipulation}
 .lfMsg{position:sticky;top:0;z-index:30;margin:0 auto;max-width:520px;text-align:center;font-size:14px;padding:0 10px;height:0;overflow:hidden;opacity:0;transition:opacity .2s;background:#123222;border:2px solid #5fc25a;color:var(--chalk)}
 .lfMsg.on{height:auto;padding:8px 10px;opacity:1;margin-bottom:6px}.lfMsg.bad{border-color:#e2603a;background:#3a1a12}
 /* dragging a card: it follows the finger, the spots it can go glow green, the rest dim; a wrong drop shakes */
-.lfTray .lfc.deck{touch-action:pan-x}
+.lfTray .lfc.deck{touch-action:none}
 .lfGhost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;opacity:.92;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6))}
 .lfc.dragSrc{opacity:.35}
 body.lfDragging,body.lfDragging *{cursor:grabbing!important;user-select:none}
@@ -1391,6 +1391,14 @@ body.lfDragging .lfc.dropHover.dropNo .lfF{box-shadow:0 0 0 3px #e2603a}
 .lfc .lfOvr{padding:4px 5px 2px}.lfc .lfOvr small{top:0}
 .lfField .lfc .lfOvr{padding:3px 4px 2px}
 .app.deskApp #title>#scrOpts{max-width:none;width:auto;min-width:min(500px,calc(94vw / var(--uiZ,1)))}
+.lfTrayHead{flex-wrap:wrap}.lfSortB{margin-left:auto;padding:8px 10px;font-size:12px;white-space:nowrap;width:auto}.app.deskApp .lfSortB{font-size:14px}
+/* card rows scroll without a visible scrollbar */
+.lfTray,.boRow,.lfPen{scrollbar-width:none;-ms-overflow-style:none}.lfTray::-webkit-scrollbar,.boRow::-webkit-scrollbar,.lfPen::-webkit-scrollbar{display:none}
+/* on PC, YOUR CARDS wraps into rows and scrolls up and down with the mouse wheel */
+@media (min-width:721px){.lfTray{flex-wrap:wrap;overflow-x:hidden;overflow-y:auto;max-height:min(400px,calc(100dvh - 220px));min-height:120px;align-content:flex-start;scroll-snap-type:none;overscroll-behavior:contain}}
+/* batting order drag: a gap opens where he'll land */
+.boRow .boSlot{transition:margin .12s}.boRow .boSlot.boGapL{margin-left:48px}.boRow .boSlot.boGapR{margin-right:48px}
+.boRow .lfc.bo{cursor:grab}
 </style>
 
 <div class="app">
@@ -6933,12 +6941,17 @@ function adsRender0(){const W=$('spWrap');W.innerHTML='';const live=[];
 // Tap a player on the field to pick him up; tap a card in the tray to sign it into his spot, or tap another hitter on the
 // field to swap their places in the batting order. Uses the signings layer (19a) for the actual roster changes. ----------
 const LF_POS={C:[50,86],'1B':[85,58],'2B':[67,43],SS:[33,43],'3B':[15,58],LF:[16,20],CF:[50,14],RF:[84,20],DH:[15,86],SP:[50,58]};/* spaced so no two cards touch at any window size */
-const LF_POS_M={C:[50,90],'1B':[80,72],'2B':[68,49],SS:[32,49],'3B':[20,72],LF:[20,25],CF:[50,9],RF:[80,25],DH:[17,91],SP:[50,69]};/* phones: a taller field so no two cards touch */
+const LF_POS_M={C:[50,88],'1B':[80,67],'2B':[68,40],SS:[32,40],'3B':[20,67],LF:[18,12],CF:[50,12],RF:[82,12],DH:[17,89.5],SP:[50,63.5]};/* (phones: the top of the outfield is cut off, CF level with the corners) *//* phones: a taller field so no two cards touch */
 const lfMob=()=>matchMedia('(max-width:720px)').matches;
 let lfDeck='bat',lfFieldC={};
-function lfFieldArt(){const m=lfMob();if(lfFieldC[m])return lfFieldC[m];const W=m?100:115,H=m?150:100,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+/* the card tray's order: SORT cycles name → position → rarity → OVR (remembered on this device) */
+const LF_POS_ORD=['SP','RP','C','1B','2B','3B','SS','LF','CF','RF','DH'],lfByO=(a,b)=>b.o-a.o||a.p.name.localeCompare(b.p.name);
+const LF_SORTS=[{n:'NAME',f:(a,b)=>a.p.name.localeCompare(b.p.name)},{n:'POSITION',f:(a,b)=>LF_POS_ORD.indexOf(a.p.pos)-LF_POS_ORD.indexOf(b.p.pos)||lfByO(a,b)},
+ {n:'RARITY',f:(a,b)=>b.r-a.r||lfByO(a,b)},{n:'OVR',f:lfByO}];
+let lfSort=(()=>{try{const v=+localStorage.getItem('pd-lfsort');return v>=0&&v<4?v:3}catch(e){return 3}})();
+function lfFieldArt(){const m=lfMob();if(lfFieldC[m])return lfFieldC[m];const W=m?100:115,H=m?128:100,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
  /* seen straight down: dark stands, a grass fan with mowing stripes and a warning track, the skinned infield, bases, mound and plate */
- const hx=W/2,hy=m?142:93,d=m?40:30,B1=[hx+d*.707,hy-d*.707],B2=[hx,hy-d*1.414],B3=[hx-d*.707,hy-d*.707],FR=m?146:91;
+ const hx=W/2,hy=m?120:93,d=m?40:30,B1=[hx+d*.707,hy-d*.707],B2=[hx,hy-d*1.414],B3=[hx-d*.707,hy-d*.707],FR=m?146:91;
  g.fillStyle='#16241c';g.fillRect(0,0,W,H);for(let y=0;y<H;y+=3)for(let x=(y%2);x<W;x+=3){g.fillStyle=((x*7+y*13)%5)?'#1b2c22':'#24382c';g.fillRect(x,y,1,1)}
  const fan=r=>{g.beginPath();g.moveTo(hx,hy);g.arc(hx,hy,r,-Math.PI*3/4,-Math.PI/4);g.closePath()};
  fan(FR);g.fillStyle='#8a6440';g.fill();fan(FR-5);g.fillStyle='#3c9a3c';g.fill();
@@ -6970,7 +6983,7 @@ for(const b of $('lnTabs').children)b.addEventListener('click',()=>{lfTab=b.data
 /* the batting order: the nine hitters in a row, in order. Tap one, then tap the spot he should bat in: they swap */
 function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you);
   return `<div class="boSlot"><span class="boNum">${i+1}</span><button type="button" class="lfc bo r${c?c.r:0}${boSel===i?' boSel':''}" data-o="${i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}</span></button></div>`}).join('');
- $('cards').innerHTML=`<div class="boRow">${row}</div>`;$('lnHint').textContent=boSel==null?'Tap a hitter, then tap the spot you want him to bat in.':`Now tap the spot for ${T.lineup[boSel].name}.`;lfFit()}
+ $('cards').innerHTML=`<div class="boRow">${row}</div>`;$('lnHint').textContent=boSel==null?(matchMedia('(pointer:fine)').matches?'Drag a hitter to a new spot in the order, or tap two hitters to swap them.':'Tap a hitter, then tap the spot you want him to bat in.'):`Now tap the spot for ${T.lineup[boSel].name}.`;lfFit()}
 function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria-pressed',String(b.dataset.t===lfTab));
  $('lnNext').textContent=pregame?'NEXT':'DONE';
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
@@ -6988,7 +7001,7 @@ function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria
  let tray='';
  if(mine){if(selPit)lfDeck='pit';else if(selBat)lfDeck='bat';
   if(!CARDS.length)buildCardDB();const used=usedCards(S.you);
-  const own=CARDS.filter(c=>COL.owned[c.id]&&c.pit===(lfDeck==='pit')).sort((a,b)=>b.o-a.o);
+  const own=CARDS.filter(c=>COL.owned[c.id]&&c.pit===(lfDeck==='pit')).sort(LF_SORTS[lfSort].f);
   tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':'RP'):q.pos;
     const can=lnSel!=null&&!inUse&&(lnSel<0)===c.pit;
     return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlips.has(fk)?' flip':''}" data-id="${c.id}"><span class="lfIn">
@@ -6998,7 +7011,7 @@ function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria
  const acts=mine&&sel?`${lnSel>=0?`<button type="button" class="mbtn lfMoveB" aria-pressed="${lfMove}">${lfMove?'Tap a hitter to swap with…':'⇅ Batting order'}</button>`:''}${sel.signed?`<button type="button" class="mbtn lfRestore">Restore original</button>`:''}`:'';
  $('cards').innerHTML=`<div class="lfWrap"><div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>
   <div class="lfSide"><h4>BULLPEN</h4><div class="lfPen">${pen}</div><div class="lfActs">${acts}</div></div></div>
-  ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><div class="seg lfTabs"><button type="button" data-d="bat" aria-pressed="${lfDeck==='bat'}">Hitters</button><button type="button" data-d="pit" aria-pressed="${lfDeck==='pit'}">Pitchers</button></div></div><div class="lfTray">${tray}</div>`:''}`;
+  ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><button type="button" class="mbtn lfSortB">SORT: ${LF_SORTS[lfSort].n}</button><div class="seg lfTabs"><button type="button" data-d="bat" aria-pressed="${lfDeck==='bat'}">Hitters</button><button type="button" data-d="pit" aria-pressed="${lfDeck==='pit'}">Pitchers</button></div></div><div class="lfTray">${tray}</div>`:''}`;
  $('lnHint').textContent=mine?'Drag one of your cards onto a player to put him in. Tap a card to flip it.':'';lfFit()}
 /* a long name (HWANG M.U.) on a narrow card was cut to HWANG M...: step the type down until the whole name fits */
 function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.style.fontSize='';let fs=parseFloat(getComputedStyle(e).fontSize),n=0;while(e.scrollWidth>e.clientWidth+.5&&fs>7.5&&n++<8){fs-=.75;e.style.fontSize=fs+'px'}}}
@@ -7008,6 +7021,7 @@ $('cards').addEventListener('click',e=>{
   if(boSel==null)boSel=i;else if(boSel===i)boSel=null;else{[L[boSel],L[i]]=[L[i],L[boSel]];boSel=null;const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}
    for(const k of[...lfFlips])if(/^f\d/.test(k))lfFlips.delete(k);applyDefense();updateHUD();try{sfx('glove')}catch(_){}}
   boRender(TEAMS[S.you],S.you);return}
+ if(e.target.closest('.lfSortB')){lfSort=(lfSort+1)%LF_SORTS.length;try{localStorage.setItem('pd-lfsort',lfSort)}catch(_){}lineupRender();return}
  const tab=e.target.closest('.lfTabs button');if(tab){lfDeck=tab.dataset.d;for(const k of[...lfFlips])if(k[0]==='d')lfFlips.delete(k);lfMove=false;lineupRender();return}
  const T=TEAMS[S.you];
  if(lnView==='mine'){
@@ -7016,7 +7030,7 @@ $('cards').addEventListener('click',e=>{
   const sg=e.target.closest('[data-sign]');
   if(sg&&lnSel!=null){const pit=lnSel<0,p=pit?T.staff[-1-lnSel]:T.lineup[lnSel],real=p.custom?T.benched||p:p;
    const why=lfFitWhy(CARD_BY[sg.dataset.sign],lnSel,p);if(why){lfSay(why,true);return}
-   if(signPlayer(S.you,real.signedFor||real.name,sg.dataset.sign,pit)){applyDefense();updateHUD();try{sfx('glove')}catch(_){}}lfFlips.delete(lfFlip);lfFlips.delete('d'+sg.dataset.sign);lfFlip=null;lfMove=false;lineupRender();return}}
+   if(signPlayer(S.you,real.signedFor||real.name,sg.dataset.sign,pit)){const b=lfBench(real);if(b)lfSay(b.trim());applyDefense();updateHUD();try{sfx('glove')}catch(_){}}lfFlips.delete(lfFlip);lfFlips.delete('d'+sg.dataset.sign);lfFlip=null;lfMove=false;lineupRender();return}}
  const b=e.target.closest('.lfc');if(!b)return;
  if(b.classList.contains('deck')){const fk='d'+b.dataset.id;
   /* a tray card flips on its own; every other turned card stays turned */
@@ -7031,6 +7045,8 @@ $('cards').addEventListener('click',e=>{
 // A card only goes where he can play: his own position, any outfield spot for an outfielder (LF, CF and RF are one), and
 // any hitter at DH. Pitchers: a starter for the starter's spot, any pitcher in the bullpen.
 const LF_OF=new Set(['LF','CF','RF']);
+/* a club player you replace isn't thrown away: his card goes into YOUR CARDS, so you can put him back (or elsewhere) later */
+function lfBench(p){if(!p||p.signed||p.custom)return'';const c=lfCard(S.you,p);if(!c||COL.owned[c.id])return'';COL.owned[c.id]=1;saveCol();return` ${p.name} went to your cards.`}
 function lfSlotPos(T,i){return i>=0?T.lineup[i].pos:i===-1?'SP':'RP'}
 function lfFitWhy(c,i,p){if(!c)return'That card is gone.';const T=TEAMS[S.you],slot=lfSlotPos(T,i),cp=c.p.pos,nm=c.p.name;
  if(c.pit!==(i<0))return c.pit?`${nm} is a pitcher. Put him on the mound or in the bullpen.`:`${nm} is a hitter. He can't pitch.`;
@@ -7042,9 +7058,12 @@ function lfSay(t,bad){const m=$('lfMsg');m.textContent=t;m.classList.toggle('bad
 const lfDrag={st:null,on:false,ghost:null,over:null,eat:0};
 function lfScroller(){let e=$('cards');while(e&&e!==document.body){const o=getComputedStyle(e).overflowY;if((o==='auto'||o==='scroll')&&e.scrollHeight>e.clientHeight)return e;e=e.parentElement}return document.scrollingElement}
 $('cards').addEventListener('pointerdown',e=>{if(lnView!=='mine'||lfTab!=='field'||e.button>0)return;const b=e.target.closest('.lfTray .lfc.deck');if(!b||e.target.closest('[data-sign]'))return;
- lfDrag.st={x:e.clientX,y:e.clientY,b,id:b.dataset.id,pid:e.pointerId}});
+ const tr=b.closest('.lfTray');lfDrag.st={x:e.clientX,y:e.clientY,b,id:b.dataset.id,pid:e.pointerId,tr,sl:tr?tr.scrollLeft:0,pan:false}});
 addEventListener('pointermove',e=>{const d=lfDrag;if(!d.st||e.pointerId!==d.st.pid)return;const dx=e.clientX-d.st.x,dy=e.clientY-d.st.y;
- if(!d.on){if(Math.hypot(dx,dy)<8)return;if(Math.abs(dx)>Math.abs(dy)*1.2&&e.pointerType!=='mouse'){d.st=null;return}/* (sideways: the tray scrolls) */lfDragStart(e)}
+ /* the tray cards take every touch themselves (touch-action:none), so the browser never grabs the gesture and cancels the drag
+    halfway up the screen; a sideways swipe scrolls the tray by hand instead */
+ if(d.st.pan){e.preventDefault();d.st.tr.scrollLeft=d.st.sl-dx;return}
+ if(!d.on){if(Math.hypot(dx,dy)<8)return;if(Math.abs(dx)>Math.abs(dy)*1.2&&e.pointerType!=='mouse'&&d.st.tr){d.st.pan=true;d.eat=performance.now()+350;return}lfDragStart(e)}
  if(!d.on)return;e.preventDefault();d.ghost.style.transform=`translate(${e.clientX-d.gw/2}px,${e.clientY-d.gh*.4}px) rotate(-4deg)`;
  const el=document.elementFromPoint(e.clientX,e.clientY),t=el&&el.closest('.lfField .lfc[data-i],.lfPen .lfc[data-i]');
  if(t!==d.over){if(d.over)d.over.classList.remove('dropHover');d.over=t;if(t)t.classList.add('dropHover')}
@@ -7055,17 +7074,35 @@ function lfDragStart(e){const d=lfDrag,c=CARD_BY[d.st.id];d.on=true;d.card=c;con
  d.st.b.classList.add('dragSrc');document.body.classList.add('lfDragging');
  const T=TEAMS[S.you];for(const t of document.querySelectorAll('.lfField .lfc[data-i],.lfPen .lfc[data-i]')){const i=+t.dataset.i,p=i>=0?T.lineup[i]:T.staff[-1-i];t.classList.add(lfFitWhy(c,i,p)?'dropNo':'dropOk')}
  try{d.st.b.setPointerCapture(e.pointerId)}catch(_){}}
-function lfDragEnd(e,cancel){const d=lfDrag;if(!d.st)return;const was=d.on;
+function lfDragEnd(e,cancel){const d=lfDrag;if(!d.st)return;const was=d.on;if(d.st.pan)d.eat=performance.now()+300;
  if(was){d.eat=performance.now()+350;const t=d.over;if(d.ghost)d.ghost.remove();d.ghost=null;d.st.b.classList.remove('dragSrc');document.body.classList.remove('lfDragging');
   for(const x of document.querySelectorAll('.dropOk,.dropNo,.dropHover'))x.classList.remove('dropOk','dropNo','dropHover');
   if(t&&!cancel){const T=TEAMS[S.you],i=+t.dataset.i,pit=i<0,p=pit?T.staff[-1-i]:T.lineup[i],why=lfFitWhy(d.card,i,p);
    if(why){lfSay(why,true);t.classList.add('dropReject');setTimeout(()=>t.classList.remove('dropReject'),450);}
-   else{const real=p.custom?T.benched||p:p;if(signPlayer(S.you,real.signedFor||real.name,d.card.id,pit)){applyDefense();updateHUD();try{sfx('glove')}catch(_){}
-     lfFlips.delete('f'+i);lfFlips.delete('d'+d.card.id);lfSay(`${d.card.p.name} is in at ${lfSlotPos(T,i)}.`);lineupRender()}}}}
+   else{const real=p.custom?T.benched||p:p,out=real;if(signPlayer(S.you,real.signedFor||real.name,d.card.id,pit)){const b=lfBench(out);applyDefense();updateHUD();try{sfx('glove')}catch(_){}
+     lfFlips.delete('f'+i);lfFlips.delete('d'+d.card.id);lfSay(`${d.card.p.name} is in at ${lfSlotPos(T,i)}.${b}`);lineupRender()}}}}
  d.st=null;d.on=false;d.over=null;d.vy=0}
 addEventListener('pointerup',e=>lfDragEnd(e,false));addEventListener('pointercancel',e=>lfDragEnd(e,true));
 $('lnNext').addEventListener('click',()=>{if(pregame){plOpen();return}document.querySelector('#scrLineup .mbtn.back').click()});
 $('cards').addEventListener('dragstart',e=>e.preventDefault());/* (a card's picture would start the browser's own image drag and cancel ours) */
+
+const boDrag={st:null,on:false};
+$('cards').addEventListener('pointerdown',e=>{if(lfTab!=='order'||e.button>0||e.pointerType==='touch')return;const b=e.target.closest('.lfc.bo');if(!b)return;
+ boDrag.st={x:e.clientX,y:e.clientY,b,i:+b.dataset.o,pid:e.pointerId}});
+function boSlots(){return[...document.querySelectorAll('.boRow .boSlot')]}
+function boIndexAt(x){const sl=boSlots();let k=0;for(let j=0;j<sl.length;j++){const r=sl[j].getBoundingClientRect();if(x>r.left+r.width/2)k=j+1}return k}
+addEventListener('pointermove',e=>{const d=boDrag;if(!d.st||e.pointerId!==d.st.pid)return;
+ if(!d.on){if(Math.hypot(e.clientX-d.st.x,e.clientY-d.st.y)<6)return;d.on=true;const r=d.st.b.getBoundingClientRect();d.w=r.width;d.h=r.height;
+  const g=d.st.b.cloneNode(true);g.classList.add('lfGhost');g.classList.remove('boSel');g.style.width=r.width+'px';document.body.appendChild(g);d.g=g;d.st.b.classList.add('dragSrc');document.body.classList.add('lfDragging')}
+ e.preventDefault();d.g.style.transform=`translate(${e.clientX-d.w/2}px,${e.clientY-d.h*.45}px) rotate(-3deg)`;
+ const k=boIndexAt(e.clientX),sl=boSlots();sl.forEach((x,j)=>{x.classList.toggle('boGapL',j===k&&k!==d.st.i&&k!==d.st.i+1);x.classList.toggle('boGapR',k===sl.length&&j===sl.length-1&&d.st.i!==sl.length-1)});
+ const row=document.querySelector('.boRow'),rr=row.getBoundingClientRect();if(e.clientX<rr.left+40)row.scrollLeft-=12;else if(e.clientX>rr.right-40)row.scrollLeft+=12},{passive:false});
+function boDragEnd(e,cancel){const d=boDrag;if(!d.st)return;if(d.on){if(d.g)d.g.remove();document.body.classList.remove('lfDragging');lfDrag.eat=performance.now()+300;
+  if(!cancel){const from=d.st.i;let to=boIndexAt(e.clientX);if(to>from)to--;if(to!==from){const L=TEAMS[S.you].lineup,[p]=L.splice(from,1);L.splice(to,0,p);
+    const ci=L.findIndex(q=>q.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}for(const k of[...lfFlips])if(/^f\d/.test(k))lfFlips.delete(k);applyDefense();updateHUD();try{sfx('glove')}catch(_){}lfSay(`${p.name} now bats ${to+1}${['','st','nd','rd'][to+1]||'th'}.`)}}
+  boSel=null;boRender(TEAMS[S.you],S.you)}
+ d.st=null;d.on=false;d.g=null}
+addEventListener('pointerup',e=>boDragEnd(e,false));addEventListener('pointercancel',e=>boDragEnd(e,true));
 // ---------- the Imugi Labs mark on the main menu: a fixed pixel bitmap (the logo put through a pixel filter at 49x23, with the
 // middle line one pixel longer at each end), so it looks the same on every device. Each '#' is one lit pixel ----------
 {const P=['..............#####################..............',
@@ -7766,7 +7803,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='3ce0e74012',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='737aaa85a1',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

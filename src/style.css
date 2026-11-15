@@ -1029,7 +1029,7 @@ body.phOver .pauseBtn{display:none!important}
 .lfc .lfNm{font-size:13px;line-height:1.2;padding:3px 2px;font-weight:700;letter-spacing:-.02em}
 .lfc .lfPos{font-size:12px;line-height:1.25;padding:1px 0}
 @media (max-width:720px){
- .lfField,#scrLineup .lfField{aspect-ratio:100/150!important;max-width:100%!important;width:100%}
+ .lfField,#scrLineup .lfField{aspect-ratio:100/128!important;max-width:100%!important;width:100%}
  .lfField .lfc{width:72px}
  .lfField .lfc img{aspect-ratio:4/3;object-fit:cover;object-position:50% 22%}
  .lfField .lfc .lfNm{font-size:11px;padding:2px 1px;letter-spacing:-.04em}
@@ -1317,7 +1317,7 @@ html,body{touch-action:manipulation}
 .lfMsg{position:sticky;top:0;z-index:30;margin:0 auto;max-width:520px;text-align:center;font-size:14px;padding:0 10px;height:0;overflow:hidden;opacity:0;transition:opacity .2s;background:#123222;border:2px solid #5fc25a;color:var(--chalk)}
 .lfMsg.on{height:auto;padding:8px 10px;opacity:1;margin-bottom:6px}.lfMsg.bad{border-color:#e2603a;background:#3a1a12}
 /* dragging a card: it follows the finger, the spots it can go glow green, the rest dim; a wrong drop shakes */
-.lfTray .lfc.deck{touch-action:pan-x}
+.lfTray .lfc.deck{touch-action:none}
 .lfGhost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;opacity:.92;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6))}
 .lfc.dragSrc{opacity:.35}
 body.lfDragging,body.lfDragging *{cursor:grabbing!important;user-select:none}
@@ -1368,3 +1368,11 @@ body.lfDragging .lfc.dropHover.dropNo .lfF{box-shadow:0 0 0 3px #e2603a}
 .lfc .lfOvr{padding:4px 5px 2px}.lfc .lfOvr small{top:0}
 .lfField .lfc .lfOvr{padding:3px 4px 2px}
 .app.deskApp #title>#scrOpts{max-width:none;width:auto;min-width:min(500px,calc(94vw / var(--uiZ,1)))}
+.lfTrayHead{flex-wrap:wrap}.lfSortB{margin-left:auto;padding:8px 10px;font-size:12px;white-space:nowrap;width:auto}.app.deskApp .lfSortB{font-size:14px}
+/* card rows scroll without a visible scrollbar */
+.lfTray,.boRow,.lfPen{scrollbar-width:none;-ms-overflow-style:none}.lfTray::-webkit-scrollbar,.boRow::-webkit-scrollbar,.lfPen::-webkit-scrollbar{display:none}
+/* on PC, YOUR CARDS wraps into rows and scrolls up and down with the mouse wheel */
+@media (min-width:721px){.lfTray{flex-wrap:wrap;overflow-x:hidden;overflow-y:auto;max-height:min(400px,calc(100dvh - 220px));min-height:120px;align-content:flex-start;scroll-snap-type:none;overscroll-behavior:contain}}
+/* batting order drag: a gap opens where he'll land */
+.boRow .boSlot{transition:margin .12s}.boRow .boSlot.boGapL{margin-left:48px}.boRow .boSlot.boGapR{margin-right:48px}
+.boRow .lfc.bo{cursor:grab}
