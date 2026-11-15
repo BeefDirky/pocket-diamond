@@ -981,7 +981,7 @@ body.phOver .pauseBtn{display:none!important}
 .lfc{perspective:600px;background:none;border:0;padding:0;box-shadow:none;transition:none}
 .lfc:hover{transform:none}
 .lfc.sel,.lfc.drop,.lfc.deck.ready{outline:0;box-shadow:none;animation:none;transform:none}
-.lfIn{position:relative;display:block;transition:transform .32s ease;transform-style:preserve-3d}
+.lfIn{position:relative;display:block;transition:transform .24s ease;transform-style:preserve-3d}
 .lfc.flip .lfIn{transform:rotateY(180deg)}
 .lfF,.lfB{display:flex;flex-direction:column;align-items:stretch;padding:3px 3px 2px;border:2px solid var(--rc);box-shadow:0 2px 0 rgba(0,0,0,.55);backface-visibility:hidden;-webkit-backface-visibility:hidden;
  background:linear-gradient(170deg,var(--tj) 0 55%,var(--tc) 55% 100%)}

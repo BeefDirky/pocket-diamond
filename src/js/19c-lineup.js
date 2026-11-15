@@ -66,7 +66,7 @@ function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria
   tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':'RP'):q.pos;
     const can=lnSel!=null&&!inUse&&(lnSel<0)===c.pit;
     return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlips.has(fk)?' flip':''}" data-id="${c.id}"><span class="lfIn">
-     ${lfFace(cardArt(c),c.o,q.name,pos+(c.pit&&q.slot==='side'?' · SIDE':'')+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,can?`<span class="lfSign" data-sign="${c.id}">SIGN IN</span>`:'')}</span></button>`}).join('')
+     ${lfFace(cardArt(c),c.o,q.name,pos+(c.pit&&q.slot==='side'?' · SIDE':'')+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,'')}</span></button>`}).join('')
    :`<p class="lfEmpty">No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Card Collection to get players.</p>`}
  const sel=lnSel==null?null:lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];
  const acts=mine&&sel?`${sel.signed?`<button type="button" class="mbtn lfRestore">Restore original</button>`:''}`:'';
@@ -104,7 +104,10 @@ $('cards').addEventListener('click',e=>{
   if(lfFlips.has(fk))lfFlips.delete(fk);else lfFlips.add(fk);b.classList.toggle('flip',lfFlips.has(fk));return}
  const i=+b.dataset.i;
  if(false){const L=T.lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];for(const k of[...lfFlips])if(k[0]==='f'&&k!=='f-1'&&!k.startsWith('f-'))lfFlips.delete(k);const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}applyDefense();updateHUD();lfMove=false;lfFlip=null;lineupRender();return}
- const fk='f'+i;if(lfFlips.has(fk)){lfFlips.delete(fk);if(lfFlip===fk)lfFlip=[...lfFlips].reverse().find(k=>k[0]==='f')||null}else{lfFlips.add(fk);lfFlip=fk}lfMove=false;lineupRender()});
+ const fk='f'+i;if(lfFlips.has(fk)){lfFlips.delete(fk);if(lfFlip===fk)lfFlip=[...lfFlips].reverse().find(k=>k[0]==='f')||null}else{lfFlips.add(fk);lfFlip=fk}lfMove=false;
+ if(lnView!=='mine'||!b.closest('.lfField,.lfPen')){lineupRender();return}
+ b.classList.toggle('flip',lfFlips.has(fk));lnSel=lfFlip&&lfFlip[0]==='f'?+lfFlip.slice(1):null;const T2=TEAMS[S.you],sel=lnSel==null?null:lnSel>=0?T2.lineup[lnSel]:T2.staff[-1-lnSel],a=document.querySelector('#cards .lfActs');
+ if(a)a.innerHTML=sel&&sel.signed?`<button type="button" class="mbtn lfRestore">Restore original</button>`:''});
 /* rotating a phone or resizing across the phone breakpoint redraws the field to match */
 {let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}else if(!$('scrLineup').hidden)lfFit()})}
 
