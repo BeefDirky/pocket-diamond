@@ -56,7 +56,7 @@ with sync_playwright() as p:
         r = route.fetch(); t = r.text(); i = t.rfind('\n})();'); route.fulfill(response=r, body=t[:i] + '\nwindow.__x=c=>eval(c);' + t[i:])
     ctx.route('**/index.html', inject)
     PA = ctx.new_page(); PB = ctx.new_page(); errs = []
-    PA.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'seoul',base:'seoul'}));localStorage.setItem('pd-privacy','1')"); PB.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'busan',base:'daegu'}));localStorage.setItem('pd-privacy','1')")
+    PA.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'seoul',base:'seoul'}));localStorage.setItem('pd-privacy','1');localStorage.setItem('pd-how','1')"); PB.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'busan',base:'daegu'}));localStorage.setItem('pd-privacy','1');localStorage.setItem('pd-how','1')")
     for n, pg in (('A', PA), ('B', PB)): pg.on('pageerror', lambda e, n=n: errs.append(n + ' ' + str(e)))
     def setup():
       for pg, uid, name in ((PA, A, 'BeefDirky'), (PB, B, 'Rival')):
@@ -76,7 +76,7 @@ with sync_playwright() as p:
         print(('ok  ' if c else 'FAIL ') + what); ok = ok and bool(c)
     PA.goto('http://localhost:8768/index.html'); PA.wait_for_timeout(3000)
     PA.evaluate(f"window.__uid='{A}';__x(\"ACC.user={{id:'{A}',email:'x@x.co'}};ACC.name='BeefDirky';acRender()\")")
-    PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#lnPlay'); PA.wait_for_timeout(9000)
+    PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#lnNext'); PA.click('#lnPlay'); PA.wait_for_timeout(9000)
     check(PA.is_visible('#scrQueue') and not PA.is_visible('#scrLineup') and not PA.evaluate("__x('!!S.rkBot')"), 'PLAY opens the queue page (no lineup); alone, still looking at 9 seconds')
     PA.wait_for_timeout(12000)
     check(PA.evaluate("__x('!!S.rkBot')") and PA.evaluate("__x('S.schedInn')") == 3, 'after 15 seconds: a bot game, 3 innings (' + PA.inner_text('#qStatus') + ')')
@@ -94,7 +94,7 @@ with sync_playwright() as p:
     check('RANKED' in PA.inner_text('#rkRes') and ('+100' in PA.inner_text('#rkRes') or '-100' in PA.inner_text('#rkRes')), 'results card shows the rating change')
     PA.click('#toLobby'); PA.wait_for_timeout(800); check(PA.is_visible('#scrMulti'), 'back to Multiplayer')
     # a second bot game, forfeited from the pause menu
-    PA.click('#goRanked'); PA.click('#lnPlay'); PA.wait_for_timeout(21000)
+    PA.click('#goRanked'); PA.click('#lnNext'); PA.click('#lnPlay'); PA.wait_for_timeout(21000)
     check(PA.evaluate("__x('!!S.rkBot')"), 'second bot game started')
     m2 = PA.evaluate("__x('S.rkBot.m')"); PA.wait_for_timeout(3000)
     PA.click('#pauseBtn'); PA.wait_for_timeout(300); check(PA.inner_text('#pQuit').strip().upper() == 'FORFEIT' and 'leaving is a loss' in PA.inner_text('#pauseInfo'), 'pause menu: Forfeit, and it says leaving is a loss')

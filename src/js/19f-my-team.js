@@ -47,7 +47,7 @@ function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON
 // leaving the club-select screen without switching puts your own club back
 function brandCancel(){if(pendingMode!=='brand')return;pendingMode=null;brandDone();if(MYTEAM&&S.you!==MYTEAM.club){S.you=MYTEAM.club;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==S.you);syncPicker();applyCustom();updateHUD();TS.dirty=false}}
 // ---- the TEAM screen: your lineup (sign cards into it), plus the inventory and the club switch ----
-function teamOpen(from){$('lnClub').hidden=from==='scrOnline';$('scrLineup').classList.remove('lnRanked');pregame=false;lnView='mine';lnSel=null;lfFlip=null;$('lnPre').hidden=true;
+function teamOpen(from){$('lnClub').hidden=from==='scrOnline';$('scrLineup').classList.remove('lnRanked');pregame=false;lnView='mine';lnSel=null;lfFlip=null;
  document.body.classList.add('lnTeam');$('scrLineup').querySelector('.mbtn.back').dataset.go=from||'scrMain';showScreen('scrLineup')}
 $('lnInv').addEventListener('click',()=>invOpen('scrLineup'));
 $('lnClub').addEventListener('click',()=>brandOpen(false));

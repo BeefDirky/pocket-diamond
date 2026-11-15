@@ -56,7 +56,7 @@ with sync_playwright() as p:
         r = route.fetch(); t = r.text(); i = t.rfind('\n})();'); route.fulfill(response=r, body=t[:i] + '\nwindow.__x=c=>eval(c);' + t[i:])
     ctx.route('**/index.html', inject)
     PA = ctx.new_page(); PB = ctx.new_page(); errs = []
-    PA.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'seoul',base:'seoul'}));localStorage.setItem('pd-privacy','1')"); PB.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'busan',base:'daegu'}));localStorage.setItem('pd-privacy','1')")
+    PA.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'seoul',base:'seoul'}));localStorage.setItem('pd-privacy','1');localStorage.setItem('pd-how','1')"); PB.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'busan',base:'daegu'}));localStorage.setItem('pd-privacy','1');localStorage.setItem('pd-how','1')")
     for n, pg in (('A', PA), ('B', PB)): pg.on('pageerror', lambda e, n=n: errs.append(n + ' ' + str(e)))
     def setup():
       for pg, uid, name in ((PA, A, 'BeefDirky'), (PB, B, 'Rival')):
@@ -75,8 +75,8 @@ with sync_playwright() as p:
         global ok
         print(('ok  ' if c else 'FAIL ') + what); ok = ok and bool(c)
     setup()
-    PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#lnPlay'); PA.wait_for_timeout(2500)
-    PB.click('#goMulti'); PB.click('#goRanked'); PB.click('#lnPlay'); PB.wait_for_timeout(6000)
+    PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#lnNext'); PA.click('#lnPlay'); PA.wait_for_timeout(2500)
+    PB.click('#goMulti'); PB.click('#goRanked'); PB.click('#lnNext'); PB.click('#lnPlay'); PB.wait_for_timeout(6000)
     check(PA.evaluate("__x('onlineGame()')") and PB.evaluate("__x('onlineGame()')"), 'ranked game started')
     mid = PA.evaluate("__x('S.online.rk.m')")
     PA.wait_for_timeout(15000)
@@ -96,7 +96,7 @@ with sync_playwright() as p:
     PB.click('#toLobby'); PB.wait_for_timeout(800)
     # game 2: B stops touching the game. 60 s → warning with a 30 s countdown; at 90 s B forfeits
     with con.cursor() as c: c.execute("update public.matches set created_at = created_at - interval '10 minutes'")
-    PA.click('#goRanked'); PA.click('#lnPlay'); PA.wait_for_timeout(2500); PB.click('#goRanked'); PB.click('#lnPlay'); PB.wait_for_timeout(6000)
+    PA.click('#goRanked'); PA.click('#lnNext'); PA.click('#lnPlay'); PA.wait_for_timeout(2500); PB.click('#goRanked'); PB.click('#lnNext'); PB.click('#lnPlay'); PB.wait_for_timeout(6000)
     check(PA.evaluate("__x('onlineGame()')") and PB.evaluate("__x('onlineGame()')"), 'second ranked game started')
     PA.click('#autoBtn')  # A keeps playing on AUTO (no inactivity warning with AUTO on)
     PB.evaluate("__x('AFK.last=Date.now()-61000')"); PB.wait_for_timeout(1200)

@@ -1308,3 +1308,62 @@ html,body{touch-action:manipulation}
 .lfc .lfOvr small{font-family:var(--f-hud);font-size:.62em;letter-spacing:.06em;color:#dfe6e0;font-weight:700}
 .lfc .lfOrd{display:none}
 .lfField .lfc .lfOvr{left:50%;top:-8px}
+/* ---- EDIT LINEUP: one title, two tabs (positions, batting order), NEXT at the bottom ---- */
+#scrLineup .lnTop{justify-content:center;margin-bottom:4px}#scrLineup .lnTop h1{margin:0}
+.lnTabs{display:grid;grid-template-columns:1fr 1fr;max-width:520px;width:100%;margin:0 auto 6px}.lnTabs button{padding:10px 6px}
+#scrLineup #lnHint{text-align:center;font-size:13px;color:var(--dim);margin:0 0 6px}
+.lnFoot{display:flex;flex-direction:column;gap:8px;margin-top:10px}.lnFoot .big{margin:0}
+.lnFoot .lnTeamBar{margin:0}
+.lfMsg{position:sticky;top:0;z-index:30;margin:0 auto;max-width:520px;text-align:center;font-size:14px;padding:0 10px;height:0;overflow:hidden;opacity:0;transition:opacity .2s;background:#123222;border:2px solid #5fc25a;color:var(--chalk)}
+.lfMsg.on{height:auto;padding:8px 10px;opacity:1;margin-bottom:6px}.lfMsg.bad{border-color:#e2603a;background:#3a1a12}
+/* dragging a card: it follows the finger, the spots it can go glow green, the rest dim; a wrong drop shakes */
+.lfTray .lfc.deck{touch-action:pan-x}
+.lfGhost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;opacity:.92;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6))}
+.lfc.dragSrc{opacity:.35}
+body.lfDragging,body.lfDragging *{cursor:grabbing!important;user-select:none}
+body.lfDragging .lfc.dropOk .lfF{box-shadow:0 0 0 3px #5fc25a,0 0 14px #5fc25a}
+body.lfDragging .lfc.dropNo{opacity:.45;filter:grayscale(.7)}
+body.lfDragging .lfc.dropHover.dropOk{transform:scale(1.08)}
+body.lfDragging .lfc.dropHover.dropNo .lfF{box-shadow:0 0 0 3px #e2603a}
+.lfc.dropReject{animation:lfShake .4s}
+@keyframes lfShake{0%,100%{translate:0}20%{translate:-5px}40%{translate:5px}60%{translate:-4px}80%{translate:3px}}
+/* the batting order: the nine in a row, numbered; the picked one lifts */
+.boRow{display:flex;gap:8px;overflow-x:auto;padding:16px 4px 12px;scroll-snap-type:x proximity;justify-content:safe center}
+.boSlot{display:flex;flex-direction:column;align-items:center;gap:8px;flex:0 0 auto;scroll-snap-align:start}
+.boNum{font-family:var(--f-px);font-size:14px;color:#ffd23f;width:28px;height:28px;display:grid;place-items:center;background:#0b1410;border:2px solid #ffd23f}
+.boRow .lfc{width:84px}
+.boRow .lfc.boSel{transform:translateY(-8px)}.boRow .lfc.boSel .lfF{box-shadow:0 0 0 3px #ffd23f,0 0 16px rgba(255,210,63,.7)}
+.app.deskApp .boRow .lfc{width:98px}
+/* ---- the play page ---- */
+#scrPlay{display:flex;flex-direction:column;gap:12px;max-width:520px}#scrPlay[hidden]{display:none}
+.plTeam{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px;background:var(--edge);border:2px solid var(--panel-hi)}
+.plTeam img{width:64px;height:64px;image-rendering:pixelated}
+.plId{display:flex;flex-direction:column;gap:4px;min-width:0;text-align:left}.plId b{font-family:var(--f-px);font-weight:400;font-size:15px;line-height:1.3}
+.plId span{font-family:var(--f-hud);font-size:12px;letter-spacing:.06em;color:var(--dim)}.plId span b{font-family:inherit;font-size:13px}
+.plOvr{display:flex;flex-direction:column;align-items:center;gap:2px}.plOvr small{font-family:var(--f-hud);font-size:11px;letter-spacing:.1em;color:var(--dim)}
+.plOvr b{font-family:var(--f-px);font-weight:400;font-size:34px;line-height:1}
+.plInfo{display:flex;flex-direction:column;gap:10px}
+.plLine{margin:0;font-size:15px;line-height:1.45;text-align:center;color:var(--chalk)}
+.plVs{display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:10px;padding:8px 12px;border:2px dashed var(--panel-hi)}
+.plVsL{font-family:var(--f-px);font-size:11px;color:var(--dim)}.plVs img{width:36px;height:36px;image-rendering:pixelated}.plVs b{font-size:15px;text-align:left}
+.plVsO{font-family:var(--f-px);font-size:18px;display:flex;align-items:baseline;gap:4px}.plVsO small{font-family:var(--f-hud);font-size:10px;color:var(--dim)}
+.plRank{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.plRank div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:var(--edge);border:2px solid var(--panel-hi)}
+.plRank b{font-family:var(--f-px);font-weight:400;font-size:16px}.plRank span{font-family:var(--f-hud);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+#scrPlay .lnPre{margin:0;flex-direction:column;align-items:stretch}#scrPlay .lnPre .big{width:100%;min-width:0}
+#scrPlay .lnPre.noSeries .lnPreTop{display:none}#scrPlay .lnPreTop{justify-content:center}#scrPlay #lnPreVs:empty{display:none}
+/* the OVR tab: number and label sit in the middle of the box */
+.lfc .lfOvr{align-items:center;padding:3px 5px 2px;line-height:1}
+.lfc .lfOvr small{line-height:1;position:relative;top:-.04em}
+#cards img{-webkit-user-drag:none;user-select:none}
+/* the lineup page never pans sideways: only up and down (the card tray and batting-order row still slide on their own) */
+#title:has(#scrLineup:not([hidden])){overflow-x:hidden;touch-action:pan-y;overscroll-behavior-x:none}
+#scrLineup{overflow-x:clip;max-width:100%}
+.lfTray,.boRow{overscroll-behavior-x:contain}
+.plId>span{display:flex;flex-direction:column;gap:2px}
+.lfMsg{align-self:center;width:100%;box-sizing:border-box}
+.app.deskApp .boRow .lfc{width:124px}.app.deskApp .boNum{width:34px;height:34px;font-size:16px}
+@media (max-width:720px){.boRow .lfc{width:66px}.boRow{gap:6px}}
+.lfc .lfOvr{padding:5px 5px 1px}.lfc .lfOvr small{top:-2px}
+.lfField .lfc .lfOvr{padding:4px 4px 1px}
+.lfc .lfOvr{padding:4px 5px 2px}.lfc .lfOvr small{top:0}
+.lfField .lfc .lfOvr{padding:3px 4px 2px}

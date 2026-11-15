@@ -175,19 +175,27 @@
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
       <div class="card wide" id="scrLineup" hidden>
-        <div class="lnTop"><h2 id="lnTitle"></h2><div class="seg"><button type="button" id="lnMine" aria-pressed="true">Your club</button><button type="button" id="lnOpp" aria-pressed="false">Scout visitors</button></div></div>
+        <div class="lnTop"><h1>EDIT <span>LINEUP</span></h1><h2 id="lnTitle" hidden></h2><div class="seg" hidden><button type="button" id="lnMine" aria-pressed="true">Your club</button><button type="button" id="lnOpp" aria-pressed="false">Scout visitors</button></div></div>
+        <div class="seg lnTabs" id="lnTabs"><button type="button" data-t="field" aria-pressed="true">POSITIONS</button><button type="button" data-t="order" aria-pressed="false">BATTING ORDER</button></div>
         <p id="lnHint"></p>
-        <div class="lnTeamBar" id="lnTeamBar"><button class="mbtn" id="lnInv" type="button">INVENTORY</button><button class="mbtn" id="lnClub" type="button">CHANGE CLUB</button></div>
-        <div class="lnPre" id="lnPre" hidden>
-          <div class="lnPreTop"><b id="lnPreVs"></b><span>SERIES</span><div class="seg" id="lnSeries"><button type="button" data-n="1" aria-pressed="true">1 game</button><button type="button" data-n="3" aria-pressed="false">Best of 3</button><button type="button" data-n="5" aria-pressed="false">Best of 5</button></div></div>
-          <button class="big" id="lnPlay" type="button">PLAY BALL</button>
-          <p class="lnQ" id="lnQ" aria-live="polite" hidden></p>
-        </div>
+        <p class="lfMsg" id="lfMsg" aria-live="polite"></p>
         <div class="cards" id="cards"></div>
         <div class="lnSheet" id="lnSheet" hidden><div class="shBox"><div class="shHead"><b id="shTitle"></b><button type="button" class="xClose" id="shClose" aria-label="Close">✕</button></div>
           <p id="shSub"></p><div class="shActs"><button type="button" class="mbtn" id="shMove">↕ Move in batting order</button><button type="button" class="mbtn" id="shOrig" hidden></button></div>
           <div class="shList" id="shList"></div></div></div>
+        <div class="lnFoot"><div class="lnTeamBar" id="lnTeamBar"><button class="mbtn" id="lnInv" type="button">INVENTORY</button><button class="mbtn" id="lnClub" type="button">CHANGE CLUB</button></div><button class="big" id="lnNext" type="button">NEXT</button></div>
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
+      </div>
+      <div class="card" id="scrPlay" hidden>
+        <h1 id="plMode">ARCADE</h1>
+        <div class="plTeam"><img id="plLogo" alt=""><div class="plId"><b id="plName"></b><span id="plSub"></span></div><div class="plOvr"><small>TEAM OVR</small><b id="plOvr">0</b></div></div>
+        <div class="plInfo" id="plInfo"></div>
+        <div class="lnPre" id="lnPre">
+          <div class="lnPreTop"><b id="lnPreVs"></b><span>SERIES</span><div class="seg" id="lnSeries"><button type="button" data-n="1" aria-pressed="true">1 game</button><button type="button" data-n="3" aria-pressed="false">Best of 3</button><button type="button" data-n="5" aria-pressed="false">Best of 5</button></div></div>
+          <button class="big" id="lnPlay" type="button">PLAY BALL</button>
+          <p class="lnQ" id="lnQ" aria-live="polite" hidden></p>
+        </div>
+        <button class="mbtn back" type="button" id="plBack" data-go="scrLineup">Back</button>
       </div>
       <div class="card wide" id="scrCards" hidden>
         <div class="ckTop"><h1>INVEN<span>TORY</span></h1><span class="ckProg" id="ckProg"></span></div>

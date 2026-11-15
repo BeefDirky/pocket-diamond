@@ -56,7 +56,7 @@ with sync_playwright() as p:
         r = route.fetch(); t = r.text(); i = t.rfind('\n})();'); route.fulfill(response=r, body=t[:i] + '\nwindow.__x=c=>eval(c);' + t[i:])
     ctx.route('**/index.html', inject)
     PA = ctx.new_page(); PB = ctx.new_page(); errs = []
-    PA.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'seoul',base:'seoul'}));localStorage.setItem('pd-privacy','1')"); PB.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'busan',base:'daegu'}));localStorage.setItem('pd-privacy','1')")
+    PA.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'seoul',base:'seoul'}));localStorage.setItem('pd-privacy','1');localStorage.setItem('pd-how','1')"); PB.add_init_script("localStorage.setItem('pd-myteam',JSON.stringify({club:'busan',base:'daegu'}));localStorage.setItem('pd-privacy','1');localStorage.setItem('pd-how','1')")
     for n, pg in (('A', PA), ('B', PB)): pg.on('pageerror', lambda e, n=n: errs.append(n + ' ' + str(e)))
     def setup():
       for pg, uid, name in ((PA, A, 'BeefDirky'), (PB, B, 'Rival')):
@@ -77,9 +77,9 @@ with sync_playwright() as p:
         if cheat:  # the guest's phone lies: one extra run for itself (away) in every snapshot it sends while pitching
             PB.evaluate("__x(\"const _ss=snapState;snapState=()=>{const z=_ss();if(pitching())z.t+=1;return z}\")")
         # both press Ranked: the queue pairs them (A waited longer, so A hosts)
-        PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#lnPlay'); PA.wait_for_timeout(2500)
+        PA.click('#goMulti'); PA.click('#goRanked'); PA.click('#lnNext'); PA.click('#lnPlay'); PA.wait_for_timeout(2500)
         print(label, '| A:', PA.inner_text('#qStatus'), PA.inner_text('#qEst'))
-        PB.click('#goMulti'); PB.click('#goRanked'); PB.click('#lnPlay'); PB.wait_for_timeout(6000)
+        PB.click('#goMulti'); PB.click('#goRanked'); PB.click('#lnNext'); PB.click('#lnPlay'); PB.wait_for_timeout(6000)
         if not (PA.evaluate("__x('onlineGame()')") and PB.evaluate("__x('onlineGame()')")):
             print('  ranked game did not start:', PA.inner_text('#olStatus'), '|', PB.inner_text('#olStatus')); ok = False; return None
         mid = PA.evaluate("__x('S.online.rk.m')"); print('  match', mid, 'started; ranked on both:', PA.evaluate("__x('S.online.ranked')"), PB.evaluate("__x('S.online.ranked')"))

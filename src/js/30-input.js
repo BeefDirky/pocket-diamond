@@ -67,11 +67,29 @@ $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;const se=S
 // (arcade and full games come straight here from Single Player: your club is set, the opponent is drawn at random)
 let pregame=false,pregameMode='arcade';
 function openPregame(m){pregameMode=m||'arcade';pregame=true;$('scrLineup').classList.remove('lnRanked');$('lnPlay').textContent='PLAY BALL';$('lnQ').hidden=true;$('scrLineup').querySelector('.mbtn.back').dataset.go='scrSingle';$('lnPre').classList.toggle('noSeries',pregameMode!=='arcade');lnView='mine';lnSel=null;lfFlip=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=pregameMode==='playoffs'?'PLAYOFFS · 8-TEAM BRACKET':`vs ${o.city} ${o.name}`;if(pregameMode==='playoffs')$('lnPlay').textContent='TO THE BRACKET';
- const n=(S.series&&S.series.len)||1;for(const b of $('lnSeries').children)b.setAttribute('aria-pressed',String(+b.dataset.n===n));$('lnPre').hidden=false;showScreen('scrLineup')}
+ const n=(S.series&&S.series.len)||1;for(const b of $('lnSeries').children)b.setAttribute('aria-pressed',String(+b.dataset.n===n));lfTab='field';showScreen('scrLineup')}
+// ---- the play page, after EDIT LINEUP → NEXT: your club and its OVR, what this mode is, and PLAY ----
+function teamOvr(k){const T=TEAMS[k];if(!T)return 0;const bat=T.lineup.reduce((a,p)=>a+ovr(p),0)/Math.max(1,T.lineup.length),sp=T.staff[0]?ovr(T.staff[0]):bat,
+ pen=T.staff.length>1?T.staff.slice(1).reduce((a,p)=>a+ovr(p),0)/(T.staff.length-1):sp;return Math.round(bat*.6+sp*.25+pen*.15)}
+function plVs(k){const T=TEAMS[k],o=teamOvr(k);return `<div class="plVs"><span class="plVsL">VS</span><img alt="" src="${LOGO_URL[k]||''}"><b>${T.city} ${T.name}</b><span class="plVsO" style="color:${rcol(o)}">${o}<small>OVR</small></span></div>`}
+function plOpen(){const k=S.you,T=TEAMS[k],o=teamOvr(k),m=pregameMode;
+ $('plMode').innerHTML={arcade:'AR<span>CADE</span>',full:'FULL <span>GAME</span>',playoffs:'PLAY<span>OFFS</span>',ranked:'RAN<span>KED</span>'}[m]||'PLAY';
+ $('plLogo').src=LOGO_URL[k]||'';$('plName').textContent=`${T.city} ${T.name}`;
+ const bat=Math.round(T.lineup.reduce((a,p)=>a+ovr(p),0)/Math.max(1,T.lineup.length)),sp=T.staff[0]?ovr(T.staff[0]):0;
+ $("plSub").innerHTML=`<span>LINEUP <b style="color:${rcol(bat)}">${bat}</b></span><span>STARTER <b style="color:${rcol(sp)}">${sp}</b></span>`;
+ $('plOvr').textContent=o;$('plOvr').style.color=rcol(o);
+ const line=t=>`<p class="plLine">${t}</p>`;
+ $('plInfo').innerHTML=m==='ranked'?`<div class="plRank"><div><b id="plRating">—</b><span>RATING</span></div><div><b id="plRec">—</b><span>THIS SEASON</span></div><div><b>${LIVE.n||'—'}</b><span>ONLINE NOW</span></div></div>`+line('3 innings against a real player, your full teams, cards and all. You bat and you pitch. The lower-rated player is home.')
+  :m==='playoffs'?line('An 8-team bracket. Win your series to move on; lose one and your run is over.')
+  :plVs(S.opp)+line(m==='full'?'9 innings. You bat and you pitch.':'3 innings. You bat, they pitch: score enough to win.');
+ $('lnPreVs').textContent='';$('lnPre').classList.toggle('noSeries',m!=='arcade');qLnSync&&qLnSync();if(m==='playoffs')$('lnPlay').textContent='TO THE BRACKET';
+ if(m==='ranked'&&typeof ACC!=='undefined'&&ACC.user)rpc('my_rating').then(r=>{if(!r||!$('plRating'))return;$('plRating').textContent=r.rating;$('plRating').style.color='#ffd23f';$('plRec').textContent=r.games?`${r.wins}-${r.losses}`:'0-0'}).catch(()=>{});
+ 
+ showScreen('scrPlay')}
 $('lnSeries').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const c of $('lnSeries').children)c.setAttribute('aria-pressed',String(c===b))});
-$('lnPlay').addEventListener('click',()=>{if(pregameMode==='ranked'){pregame=false;$('lnPre').hidden=true;$('scrLineup').classList.remove('lnRanked');qStart(false);return}/* PLAY: the queue page */if(pregameMode==='playoffs'){pregame=false;$('lnPre').hidden=true;tsFlush();openBracket(true);return}if(pregameMode==='full'){pregame=false;$('lnPre').hidden=true;S.series=null;S.auto=false;syncAuto();withLoading(()=>{tsFlush();startGame('full');render(performance.now())});return}const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
- S.series={len:n,w:0,l:0};pregame=false;$('lnPre').hidden=true;S.auto=false;syncAuto();withLoading(()=>{startGame('arcade');render(performance.now())})});
-document.querySelector('#scrLineup .mbtn.back').addEventListener('click',e=>{if(!pregame)return;e.stopImmediatePropagation();pregame=false;$('lnPre').hidden=true;pendingMode=null;const to=pregameMode==='ranked'?'scrMulti':'scrSingle';$('scrLineup').classList.remove('lnRanked');showScreen(to)},true);
+$('lnPlay').addEventListener('click',()=>{if(pregameMode==='ranked'){pregame=false;$('scrLineup').classList.remove('lnRanked');qStart(false);return}/* PLAY: the queue page */if(pregameMode==='playoffs'){pregame=false;tsFlush();openBracket(true);return}if(pregameMode==='full'){pregame=false;S.series=null;S.auto=false;syncAuto();withLoading(()=>{tsFlush();startGame('full');render(performance.now())});return}const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
+ S.series={len:n,w:0,l:0};pregame=false;S.auto=false;syncAuto();withLoading(()=>{startGame('arcade');render(performance.now())})});
+document.querySelector('#scrLineup .mbtn.back').addEventListener('click',e=>{if(!pregame)return;e.stopImmediatePropagation();pregame=false;pendingMode=null;const to=pregameMode==='ranked'?'scrMulti':'scrSingle';$('scrLineup').classList.remove('lnRanked');showScreen(to)},true);
 $('change').addEventListener('click',toTitle);
 $('quit').addEventListener('click',toTitle);
 $('optsBtn').addEventListener('click',openOptionsInGame);

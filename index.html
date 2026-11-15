@@ -1331,6 +1331,65 @@ html,body{touch-action:manipulation}
 .lfc .lfOvr small{font-family:var(--f-hud);font-size:.62em;letter-spacing:.06em;color:#dfe6e0;font-weight:700}
 .lfc .lfOrd{display:none}
 .lfField .lfc .lfOvr{left:50%;top:-8px}
+/* ---- EDIT LINEUP: one title, two tabs (positions, batting order), NEXT at the bottom ---- */
+#scrLineup .lnTop{justify-content:center;margin-bottom:4px}#scrLineup .lnTop h1{margin:0}
+.lnTabs{display:grid;grid-template-columns:1fr 1fr;max-width:520px;width:100%;margin:0 auto 6px}.lnTabs button{padding:10px 6px}
+#scrLineup #lnHint{text-align:center;font-size:13px;color:var(--dim);margin:0 0 6px}
+.lnFoot{display:flex;flex-direction:column;gap:8px;margin-top:10px}.lnFoot .big{margin:0}
+.lnFoot .lnTeamBar{margin:0}
+.lfMsg{position:sticky;top:0;z-index:30;margin:0 auto;max-width:520px;text-align:center;font-size:14px;padding:0 10px;height:0;overflow:hidden;opacity:0;transition:opacity .2s;background:#123222;border:2px solid #5fc25a;color:var(--chalk)}
+.lfMsg.on{height:auto;padding:8px 10px;opacity:1;margin-bottom:6px}.lfMsg.bad{border-color:#e2603a;background:#3a1a12}
+/* dragging a card: it follows the finger, the spots it can go glow green, the rest dim; a wrong drop shakes */
+.lfTray .lfc.deck{touch-action:pan-x}
+.lfGhost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;opacity:.92;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6))}
+.lfc.dragSrc{opacity:.35}
+body.lfDragging,body.lfDragging *{cursor:grabbing!important;user-select:none}
+body.lfDragging .lfc.dropOk .lfF{box-shadow:0 0 0 3px #5fc25a,0 0 14px #5fc25a}
+body.lfDragging .lfc.dropNo{opacity:.45;filter:grayscale(.7)}
+body.lfDragging .lfc.dropHover.dropOk{transform:scale(1.08)}
+body.lfDragging .lfc.dropHover.dropNo .lfF{box-shadow:0 0 0 3px #e2603a}
+.lfc.dropReject{animation:lfShake .4s}
+@keyframes lfShake{0%,100%{translate:0}20%{translate:-5px}40%{translate:5px}60%{translate:-4px}80%{translate:3px}}
+/* the batting order: the nine in a row, numbered; the picked one lifts */
+.boRow{display:flex;gap:8px;overflow-x:auto;padding:16px 4px 12px;scroll-snap-type:x proximity;justify-content:safe center}
+.boSlot{display:flex;flex-direction:column;align-items:center;gap:8px;flex:0 0 auto;scroll-snap-align:start}
+.boNum{font-family:var(--f-px);font-size:14px;color:#ffd23f;width:28px;height:28px;display:grid;place-items:center;background:#0b1410;border:2px solid #ffd23f}
+.boRow .lfc{width:84px}
+.boRow .lfc.boSel{transform:translateY(-8px)}.boRow .lfc.boSel .lfF{box-shadow:0 0 0 3px #ffd23f,0 0 16px rgba(255,210,63,.7)}
+.app.deskApp .boRow .lfc{width:98px}
+/* ---- the play page ---- */
+#scrPlay{display:flex;flex-direction:column;gap:12px;max-width:520px}#scrPlay[hidden]{display:none}
+.plTeam{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px;background:var(--edge);border:2px solid var(--panel-hi)}
+.plTeam img{width:64px;height:64px;image-rendering:pixelated}
+.plId{display:flex;flex-direction:column;gap:4px;min-width:0;text-align:left}.plId b{font-family:var(--f-px);font-weight:400;font-size:15px;line-height:1.3}
+.plId span{font-family:var(--f-hud);font-size:12px;letter-spacing:.06em;color:var(--dim)}.plId span b{font-family:inherit;font-size:13px}
+.plOvr{display:flex;flex-direction:column;align-items:center;gap:2px}.plOvr small{font-family:var(--f-hud);font-size:11px;letter-spacing:.1em;color:var(--dim)}
+.plOvr b{font-family:var(--f-px);font-weight:400;font-size:34px;line-height:1}
+.plInfo{display:flex;flex-direction:column;gap:10px}
+.plLine{margin:0;font-size:15px;line-height:1.45;text-align:center;color:var(--chalk)}
+.plVs{display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:10px;padding:8px 12px;border:2px dashed var(--panel-hi)}
+.plVsL{font-family:var(--f-px);font-size:11px;color:var(--dim)}.plVs img{width:36px;height:36px;image-rendering:pixelated}.plVs b{font-size:15px;text-align:left}
+.plVsO{font-family:var(--f-px);font-size:18px;display:flex;align-items:baseline;gap:4px}.plVsO small{font-family:var(--f-hud);font-size:10px;color:var(--dim)}
+.plRank{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.plRank div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:var(--edge);border:2px solid var(--panel-hi)}
+.plRank b{font-family:var(--f-px);font-weight:400;font-size:16px}.plRank span{font-family:var(--f-hud);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+#scrPlay .lnPre{margin:0;flex-direction:column;align-items:stretch}#scrPlay .lnPre .big{width:100%;min-width:0}
+#scrPlay .lnPre.noSeries .lnPreTop{display:none}#scrPlay .lnPreTop{justify-content:center}#scrPlay #lnPreVs:empty{display:none}
+/* the OVR tab: number and label sit in the middle of the box */
+.lfc .lfOvr{align-items:center;padding:3px 5px 2px;line-height:1}
+.lfc .lfOvr small{line-height:1;position:relative;top:-.04em}
+#cards img{-webkit-user-drag:none;user-select:none}
+/* the lineup page never pans sideways: only up and down (the card tray and batting-order row still slide on their own) */
+#title:has(#scrLineup:not([hidden])){overflow-x:hidden;touch-action:pan-y;overscroll-behavior-x:none}
+#scrLineup{overflow-x:clip;max-width:100%}
+.lfTray,.boRow{overscroll-behavior-x:contain}
+.plId>span{display:flex;flex-direction:column;gap:2px}
+.lfMsg{align-self:center;width:100%;box-sizing:border-box}
+.app.deskApp .boRow .lfc{width:124px}.app.deskApp .boNum{width:34px;height:34px;font-size:16px}
+@media (max-width:720px){.boRow .lfc{width:66px}.boRow{gap:6px}}
+.lfc .lfOvr{padding:5px 5px 1px}.lfc .lfOvr small{top:-2px}
+.lfField .lfc .lfOvr{padding:4px 4px 1px}
+.lfc .lfOvr{padding:4px 5px 2px}.lfc .lfOvr small{top:0}
+.lfField .lfc .lfOvr{padding:3px 4px 2px}
 </style>
 
 <div class="app">
@@ -1586,19 +1645,27 @@ html,body{touch-action:manipulation}
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
       <div class="card wide" id="scrLineup" hidden>
-        <div class="lnTop"><h2 id="lnTitle"></h2><div class="seg"><button type="button" id="lnMine" aria-pressed="true">Your club</button><button type="button" id="lnOpp" aria-pressed="false">Scout visitors</button></div></div>
+        <div class="lnTop"><h1>EDIT <span>LINEUP</span></h1><h2 id="lnTitle" hidden></h2><div class="seg" hidden><button type="button" id="lnMine" aria-pressed="true">Your club</button><button type="button" id="lnOpp" aria-pressed="false">Scout visitors</button></div></div>
+        <div class="seg lnTabs" id="lnTabs"><button type="button" data-t="field" aria-pressed="true">POSITIONS</button><button type="button" data-t="order" aria-pressed="false">BATTING ORDER</button></div>
         <p id="lnHint"></p>
-        <div class="lnTeamBar" id="lnTeamBar"><button class="mbtn" id="lnInv" type="button">INVENTORY</button><button class="mbtn" id="lnClub" type="button">CHANGE CLUB</button></div>
-        <div class="lnPre" id="lnPre" hidden>
-          <div class="lnPreTop"><b id="lnPreVs"></b><span>SERIES</span><div class="seg" id="lnSeries"><button type="button" data-n="1" aria-pressed="true">1 game</button><button type="button" data-n="3" aria-pressed="false">Best of 3</button><button type="button" data-n="5" aria-pressed="false">Best of 5</button></div></div>
-          <button class="big" id="lnPlay" type="button">PLAY BALL</button>
-          <p class="lnQ" id="lnQ" aria-live="polite" hidden></p>
-        </div>
+        <p class="lfMsg" id="lfMsg" aria-live="polite"></p>
         <div class="cards" id="cards"></div>
         <div class="lnSheet" id="lnSheet" hidden><div class="shBox"><div class="shHead"><b id="shTitle"></b><button type="button" class="xClose" id="shClose" aria-label="Close">✕</button></div>
           <p id="shSub"></p><div class="shActs"><button type="button" class="mbtn" id="shMove">↕ Move in batting order</button><button type="button" class="mbtn" id="shOrig" hidden></button></div>
           <div class="shList" id="shList"></div></div></div>
+        <div class="lnFoot"><div class="lnTeamBar" id="lnTeamBar"><button class="mbtn" id="lnInv" type="button">INVENTORY</button><button class="mbtn" id="lnClub" type="button">CHANGE CLUB</button></div><button class="big" id="lnNext" type="button">NEXT</button></div>
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
+      </div>
+      <div class="card" id="scrPlay" hidden>
+        <h1 id="plMode">ARCADE</h1>
+        <div class="plTeam"><img id="plLogo" alt=""><div class="plId"><b id="plName"></b><span id="plSub"></span></div><div class="plOvr"><small>TEAM OVR</small><b id="plOvr">0</b></div></div>
+        <div class="plInfo" id="plInfo"></div>
+        <div class="lnPre" id="lnPre">
+          <div class="lnPreTop"><b id="lnPreVs"></b><span>SERIES</span><div class="seg" id="lnSeries"><button type="button" data-n="1" aria-pressed="true">1 game</button><button type="button" data-n="3" aria-pressed="false">Best of 3</button><button type="button" data-n="5" aria-pressed="false">Best of 5</button></div></div>
+          <button class="big" id="lnPlay" type="button">PLAY BALL</button>
+          <p class="lnQ" id="lnQ" aria-live="polite" hidden></p>
+        </div>
+        <button class="mbtn back" type="button" id="plBack" data-go="scrLineup">Back</button>
       </div>
       <div class="card wide" id="scrCards" hidden>
         <div class="ckTop"><h1>INVEN<span>TORY</span></h1><span class="ckProg" id="ckProg"></span></div>
@@ -6689,7 +6756,7 @@ let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createEle
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){qLeaving(id);roomLineupBack(id);if(pendingMode==='watch'&&id!=='scrTeams'){pendingMode=null;myTeamRestore()}/* backed out of picking a team to watch: your own club again */if(pendingMode==='brand'&&id!=='scrTeams')brandCancel();if(id==='scrTeams'&&pendingMode==='brand'){$('tsPrev').hidden=$('tsNext').hidden=false}
- document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;if(id==='scrLineup'&&$('lnPre')&&!(typeof pregame!=='undefined'&&pregame))$('lnPre').hidden=true;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb','scrLegal'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+ document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb','scrLegal','scrPlay'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();
 // PC menu scale: 1 at about 720 px tall (1.5 on 1080p), up to 1.65 on big screens (never wider than the screen allows);
 // the main menu grows a fifth as much (1.1 on 1080p)
@@ -6865,7 +6932,7 @@ function adsRender0(){const W=$('spWrap');W.innerHTML='';const live=[];
 // Tap a player on the field to pick him up; tap a card in the tray to sign it into his spot, or tap another hitter on the
 // field to swap their places in the batting order. Uses the signings layer (19a) for the actual roster changes. ----------
 const LF_POS={C:[50,86],'1B':[85,58],'2B':[67,43],SS:[33,43],'3B':[15,58],LF:[16,20],CF:[50,14],RF:[84,20],DH:[15,86],SP:[50,58]};/* spaced so no two cards touch at any window size */
-const LF_POS_M={C:[50,90],'1B':[82,72],'2B':[68,49],SS:[32,49],'3B':[18,72],LF:[18,25],CF:[50,9],RF:[82,25],DH:[13,91],SP:[50,69]};/* phones: a taller field so no two cards touch */
+const LF_POS_M={C:[50,90],'1B':[80,72],'2B':[68,49],SS:[32,49],'3B':[20,72],LF:[20,25],CF:[50,9],RF:[80,25],DH:[17,91],SP:[50,69]};/* phones: a taller field so no two cards touch */
 const lfMob=()=>matchMedia('(max-width:720px)').matches;
 let lfDeck='bat',lfFieldC={};
 function lfFieldArt(){const m=lfMob();if(lfFieldC[m])return lfFieldC[m];const W=m?100:115,H=m?150:100,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
@@ -6897,7 +6964,16 @@ let lfFlip=null,lfMove=false;const lfFlips=new Set();let lfFlipsOf='';
 function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c,k):portrait(T,p,k===S.you),o=ovr(p),pit=opt.i<0,fk='f'+opt.i;
  return `<button type="button" class="lfc r${r}${lfFlips.has(fk)?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
   ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'?' · SIDE':''))}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
-function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
+let lfTab='field',boSel=null;
+for(const b of $('lnTabs').children)b.addEventListener('click',()=>{lfTab=b.dataset.t;boSel=null;lfMove=false;lineupRender()});
+/* the batting order: the nine hitters in a row, in order. Tap one, then tap the spot he should bat in: they swap */
+function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you);
+  return `<div class="boSlot"><span class="boNum">${i+1}</span><button type="button" class="lfc bo r${c?c.r:0}${boSel===i?' boSel':''}" data-o="${i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}</span></button></div>`}).join('');
+ $('cards').innerHTML=`<div class="boRow">${row}</div>`;$('lnHint').textContent=boSel==null?'Tap a hitter, then tap the spot you want him to bat in.':`Now tap the spot for ${T.lineup[boSel].name}.`;lfFit()}
+function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria-pressed',String(b.dataset.t===lfTab));
+ $('lnNext').textContent=pregame?'NEXT':'DONE';
+ const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
+ if(lfTab==='order'){boRender(T,key);return}
  if(!mine)lfMove=false;
  if(lfFlipsOf!==lnView+key){lfFlipsOf=lnView+key;lfFlips.clear();lfFlip=null}
  if(lfFlip&&!lfFlips.has(lfFlip))lfFlip=null;
@@ -6922,10 +6998,15 @@ function lineupRender(){const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=
  $('cards').innerHTML=`<div class="lfWrap"><div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>
   <div class="lfSide"><h4>BULLPEN</h4><div class="lfPen">${pen}</div><div class="lfActs">${acts}</div></div></div>
   ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><div class="seg lfTabs"><button type="button" data-d="bat" aria-pressed="${lfDeck==='bat'}">Hitters</button><button type="button" data-d="pit" aria-pressed="${lfDeck==='pit'}">Pitchers</button></div></div><div class="lfTray">${tray}</div>`:''}`;
- $('lnHint').textContent='';lfFit()}
+ $('lnHint').textContent=mine?'Drag one of your cards onto a player to put him in. Tap a card to flip it.':'';lfFit()}
 /* a long name (HWANG M.U.) on a narrow card was cut to HWANG M...: step the type down until the whole name fits */
 function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.style.fontSize='';let fs=parseFloat(getComputedStyle(e).fontSize),n=0;while(e.scrollWidth>e.clientWidth+.5&&fs>7.5&&n++<8){fs-=.75;e.style.fontSize=fs+'px'}}}
 $('cards').addEventListener('click',e=>{
+ if(lfDrag.eat>performance.now()){e.stopImmediatePropagation();return}
+ const bo=e.target.closest('.lfc.bo');if(bo){const i=+bo.dataset.o,L=TEAMS[S.you].lineup;
+  if(boSel==null)boSel=i;else if(boSel===i)boSel=null;else{[L[boSel],L[i]]=[L[i],L[boSel]];boSel=null;const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}
+   for(const k of[...lfFlips])if(/^f\d/.test(k))lfFlips.delete(k);applyDefense();updateHUD();try{sfx('glove')}catch(_){}}
+  boRender(TEAMS[S.you],S.you);return}
  const tab=e.target.closest('.lfTabs button');if(tab){lfDeck=tab.dataset.d;for(const k of[...lfFlips])if(k[0]==='d')lfFlips.delete(k);lfMove=false;lineupRender();return}
  const T=TEAMS[S.you];
  if(lnView==='mine'){
@@ -6933,6 +7014,7 @@ $('cards').addEventListener('click',e=>{
   if(e.target.closest('.lfMoveB')){lfMove=!lfMove;lineupRender();return}
   const sg=e.target.closest('[data-sign]');
   if(sg&&lnSel!=null){const pit=lnSel<0,p=pit?T.staff[-1-lnSel]:T.lineup[lnSel],real=p.custom?T.benched||p:p;
+   const why=lfFitWhy(CARD_BY[sg.dataset.sign],lnSel,p);if(why){lfSay(why,true);return}
    if(signPlayer(S.you,real.signedFor||real.name,sg.dataset.sign,pit)){applyDefense();updateHUD();try{sfx('glove')}catch(_){}}lfFlips.delete(lfFlip);lfFlips.delete('d'+sg.dataset.sign);lfFlip=null;lfMove=false;lineupRender();return}}
  const b=e.target.closest('.lfc');if(!b)return;
  if(b.classList.contains('deck')){const fk='d'+b.dataset.id;
@@ -6943,6 +7025,46 @@ $('cards').addEventListener('click',e=>{
  const fk='f'+i;if(lfFlips.has(fk)){lfFlips.delete(fk);if(lfFlip===fk)lfFlip=[...lfFlips].reverse().find(k=>k[0]==='f')||null}else{lfFlips.add(fk);lfFlip=fk}lfMove=false;lineupRender()});
 /* rotating a phone or resizing across the phone breakpoint redraws the field to match */
 {let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}else if(!$('scrLineup').hidden)lfFit()})}
+
+// ---- drag a card from your tray onto a player on the field (or in the bullpen) to sign it into his spot ----
+// A card only goes where he can play: his own position, any outfield spot for an outfielder (LF, CF and RF are one), and
+// any hitter at DH. Pitchers: a starter for the starter's spot, any pitcher in the bullpen.
+const LF_OF=new Set(['LF','CF','RF']);
+function lfSlotPos(T,i){return i>=0?T.lineup[i].pos:i===-1?'SP':'RP'}
+function lfFitWhy(c,i,p){if(!c)return'That card is gone.';const T=TEAMS[S.you],slot=lfSlotPos(T,i),cp=c.p.pos,nm=c.p.name;
+ if(c.pit!==(i<0))return c.pit?`${nm} is a pitcher. Put him on the mound or in the bullpen.`:`${nm} is a hitter. He can't pitch.`;
+ if(usedCards(S.you).has(c.id)&&!(p&&p.signed===c.id))return`${nm} is already in your lineup.`;
+ if(c.pit)return slot==='SP'&&cp!=='SP'?`${nm} is a reliever. Only a starter can start.`:'';
+ if(slot==='DH'||cp===slot||(LF_OF.has(cp)&&LF_OF.has(slot)))return'';
+ return`${nm} plays ${cp}. He can't play ${slot}.`}
+function lfSay(t,bad){const m=$('lfMsg');m.textContent=t;m.classList.toggle('bad',!!bad);m.classList.add('on');clearTimeout(lfSay.t);lfSay.t=setTimeout(()=>m.classList.remove('on'),2600)}
+const lfDrag={st:null,on:false,ghost:null,over:null,eat:0};
+function lfScroller(){let e=$('cards');while(e&&e!==document.body){const o=getComputedStyle(e).overflowY;if((o==='auto'||o==='scroll')&&e.scrollHeight>e.clientHeight)return e;e=e.parentElement}return document.scrollingElement}
+$('cards').addEventListener('pointerdown',e=>{if(lnView!=='mine'||lfTab!=='field'||e.button>0)return;const b=e.target.closest('.lfTray .lfc.deck');if(!b||e.target.closest('[data-sign]'))return;
+ lfDrag.st={x:e.clientX,y:e.clientY,b,id:b.dataset.id,pid:e.pointerId}});
+addEventListener('pointermove',e=>{const d=lfDrag;if(!d.st||e.pointerId!==d.st.pid)return;const dx=e.clientX-d.st.x,dy=e.clientY-d.st.y;
+ if(!d.on){if(Math.hypot(dx,dy)<8)return;if(Math.abs(dx)>Math.abs(dy)*1.2&&e.pointerType!=='mouse'){d.st=null;return}/* (sideways: the tray scrolls) */lfDragStart(e)}
+ if(!d.on)return;e.preventDefault();d.ghost.style.transform=`translate(${e.clientX-d.gw/2}px,${e.clientY-d.gh*.4}px) rotate(-4deg)`;
+ const el=document.elementFromPoint(e.clientX,e.clientY),t=el&&el.closest('.lfField .lfc[data-i],.lfPen .lfc[data-i]');
+ if(t!==d.over){if(d.over)d.over.classList.remove('dropHover');d.over=t;if(t)t.classList.add('dropHover')}
+ const sc=lfScroller(),r=sc===document.scrollingElement?{top:0,bottom:innerHeight}:sc.getBoundingClientRect();
+ d.vy=e.clientY<r.top+60?-1:e.clientY>r.bottom-60?1:0;if(d.vy&&!d.raf){const tick=()=>{if(!d.on||!d.vy){d.raf=0;return}sc.scrollTop+=d.vy*9;d.raf=requestAnimationFrame(tick)};d.raf=requestAnimationFrame(tick)}},{passive:false});
+function lfDragStart(e){const d=lfDrag,c=CARD_BY[d.st.id];d.on=true;d.card=c;const r=d.st.b.getBoundingClientRect();d.gw=r.width;d.gh=r.height;
+ const g=d.st.b.cloneNode(true);g.classList.remove('flip');g.classList.add('lfGhost');g.style.width=r.width+'px';document.body.appendChild(g);d.ghost=g;
+ d.st.b.classList.add('dragSrc');document.body.classList.add('lfDragging');
+ const T=TEAMS[S.you];for(const t of document.querySelectorAll('.lfField .lfc[data-i],.lfPen .lfc[data-i]')){const i=+t.dataset.i,p=i>=0?T.lineup[i]:T.staff[-1-i];t.classList.add(lfFitWhy(c,i,p)?'dropNo':'dropOk')}
+ try{d.st.b.setPointerCapture(e.pointerId)}catch(_){}}
+function lfDragEnd(e,cancel){const d=lfDrag;if(!d.st)return;const was=d.on;
+ if(was){d.eat=performance.now()+350;const t=d.over;if(d.ghost)d.ghost.remove();d.ghost=null;d.st.b.classList.remove('dragSrc');document.body.classList.remove('lfDragging');
+  for(const x of document.querySelectorAll('.dropOk,.dropNo,.dropHover'))x.classList.remove('dropOk','dropNo','dropHover');
+  if(t&&!cancel){const T=TEAMS[S.you],i=+t.dataset.i,pit=i<0,p=pit?T.staff[-1-i]:T.lineup[i],why=lfFitWhy(d.card,i,p);
+   if(why){lfSay(why,true);t.classList.add('dropReject');setTimeout(()=>t.classList.remove('dropReject'),450);}
+   else{const real=p.custom?T.benched||p:p;if(signPlayer(S.you,real.signedFor||real.name,d.card.id,pit)){applyDefense();updateHUD();try{sfx('glove')}catch(_){}
+     lfFlips.delete('f'+i);lfFlips.delete('d'+d.card.id);lfSay(`${d.card.p.name} is in at ${lfSlotPos(T,i)}.`);lineupRender()}}}}
+ d.st=null;d.on=false;d.over=null;d.vy=0}
+addEventListener('pointerup',e=>lfDragEnd(e,false));addEventListener('pointercancel',e=>lfDragEnd(e,true));
+$('lnNext').addEventListener('click',()=>{if(pregame){plOpen();return}document.querySelector('#scrLineup .mbtn.back').click()});
+$('cards').addEventListener('dragstart',e=>e.preventDefault());/* (a card's picture would start the browser's own image drag and cancel ours) */
 // ---------- the Imugi Labs mark on the main menu: a fixed pixel bitmap (the logo put through a pixel filter at 49x23, with the
 // middle line one pixel longer at each end), so it looks the same on every device. Each '#' is one lit pixel ----------
 {const P=['..............#####################..............',
@@ -7031,7 +7153,7 @@ function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON
 // leaving the club-select screen without switching puts your own club back
 function brandCancel(){if(pendingMode!=='brand')return;pendingMode=null;brandDone();if(MYTEAM&&S.you!==MYTEAM.club){S.you=MYTEAM.club;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==S.you);syncPicker();applyCustom();updateHUD();TS.dirty=false}}
 // ---- the TEAM screen: your lineup (sign cards into it), plus the inventory and the club switch ----
-function teamOpen(from){$('lnClub').hidden=from==='scrOnline';$('scrLineup').classList.remove('lnRanked');pregame=false;lnView='mine';lnSel=null;lfFlip=null;$('lnPre').hidden=true;
+function teamOpen(from){$('lnClub').hidden=from==='scrOnline';$('scrLineup').classList.remove('lnRanked');pregame=false;lnView='mine';lnSel=null;lfFlip=null;
  document.body.classList.add('lnTeam');$('scrLineup').querySelector('.mbtn.back').dataset.go=from||'scrMain';showScreen('scrLineup')}
 $('lnInv').addEventListener('click',()=>invOpen('scrLineup'));
 $('lnClub').addEventListener('click',()=>brandOpen(false));
@@ -7643,7 +7765,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='18beab361e',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='3ce0e74012',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -7765,8 +7887,7 @@ function qBallDraw(t){const cv=$('qBall');if(!cv)return;const g=cv.getContext('2
  g.putImageData(id,0,0)}
 function qBallLoop(t){if(!$('scrQueue')||$('scrQueue').hidden||$('title').hidden){Q.raf=0;return}qBallDraw(t);qEst();Q.raf=requestAnimationFrame(qBallLoop)}
 // Ranked → your lineup with PLAY; PLAY joins the queue right there (the button says IN QUEUE; tap it again to cancel)
-function rankedLineup(){openPregame('ranked');$('scrLineup').querySelector('.mbtn.back').dataset.go='scrMulti';$('scrLineup').classList.add('lnRanked');
- $('lnPreVs').textContent='RANKED · 3 INNINGS · YOU BAT AND PITCH';qLnSync()}
+function rankedLineup(){openPregame('ranked');$('scrLineup').querySelector('.mbtn.back').dataset.go='scrMulti';qLnSync()}
 function qLnSync(){const on=!!(Q.on&&Q.fromLn);$('lnPlay').textContent=on?'IN QUEUE':pregameMode==='ranked'?'PLAY':'PLAY BALL';$('lnPlay').classList.toggle('inQ',on);$('lnQ').hidden=!on;
  if(on){const est=$('qEst')?$('qEst').textContent:'';$('lnQ').textContent=`LOOKING FOR OPPONENT · ${fmtClock((Date.now()-Q.t0)/1000)}${est?' · '+est:''} · TAP TO CANCEL`}}
 function qCancelQuiet(){if(!Q.on)return;track('queue_cancelled',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});qStop();rpc('queue_leave').catch(()=>{})}
@@ -7783,7 +7904,7 @@ async function qStart(fromLn){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=
  catch(e){if(Q.gen!==gen)return;Q.on=false;clearInterval(Q.tick);qSay('COULDN\u2019T JOIN THE QUEUE',rkErr(e))}}
 function qStop(){Q.on=false;Q.gen++;clearInterval(Q.tick);qLnSync()}
 $('qCancel').addEventListener('click',()=>{const was=Q.on;if(was)track('queue_cancelled',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});qStop();if(was)rpc('queue_leave').catch(()=>{});
- const o=S.online;if(o&&o.queued){if(o.nr)o.nr.leave().catch(()=>{});S.online=null}rankedLineup()});/* Cancel: back to your lineup, PLAY to queue again */
+ const o=S.online;if(o&&o.queued){if(o.nr)o.nr.leave().catch(()=>{});S.online=null}rankedLineup();plOpen()});/* Cancel: back to your lineup, PLAY to queue again */
 // paired: meet the opponent in the match's room
 async function qMatched(info,gen){Q.on=false;if(Q.fromLn){Q.fromLn=false;qLnSync();showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop)}track('queue_matched',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});const opp=info.me==='home'?info.away_name:info.home_name,mine=info.me==='home'?info.home_club:info.away_club;
  qSay(`OPPONENT FOUND: ${String(opp||'?').toUpperCase()}`,`You play as ${TEAMS[mine]?TEAMS[mine].city+' '+TEAMS[mine].name:mine} · connecting…`);
@@ -9655,11 +9776,29 @@ $('again').addEventListener('click',()=>{ensureAudio();S.cheerUntil=0;const se=S
 // (arcade and full games come straight here from Single Player: your club is set, the opponent is drawn at random)
 let pregame=false,pregameMode='arcade';
 function openPregame(m){pregameMode=m||'arcade';pregame=true;$('scrLineup').classList.remove('lnRanked');$('lnPlay').textContent='PLAY BALL';$('lnQ').hidden=true;$('scrLineup').querySelector('.mbtn.back').dataset.go='scrSingle';$('lnPre').classList.toggle('noSeries',pregameMode!=='arcade');lnView='mine';lnSel=null;lfFlip=null;const o=TEAMS[S.opp];$('lnPreVs').textContent=pregameMode==='playoffs'?'PLAYOFFS · 8-TEAM BRACKET':`vs ${o.city} ${o.name}`;if(pregameMode==='playoffs')$('lnPlay').textContent='TO THE BRACKET';
- const n=(S.series&&S.series.len)||1;for(const b of $('lnSeries').children)b.setAttribute('aria-pressed',String(+b.dataset.n===n));$('lnPre').hidden=false;showScreen('scrLineup')}
+ const n=(S.series&&S.series.len)||1;for(const b of $('lnSeries').children)b.setAttribute('aria-pressed',String(+b.dataset.n===n));lfTab='field';showScreen('scrLineup')}
+// ---- the play page, after EDIT LINEUP → NEXT: your club and its OVR, what this mode is, and PLAY ----
+function teamOvr(k){const T=TEAMS[k];if(!T)return 0;const bat=T.lineup.reduce((a,p)=>a+ovr(p),0)/Math.max(1,T.lineup.length),sp=T.staff[0]?ovr(T.staff[0]):bat,
+ pen=T.staff.length>1?T.staff.slice(1).reduce((a,p)=>a+ovr(p),0)/(T.staff.length-1):sp;return Math.round(bat*.6+sp*.25+pen*.15)}
+function plVs(k){const T=TEAMS[k],o=teamOvr(k);return `<div class="plVs"><span class="plVsL">VS</span><img alt="" src="${LOGO_URL[k]||''}"><b>${T.city} ${T.name}</b><span class="plVsO" style="color:${rcol(o)}">${o}<small>OVR</small></span></div>`}
+function plOpen(){const k=S.you,T=TEAMS[k],o=teamOvr(k),m=pregameMode;
+ $('plMode').innerHTML={arcade:'AR<span>CADE</span>',full:'FULL <span>GAME</span>',playoffs:'PLAY<span>OFFS</span>',ranked:'RAN<span>KED</span>'}[m]||'PLAY';
+ $('plLogo').src=LOGO_URL[k]||'';$('plName').textContent=`${T.city} ${T.name}`;
+ const bat=Math.round(T.lineup.reduce((a,p)=>a+ovr(p),0)/Math.max(1,T.lineup.length)),sp=T.staff[0]?ovr(T.staff[0]):0;
+ $("plSub").innerHTML=`<span>LINEUP <b style="color:${rcol(bat)}">${bat}</b></span><span>STARTER <b style="color:${rcol(sp)}">${sp}</b></span>`;
+ $('plOvr').textContent=o;$('plOvr').style.color=rcol(o);
+ const line=t=>`<p class="plLine">${t}</p>`;
+ $('plInfo').innerHTML=m==='ranked'?`<div class="plRank"><div><b id="plRating">—</b><span>RATING</span></div><div><b id="plRec">—</b><span>THIS SEASON</span></div><div><b>${LIVE.n||'—'}</b><span>ONLINE NOW</span></div></div>`+line('3 innings against a real player, your full teams, cards and all. You bat and you pitch. The lower-rated player is home.')
+  :m==='playoffs'?line('An 8-team bracket. Win your series to move on; lose one and your run is over.')
+  :plVs(S.opp)+line(m==='full'?'9 innings. You bat and you pitch.':'3 innings. You bat, they pitch: score enough to win.');
+ $('lnPreVs').textContent='';$('lnPre').classList.toggle('noSeries',m!=='arcade');qLnSync&&qLnSync();if(m==='playoffs')$('lnPlay').textContent='TO THE BRACKET';
+ if(m==='ranked'&&typeof ACC!=='undefined'&&ACC.user)rpc('my_rating').then(r=>{if(!r||!$('plRating'))return;$('plRating').textContent=r.rating;$('plRating').style.color='#ffd23f';$('plRec').textContent=r.games?`${r.wins}-${r.losses}`:'0-0'}).catch(()=>{});
+ 
+ showScreen('scrPlay')}
 $('lnSeries').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;for(const c of $('lnSeries').children)c.setAttribute('aria-pressed',String(c===b))});
-$('lnPlay').addEventListener('click',()=>{if(pregameMode==='ranked'){pregame=false;$('lnPre').hidden=true;$('scrLineup').classList.remove('lnRanked');qStart(false);return}/* PLAY: the queue page */if(pregameMode==='playoffs'){pregame=false;$('lnPre').hidden=true;tsFlush();openBracket(true);return}if(pregameMode==='full'){pregame=false;$('lnPre').hidden=true;S.series=null;S.auto=false;syncAuto();withLoading(()=>{tsFlush();startGame('full');render(performance.now())});return}const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
- S.series={len:n,w:0,l:0};pregame=false;$('lnPre').hidden=true;S.auto=false;syncAuto();withLoading(()=>{startGame('arcade');render(performance.now())})});
-document.querySelector('#scrLineup .mbtn.back').addEventListener('click',e=>{if(!pregame)return;e.stopImmediatePropagation();pregame=false;$('lnPre').hidden=true;pendingMode=null;const to=pregameMode==='ranked'?'scrMulti':'scrSingle';$('scrLineup').classList.remove('lnRanked');showScreen(to)},true);
+$('lnPlay').addEventListener('click',()=>{if(pregameMode==='ranked'){pregame=false;$('scrLineup').classList.remove('lnRanked');qStart(false);return}/* PLAY: the queue page */if(pregameMode==='playoffs'){pregame=false;tsFlush();openBracket(true);return}if(pregameMode==='full'){pregame=false;S.series=null;S.auto=false;syncAuto();withLoading(()=>{tsFlush();startGame('full');render(performance.now())});return}const n=+([...$('lnSeries').children].find(b=>b.getAttribute('aria-pressed')==='true')||{dataset:{n:1}}).dataset.n;
+ S.series={len:n,w:0,l:0};pregame=false;S.auto=false;syncAuto();withLoading(()=>{startGame('arcade');render(performance.now())})});
+document.querySelector('#scrLineup .mbtn.back').addEventListener('click',e=>{if(!pregame)return;e.stopImmediatePropagation();pregame=false;pendingMode=null;const to=pregameMode==='ranked'?'scrMulti':'scrSingle';$('scrLineup').classList.remove('lnRanked');showScreen(to)},true);
 $('change').addEventListener('click',toTitle);
 $('quit').addEventListener('click',toTitle);
 $('optsBtn').addEventListener('click',openOptionsInGame);
