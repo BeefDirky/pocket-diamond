@@ -7508,7 +7508,7 @@ else if(supaOK())$('goAcct').addEventListener('click',()=>accWatch().catch(()=>{
 // ---- usernames: one per account, unique ignoring case (the database's unique index is the final word) ----
 const NAME_RE=/^[A-Za-z0-9_]{3,16}$/,NAME_RES=/^(admin|administrator|mod|moderator|imugi|imugilabs|pocketdiamond|system|support|guest|cpu|null|undefined)$/i;
 function nameBad(n){if(!n)return'Choose a username.';if(n.length<3)return'Usernames are at least 3 characters.';if(n.length>16)return'Usernames are at most 16 characters.';
- if(!NAME_RE.test(n))return'Use only letters, numbers and _ in your username.';if(NAME_RES.test(n))return'That username is reserved. Try another.';return''}
+ if(!NAME_RE.test(n))return'Use only letters, numbers and _ in your username.';if(NAME_RES.test(n))return'That username is reserved. Try another.';if(nameOffensive(n))return'That username isn\u2019t allowed. Pick another.';return''}
 const noProfiles=e=>/profiles|relation|schema cache/i.test((e&&e.message)||'');
 // true = free, false = taken, null = couldn't check
 async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.from('profiles').select('user_id').eq('uname_lc',n.toLowerCase()).limit(1);if(error)return null;
@@ -7516,6 +7516,7 @@ async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.f
 async function nameClaim(n){const c=await supaClient(),{error}=await c.from('profiles').upsert({user_id:ACC.user.id,username:n});
  if(!error){track('username_set',{first:!ACC.name});if(ACC.name)ACC.nameAt=new Date().toISOString();ACC.name=n;phIdent();const m=accMeta();m.name=n;accSetMeta(m);return''}
  if(error.code==='23505'||/duplicate|unique/i.test(error.message||''))return`${n} is taken. Try another username.`;
+ if(error.code==='P0031'||/username isn.t allowed/i.test(error.message||''))return'That username isn\u2019t allowed. Pick another.';
  if(error.code==='P0030'||/change your username again/i.test(error.message||''))return error.message;
  if(noProfiles(error))return'Usernames are not set up on the server yet.';return error.message||'Could not save your username. Try again.'}
 // after sign-in: load the username; a new account claims the one it signed up with, or picks one
@@ -7555,6 +7556,22 @@ function acDetails(){const u=ACC.user;if(!u)return;const made=u.created_at;
   rpc('my_rating').then(r=>{if(!r||!ACC.user||ACC.user.id!==u.id)return;acDetails.r=r;acRatingShow()}).catch(()=>{})}else acRatingShow()}
 function acRatingShow(){const r=acDetails.r;if(!r)return;$('acRating').textContent=r.rating;$('acRec').textContent=r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet'}
 $('acProfile').addEventListener('click',()=>{if(!ACC.user)return;lbOpen();lbProfile(ACC.user.id)});
+// ---------- username filter: offensive names are refused here and, the same way, by the server (migration 010) ----------
+// The word lists are ROT13 so the source doesn't read like one. A name is checked in several spellings: lower case, with
+// look-alike digits read as letters (0→o 1→i or l 3→e 4→a 5→s 7→t 8→b 9→g), without digits, and with repeated letters
+// squeezed. "sub" words are refused anywhere in the name; "exact" words (short ones that hide inside innocent words:
+// class, Dickens, cocktail) only as the whole name or as one of its parts, split at _ , capitals and digits.
+const NAME_SUB='avtt avttn avtn avte arteb snttbg sntbg xvxr jrgonpx ornare genaal genaavr ergneq tbbx puvatpubat gbjryurnq enturnq uvgyre urvy xxx fjnfgvxn ubybpnhfg crqbcuvy cnrqb crqborne zbyrfg vaprfg orfgvny arpebcuvy shpx spx cuhpx fuvg phag ovgpu ovngpu juber fyhg cbea chffl cravf intvan qvyqb wvmm oybjwbo unaqwbo evzwbo zvys uragnv kkk znfgheong phzfubg pernzcvr ohxxnxr tnatonat betnfz rerpgvba gvggl obbof ahqr anxrq xvyylbhefrys fhvpvqr greebevfg wvunq'.split(' '),NAME_EXACT='fcvp fcvpx pbba cnxv qlxr puvax encr encre encvfg encvat crqb qvpx pbpx gvg gvgf nany phz frk nff nefr ubr wnc gjng anmv snt sntf shx ubeal yrfob avttre xlf'.split(' ');
+const rot13=s=>s.replace(/[a-z]/g,c=>String.fromCharCode((c.charCodeAt(0)-97+13)%26+97));
+const NAME_BAN={sub:NAME_SUB.map(rot13),exact:new Set(NAME_EXACT.map(rot13))};
+const LEET={0:'o',3:'e',4:'a',5:'s',7:'t',8:'b',9:'g'};
+function nameForms(s){const l=s.toLowerCase(),leet=one=>l.replace(/[0-9]/g,d=>d==='1'?one:LEET[d]||'').replace(/[^a-z]/g,''),
+ squeeze=x=>x.replace(/(.)\1+/g,'$1'),out=new Set();for(const f of[leet('i'),leet('l'),l.replace(/[^a-z]/g,'')]){out.add(f);out.add(squeeze(f))}return[...out].filter(Boolean)}
+function nameParts(s){const camel=s.replace(/([a-z0-9])([A-Z])/g,'$1_$2'),out=new Set();
+ for(const p of camel.split('_'))for(const f of nameForms(p))out.add(f);
+ for(const p of camel.replace(/([A-Za-z])([0-9])/g,'$1_$2').replace(/([0-9])([A-Za-z])/g,'$1_$2').split('_'))if(/[A-Za-z]/.test(p))for(const f of nameForms(p))out.add(f);
+ for(const f of nameForms(s))out.add(f);return[...out]}
+function nameOffensive(s){if(nameForms(s).some(f=>NAME_BAN.sub.some(w=>f.includes(w))))return true;return nameParts(s).some(p=>NAME_BAN.exact.has(p))}
 // ---------- the match record: every pitch and plate appearance, written the same way on both online phones ----------
 // Fed by small hooks in the pitching and play code; it never changes the game. At the end it becomes:
 //  * a ranked submission (both phones send theirs; the server compares them and writes the stats), or
@@ -7612,7 +7629,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='38b716d1d7',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='a33b4936a7',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

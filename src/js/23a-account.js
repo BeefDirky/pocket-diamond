@@ -92,7 +92,7 @@ else if(supaOK())$('goAcct').addEventListener('click',()=>accWatch().catch(()=>{
 // ---- usernames: one per account, unique ignoring case (the database's unique index is the final word) ----
 const NAME_RE=/^[A-Za-z0-9_]{3,16}$/,NAME_RES=/^(admin|administrator|mod|moderator|imugi|imugilabs|pocketdiamond|system|support|guest|cpu|null|undefined)$/i;
 function nameBad(n){if(!n)return'Choose a username.';if(n.length<3)return'Usernames are at least 3 characters.';if(n.length>16)return'Usernames are at most 16 characters.';
- if(!NAME_RE.test(n))return'Use only letters, numbers and _ in your username.';if(NAME_RES.test(n))return'That username is reserved. Try another.';return''}
+ if(!NAME_RE.test(n))return'Use only letters, numbers and _ in your username.';if(NAME_RES.test(n))return'That username is reserved. Try another.';if(nameOffensive(n))return'That username isn\u2019t allowed. Pick another.';return''}
 const noProfiles=e=>/profiles|relation|schema cache/i.test((e&&e.message)||'');
 // true = free, false = taken, null = couldn't check
 async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.from('profiles').select('user_id').eq('uname_lc',n.toLowerCase()).limit(1);if(error)return null;
@@ -100,6 +100,7 @@ async function nameFree(n){try{const c=await supaClient(),{data,error}=await c.f
 async function nameClaim(n){const c=await supaClient(),{error}=await c.from('profiles').upsert({user_id:ACC.user.id,username:n});
  if(!error){track('username_set',{first:!ACC.name});if(ACC.name)ACC.nameAt=new Date().toISOString();ACC.name=n;phIdent();const m=accMeta();m.name=n;accSetMeta(m);return''}
  if(error.code==='23505'||/duplicate|unique/i.test(error.message||''))return`${n} is taken. Try another username.`;
+ if(error.code==='P0031'||/username isn.t allowed/i.test(error.message||''))return'That username isn\u2019t allowed. Pick another.';
  if(error.code==='P0030'||/change your username again/i.test(error.message||''))return error.message;
  if(noProfiles(error))return'Usernames are not set up on the server yet.';return error.message||'Could not save your username. Try again.'}
 // after sign-in: load the username; a new account claims the one it signed up with, or picks one
