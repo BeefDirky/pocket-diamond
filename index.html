@@ -1261,6 +1261,9 @@ canvas.shake{animation:packShake .6s steps(6)}
 .app.deskApp .acIn{font-size:18px}
 .app.deskApp #title .card .acLead{font-size:15px}.app.deskApp #title .card .acHint{font-size:14px}.app.deskApp #title .card .acSwap{font-size:15px}
 .app.deskApp #title .card .mode.bp small{font-size:14px}.app.deskApp #title .card .mpBoard{font-size:21px}
+/* the sponsors preview under the PC menu zoom: keep the card inside the screen so its list scrolls instead of running off the bottom */
+.app.deskApp #title>#scrAds{width:calc(96vw / var(--uiZ,1));max-width:calc(min(1100px,96vw) / var(--uiZ,1) * 1.25)}
+.app.deskApp #scrAds .adsWrap{max-height:calc((100dvh - 190px) / var(--uiZ,1));overscroll-behavior:contain}
 </style>
 
 <div class="app">
