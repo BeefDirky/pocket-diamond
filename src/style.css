@@ -1376,3 +1376,6 @@ body.lfDragging .lfc.dropHover.dropNo .lfF{box-shadow:0 0 0 3px #e2603a}
 /* batting order drag: a gap opens where he'll land */
 .boRow .boSlot{transition:margin .12s}.boRow .boSlot.boGapL{margin-left:48px}.boRow .boSlot.boGapR{margin-right:48px}
 .boRow .lfc.bo{cursor:grab}
+/* a flipped card hides its OVR tab (it would show through mirrored); the back already shows the rating */
+.lfc .lfOvr{backface-visibility:hidden;-webkit-backface-visibility:hidden}.lfc.flip .lfF .lfOvr{visibility:hidden}
+.lfPen,.lfTray{scroll-snap-type:none!important}

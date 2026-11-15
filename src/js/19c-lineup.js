@@ -44,7 +44,7 @@ for(const b of $('lnTabs').children)b.addEventListener('click',()=>{lfTab=b.data
 /* the batting order: the nine hitters in a row, in order. Tap one, then tap the spot he should bat in: they swap */
 function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you);
   return `<div class="boSlot"><span class="boNum">${i+1}</span><button type="button" class="lfc bo r${c?c.r:0}${boSel===i?' boSel':''}" data-o="${i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}</span></button></div>`}).join('');
- $('cards').innerHTML=`<div class="boRow">${row}</div>`;$('lnHint').textContent=boSel==null?(matchMedia('(pointer:fine)').matches?'Drag a hitter to a new spot in the order, or tap two hitters to swap them.':'Tap a hitter, then tap the spot you want him to bat in.'):`Now tap the spot for ${T.lineup[boSel].name}.`;lfFit()}
+ const keep=lfKeepScroll();$('cards').innerHTML=`<div class="boRow">${row}</div>`;keep();$('lnHint').textContent=boSel==null?(matchMedia('(pointer:fine)').matches?'Drag a hitter to a new spot in the order, or tap two hitters to swap them.':'Tap a hitter, then tap the spot you want him to bat in.'):`Now tap the spot for ${T.lineup[boSel].name}.`;lfFit()}
 function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria-pressed',String(b.dataset.t===lfTab));
  $('lnNext').textContent=pregame?'NEXT':'DONE';
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
@@ -69,11 +69,15 @@ function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria
      ${lfFace(cardArt(c),c.o,q.name,pos+(c.pit&&q.slot==='side'?' · SIDE':'')+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,can?`<span class="lfSign" data-sign="${c.id}">SIGN IN</span>`:'')}</span></button>`}).join('')
    :`<p class="lfEmpty">No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Card Collection to get players.</p>`}
  const sel=lnSel==null?null:lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];
- const acts=mine&&sel?`${lnSel>=0?`<button type="button" class="mbtn lfMoveB" aria-pressed="${lfMove}">${lfMove?'Tap a hitter to swap with…':'⇅ Batting order'}</button>`:''}${sel.signed?`<button type="button" class="mbtn lfRestore">Restore original</button>`:''}`:'';
+ const acts=mine&&sel?`${sel.signed?`<button type="button" class="mbtn lfRestore">Restore original</button>`:''}`:'';
+ const keep=lfKeepScroll();
  $('cards').innerHTML=`<div class="lfWrap"><div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>
   <div class="lfSide"><h4>BULLPEN</h4><div class="lfPen">${pen}</div><div class="lfActs">${acts}</div></div></div>
   ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><button type="button" class="mbtn lfSortB">SORT: ${LF_SORTS[lfSort].n}</button><div class="seg lfTabs"><button type="button" data-d="bat" aria-pressed="${lfDeck==='bat'}">Hitters</button><button type="button" data-d="pit" aria-pressed="${lfDeck==='pit'}">Pitchers</button></div></div><div class="lfTray">${tray}</div>`:''}`;
- $('lnHint').textContent=mine?'Drag one of your cards onto a player to put him in. Tap a card to flip it.':'';lfFit()}
+ $('lnHint').textContent=mine?'Drag one of your cards onto a player to put him in. Tap a card to flip it.':'';lfFit();keep()}
+/* a redraw (flipping a card) keeps the bullpen and card rows where you had scrolled them */
+function lfKeepScroll(){const at={};for(const c of['lfPen','lfTray','boRow']){const e=document.querySelector('#cards .'+c);if(e)at[c]=[e.scrollLeft,e.scrollTop]}
+ return()=>{for(const c in at){const e=document.querySelector('#cards .'+c);if(e){e.style.scrollBehavior='auto';e.scrollLeft=at[c][0];e.scrollTop=at[c][1];e.style.scrollBehavior=''}}}}
 /* a long name (HWANG M.U.) on a narrow card was cut to HWANG M...: step the type down until the whole name fits */
 function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.style.fontSize='';let fs=parseFloat(getComputedStyle(e).fontSize),n=0;while(e.scrollWidth>e.clientWidth+.5&&fs>7.5&&n++<8){fs-=.75;e.style.fontSize=fs+'px'}}}
 $('cards').addEventListener('click',e=>{
@@ -97,7 +101,7 @@ $('cards').addEventListener('click',e=>{
   /* a tray card flips on its own; every other turned card stays turned */
   if(lfFlips.has(fk))lfFlips.delete(fk);else lfFlips.add(fk);b.classList.toggle('flip',lfFlips.has(fk));return}
  const i=+b.dataset.i;
- if(lnView==='mine'&&lfMove&&lnSel!=null&&lnSel>=0&&i>=0&&i!==lnSel){const L=T.lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];for(const k of[...lfFlips])if(k[0]==='f'&&k!=='f-1'&&!k.startsWith('f-'))lfFlips.delete(k);const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}applyDefense();updateHUD();lfMove=false;lfFlip=null;lineupRender();return}
+ if(false){const L=T.lineup;[L[lnSel],L[i]]=[L[i],L[lnSel]];for(const k of[...lfFlips])if(k[0]==='f'&&k!=='f-1'&&!k.startsWith('f-'))lfFlips.delete(k);const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}applyDefense();updateHUD();lfMove=false;lfFlip=null;lineupRender();return}
  const fk='f'+i;if(lfFlips.has(fk)){lfFlips.delete(fk);if(lfFlip===fk)lfFlip=[...lfFlips].reverse().find(k=>k[0]==='f')||null}else{lfFlips.add(fk);lfFlip=fk}lfMove=false;lineupRender()});
 /* rotating a phone or resizing across the phone breakpoint redraws the field to match */
 {let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}else if(!$('scrLineup').hidden)lfFit()})}
