@@ -83,13 +83,20 @@ function outfieldHit(play,it,P,runners,delay,errBy){
  const t0=it.t+(it.i>=6?OF_REL-.05:.65)+ex;
  let cov=tgt===4?1:tgt===3?4:(it.p.x<0?3:5);
  let tArr,rcv=null,cutMan=null;
+ /* when every runner will already be standing on his base before the ball can get there, there's no play: nobody throws
+    to a bag. The outfielder just gets it back to the infield (to the middle infielder near second), and on a deep hit the
+    cutoff man keeps it instead of relaying it on */
+ const onBag=r=>r.start+(r.dest-r.from-(r.L0||0))*LEG/r.speed+.25,settled=runners.filter(r=>!r.out&&r.dest<4).reduce((m,r)=>Math.max(m,onBag(r)),0);
+ const noPlay=!sendHome&&it.i>=6&&settled<t0;
  if(it.i>=6&&Math.hypot(it.p.x,it.p.y)>200){
   // deep hit: the outfielder hits the cutoff man, who turns and relays to the base
   const Cc={x:lerp(tb.x,it.p.x,.45),y:lerp(tb.y,it.p.y,.45)},cut=nearMid(Cc,play),o=fromF(play,it.i,t0),t1=t0+dist(o,Cc)/THROW;cutMan=cut;
   play.fk[cut]=cover(cut,Cc,t1);
-  play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,Cc),holdSeg(play,t1,t1+.32,cut),throwSeg(t1+.32,Cc,tb));
-  tArr=t1+.32+dist(Cc,tb)/THROW;
- }else if(tgt===2&&it.i>=6){
+  if(!sendHome&&settled<t1+.32){play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,Cc),holdSeg(play,t1,t1+1.6,cut));tArr=t1;rcv=cut}
+  else{play.segs.push(holdSeg(play,it.t,t0,it.i),throwSeg(t0,o,Cc),holdSeg(play,t1,t1+.32,cut),throwSeg(t1+.32,Cc,tb));
+  tArr=t1+.32+dist(Cc,tb)/THROW}
+ }else if((tgt===2||noPlay)&&it.i>=6){
+  const tb=BASES[2];
   // no play at second: the outfielder hits the middle infielder on that side, who has come out onto the edge of the grass to
   // take it (he doesn't run to the bag); the other middle infielder covers second
   const o=fromF(play,it.i,t0),dd=dist(tb,o),C={x:tb.x+(o.x-tb.x)*Math.min(.32,34/Math.max(1,dd)),y:tb.y+(o.y-tb.y)*Math.min(.32,34/Math.max(1,dd))};
