@@ -58,4 +58,4 @@ function privClose(){$('privBar').hidden=true;try{localStorage.setItem('pd-priva
 if(/^phc_/.test(PH.key)&&typeof window.claude==='undefined'&&!privSeen())setTimeout(()=>{if(!privSeen())$('privBar').hidden=false},2600);// after the title screen
 $('privOk').addEventListener('click',privClose);
 $('privOff').addEventListener('click',()=>{phOptOut(true);phOptSync();privClose()});
-$('privMore').addEventListener('click',()=>{privClose();showScreen('scrAbout');setTimeout(()=>$('abPriv').scrollIntoView({block:'start',behavior:'smooth'}),60)});
+$('privMore').addEventListener('click',()=>{privClose();legalOpen('privacy','scrMain')});

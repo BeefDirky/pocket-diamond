@@ -18,7 +18,10 @@ rd = lambda p: open(os.path.join(ROOT, p), encoding='utf-8').read()
 
 def page(js):
     # the splash comes first so it paints before the fonts and the big stylesheet arrive
-    return (rd('src/splash.html') + rd('src/head.html') + '<style>\n' + rd('src/style.css') + '</style>\n' + rd('src/body.html')
+    body = rd('src/body.html')
+    assert body.count('<!--@LEGAL-->') == 1
+    body = body.replace('<!--@LEGAL-->', rd('src/legal.html'))
+    return (rd('src/splash.html') + rd('src/head.html') + '<style>\n' + rd('src/style.css') + '</style>\n' + body
             + '<script>\n' + js + '</script>\n' + rd('src/tail.html'))
 
 def source_js():
@@ -51,6 +54,39 @@ def build_web(js, cfg):
     html += '<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>\n</body></html>\n'
     return html, keys
 
+LEGAL_PAGE = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title} · Pocket Diamond</title><meta name="description" content="{title} for Pocket Diamond, a pixel KBO baseball game by Imugi Labs.">
+<link rel="icon" href="icon-192.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600;700&display=swap">
+<style>
+:root{{--bg:#0f2018;--panel:#1b3a2a;--edge:#0b130e;--amber:#f2be55;--chalk:#f4f1e8;--dim:#a9b8ad}}
+*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--chalk);font-family:"Pixelify Sans",system-ui,sans-serif;font-weight:500}}
+main{{max-width:760px;margin:0 auto;padding:28px 18px 60px}}
+.top{{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}}
+.logo{{font-family:"Press Start 2P",monospace;font-size:15px;color:var(--chalk);text-decoration:none}}.logo span{{color:var(--amber)}}
+nav a{{color:var(--chalk);text-decoration:none;border:2px solid var(--edge);background:var(--panel);padding:8px 12px;margin-left:6px;font-size:15px;display:inline-block}}
+nav a[aria-current]{{border-color:var(--amber);color:var(--amber)}}
+.card{{background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #2c5a40;padding:22px 22px 14px}}
+h2{{font-family:"Press Start 2P",monospace;font-weight:400;font-size:18px;color:var(--amber);margin:0 0 8px;line-height:1.4}}
+h3{{font-size:18px;letter-spacing:.04em;color:var(--amber);margin:22px 0 6px}}
+p{{font-size:17px;line-height:1.6;margin:0 0 10px}}.lgDate{{color:var(--dim);font-size:15px}}a{{color:var(--amber)}}
+.play{{display:inline-block;margin-top:18px;font-family:"Press Start 2P",monospace;font-size:12px;background:var(--amber);color:#14110a;text-decoration:none;padding:14px 18px;border:3px solid var(--edge)}}
+</style></head><body><main>
+<div class="top"><a class="logo" href="/">POCKET <span>DIAMOND</span></a><nav><a href="privacy"{pa}>Privacy</a><a href="terms"{ta}>Terms</a></nav></div>
+<div class="card">{doc}</div>
+<a class="play" href="/">PLAY POCKET DIAMOND</a>
+</main></body></html>
+"""
+
+def build_legal():
+    src = rd('src/legal.html')
+    for doc, title in (('privacy', 'Privacy Policy'), ('terms', 'Terms of Use')):
+        m = re.search(r'<section class="lgDoc" data-doc="%s">(.*?)</section>' % doc, src, re.S)
+        cur = ' aria-current="page"'
+        html = LEGAL_PAGE.format(title=title, doc=m.group(1), pa=cur if doc == 'privacy' else '', ta=cur if doc == 'terms' else '')
+        open(os.path.join(ROOT, doc + '.html'), 'w', encoding='utf-8').write(html)
+
 def main():
     js = source_js()
     # the game's own version (same for both builds): ranked submissions carry it, and both phones must match
@@ -81,6 +117,7 @@ def main():
           " if(cdn){e.respondWith(caches.match(q).then(h=>{const n=fetch(q).then(r=>put(RT,q,r)).catch(()=>h);return h||n}));return}\n"
           " e.respondWith(caches.match(q).then(h=>h||fetch(q).then(r=>put(C,q,r))))});\n")
     open(os.path.join(ROOT, 'sw.js'), 'w').write(sw)
+    build_legal()
     print(f'built: index.html {len(html)//1024} KB, dist/pocket-diamond.html {len(art)//1024} KB, cache pd-{ver}')
 
 if __name__ == '__main__':

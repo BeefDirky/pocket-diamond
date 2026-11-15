@@ -62,6 +62,7 @@
           <input class="acIn" id="acUser" type="text" placeholder="USERNAME" autocomplete="username" spellcheck="false" maxlength="16" autocapitalize="off">
           <p class="acHint" id="acUserHint">3-16 letters, numbers or _ · how other players see you</p>
           <button class="big" id="acSignUp" type="button">CREATE ACCOUNT</button>
+          <p class="acHint acAgree" id="acAgree">By creating an account you agree to the <a href="terms" data-legal="terms">Terms of Use</a> and <a href="privacy" data-legal="privacy">Privacy Policy</a>.</p>
           <button class="big" id="acSignIn" type="button">LOG IN</button>
           <button class="ghost" id="acForgot" type="button">Forgot password?</button>
           <button class="ghost acSwap" id="acSwap" type="button"></button>
@@ -110,6 +111,12 @@
         <p>This game collects gameplay stats to improve it.</p>
         <div><button type="button" id="privMore">Privacy</button><button type="button" id="privOff">Turn off</button><button type="button" id="privOk">OK</button></div>
       </div>
+      <div class="card" id="scrLegal" hidden>
+        <h1><span>LEGAL</span></h1>
+        <div class="seg lgTabs" id="lgTabs"><button type="button" data-doc="privacy" aria-pressed="true">Privacy</button><button type="button" data-doc="terms" aria-pressed="false">Terms</button></div>
+        <div class="lgBody" id="lgBody"><!--@LEGAL--></div>
+        <button class="mbtn back" type="button" data-go="scrAbout">Back</button>
+      </div>
       <div class="card" id="scrAbout" hidden>
         <h1><span>ABOUT</span></h1>
         <div class="about">
@@ -119,12 +126,9 @@
             <dt>Audio</dt><dd>Meadow</dd>
             <dt>Version</dt><dd id="abVer">2.1</dd>
           </dl>
-          <section class="abPriv" id="abPriv" aria-labelledby="abPrivH">
-            <h2 id="abPrivH">Privacy</h2>
-            <p><b>Account.</b> If you make one: your email (to sign in) and your username (other players see it).</p>
-            <p><b>Gameplay stats.</b> Games you play and how they go (results, pitches, swings, screens you visit), to balance the game and fix bugs. Ranked results are kept for ratings and leaderboards.</p>
-            <p><b>Connection.</b> Your IP address and country, for analytics and to stop cheating in ranked.</p>
-            <p>We don't sell your data or use it for ads. You can turn gameplay stats off any time in <b>Options → Share stats</b>. To delete your account and its data, contact Imugi Labs at imugilabs.com.</p>
+          <section class="abPriv" id="abPriv">
+            <p>We don't sell your data or show ads. Gameplay stats can be turned off in <b>Options → Share stats</b>.</p>
+            <div class="abLegal"><button class="mbtn" type="button" data-legal="privacy">PRIVACY POLICY</button><button class="mbtn" type="button" data-legal="terms">TERMS OF USE</button></div>
           </section>
           <p class="abFoot">© Imugi Labs · imugilabs.com</p>
         </div>

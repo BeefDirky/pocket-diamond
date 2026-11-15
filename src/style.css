@@ -1273,3 +1273,16 @@ canvas.shake{animation:packShake .6s steps(6)}
 .hModes span{font-family:var(--f-px);font-size:10px;padding:10px 8px;border:2px solid var(--edge)}.hModes .a{background:var(--amber);color:#14110a}.hModes .b{background:#f4f1e8;color:#14110a}.hModes .c{background:var(--edge);color:var(--chalk)}
 @media (prefers-reduced-motion:reduce){.hMeter .rmBar b,.hStam div i{animation:none}.hMeter .rmBar b{left:50%}}
 .app.deskApp .howStep p{font-size:16px}
+/* ---- privacy policy and terms ---- */
+#scrLegal{display:flex;flex-direction:column;gap:10px;max-width:620px}#scrLegal[hidden]{display:none}
+.lgTabs{display:grid;grid-template-columns:1fr 1fr}.lgTabs button{padding:10px 6px}
+.lgBody{max-height:60vh;overflow:auto;text-align:left;padding:2px 6px 8px 2px;flex:0 0 auto}
+.app.deskApp #scrLegal .lgBody{height:calc((100dvh - 300px) / var(--uiZ,1));max-height:none}
+.lgDoc[hidden]{display:none}
+.lgDoc h2{font-family:var(--f-px);font-weight:400;font-size:15px;color:var(--amber);margin:4px 0 2px}
+.lgDoc h3{font-family:var(--f-hud);font-size:15px;letter-spacing:.06em;color:var(--amber);margin:16px 0 4px}
+.lgDoc p{font-size:14px;line-height:1.5;margin:0 0 8px;color:var(--chalk)}.lgDoc p b{color:var(--chalk);font-weight:700}
+.lgDoc .lgDate{color:var(--dim);font-size:12px}.lgDoc a,.acAgree a{color:var(--amber)}
+.abLegal{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.abLegal .mbtn{text-align:center;font-size:13px}
+.acAgree{text-align:center}#acSignedOut.login #acAgree{display:none}
+.app.deskApp .lgDoc p{font-size:16px}.app.deskApp .lgDoc h3{font-size:16px}
