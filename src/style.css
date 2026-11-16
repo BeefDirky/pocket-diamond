@@ -1506,7 +1506,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
 #scrMain .mmSm.mmInv.mmNew{animation:mmNewT 1.6s ease-in-out infinite}
 @keyframes mmNewT{0%,100%{box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--maEdge,#c7871a),0 0 0 0 rgba(242,190,85,0)}50%{box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--maEdge,#c7871a),0 0 0 5px rgba(242,190,85,.4)}}
 #scrMain .mmSm.mmShop{color:#fff!important;border-color:#0b130e;isolation:isolate;
- background:linear-gradient(120deg,#ff5fa2,#ffc23d,#4dff9a,#3fb8ff,#9a6bff,#ff5fa2) 0 0/300% 100%;animation:shopHolo 6s linear infinite;
+ background:linear-gradient(120deg,#ffd0e2,#ffe8b5,#cdf4dc,#c8e6fb,#ddd0fc,#ffd0e2) 0 0/300% 100%;animation:shopHolo 6s linear infinite;
  text-shadow:2px 0 #0b130e,-2px 0 #0b130e,0 2px #0b130e,0 -2px #0b130e,2px 2px #0b130e,-2px -2px #0b130e,2px -2px #0b130e,-2px 2px #0b130e;box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px rgba(255,255,255,.7)}
 #scrMain .mmSm.mmShop::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
  background:repeating-linear-gradient(-45deg,rgba(255,255,255,.18) 0 4px,rgba(255,255,255,0) 4px 10px),linear-gradient(105deg,transparent 30%,rgba(255,255,255,.75) 45%,rgba(255,255,255,.25) 52%,transparent 64%) no-repeat;
@@ -1523,3 +1523,4 @@ body.gPause #title{z-index:60;pointer-events:auto}
 .acHero #acSince{display:none}
 .acHeroLogo{width:88px;height:88px;margin:-8px 0}
 .acHero b{font-size:clamp(24px,7vw,34px);transform:skewX(-12deg);letter-spacing:.02em;line-height:1.1;word-break:normal;white-space:nowrap}.acHeroTx{flex:1 1 auto;max-width:max-content;padding-right:6px}
+#scrMain .mmSm .pkBadge{text-shadow:none}

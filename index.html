@@ -1529,7 +1529,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
 #scrMain .mmSm.mmInv.mmNew{animation:mmNewT 1.6s ease-in-out infinite}
 @keyframes mmNewT{0%,100%{box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--maEdge,#c7871a),0 0 0 0 rgba(242,190,85,0)}50%{box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--maEdge,#c7871a),0 0 0 5px rgba(242,190,85,.4)}}
 #scrMain .mmSm.mmShop{color:#fff!important;border-color:#0b130e;isolation:isolate;
- background:linear-gradient(120deg,#ff5fa2,#ffc23d,#4dff9a,#3fb8ff,#9a6bff,#ff5fa2) 0 0/300% 100%;animation:shopHolo 6s linear infinite;
+ background:linear-gradient(120deg,#ffd0e2,#ffe8b5,#cdf4dc,#c8e6fb,#ddd0fc,#ffd0e2) 0 0/300% 100%;animation:shopHolo 6s linear infinite;
  text-shadow:2px 0 #0b130e,-2px 0 #0b130e,0 2px #0b130e,0 -2px #0b130e,2px 2px #0b130e,-2px -2px #0b130e,2px -2px #0b130e,-2px 2px #0b130e;box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px rgba(255,255,255,.7)}
 #scrMain .mmSm.mmShop::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
  background:repeating-linear-gradient(-45deg,rgba(255,255,255,.18) 0 4px,rgba(255,255,255,0) 4px 10px),linear-gradient(105deg,transparent 30%,rgba(255,255,255,.75) 45%,rgba(255,255,255,.25) 52%,transparent 64%) no-repeat;
@@ -1546,6 +1546,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
 .acHero #acSince{display:none}
 .acHeroLogo{width:88px;height:88px;margin:-8px 0}
 .acHero b{font-size:clamp(24px,7vw,34px);transform:skewX(-12deg);letter-spacing:.02em;line-height:1.1;word-break:normal;white-space:nowrap}.acHeroTx{flex:1 1 auto;max-width:max-content;padding-right:6px}
+#scrMain .mmSm .pkBadge{text-shadow:none}
 </style>
 
 <div class="app">
@@ -8006,7 +8007,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='2ad053110e',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='8592a30c40',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -10237,7 +10238,7 @@ const toTitle=()=>{if(S.rkBot){if(S.phase!=='over')botLeave();botClear()}if(S.tn
 let pendingMode=null;
 const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTING PRACTICE',playoffs:'PLAYOFFS',watch:'WATCH A GAME'};
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}
-function updateOppLine(){const o=TEAMS[S.opp];$('oppLine').innerHTML=pendingMode==='online'?'Your friend picks their own club when they join.':pendingMode==='playoffs'?'Seven other clubs are drawn into the bracket with you.':parkFromBP?'Pick a club: you hit in their park, with their hitters.':pendingMode==='bp'?'Batting practice: just you, the machine and an empty park.':`Opponent (random): <b>${o.city} ${o.name}</b>`}
+function updateOppLine(){if(pendingMode==='brand'){if(typeof brandSync==='function')brandSync();return}const o=TEAMS[S.opp];$('oppLine').innerHTML=pendingMode==='online'?'Your friend picks their own club when they join.':pendingMode==='playoffs'?'Seven other clubs are drawn into the bracket with you.':parkFromBP?'Pick a club: you hit in their park, with their hitters.':pendingMode==='bp'?'Batting practice: just you, the machine and an empty park.':`Opponent (random): <b>${o.city} ${o.name}</b>`}
 // arcade / full game: no club-select page; your club against a random opponent, straight to the lineup
 function quickStart(m){if(S.online&&!S.online.inGame){const o=S.online;if(o.nr)o.nr.leave().catch(()=>{});if(o.prevCustom!=null){CUSTOM.active=o.prevCustom;applyCustom()}S.online=null}
  myTeamRestore();pendingMode=null;drawOpp();tsFlush();openPregame(m)}
