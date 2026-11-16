@@ -84,7 +84,9 @@ function lfKeepScroll(){const at={};for(const c of['lfPen','lfTray','boRow']){co
  return()=>{for(const c in at){const e=document.querySelector('#cards .'+c);if(e){e.style.scrollBehavior='auto';e.scrollLeft=at[c][0];e.scrollTop=at[c][1];e.style.scrollBehavior=''}}}}
 /* a long name (HWANG M.U.) on a narrow card was cut to HWANG M...: step the type down until the whole name fits */
 function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.style.fontSize='';e.style.lineHeight='';const h=e.clientHeight,cs=getComputedStyle(e),pad=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
- let fs=parseFloat(cs.fontSize),n=0;while(e.scrollWidth>e.clientWidth+.5&&fs>7.5&&n++<8){fs-=.75;e.style.fontSize=fs+'px'}
+ /* (measure the text itself: scrollWidth rounds, so a name a fraction of a pixel too wide still got cut to "JUNG M...") */
+ const rg=document.createRange();rg.selectNodeContents(e);const room=()=>e.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+ let fs=parseFloat(cs.fontSize),n=0;while(rg.getBoundingClientRect().width>room()+.05&&fs>7.5&&n++<10){fs-=.75;e.style.fontSize=fs+'px'}
  if(n)e.style.lineHeight=(h-pad)+'px'}}/* (the smaller type keeps the row's height, so a long-named card is as tall as the rest) */
 $('cards').addEventListener('click',e=>{
  if(lfDrag.eat>performance.now()){e.stopImmediatePropagation();return}
@@ -112,6 +114,8 @@ $('cards').addEventListener('click',e=>{
  if(lnView!=='mine'||!b.closest('.lfField,.lfPen')){lineupRender();return}
  b.classList.toggle('flip',lfFlips.has(fk));lnSel=lfFlip&&lfFlip[0]==='f'?+lfFlip.slice(1):null;const T2=TEAMS[S.you],sel=lnSel==null?null:lnSel>=0?T2.lineup[lnSel]:T2.staff[-1-lnSel],a=document.querySelector('#cards .lfActs');
  if(a)a.innerHTML=''});
+/* the pixel font can arrive after the first draw (it's wider than the stand-in), so fit the names again then */
+try{document.fonts.ready.then(()=>{if(!$('scrLineup').hidden)lfFit()});document.fonts.addEventListener('loadingdone',()=>{if(!$('scrLineup').hidden)lfFit()})}catch(e){}
 /* rotating a phone or resizing across the phone breakpoint redraws the field to match */
 {let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}else if(!$('scrLineup').hidden)lfFit()})}
 

@@ -1545,3 +1545,13 @@ body.gPause #title{z-index:60;pointer-events:auto}
  .edGrid{grid-template-columns:64px minmax(0,1fr)}.edGrid>*{min-width:0}.edGrid .seg{min-width:0;flex-wrap:wrap}.edGrid .seg button{flex:1 1 0;min-width:0;padding-left:3px;padding-right:3px}
  .edGrid input,.edGrid select{width:100%}
 }
+/* lineup cards: bigger, crisper name and position text (a long name still steps down until it fits) */
+.lfc .lfNm{font-size:15px;color:#fff;letter-spacing:0}
+.lfc .lfPos{font-size:14px;font-weight:700;letter-spacing:.06em}
+@media (max-width:720px){
+ .lfField .lfc .lfNm{font-size:min(13.5px,4.4cqw);letter-spacing:-.02em}.lfField .lfc .lfPos{font-size:min(12.5px,4cqw)}
+ .lfPen .lfc .lfNm{font-size:13px;letter-spacing:-.02em}.lfPen .lfc .lfPos{font-size:12px}
+ .lfTray .lfc .lfNm{font-size:14px;letter-spacing:-.02em}.lfTray .lfc .lfPos{font-size:13px}
+ .boRow .lfc .lfNm{font-size:12px}.boRow .lfc .lfPos{font-size:11.5px}
+}
+@media (min-width:721px){.lfField .lfc .lfNm{font-size:clamp(11px,2.6cqw,18px)}.lfField .lfc .lfPos{font-size:clamp(10px,2.35cqw,16px)}}

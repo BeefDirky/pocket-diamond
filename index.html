@@ -1568,6 +1568,16 @@ body.gPause #title{z-index:60;pointer-events:auto}
  .edGrid{grid-template-columns:64px minmax(0,1fr)}.edGrid>*{min-width:0}.edGrid .seg{min-width:0;flex-wrap:wrap}.edGrid .seg button{flex:1 1 0;min-width:0;padding-left:3px;padding-right:3px}
  .edGrid input,.edGrid select{width:100%}
 }
+/* lineup cards: bigger, crisper name and position text (a long name still steps down until it fits) */
+.lfc .lfNm{font-size:15px;color:#fff;letter-spacing:0}
+.lfc .lfPos{font-size:14px;font-weight:700;letter-spacing:.06em}
+@media (max-width:720px){
+ .lfField .lfc .lfNm{font-size:min(13.5px,4.4cqw);letter-spacing:-.02em}.lfField .lfc .lfPos{font-size:min(12.5px,4cqw)}
+ .lfPen .lfc .lfNm{font-size:13px;letter-spacing:-.02em}.lfPen .lfc .lfPos{font-size:12px}
+ .lfTray .lfc .lfNm{font-size:14px;letter-spacing:-.02em}.lfTray .lfc .lfPos{font-size:13px}
+ .boRow .lfc .lfNm{font-size:12px}.boRow .lfc .lfPos{font-size:11.5px}
+}
+@media (min-width:721px){.lfField .lfc .lfNm{font-size:clamp(11px,2.6cqw,18px)}.lfField .lfc .lfPos{font-size:clamp(10px,2.35cqw,16px)}}
 </style>
 
 <div class="app">
@@ -7223,7 +7233,9 @@ function lfKeepScroll(){const at={};for(const c of['lfPen','lfTray','boRow']){co
  return()=>{for(const c in at){const e=document.querySelector('#cards .'+c);if(e){e.style.scrollBehavior='auto';e.scrollLeft=at[c][0];e.scrollTop=at[c][1];e.style.scrollBehavior=''}}}}
 /* a long name (HWANG M.U.) on a narrow card was cut to HWANG M...: step the type down until the whole name fits */
 function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.style.fontSize='';e.style.lineHeight='';const h=e.clientHeight,cs=getComputedStyle(e),pad=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
- let fs=parseFloat(cs.fontSize),n=0;while(e.scrollWidth>e.clientWidth+.5&&fs>7.5&&n++<8){fs-=.75;e.style.fontSize=fs+'px'}
+ /* (measure the text itself: scrollWidth rounds, so a name a fraction of a pixel too wide still got cut to "JUNG M...") */
+ const rg=document.createRange();rg.selectNodeContents(e);const room=()=>e.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+ let fs=parseFloat(cs.fontSize),n=0;while(rg.getBoundingClientRect().width>room()+.05&&fs>7.5&&n++<10){fs-=.75;e.style.fontSize=fs+'px'}
  if(n)e.style.lineHeight=(h-pad)+'px'}}/* (the smaller type keeps the row's height, so a long-named card is as tall as the rest) */
 $('cards').addEventListener('click',e=>{
  if(lfDrag.eat>performance.now()){e.stopImmediatePropagation();return}
@@ -7251,6 +7263,8 @@ $('cards').addEventListener('click',e=>{
  if(lnView!=='mine'||!b.closest('.lfField,.lfPen')){lineupRender();return}
  b.classList.toggle('flip',lfFlips.has(fk));lnSel=lfFlip&&lfFlip[0]==='f'?+lfFlip.slice(1):null;const T2=TEAMS[S.you],sel=lnSel==null?null:lnSel>=0?T2.lineup[lnSel]:T2.staff[-1-lnSel],a=document.querySelector('#cards .lfActs');
  if(a)a.innerHTML=''});
+/* the pixel font can arrive after the first draw (it's wider than the stand-in), so fit the names again then */
+try{document.fonts.ready.then(()=>{if(!$('scrLineup').hidden)lfFit()});document.fonts.addEventListener('loadingdone',()=>{if(!$('scrLineup').hidden)lfFit()})}catch(e){}
 /* rotating a phone or resizing across the phone breakpoint redraws the field to match */
 {let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}else if(!$('scrLineup').hidden)lfFit()})}
 
@@ -8035,7 +8049,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='7a2bf897aa',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='dbab572690',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
