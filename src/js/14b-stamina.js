@@ -4,7 +4,9 @@
 // a reliever 45. Below half he starts to tire (velocity, control); at zero he is gassed: the PERFECT window on the release
 // meter is gone and the GOOD window shrinks. A tiring pitcher sweats on the mound.
 const STAM_K={FB:1,CH:1.2,SL:1.45,CB:1.7,KN:1.95,SP:2.2};
-const stamMax=p=>p&&p.pos==='RP'?35:100;/* a reliever has about a third of a starter's tank */
+/* the tank: STAMINA 70 is the old full tank (100 for a starter, 35 for a reliever, about a third); it grows faster than
+   the stat, so 100 stamina lasts about two and a half times as long as 50 (157 vs 65 for a starter) */
+const stamMax=p=>Math.round((p&&p.pos==='RP'?35:100)*Math.pow(staOf(p)/70,1.3));
 function stamOf(k){S.stamOf=S.stamOf||{};const v=S.stamOf[k];return v==null?stamMax(TEAMS[k]&&staffOf(k)[S.pIdxOf[k]||0]):v}
 const stamNow=()=>stamOf(fldKey());
 const stamFrac=()=>stamNow()/stamMax(pitcher());

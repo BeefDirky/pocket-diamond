@@ -62,6 +62,11 @@ function buildRosters(){
  }
 }
 /* a speed demon: any pitcher with velocity 90 or more (a knuckleballer never is) */
+/* STAMINA: how long a pitcher lasts. Every pitcher has one, worked out from his name and role (so both phones in an
+   online game always agree): starters 58-90, relievers 42-72; flamethrowers tire a little sooner, knuckleballers go forever.
+   A card can also carry its own (p.sta). */
+function staOf(p){if(!p)return 60;if(p.sta!=null)return p.sta;const h=hash((p.name||'')+'sta'),sp=p.pos!=='RP';
+ return clamp((sp?58+h%33:42+h%31)+(p.type==='knuckle'?10:0)-(p.type!=='knuckle'&&(p.type==='demon'||(p.vel||0)>=90)?6:0),30,99)}
 const isDemon=p=>!!p&&p.type!=='knuckle'&&(p.type==='demon'||(p.vel||0)>=90);
 function arsFor(p,k){const h=hash((k||'')+p.name+'ars');
  if(p.type==='knuckle')return['FB','KN','CH'];
