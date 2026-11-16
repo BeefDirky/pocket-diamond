@@ -2312,10 +2312,12 @@ function buildRosters(){
   for(const p of T.staff)p.ars=arsFor(p,k);
  }
 }
+/* a speed demon: any pitcher with velocity 90 or more (a knuckleballer never is) */
+const isDemon=p=>!!p&&p.type!=='knuckle'&&(p.type==='demon'||(p.vel||0)>=90);
 function arsFor(p,k){const h=hash((k||'')+p.name+'ars');
  if(p.type==='knuckle')return['FB','KN','CH'];
  if(p.pos==='SP')return['FB',...[['SL','CH','SP'],['CB','CH','SP'],['SL','CB','CH'],['SL','CB','SP'],['SL','CH','SP'],['CB','SL','CH']][h%6]];
- if(p.type==='demon')return['FB','SL',h%2?'SP':'CH'];
+ if(isDemon(p))return['FB','SL',h%2?'SP':'CH'];
  return['FB',...[['SL','CH'],['SL','SP'],['CH','SP'],['CB','CH'],['CH','SP'],['SL','CB'],['CB','SP']][h%7]]}
 const arsOf=p=>(p&&p.ars)||arsFor(p||{});
 const ovr=p=>(p.pos==='SP'||p.pos==='RP')?Math.round(p.vel*.4+p.mov*.35+p.ctl*.25):Math.round(p.con*.3+p.pow*.3+p.spd*.15+p.def*.25);
@@ -5879,11 +5881,12 @@ function pitchRoll(kf,pt,bpm,dmn,knk){
  // velocity first, then flight time from velocity: every extra mph arrives visibly sooner
  let mph=k==='KN'?rand(P.mph[1],P.mph[0]):rand(P.mph[1],P.mph[0])+(pt.vel-70)*.12;
  if(k==='FB'&&Math.random()<.15)mph+=rand(1,3);
- if(dmn&&k==='FB')mph+=rand(1.5,3.5);
+ /* a speed demon's fastball: velocity 90 = 100 mph, every 2 more = 1 mph more (92 = 101, 98 = 104), give or take 1 */
+ if(dmn&&k==='FB')mph=100+(pt.vel-90)/2+rand(-1,1);
  if(dmn&&k==='SL')mph+=rand(5,8);
  if(knk&&k==='FB')mph-=6;
  mph-=tiredness()*4;// a tiring arm loses a few ticks
- mph=Math.round(clamp(mph,62,dmn?104:102));
+ mph=Math.round(clamp(mph,62,dmn?106:102));
  const travel=520*Math.pow(95/mph,2.2)*(k==='FB'?1:1.08);
  WIN=winOf(curBatter())*Math.pow(95/mph,1.3);
  const sideArm=pt.slot==='side'&&!bpm;
@@ -5895,7 +5898,7 @@ function pitchRoll(kf,pt,bpm,dmn,knk){
  zoneSpot(p,bpm);return p}
 function startWindup(kf){closePen();unduckMusic();
  const bpm=S.mode==='bp';if(bpm)kf=S.bpPitch==='RND'?pick(['FB','SL','CH','SP','CB','KN']):(S.bpPitch||'FB');
- const pt=bpm?{vel:70,mov:72,ctl:99,slot:'over',hand:'R'}:pitcher(),dmn=!bpm&&pt.type==='demon',knk=!bpm&&pt.type==='knuckle';
+ const pt=bpm?{vel:70,mov:72,ctl:99,slot:'over',hand:'R'}:pitcher(),dmn=!bpm&&isDemon(pt),knk=!bpm&&pt.type==='knuckle';
  const pid=S.online&&S.online.inGame&&pitching()?S.online.role[0]+((S.online.n||0)+1):null;
  S.pitch=netSeedPid(pid,'w',()=>pitchRoll(kf,pt,bpm,dmn,knk));WIN=winOf(curBatter())*Math.pow(95/S.pitch.mph,1.3);
  S.swing=null;setPhase('windup');
@@ -6103,7 +6106,7 @@ function renderPen(){const k=fldKey(),st=staffOf(k),cur=S.pIdxOf[k]||0,pc=S.pcOf
  $('penSub').textContent=`${TEAMS[k].name} · current pitcher at ${pc} pitches`;
  $('penList').innerHTML=st.map((p,i)=>{const now=i===cur,used=usedOf(k).includes(i);
   const sf=now?clamp(stamFrac(),0,1):1,tag=now?`<span class="st now">PITCHING · ${pc}P<i class="penStam"><i style="width:${Math.round(sf*100)}%;background:${sf<=0?'#e2603a':sf<.25?'#e2603a':sf<.5?'#e6b93a':'#5fc25a'}"></i></i></span>`:used?'<span class="st">USED</span>':'<span class="st ready">READY</span>';
-  const role=p.pos==='SP'?'Starter':p.type==='demon'?'Flamethrower':p.type==='knuckle'?'Knuckleballer':'Reliever';
+  const role=p.pos==='SP'?'Starter':isDemon(p)?'Flamethrower':p.type==='knuckle'?'Knuckleballer':'Reliever';
   return `<button type="button" class="penRow" data-i="${i}" ${now?'aria-current="true"':''} ${now||used?'disabled':''}>
 <span class="no">#${p.no}</span><span class="nm"><b>${p.name}</b><small>${role} · ${p.hand}HP${p.slot==='side'?' · sidearm':''}</small></span>${tag}<span class="ln2"><span class="rt">VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)}</span><span class="ars">${arsOf(p).map(a=>`<i>${PITCHES[a].name}</i>`).join('')}</span></span></button>`}).join('')}
 function changePitcher(k,i,quiet){const cur=S.pIdxOf[k]||0;if(i===cur)return;usedOf(k).push(cur);
@@ -6914,7 +6917,7 @@ function updateHUD(){document.body.classList.toggle('bpMode',S.mode==='bp'&&S.ph
  muSet('abName',batKey(),b.name,[`#${b.no}`],`${((S.orderOf&&S.orderOf[batKey()])||0)+1}.`);$('abTeam').innerHTML=`AT BAT<span class="muPos">${b.hand}</span>`;
  $('abHand').innerHTML=muStats([['POS',`<b>${b.pos}</b>`],['CON',rb(b.con)],['POW',rb(b.pow)],['SPD',rb(b.spd)]]);
  muSet('pName',fldKey(),p.name,[`#${p.no}`]);if(!(S.mode==='bp'&&S.phase!=='title'))$('pTeam').innerHTML=`PITCHING${pitching()?' (YOU)':''}<span class="muPos">${p.hand}</span>${p.slot==='side'?'<span class="muPos side">SIDEARM</span>':''}`;
- if(S.mode==='bp'&&S.phase!=='title'){$('pName').innerHTML=`<span class="bpThrow">Throwing:</span><button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button>`;$('pHand').innerHTML=`<span class="bpStat">${S.bp.sw} swings <i class=muSep></i> ${S.bp.hr} HR <i class=muSep></i> longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=muStats([['POS',`<b>${p.pos||'P'}</b>`],['VEL',rb(p.vel)],['MOV',rb(p.mov)],['CTL',rb(p.ctl)]])+(p.type==='demon'?'<span class="muTag dmn">SPEED DEMON</span>':p.type==='knuckle'?'<span class="muTag knk">KNUCKLER</span>':'');
+ if(S.mode==='bp'&&S.phase!=='title'){$('pName').innerHTML=`<span class="bpThrow">Throwing:</span><button type="button" class="bpPick" id="bpPickBtn">${S.bpPitch==='RND'?'RANDOM':PITCHES[S.bpPitch||'FB'].name}<i>▾</i></button>`;$('pHand').innerHTML=`<span class="bpStat">${S.bp.sw} swings <i class=muSep></i> ${S.bp.hr} HR <i class=muSep></i> longest <b>${S.bp.long}</b> ft</span>`}else $('pHand').innerHTML=muStats([['POS',`<b>${p.pos||'P'}</b>`],['VEL',rb(p.vel)],['MOV',rb(p.mov)],['CTL',rb(p.ctl)]])+(isDemon(p)?'<span class="muTag dmn">SPEED DEMON</span>':p.type==='knuckle'?'<span class="muTag knk">KNUCKLER</span>':'');
  stamHUD();
  const w=winOf(b),pc=v=>`${50-Math.min(v,180)/180*50}%`,z=document.querySelectorAll('.bar .z');
  [w,w*GOODK,w*PERFK].forEach((v,k)=>{z[k].style.left=z[k].style.right=pc(v)});
@@ -6964,7 +6967,7 @@ function renderCards(){
  const stat=(l,v)=>`<div class="st"><span>${l}</span><i><u style="width:${Math.min(100,v)}%;background:${rcol(v)}"></u></i><b style="color:${rcol(v)}">${v}</b></div>`;
  const card=(p,slot,i)=>`<button type="button" class="pcard${lnSel===i?' sel':''}${!mine?' ro':''}${p.custom?' mine':''}${p.signed?' signed':''}" data-i="${i}" style="--tc:${T.jersey};--tc2:${T.cap}">
   <div class="pcTop"><span class="slot">${slot}</span><span class="pcPos">${p.pos}${p.custom?' ★':''}${p.signed?' · CARD':''}</span><span class="pcOvr">${ovr(p)}</span></div>
-  <div class="pcMid"><img alt="" src="${portrait(T,p,key===S.you)}"><div class="pcId"><b>${p.name}</b><span>#${p.no} · ${(p.pos==='SP'||p.pos==='RP')?'Throws '+p.hand+(p.slot==='side'?' · sidearm':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':''):'B/T '+p.hand+'/'+p.thr}</span></div></div>
+  <div class="pcMid"><img alt="" src="${portrait(T,p,key===S.you)}"><div class="pcId"><b>${p.name}</b><span>#${p.no} · ${(p.pos==='SP'||p.pos==='RP')?'Throws '+p.hand+(p.slot==='side'?' · sidearm':'')+(isDemon(p)?' · DEMON':p.type==='knuckle'?' · KNUCKLER':''):'B/T '+p.hand+'/'+p.thr}</span></div></div>
   <div class="pcStats">${(p.pos==='SP'||p.pos==='RP')?stat('VEL',p.vel)+stat('MOV',p.mov)+stat('CTL',p.ctl)+stat('DEF',p.def):stat('CON',p.con)+stat('POW',p.pow)+stat('SPD',p.spd)+stat('DEF',p.def)}</div></button>`;
  $('cards').innerHTML=T.lineup.map((p,i)=>card(p,i+1,i)).join('')+T.staff.map((p,k)=>card(p,'',-1-k)).join('');
 }
@@ -7692,7 +7695,7 @@ function netRelease(){const o=S.online,p=S.pitch;netPresence({pt:{id:p.pid,st:'r
 function netDecide(k){const o=S.online,sw=S.swing||{};netPresence({dc:{id:S.pitch.pid,k,e:sw.err||0,m:!!sw.miss,h:hash(stCanon(snapState())),sl:S.steal?{1:!!S.steal[1],2:!!S.steal[2]}:null}})}
 // batter side: start the remote pitch
 function applyWindup(pt){const o=S.online;o.seenW=pt.id;netCheckSnap(pt.z,'state');applySnap(pt.z);hideBanner();
- {const P=pitcher(),bpm=false,mine=netSeedPid(pt.id,'w',()=>pitchRoll(pt.p.k,P,bpm,P.type==='demon',P.type==='knuckle')),moved=pt.st==='r'&&pt.p.q!=null,pick=q=>moved?{k:q.k,mph:q.mph,hbp:!!q.hbp,kn:q.kn}:{k:q.k,mph:q.mph,inZone:q.inZone,plateX:q.plateX,hbp:!!q.hbp,kn:q.kn};/* seen only at release: where it ended up is checked by the release roll */
+ {const P=pitcher(),bpm=false,mine=netSeedPid(pt.id,'w',()=>pitchRoll(pt.p.k,P,bpm,isDemon(P),P.type==='knuckle')),moved=pt.st==='r'&&pt.p.q!=null,pick=q=>moved?{k:q.k,mph:q.mph,hbp:!!q.hbp,kn:q.kn}:{k:q.k,mph:q.mph,inZone:q.inZone,plateX:q.plateX,hbp:!!q.hbp,kn:q.kn};/* seen only at release: where it ended up is checked by the release roll */
   if(canon(pick(mine))!==canon(pick(pt.p)))netFlag('pitch',{mine:pick(mine),theirs:pick(pt.p)})}
  unduckMusic();S.pitch={...pt.p,releaseAt:0,trail:[],remote:true};WIN=winOf(curBatter())*Math.pow(95/S.pitch.mph,1.3);S.swing=null;o.waitMsg=false;setPhase('windup');updateHUD()}
 function applyRelease(pt){const o=S.online;o.seenR=pt.id;
@@ -8058,7 +8061,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='94ed344053',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='e8e819b827',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8943,7 +8946,7 @@ function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key]
  return ART[c.id]=cv2.toDataURL()}
 function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],own=COL.owned[c.id]|0,lock=opts.lock,lv=lvOf(c.id),n=lvN(c.id),p={...c.p,...cardEff(c)},o=n?ovr(p):c.o;
  const st=(c.pit?[['VEL','vel'],['MOV','mov'],['CTL','ctl'],['DEF','def']]:[['CON','con'],['POW','pow'],['SPD','spd'],['DEF','def']]).map(([k,f])=>[k,p[f],lv[f]|0]);
- const tag=(p.slot==='side'?' · SIDEARM':'')+(p.type==='demon'?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'');
+ const tag=(p.slot==='side'?' · SIDEARM':'')+(isDemon(p)?' · DEMON':p.type==='knuckle'?' · KNUCKLER':'');
  return `<div class="tc r${c.r}${lock?' lock':''}${c.set==='bl'?' bl':''}" data-id="${c.id}" style="--tj:${T.jersey};--tc:${T.cap}">
   <div class="tcHead"><img alt="" src="${cardLogo(c)}">${c.set==='bl'||c.set==='fa'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(o)}"`}>${lock?'??':o}</span></div>
   <img class="art" alt="" src="${cardArt(c)}">

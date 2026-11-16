@@ -82,7 +82,7 @@ function netRelease(){const o=S.online,p=S.pitch;netPresence({pt:{id:p.pid,st:'r
 function netDecide(k){const o=S.online,sw=S.swing||{};netPresence({dc:{id:S.pitch.pid,k,e:sw.err||0,m:!!sw.miss,h:hash(stCanon(snapState())),sl:S.steal?{1:!!S.steal[1],2:!!S.steal[2]}:null}})}
 // batter side: start the remote pitch
 function applyWindup(pt){const o=S.online;o.seenW=pt.id;netCheckSnap(pt.z,'state');applySnap(pt.z);hideBanner();
- {const P=pitcher(),bpm=false,mine=netSeedPid(pt.id,'w',()=>pitchRoll(pt.p.k,P,bpm,P.type==='demon',P.type==='knuckle')),moved=pt.st==='r'&&pt.p.q!=null,pick=q=>moved?{k:q.k,mph:q.mph,hbp:!!q.hbp,kn:q.kn}:{k:q.k,mph:q.mph,inZone:q.inZone,plateX:q.plateX,hbp:!!q.hbp,kn:q.kn};/* seen only at release: where it ended up is checked by the release roll */
+ {const P=pitcher(),bpm=false,mine=netSeedPid(pt.id,'w',()=>pitchRoll(pt.p.k,P,bpm,isDemon(P),P.type==='knuckle')),moved=pt.st==='r'&&pt.p.q!=null,pick=q=>moved?{k:q.k,mph:q.mph,hbp:!!q.hbp,kn:q.kn}:{k:q.k,mph:q.mph,inZone:q.inZone,plateX:q.plateX,hbp:!!q.hbp,kn:q.kn};/* seen only at release: where it ended up is checked by the release roll */
   if(canon(pick(mine))!==canon(pick(pt.p)))netFlag('pitch',{mine:pick(mine),theirs:pick(pt.p)})}
  unduckMusic();S.pitch={...pt.p,releaseAt:0,trail:[],remote:true};WIN=winOf(curBatter())*Math.pow(95/S.pitch.mph,1.3);S.swing=null;o.waitMsg=false;setPhase('windup');updateHUD()}
 function applyRelease(pt){const o=S.online;o.seenR=pt.id;

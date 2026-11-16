@@ -8,11 +8,12 @@ function pitchRoll(kf,pt,bpm,dmn,knk){
  // velocity first, then flight time from velocity: every extra mph arrives visibly sooner
  let mph=k==='KN'?rand(P.mph[1],P.mph[0]):rand(P.mph[1],P.mph[0])+(pt.vel-70)*.12;
  if(k==='FB'&&Math.random()<.15)mph+=rand(1,3);
- if(dmn&&k==='FB')mph+=rand(1.5,3.5);
+ /* a speed demon's fastball: velocity 90 = 100 mph, every 2 more = 1 mph more (92 = 101, 98 = 104), give or take 1 */
+ if(dmn&&k==='FB')mph=100+(pt.vel-90)/2+rand(-1,1);
  if(dmn&&k==='SL')mph+=rand(5,8);
  if(knk&&k==='FB')mph-=6;
  mph-=tiredness()*4;// a tiring arm loses a few ticks
- mph=Math.round(clamp(mph,62,dmn?104:102));
+ mph=Math.round(clamp(mph,62,dmn?106:102));
  const travel=520*Math.pow(95/mph,2.2)*(k==='FB'?1:1.08);
  WIN=winOf(curBatter())*Math.pow(95/mph,1.3);
  const sideArm=pt.slot==='side'&&!bpm;
@@ -24,7 +25,7 @@ function pitchRoll(kf,pt,bpm,dmn,knk){
  zoneSpot(p,bpm);return p}
 function startWindup(kf){closePen();unduckMusic();
  const bpm=S.mode==='bp';if(bpm)kf=S.bpPitch==='RND'?pick(['FB','SL','CH','SP','CB','KN']):(S.bpPitch||'FB');
- const pt=bpm?{vel:70,mov:72,ctl:99,slot:'over',hand:'R'}:pitcher(),dmn=!bpm&&pt.type==='demon',knk=!bpm&&pt.type==='knuckle';
+ const pt=bpm?{vel:70,mov:72,ctl:99,slot:'over',hand:'R'}:pitcher(),dmn=!bpm&&isDemon(pt),knk=!bpm&&pt.type==='knuckle';
  const pid=S.online&&S.online.inGame&&pitching()?S.online.role[0]+((S.online.n||0)+1):null;
  S.pitch=netSeedPid(pid,'w',()=>pitchRoll(kf,pt,bpm,dmn,knk));WIN=winOf(curBatter())*Math.pow(95/S.pitch.mph,1.3);
  S.swing=null;setPhase('windup');

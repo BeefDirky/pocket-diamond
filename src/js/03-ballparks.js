@@ -61,10 +61,12 @@ function buildRosters(){
   for(const p of T.staff)p.ars=arsFor(p,k);
  }
 }
+/* a speed demon: any pitcher with velocity 90 or more (a knuckleballer never is) */
+const isDemon=p=>!!p&&p.type!=='knuckle'&&(p.type==='demon'||(p.vel||0)>=90);
 function arsFor(p,k){const h=hash((k||'')+p.name+'ars');
  if(p.type==='knuckle')return['FB','KN','CH'];
  if(p.pos==='SP')return['FB',...[['SL','CH','SP'],['CB','CH','SP'],['SL','CB','CH'],['SL','CB','SP'],['SL','CH','SP'],['CB','SL','CH']][h%6]];
- if(p.type==='demon')return['FB','SL',h%2?'SP':'CH'];
+ if(isDemon(p))return['FB','SL',h%2?'SP':'CH'];
  return['FB',...[['SL','CH'],['SL','SP'],['CH','SP'],['CB','CH'],['CH','SP'],['SL','CB'],['CB','SP']][h%7]]}
 const arsOf=p=>(p&&p.ars)||arsFor(p||{});
 const ovr=p=>(p.pos==='SP'||p.pos==='RP')?Math.round(p.vel*.4+p.mov*.35+p.ctl*.25):Math.round(p.con*.3+p.pow*.3+p.spd*.15+p.def*.25);
