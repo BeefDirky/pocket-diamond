@@ -1599,7 +1599,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
         <div class="mmLogo"><h1 aria-label="Pocket Diamond">POCKE<i class="kn">T</i> <span>D<i class="kn">I</i>AMOND</span></h1><small>KBO-STYLE PIXEL BASEBALL</small><b class="offChip" title="No internet: single player and batting practice still work">● OFFLINE</b></div>
         <nav class="mmBtns">
           <button class="mmBtn" id="goSingle" type="button" data-go="scrSingle">SINGLE PLAYER</button>
-          <button class="mmBtn alt" id="goMulti" type="button">MULTIPLAYER</button>
+          <button class="mmBtn alt" id="goMulti" type="button">MUL<i class="kT">T</i>IPLAYER</button>
           <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">TEAM</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
           <div class="mmPair"><button class="mmSm" id="goHow" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
@@ -1871,7 +1871,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
         <div class="tiles three"><button class="tile" type="button" id="poSim"><span>Sim this game</span></button><button class="tile" type="button" id="poNew"><span>New bracket</span></button><button class="tile" type="button" data-go="scrMain"><span>Menu</span></button></div>
       </div>
       <div class="card" id="scrMulti" hidden>
-        <h1>MULTI<span>PLAYER</span></h1>
+        <h1>MUL<i class="kT">T</i>I<span>PLAYER</span></h1>
         <div class="mpPick">
           <button class="mode" id="goRanked" type="button"><b>RANKED</b></button>
           <button class="mode alt" id="goCustom" type="button"><b>CUS<i class="kT">T</i>OM</b></button>
@@ -6824,7 +6824,7 @@ function gameOver(win){if(S.olMenu){S.olMenu=false;$('title').hidden=true;showSc
  awardPacks(win);coinGameOver(win);
  $('toLobby').hidden=!onl;if(onl){resumeClear();$('again').hidden=true;$('toBracket').hidden=true;S.online.inGame=false;netPresence({pt:null,dc:null})}
  else if(S.poGame){S.poGame=false;poRecord(win);$('toBracket').hidden=false;$('again').hidden=true;const sr=poMySeries();if(sr)$('overS').textContent+=` Series: ${poLine(sr)}.`}else{$('toBracket').hidden=true;$('again').hidden=false;const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;$('again').textContent=se?(se.done?'NEW SERIES':`GAME ${se.w+se.l+1}`):'PLAY AGAIN'}
- if(S.rkBot){$('again').hidden=true;$('toLobby').hidden=false;$('toLobby').textContent='BACK TO MULTIPLAYER'}
+ if(S.rkBot){$('again').hidden=true;$('toLobby').hidden=false;$('toLobby').innerHTML='BACK TO MUL<i class="kT">T</i>IPLAYER'}
  S.tnBack=tnGameOver();
  if(S.celebr){const gid=S.overGid=(S.overGid||0)+1;setTimeout(()=>{if(S.phase==='over'&&S.overGid===gid&&$('title').hidden)$('over').hidden=false},3400)}else $('over').hidden=false;/* the results card always follows the celebration */updateHUD();
 }
@@ -8013,7 +8013,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='77e9a866b8',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='b2a11d223a',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8081,7 +8081,7 @@ function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=nul
  if(info.status==='abandoned'){rkShow('NOT COUNTED · the match timed out','bad');return true}
  return false}
 // game over: ranked submits the match record; everything else reports your own line (if you're signed in)
-async function rkGameOver(){if(S.rkBot){botGameOver();return}const o=S.online,m=ML&&ML.fin?ML:null;$('toLobby').textContent=o&&o.queued?'BACK TO MULTIPLAYER':'BACK TO THE ROOM';if(!m||RK.done)return;RK.done=true;
+async function rkGameOver(){if(S.rkBot){botGameOver();return}const o=S.online,m=ML&&ML.fin?ML:null;$('toLobby').innerHTML=o&&o.queued?'BACK TO MUL<i class="kT">T</i>IPLAYER':'BACK TO THE ROOM';if(!m||RK.done)return;RK.done=true;
  if(o&&o.ranked&&o.rk){clearInterval(RK.pingT);rkShow('RANKED · sending the result…');
   try{const h=await mlHash(m);let info=await rpc('ranked_submit',{p_match:o.rk.m,p_hash:h,p_log:mlWire(m),p_flags:o.flags||[],p_version:PD_VER});
    if(rkResult(info))return;rkShow('RANKED · waiting for your opponent’s result…');
@@ -8114,7 +8114,7 @@ function olEndScreen(o,title,sub){if(S.olMenu){S.olMenu=false;$('title').hidden=
  const you=TEAMS[S.you],opp=TEAMS[S.opp];$('overT').innerHTML=title;$('overS').textContent=`${sub} Score: ${opp.name} ${S.target||0}, ${you.name} ${S.runs||0} (${S.half==='top'?'top':'bottom'} of the ${ord(S.inning||1)}).`;
  $('overStats').innerHTML=`<div><b>${S.hits||0}</b><span>HITS</span></div><div><b>${S.hr||0}</b><span>HOME RUNS</span></div><div><b>${S.myK||0}</b><span>K'S PITCHED</span></div>`;
  for(const id of['olNext','olSeries','again','toBracket','coinEarn','packEarn'])$(id).hidden=true;rkShow('');
- $('toLobby').hidden=false;$('toLobby').textContent=o.queued?'BACK TO MULTIPLAYER':'BACK TO THE ROOM';$('over').hidden=false;updateHUD()}
+ $('toLobby').hidden=false;$('toLobby').innerHTML=o.queued?'BACK TO MUL<i class="kT">T</i>IPLAYER':'BACK TO THE ROOM';$('over').hidden=false;updateHUD()}
 
 // ---- the ranked queue: Ranked on the Multiplayer page finds you an opponent ----
 // You wait on the server (queue_poll every 2 s). When it pairs you, both phones meet in a room named after the match,
@@ -8726,8 +8726,9 @@ maPaint();setInterval(maPaint,1000);
    The stylesheet's own colors are re-tinted: the dark greens of the panels, edges and muted text take your club's main
    color, and the amber highlights take its second color. Each color keeps its own lightness, so every dark stays as dark
    and every bright stays as bright; only the hue (and how strong it is) changes. Card rarities, coins, win/loss marks,
-   lamps and the like keep their meaning colors, and so do whites and creams. */
-const TH_SKIP=/\.r[0-3]\b|coin|Coin|Ovr|Badge|hsRd|\.hsRow\.[wl]\b|\.w\b|\.l\b|frDot|lfc\.r|\blg|holo|mmShop|mmInv|acHero|lamp|bulb|olReady|dropOk|dropNo|tsDots|rcol|kz/;
+   lamps and the like keep their meaning colors, and so do whites and creams. The game-mode buttons on the Single
+   Player and Multiplayer pages always keep their own colors. */
+const TH_SKIP=/\.mode\b|#scrSingle|#scrMulti|mpPick|mpTn|\.r[0-3]\b|coin|Coin|Ovr|Badge|hsRd|\.hsRow\.[wl]\b|\.w\b|\.l\b|frDot|lfc\.r|\blg|holo|mmShop|mmInv|acHero|lamp|bulb|olReady|dropOk|dropNo|tsDots|rcol|kz/;
 function thParse(c){let m=c.match(/^#([0-9a-f]{3,8})$/i);
  if(m){let h=m[1];if(h.length<6)h=h.split('').map(x=>x+x).join('');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16),h.length>=8?parseInt(h.slice(6,8),16)/255:1]}
  m=c.match(/^rgba?\(\s*([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/i);
@@ -8750,7 +8751,10 @@ function thBuild(club){const T=TEAMS[club];if(!T)return'';
    let ch=false;const nv=val.replace(COL,m=>{const x=thMap(m,P,A);if(x){ch=true;return x}return m});
    if(ch)decl+=`${p}:${nv}${st.getPropertyPriority(p)?' !important':''};`}
   if(decl)out+=`${r.selectorText}{${decl}}`}return out};
- let css='';for(const sh of document.styleSheets){if(sh.ownerNode&&sh.ownerNode.id==='fitTheme')continue;try{css+=walk(sh.cssRules)}catch(e){}}return css}
+ let css='',keep='';for(const sh of document.styleSheets){if(sh.ownerNode&&sh.ownerNode.id==='fitTheme')continue;try{css+=walk(sh.cssRules);
+  for(const r of sh.cssRules)if(r instanceof CSSStyleRule&&r.selectorText===':root')for(let i=0;i<r.style.length;i++){const p=r.style[i];if(p.startsWith('--'))keep+=`${p}:${r.style.getPropertyValue(p)};`}}catch(e){}}
+ /* the mode buttons keep the original colors: give them back the untinted color variables */
+ return css+(keep?`#scrSingle .mode,#scrMulti .mode,#scrSingle .mode *,#scrMulti .mode *{${keep}}`:'')}
 let thFor=null;
 function thApply(){const club=OPT.fit&&typeof MYTEAM!=='undefined'&&MYTEAM&&TEAMS[MYTEAM.club]?MYTEAM.club:'';if(club===thFor)return;thFor=club;
  let el=$('fitTheme');if(!club){if(el)el.remove();return}

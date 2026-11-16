@@ -74,7 +74,7 @@ function rkResult(info){const d=info.rating_after!=null&&info.rating_before!=nul
  if(info.status==='abandoned'){rkShow('NOT COUNTED · the match timed out','bad');return true}
  return false}
 // game over: ranked submits the match record; everything else reports your own line (if you're signed in)
-async function rkGameOver(){if(S.rkBot){botGameOver();return}const o=S.online,m=ML&&ML.fin?ML:null;$('toLobby').textContent=o&&o.queued?'BACK TO MULTIPLAYER':'BACK TO THE ROOM';if(!m||RK.done)return;RK.done=true;
+async function rkGameOver(){if(S.rkBot){botGameOver();return}const o=S.online,m=ML&&ML.fin?ML:null;$('toLobby').innerHTML=o&&o.queued?'BACK TO MUL<i class="kT">T</i>IPLAYER':'BACK TO THE ROOM';if(!m||RK.done)return;RK.done=true;
  if(o&&o.ranked&&o.rk){clearInterval(RK.pingT);rkShow('RANKED · sending the result…');
   try{const h=await mlHash(m);let info=await rpc('ranked_submit',{p_match:o.rk.m,p_hash:h,p_log:mlWire(m),p_flags:o.flags||[],p_version:PD_VER});
    if(rkResult(info))return;rkShow('RANKED · waiting for your opponent’s result…');
@@ -107,7 +107,7 @@ function olEndScreen(o,title,sub){if(S.olMenu){S.olMenu=false;$('title').hidden=
  const you=TEAMS[S.you],opp=TEAMS[S.opp];$('overT').innerHTML=title;$('overS').textContent=`${sub} Score: ${opp.name} ${S.target||0}, ${you.name} ${S.runs||0} (${S.half==='top'?'top':'bottom'} of the ${ord(S.inning||1)}).`;
  $('overStats').innerHTML=`<div><b>${S.hits||0}</b><span>HITS</span></div><div><b>${S.hr||0}</b><span>HOME RUNS</span></div><div><b>${S.myK||0}</b><span>K'S PITCHED</span></div>`;
  for(const id of['olNext','olSeries','again','toBracket','coinEarn','packEarn'])$(id).hidden=true;rkShow('');
- $('toLobby').hidden=false;$('toLobby').textContent=o.queued?'BACK TO MULTIPLAYER':'BACK TO THE ROOM';$('over').hidden=false;updateHUD()}
+ $('toLobby').hidden=false;$('toLobby').innerHTML=o.queued?'BACK TO MUL<i class="kT">T</i>IPLAYER':'BACK TO THE ROOM';$('over').hidden=false;updateHUD()}
 
 // ---- the ranked queue: Ranked on the Multiplayer page finds you an opponent ----
 // You wait on the server (queue_poll every 2 s). When it pairs you, both phones meet in a room named after the match,

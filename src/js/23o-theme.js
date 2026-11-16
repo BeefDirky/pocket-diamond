@@ -2,8 +2,9 @@
    The stylesheet's own colors are re-tinted: the dark greens of the panels, edges and muted text take your club's main
    color, and the amber highlights take its second color. Each color keeps its own lightness, so every dark stays as dark
    and every bright stays as bright; only the hue (and how strong it is) changes. Card rarities, coins, win/loss marks,
-   lamps and the like keep their meaning colors, and so do whites and creams. */
-const TH_SKIP=/\.r[0-3]\b|coin|Coin|Ovr|Badge|hsRd|\.hsRow\.[wl]\b|\.w\b|\.l\b|frDot|lfc\.r|\blg|holo|mmShop|mmInv|acHero|lamp|bulb|olReady|dropOk|dropNo|tsDots|rcol|kz/;
+   lamps and the like keep their meaning colors, and so do whites and creams. The game-mode buttons on the Single
+   Player and Multiplayer pages always keep their own colors. */
+const TH_SKIP=/\.mode\b|#scrSingle|#scrMulti|mpPick|mpTn|\.r[0-3]\b|coin|Coin|Ovr|Badge|hsRd|\.hsRow\.[wl]\b|\.w\b|\.l\b|frDot|lfc\.r|\blg|holo|mmShop|mmInv|acHero|lamp|bulb|olReady|dropOk|dropNo|tsDots|rcol|kz/;
 function thParse(c){let m=c.match(/^#([0-9a-f]{3,8})$/i);
  if(m){let h=m[1];if(h.length<6)h=h.split('').map(x=>x+x).join('');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16),h.length>=8?parseInt(h.slice(6,8),16)/255:1]}
  m=c.match(/^rgba?\(\s*([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/i);
@@ -26,7 +27,10 @@ function thBuild(club){const T=TEAMS[club];if(!T)return'';
    let ch=false;const nv=val.replace(COL,m=>{const x=thMap(m,P,A);if(x){ch=true;return x}return m});
    if(ch)decl+=`${p}:${nv}${st.getPropertyPriority(p)?' !important':''};`}
   if(decl)out+=`${r.selectorText}{${decl}}`}return out};
- let css='';for(const sh of document.styleSheets){if(sh.ownerNode&&sh.ownerNode.id==='fitTheme')continue;try{css+=walk(sh.cssRules)}catch(e){}}return css}
+ let css='',keep='';for(const sh of document.styleSheets){if(sh.ownerNode&&sh.ownerNode.id==='fitTheme')continue;try{css+=walk(sh.cssRules);
+  for(const r of sh.cssRules)if(r instanceof CSSStyleRule&&r.selectorText===':root')for(let i=0;i<r.style.length;i++){const p=r.style[i];if(p.startsWith('--'))keep+=`${p}:${r.style.getPropertyValue(p)};`}}catch(e){}}
+ /* the mode buttons keep the original colors: give them back the untinted color variables */
+ return css+(keep?`#scrSingle .mode,#scrMulti .mode,#scrSingle .mode *,#scrMulti .mode *{${keep}}`:'')}
 let thFor=null;
 function thApply(){const club=OPT.fit&&typeof MYTEAM!=='undefined'&&MYTEAM&&TEAMS[MYTEAM.club]?MYTEAM.club:'';if(club===thFor)return;thFor=club;
  let el=$('fitTheme');if(!club){if(el)el.remove();return}
