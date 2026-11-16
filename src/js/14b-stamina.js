@@ -4,7 +4,7 @@
 // a reliever 45. Below half he starts to tire (velocity, control); at zero he is gassed: the PERFECT window on the release
 // meter is gone and the GOOD window shrinks. A tiring pitcher sweats on the mound.
 const STAM_K={FB:1,CH:1.2,SL:1.45,CB:1.7,KN:1.95,SP:2.2};
-const stamMax=p=>p&&p.pos==='RP'?45:100;
+const stamMax=p=>p&&p.pos==='RP'?35:100;/* a reliever has about a third of a starter's tank */
 function stamOf(k){S.stamOf=S.stamOf||{};const v=S.stamOf[k];return v==null?stamMax(TEAMS[k]&&staffOf(k)[S.pIdxOf[k]||0]):v}
 const stamNow=()=>stamOf(fldKey());
 const stamFrac=()=>stamNow()/stamMax(pitcher());
@@ -18,9 +18,9 @@ function stamSpend(p){if(S.mode==='bp'||!p)return;const k=fldKey();
  // q: the meter's release quality when you pitch; a CPU arm (or AUTO) gets one from his control
  const q=p.q!=null?p.q:clamp(.45+pitcher().ctl*.004+randn()*.2,0,1);
  const t=.5+1.4*(1-q);// PERFECT .5x, GOOD ~.7-1.1x, over the plate ~1.3x, missed or late ~1.6-1.9x
- S.stamOf=S.stamOf||{};S.stamOf[k]=Math.max(0,stamOf(k)-1.3*(STAM_K[p.k]||1.3)*t);stamHUD()}
+ S.stamOf=S.stamOf||{};S.stamOf[k]=Math.max(0,stamOf(k)-1.15*(STAM_K[p.k]||1.3)*t);stamHUD()}
 // what the at-bat did to the pitcher: hits wear him down (more for extra bases), a strikeout gives him a little back
-const STAM_PA={'1B':-3,IFH:-3,'2B':-6,'3B':-9,HR:-14,IPHR:-14,BB:-2,HBP:-2,K:2,KL:2};
+const STAM_PA={'1B':-2.5,IFH:-2.5,'2B':-5,'3B':-7.5,HR:-12,IPHR:-12,BB:-2,HBP:-2,K:2,KL:2};
 function stamResult(code,k){const d=STAM_PA[code];if(S.mode==='bp'||!d||!k||!TEAMS[k])return;S.stamOf=S.stamOf||{};
  const mx=stamMax(staffOf(k)[S.pIdxOf[k]||0]);S.stamOf[k]=clamp(stamOf(k)+d,0,mx);stamHUD()}
 function stamHUD(){const el=$('pStam');if(!el)return;const bp=S.mode==='bp'||S.phase==='title';el.hidden=bp;if(bp)return;
