@@ -43,8 +43,8 @@ let lfTab='field',boSel=null;
 /* the BATTING ORDER tab starts exactly where the POSITIONS tab starts (so the header and tabs don't jump), and is only
    as tall as it needs to be */
 let lfFieldTop=null;
-function lnHold(){const c=$('scrLineup'),o=lfTab==='order';c.classList.toggle('boTab',o);c.style.marginTop=o&&lfFieldTop!=null?Math.max(0,lfFieldTop)+'px':''}
-for(const b of $('lnTabs').children)b.addEventListener('click',()=>{if(lfTab==='field'&&!$('scrLineup').hidden){const c=$('scrLineup'),t=$('title');lfFieldTop=c.getBoundingClientRect().top-t.getBoundingClientRect().top+t.scrollTop-parseFloat(getComputedStyle(t).paddingTop)}lfTab=b.dataset.t;boSel=null;lfMove=false;lineupRender()});
+function lnHold(){const c=$('scrLineup'),o=lfTab!=='field';c.classList.toggle('boTab',o);c.style.marginTop=o&&lfFieldTop!=null?Math.max(0,lfFieldTop)+'px':''}
+for(const b of $('lnTabs').children)b.addEventListener('click',()=>{if(lfTab==='field'&&!$('scrLineup').hidden){const c=$('scrLineup'),t=$('title');lfFieldTop=c.getBoundingClientRect().top-t.getBoundingClientRect().top+t.scrollTop-parseFloat(getComputedStyle(t).paddingTop)}lfTab=b.dataset.t;boSel=null;psOpen=null;lfMove=false;lineupRender()});
 /* the batting order: the nine hitters in a row, in order. Tap one, then tap the spot he should bat in: they swap */
 function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you);
   return `<div class="boSlot"><span class="boNum">${i+1}</span><button type="button" class="lfc bo r${c?c.r:0}${boSel===i?' boSel':''}" data-o="${i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}</span></button></div>`}).join('');
@@ -52,7 +52,7 @@ function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),ar
 function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()%2600)+'ms');for(const b of $('lnTabs').children)b.setAttribute('aria-pressed',String(b.dataset.t===lfTab));
  $('lnNext').textContent=pregame?'NEXT':'DONE';
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
- lnHold();if(lfTab==='order'){boRender(T,key);return}
+ lnHold();if(lfTab==='order'){boRender(T,key);return}if(lfTab==='stats'){stRender(T,key);return}
  if(!mine)lfMove=false;
  if(lfFlipsOf!==lnView+key){lfFlipsOf=lnView+key;lfFlips.clear();lfFlip=null}
  if(lfFlip&&!lfFlips.has(lfFlip))lfFlip=null;

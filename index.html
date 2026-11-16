@@ -1610,6 +1610,27 @@ body.gPause #title{z-index:60;pointer-events:auto}
 .fpTiles{grid-template-columns:1fr}
 /* REMOVE FRIEND: a small text button, not a full-size one */
 .frMore{grid-template-columns:1fr auto;align-items:center}.frMore .mbtn[data-rm]{font-size:10px;padding:6px 10px;opacity:.8;min-height:0;letter-spacing:.06em}
+/* Team > STATS: two tables, then a page per player */
+.lnTabs{grid-template-columns:1fr 1.25fr .8fr}
+.psWrap{display:flex;flex-direction:column;gap:12px;width:100%;max-width:760px;margin:0 auto}
+.psSub{margin:0;text-align:center;font-family:var(--f-hud);font-size:12px;letter-spacing:.1em;color:var(--dim)}
+.psT{width:100%;border-collapse:collapse;font-family:var(--f-hud);font-size:13px;background:var(--edge);border:2px solid var(--panel-hi)}
+.psT th{padding:8px 4px;font-weight:400;font-size:11px;letter-spacing:.08em;color:var(--amber);text-align:right;border-bottom:2px solid var(--panel-hi)}
+.psT th:first-child{text-align:left;padding-left:10px}
+.psT td{padding:7px 4px;text-align:right;color:var(--chalk);border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap}
+.psT td:last-child,.psT th:last-child{padding-right:10px}
+.psT tbody tr{cursor:pointer}.psT tbody tr:hover td{background:rgba(255,255,255,.04)}
+.psNm{text-align:left!important;padding-left:10px!important;max-width:0;width:44%;overflow:hidden}
+.psNm b{font-weight:400;color:#fff;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 30px);vertical-align:middle}.psNm small{margin-left:6px;color:var(--dim);font-size:10px;vertical-align:middle}
+.psPage{display:flex;flex-direction:column;gap:12px;width:100%;max-width:640px;margin:0 auto}
+.psBack{align-self:flex-start;font-size:12px;padding:8px 12px}
+.psHead{display:flex;align-items:center;gap:16px}
+.psCard{width:110px;flex:none;pointer-events:none}
+.psWho{display:flex;flex-direction:column;gap:4px;min-width:0}.psWho b{font-family:var(--f-px);font-weight:400;font-size:20px;color:#fff;transform:skewX(-8deg)}.psWho small{font-family:var(--f-hud);font-size:12px;letter-spacing:.08em;color:var(--dim)}
+.psGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px;min-width:0}.psPage,.psWrap{min-width:0;box-sizing:border-box}
+.psGrid div{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;background:var(--edge);border:2px solid var(--panel-hi)}
+.psGrid b{font-family:var(--f-px);font-weight:400;font-size:17px;color:var(--chalk)}.psGrid span{font-family:var(--f-hud);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+@media (max-width:420px){.psT{font-size:12px}.psNm small{display:none}.psNm b{max-width:100%}.psGrid{grid-template-columns:repeat(4,minmax(0,1fr))}.psGrid b{font-size:15px}}
 </style>
 
 <div class="app">
@@ -1867,7 +1888,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
       </div>
       <div class="card wide" id="scrLineup" hidden>
         <div class="lnTop"><h1>EDIT <span>LINEUP</span></h1><h2 id="lnTitle" hidden></h2><div class="seg" hidden><button type="button" id="lnMine" aria-pressed="true">Your club</button><button type="button" id="lnOpp" aria-pressed="false">Scout visitors</button></div></div>
-        <div class="seg lnTabs" id="lnTabs"><button type="button" data-t="field" aria-pressed="true">POSITIONS</button><button type="button" data-t="order" aria-pressed="false">BATTING ORDER</button></div>
+        <div class="seg lnTabs" id="lnTabs"><button type="button" data-t="field" aria-pressed="true">POSITIONS</button><button type="button" data-t="order" aria-pressed="false">BATTING ORDER</button><button type="button" data-t="stats" aria-pressed="false">STATS</button></div>
         <p id="lnHint"></p>
         <p class="lfMsg" id="lfMsg" aria-live="polite"></p>
         <div class="cards" id="cards"></div>
@@ -7256,8 +7277,8 @@ let lfTab='field',boSel=null;
 /* the BATTING ORDER tab starts exactly where the POSITIONS tab starts (so the header and tabs don't jump), and is only
    as tall as it needs to be */
 let lfFieldTop=null;
-function lnHold(){const c=$('scrLineup'),o=lfTab==='order';c.classList.toggle('boTab',o);c.style.marginTop=o&&lfFieldTop!=null?Math.max(0,lfFieldTop)+'px':''}
-for(const b of $('lnTabs').children)b.addEventListener('click',()=>{if(lfTab==='field'&&!$('scrLineup').hidden){const c=$('scrLineup'),t=$('title');lfFieldTop=c.getBoundingClientRect().top-t.getBoundingClientRect().top+t.scrollTop-parseFloat(getComputedStyle(t).paddingTop)}lfTab=b.dataset.t;boSel=null;lfMove=false;lineupRender()});
+function lnHold(){const c=$('scrLineup'),o=lfTab!=='field';c.classList.toggle('boTab',o);c.style.marginTop=o&&lfFieldTop!=null?Math.max(0,lfFieldTop)+'px':''}
+for(const b of $('lnTabs').children)b.addEventListener('click',()=>{if(lfTab==='field'&&!$('scrLineup').hidden){const c=$('scrLineup'),t=$('title');lfFieldTop=c.getBoundingClientRect().top-t.getBoundingClientRect().top+t.scrollTop-parseFloat(getComputedStyle(t).paddingTop)}lfTab=b.dataset.t;boSel=null;psOpen=null;lfMove=false;lineupRender()});
 /* the batting order: the nine hitters in a row, in order. Tap one, then tap the spot he should bat in: they swap */
 function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you);
   return `<div class="boSlot"><span class="boNum">${i+1}</span><button type="button" class="lfc bo r${c?c.r:0}${boSel===i?' boSel':''}" data-o="${i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}</span></button></div>`}).join('');
@@ -7265,7 +7286,7 @@ function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),ar
 function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()%2600)+'ms');for(const b of $('lnTabs').children)b.setAttribute('aria-pressed',String(b.dataset.t===lfTab));
  $('lnNext').textContent=pregame?'NEXT':'DONE';
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
- lnHold();if(lfTab==='order'){boRender(T,key);return}
+ lnHold();if(lfTab==='order'){boRender(T,key);return}if(lfTab==='stats'){stRender(T,key);return}
  if(!mine)lfMove=false;
  if(lfFlipsOf!==lnView+key){lfFlipsOf=lnView+key;lfFlips.clear();lfFlip=null}
  if(lfFlip&&!lfFlips.has(lfFlip))lfFlip=null;
@@ -7427,6 +7448,51 @@ function lfGlide(tr,v){if(!tr||Math.abs(v)<.05)return;let last=performance.now()
  const W=P[0].length,H=P.length,o=document.createElement('canvas');o.width=W+1;o.height=H+1;const q=o.getContext('2d');q.fillStyle='#f4f1e8';
  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(P[y][x]==='#')q.fillRect(x,y,1,1);
  const u=o.toDataURL();for(const id of['ilMark','ilMark2']){const el=document.getElementById(id);if(el)el.src=u}}
+/* ---------- player stats: every game you finish adds to your players' season lines (Team > STATS) ----------
+   Built from the match record (23b-match-log.js) when a game ends: each plate appearance your club batted counts for its
+   hitter, each one it pitched counts for its pitcher. Kept on this device and in your account's save ('pd-pstats').
+   A player is known by the same key the match record uses: his signed card, or club:name. Batting practice doesn't count. */
+const PS_KEY='pd-pstats';
+let PS=(()=>{try{const v=JSON.parse(localStorage.getItem(PS_KEY)||'null');if(v&&v.p)return v}catch(e){}return{v:1,p:{},games:0}})();
+function psSave(){try{localStorage.setItem(PS_KEY,JSON.stringify(PS));if(typeof accDirty==='function')accDirty()}catch(e){}}
+const PS_HIT={'1B':1,'2B':2,'3B':3,HR:4},PS_NOAB={BB:1,IBB:1,HBP:1,SF:1,SH:1,OTHER:1};
+function psLine(k){return PS.p[k]=PS.p[k]||{g:0,pa:0,ab:0,h:0,d:0,t:0,hr:0,bb:0,k:0,hbp:0,rbi:0,sf:0,bf:0,outs:0,pk:0,pbb:0,ph:0,phr:0,pr:0,pg:0}}
+/* the game is over: add its plate appearances to your players' lines (once per game) */
+function psRecord(m){if(!m||m.ps||!m.pa||!m.pa.length)return;m.ps=1;const side=m.me||'home',inG=new Set(),pG=new Set();
+ for(const c of m.pa){if(c.r==='OTHER'&&!c.om)continue;
+  if(c.bs===side){if(c.r==='OTHER')continue;const L=psLine(c.bk);inG.add(c.bk);L.pa++;const hit=PS_HIT[c.r];
+   if(!PS_NOAB[c.r])L.ab++;if(hit){L.h++;if(hit===2)L.d++;else if(hit===3)L.t++;else if(hit===4)L.hr++}
+   if(c.r==='BB'||c.r==='IBB')L.bb++;else if(c.r==='HBP')L.hbp++;else if(c.r==='K')L.k++;else if(c.r==='SF')L.sf++;L.rbi+=c.rbi|0}
+  else{const L=psLine(c.pk);pG.add(c.pk);L.outs+=c.om|0;L.pr+=c.rs|0;if(c.r==='OTHER')continue;L.bf++;
+   if(PS_HIT[c.r]){L.ph++;if(c.r==='HR')L.phr++}else if(c.r==='K')L.pk++;else if(c.r==='BB'||c.r==='IBB'||c.r==='HBP')L.pbb++}}
+ for(const k of inG)PS.p[k].g++;for(const k of pG)PS.p[k].pg++;PS.games=(PS.games|0)+1;psSave()}
+const f3=v=>v==null||!isFinite(v)?'—':v.toFixed(3).replace(/^0/,''),f2=v=>v==null||!isFinite(v)?'—':v.toFixed(2);
+const psIP=o=>`${Math.floor(o/3)}${o%3?'.'+(o%3):''}`;
+function psRates(L){const avg=L.ab?L.h/L.ab:null,obpD=L.ab+L.bb+L.hbp+L.sf,obp=obpD?(L.h+L.bb+L.hbp)/obpD:null,slg=L.ab?(L.h+L.d+2*L.t+3*L.hr)/L.ab:null;
+ return{avg,obp,slg,ops:obp!=null&&slg!=null?obp+slg:null,era:L.outs?L.pr*27/L.outs:null,whip:L.outs?(L.ph+L.pbb)*3/L.outs:null,k9:L.outs?L.pk*27/L.outs:null}}
+let psOpen=null;/* the player whose page is showing */
+function stRender(T,key){const pit=p=>p.pos==='SP'||p.pos==='RP',hit=T.lineup,arms=T.staff,L=p=>PS.p[mlKey(key,p)];
+ if(psOpen){const p=[...hit,...arms].find(x=>mlKey(key,x)===psOpen);if(p){psPage(T,key,p);return}psOpen=null}
+ const row=(p,cells)=>`<tr data-ps="${esc(mlKey(key,p))}"><td class="psNm"><b>${esc(p.name)}</b><small>${p.pos}</small></td>${cells.map(c=>`<td>${c}</td>`).join('')}</tr>`;
+ const hr=hit.map(p=>{const l=L(p);if(!l||!l.pa)return row(p,['0','—','—','—','—']);const r=psRates(l);return row(p,[l.g,f3(r.avg),l.hr,l.rbi,f3(r.ops)])}).join('');
+ const pr=arms.map(p=>{const l=L(p);if(!l||!l.bf)return row(p,['0','—','—','—','—']);const r=psRates(l);return row(p,[l.pg,psIP(l.outs),f2(r.era),l.pk,f2(r.whip)])}).join('');
+ $('cards').innerHTML=`<div class="psWrap"><p class="psSub">${PS.games?`ALL GAMES · ${PS.games} PLAYED`:'No games yet: finish a game and your players’ stats show up here.'}</p>
+  <table class="psT"><thead><tr><th>HITTERS</th><th>G</th><th>AVG</th><th>HR</th><th>RBI</th><th>OPS</th></tr></thead><tbody>${hr}</tbody></table>
+  <table class="psT"><thead><tr><th>PITCHERS</th><th>G</th><th>IP</th><th>ERA</th><th>K</th><th>WHIP</th></tr></thead><tbody>${pr}</tbody></table></div>`;
+ $('lnHint').textContent='Tap a player for his full stats.'}
+/* one player's page: his card and every number */
+function psPage(T,key,p){const l=PS.p[mlKey(key,p)]||psLine('__none'),r=psRates(l),c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you),isP=p.pos==='SP'||p.pos==='RP';
+ delete PS.p.__none;
+ const box=(k,v)=>`<div><b>${v}</b><span>${k}</span></div>`;
+ const g=isP?[['G',l.pg],['IP',psIP(l.outs)],['ERA',f2(r.era)],['WHIP',f2(r.whip)],['K',l.pk],['BB',l.pbb],['H',l.ph],['HR',l.phr],['R',l.pr],['BF',l.bf],['K/9',f2(r.k9)],['STA',staOf(p)]]
+  :[['G',l.g],['PA',l.pa],['AB',l.ab],['H',l.h],['AVG',f3(r.avg)],['OBP',f3(r.obp)],['SLG',f3(r.slg)],['OPS',f3(r.ops)],['2B',l.d],['3B',l.t],['HR',l.hr],['RBI',l.rbi],['BB',l.bb],['K',l.k]];
+ $('cards').innerHTML=`<div class="psPage"><button type="button" class="mbtn psBack">‹ ALL PLAYERS</button>
+  <div class="psHead"><span class="lfc r${c?c.r:0} psCard" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}</span></span>
+  <div class="psWho"><b>${esc(p.name)}</b><small>${p.pos} · ${esc(T.city+' '+T.name)}</small></div></div>
+  <div class="psGrid">${g.map(([k,v])=>box(k,v)).join('')}</div></div>`;
+ $('lnHint').textContent='';lfFit()}
+$('cards').addEventListener('click',e=>{if(lfTab!=='stats')return;const b=e.target.closest('.psBack');if(b){psOpen=null;lineupRender();return}
+ const r=e.target.closest('[data-ps]');if(r){psOpen=r.dataset.ps;lineupRender()}});
 // ---------- offline: the game runs from the stored copy without a connection. Say so when the connection drops or comes back,
 // mark multiplayer as needing one, and push any account save once it's back ----------
 {const t=$('netToast');let tm=0,tm2=0;
@@ -7892,7 +7958,7 @@ function roomKitRestore(id){if((id==='scrMulti'||id==='scrMain'||id==='scrSingle
 // The device keeps working offline exactly as before; each change is pushed to the player's row in `saves` a few
 // seconds later. Signing in on a device that already has guest progress uploads it, unless the account already
 // has a different save, in which case the player chooses which one to keep.
-const SAVE_KEYS=['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-opts2','pd-wallet','pd-myteam','pd-history'];
+const SAVE_KEYS=['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-opts2','pd-wallet','pd-myteam','pd-history','pd-pstats'];
 const ACC={user:null,state:'out',msg:'',pushT:0,busy:false,cloud:null,name:'',pick:false,mode:'up',nameAt:null};
 const accMeta=()=>{try{return JSON.parse(localStorage.getItem('pd-acct')||'{}')}catch(e){return{}}};
 const accSetMeta=m=>{try{RAW_SET('pd-acct',JSON.stringify(m))}catch(e){}};
@@ -8096,7 +8162,7 @@ function mlInPlay(r,runs){let code=ML_RES[r.code]||'OTHER';if(code==='GO'&&/^Sac
  mlDone(code,code==='E'||code==='DP'?0:runs)}
 // the game is over: close what's open and keep the final line
 function mlEnd(){if(!ML)return null;if(ML.fin)return ML;if(ML.cur)mlClose('OTHER',0);ML.sched=S.schedInn||ML.sched;
- ML.fin={home:S.runs,away:S.target,inn:S.inning,line:{home:S.youLine.slice(),away:S.oppLine.slice()}};ML.secs=Math.round((Date.now()-ML.t0)/1000);return ML}
+ ML.fin={home:S.runs,away:S.target,inn:S.inning,line:{home:S.youLine.slice(),away:S.oppLine.slice()}};ML.secs=Math.round((Date.now()-ML.t0)/1000);try{psRecord(ML)}catch(e){}return ML}
 // the part both phones must agree on exactly: every discrete fact, no floating-point measurements
 function mlCore(m){return{v:m.v,sched:m.sched,home:m.home,away:m.away,fin:m.fin,
  pa:m.pa.map(c=>[c.i,c.h,c.bs,c.bk,c.pk,c.ob,c.bb,c.r,c.rbi,c.rs,c.om,c.p.map(p=>[p.k,p.mph,p.z,p.w,p.o])])}}
@@ -8114,7 +8180,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='94c2371aac',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='5052fb116b',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

@@ -1587,3 +1587,24 @@ body.gPause #title{z-index:60;pointer-events:auto}
 .fpTiles{grid-template-columns:1fr}
 /* REMOVE FRIEND: a small text button, not a full-size one */
 .frMore{grid-template-columns:1fr auto;align-items:center}.frMore .mbtn[data-rm]{font-size:10px;padding:6px 10px;opacity:.8;min-height:0;letter-spacing:.06em}
+/* Team > STATS: two tables, then a page per player */
+.lnTabs{grid-template-columns:1fr 1.25fr .8fr}
+.psWrap{display:flex;flex-direction:column;gap:12px;width:100%;max-width:760px;margin:0 auto}
+.psSub{margin:0;text-align:center;font-family:var(--f-hud);font-size:12px;letter-spacing:.1em;color:var(--dim)}
+.psT{width:100%;border-collapse:collapse;font-family:var(--f-hud);font-size:13px;background:var(--edge);border:2px solid var(--panel-hi)}
+.psT th{padding:8px 4px;font-weight:400;font-size:11px;letter-spacing:.08em;color:var(--amber);text-align:right;border-bottom:2px solid var(--panel-hi)}
+.psT th:first-child{text-align:left;padding-left:10px}
+.psT td{padding:7px 4px;text-align:right;color:var(--chalk);border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap}
+.psT td:last-child,.psT th:last-child{padding-right:10px}
+.psT tbody tr{cursor:pointer}.psT tbody tr:hover td{background:rgba(255,255,255,.04)}
+.psNm{text-align:left!important;padding-left:10px!important;max-width:0;width:44%;overflow:hidden}
+.psNm b{font-weight:400;color:#fff;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 30px);vertical-align:middle}.psNm small{margin-left:6px;color:var(--dim);font-size:10px;vertical-align:middle}
+.psPage{display:flex;flex-direction:column;gap:12px;width:100%;max-width:640px;margin:0 auto}
+.psBack{align-self:flex-start;font-size:12px;padding:8px 12px}
+.psHead{display:flex;align-items:center;gap:16px}
+.psCard{width:110px;flex:none;pointer-events:none}
+.psWho{display:flex;flex-direction:column;gap:4px;min-width:0}.psWho b{font-family:var(--f-px);font-weight:400;font-size:20px;color:#fff;transform:skewX(-8deg)}.psWho small{font-family:var(--f-hud);font-size:12px;letter-spacing:.08em;color:var(--dim)}
+.psGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px;min-width:0}.psPage,.psWrap{min-width:0;box-sizing:border-box}
+.psGrid div{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;background:var(--edge);border:2px solid var(--panel-hi)}
+.psGrid b{font-family:var(--f-px);font-weight:400;font-size:17px;color:var(--chalk)}.psGrid span{font-family:var(--f-hud);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+@media (max-width:420px){.psT{font-size:12px}.psNm small{display:none}.psNm b{max-width:100%}.psGrid{grid-template-columns:repeat(4,minmax(0,1fr))}.psGrid b{font-size:15px}}

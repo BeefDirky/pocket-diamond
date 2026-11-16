@@ -37,7 +37,7 @@ function mlInPlay(r,runs){let code=ML_RES[r.code]||'OTHER';if(code==='GO'&&/^Sac
  mlDone(code,code==='E'||code==='DP'?0:runs)}
 // the game is over: close what's open and keep the final line
 function mlEnd(){if(!ML)return null;if(ML.fin)return ML;if(ML.cur)mlClose('OTHER',0);ML.sched=S.schedInn||ML.sched;
- ML.fin={home:S.runs,away:S.target,inn:S.inning,line:{home:S.youLine.slice(),away:S.oppLine.slice()}};ML.secs=Math.round((Date.now()-ML.t0)/1000);return ML}
+ ML.fin={home:S.runs,away:S.target,inn:S.inning,line:{home:S.youLine.slice(),away:S.oppLine.slice()}};ML.secs=Math.round((Date.now()-ML.t0)/1000);try{psRecord(ML)}catch(e){}return ML}
 // the part both phones must agree on exactly: every discrete fact, no floating-point measurements
 function mlCore(m){return{v:m.v,sched:m.sched,home:m.home,away:m.away,fin:m.fin,
  pa:m.pa.map(c=>[c.i,c.h,c.bs,c.bk,c.pk,c.ob,c.bb,c.r,c.rbi,c.rs,c.om,c.p.map(p=>[p.k,p.mph,p.z,p.w,p.o])])}}
