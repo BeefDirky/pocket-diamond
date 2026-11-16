@@ -1555,3 +1555,11 @@ body.gPause #title{z-index:60;pointer-events:auto}
  .boRow .lfc .lfNm{font-size:12px}.boRow .lfc .lfPos{font-size:11.5px}
 }
 @media (min-width:721px){.lfField .lfc .lfNm{font-size:clamp(11px,2.6cqw,18px)}.lfField .lfc .lfPos{font-size:clamp(10px,2.35cqw,16px)}}
+/* no cards of this kind yet: a row of empty card slots with the note on top */
+.lfTray:has(.lfHole){position:relative}
+.lfTray .lfc.lfHole{display:block;height:140px;flex-shrink:0;border:2px dashed rgba(241,236,220,.38);background:rgba(255,255,255,.05);box-shadow:none;pointer-events:none}
+.lfTray .lfEmpty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 24px;margin:0;
+ font-size:14px;color:var(--chalk);text-shadow:0 2px 0 #000,0 0 8px #000;pointer-events:none}
+@media (min-width:721px){.lfTray .lfc.lfHole{height:170px}}
+.lfTray .lfEmpty{left:0;right:0;width:auto;max-width:none}
+@media (min-width:721px){.lfTray:has(.lfHole){flex-wrap:nowrap;overflow:hidden}.lfTray .lfEmpty{font-size:16px}}
