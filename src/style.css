@@ -1492,3 +1492,19 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 body.gPause .app>*:not(.stage),body.gPause .stage>*:not(#title):not(#upd){pointer-events:none!important;filter:blur(3px) brightness(.8)}
 body.gPause #title{z-index:60;pointer-events:auto}
 .mmSpons[hidden]{display:none!important}/* sponsors is switched off for now (remove hidden on the button to bring it back); feedback then sits alone, the same width as one of the small buttons, centered */.mmPair:has(.mmSpons[hidden]){grid-template-columns:1fr 1fr}.mmPair:has(.mmSpons[hidden]) .mmFb{grid-column:1 / span 2;justify-self:center;width:calc(50% - 6px)}
+/* TEAM and SHOP: bigger than the other small buttons. TEAM wears a pixel paint swirl (drawn in 23n-menu-art.js), SHOP is holographic */
+#scrMain .mmSm.mmInv,#scrMain .mmSm.mmShop{padding:24px 10px;font-size:16px;letter-spacing:.12em;overflow:visible}
+.menuMain .mmSm.mmInv,.menuMain .mmSm.mmShop{padding:20px 8px;font-size:15px}
+#scrMain .mmSm.mmInv,#scrMain .mmSm.mmInv.mmNew{background-color:#1b4f96;background-size:100% 100%;background-repeat:no-repeat;image-rendering:pixelated;color:#fff!important;
+ text-shadow:2px 0 #0b130e,-2px 0 #0b130e,0 2px #0b130e,0 -2px #0b130e,2px 2px #0b130e,-2px -2px #0b130e,2px -2px #0b130e,-2px 2px #0b130e;border-color:#0b130e;box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--maEdge,#c7871a)}
+#scrMain .mmSm.mmInv.mmNew{animation:mmNewT 1.6s ease-in-out infinite}
+@keyframes mmNewT{0%,100%{box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--maEdge,#c7871a),0 0 0 0 rgba(242,190,85,0)}50%{box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--maEdge,#c7871a),0 0 0 5px rgba(242,190,85,.4)}}
+#scrMain .mmSm.mmShop{color:#fff!important;border-color:#0b130e;isolation:isolate;
+ background:linear-gradient(120deg,#ff5fa2,#ffc23d,#4dff9a,#3fb8ff,#9a6bff,#ff5fa2) 0 0/300% 100%;animation:shopHolo 6s linear infinite;
+ text-shadow:2px 0 #0b130e,-2px 0 #0b130e,0 2px #0b130e,0 -2px #0b130e,2px 2px #0b130e,-2px -2px #0b130e,2px -2px #0b130e,-2px 2px #0b130e;box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px rgba(255,255,255,.7)}
+#scrMain .mmSm.mmShop::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background:repeating-linear-gradient(-45deg,rgba(255,255,255,.18) 0 4px,rgba(255,255,255,0) 4px 10px),linear-gradient(105deg,transparent 30%,rgba(255,255,255,.75) 45%,rgba(255,255,255,.25) 52%,transparent 64%) no-repeat;
+ background-size:auto,250% 100%;animation:shopShine 2.8s ease-in-out infinite}
+@keyframes shopHolo{to{background-position:300% 0}}
+@keyframes shopShine{0%{background-position:0 0,130% 0}60%,100%{background-position:0 0,-130% 0}}
+@media (prefers-reduced-motion:reduce){#scrMain .mmSm.mmShop,#scrMain .mmSm.mmShop::before,#scrMain .mmSm.mmInv.mmNew{animation:none}}
