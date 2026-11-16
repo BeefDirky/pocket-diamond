@@ -32,7 +32,10 @@ function startWindup(kf){closePen();unduckMusic();
  if(S.online&&S.online.inGame&&pitching())netWindup();
  if(pitching()&&!S.auto){S.pitch.q=null;S.meterT0=performance.now();const z=meterZones(),gh=goodHalf(z);$('rmP').hidden=z.pz<=0;$('rmP').style.left=$('rmP').style.right=`${(.5-z.pz)*100}%`;$('rmG').style.left=$('rmG').style.right=`${(.5-gh)*100}%`;$('rmTxt').textContent=z.pz<=0?'GASSED · TAP TO RELEASE':'TAP TO RELEASE';$('relMeter').hidden=false}
 }
-const meterPos=now=>(Math.sin((now-S.meterT0)/1000*Math.PI*1.7-Math.PI/2)+1)/2;
+/* the release meter swings at a different speed for each pitch: the hard stuff is quickest to time, the slow stuff
+   gives you more time (passes across the bar per second; it was 1.7 for every pitch) */
+const METER_RATE={FB:2.05,SP:1.85,SL:1.7,CB:1.5,CH:1.35,KN:1.15};
+const meterPos=now=>(Math.sin((now-S.meterT0)/1000*Math.PI*(METER_RATE[S.pitch&&S.pitch.k]||1.7)-Math.PI/2)+1)/2;
 function releaseTap(){
  if(S.phase!=='windup'||!pitching()||S.pitch.q!=null)return;
  const m=meterPos(performance.now()),{pz,gw}=meterZones(),d=Math.abs(m-.5);
