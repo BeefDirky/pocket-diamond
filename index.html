@@ -1009,13 +1009,11 @@ body.phOver .pauseBtn{display:none!important}
 .lfF,.lfB{display:flex;flex-direction:column;align-items:stretch;padding:3px 3px 2px;border:2px solid var(--rc);box-shadow:0 2px 0 rgba(0,0,0,.55);backface-visibility:hidden;-webkit-backface-visibility:hidden;
  background:linear-gradient(170deg,var(--tj) 0 55%,var(--tc) 55% 100%)}
 .lfB{position:absolute;inset:0;transform:rotateY(180deg);background:#101a15;gap:2px;padding:4px 5px;justify-content:flex-start;text-align:left;overflow:hidden}
-.lfc.r0{--rc:#9aa2a9}.lfc.r1{--rc:#4f9fe0}.lfc.r2{--rc:#a46ef0}.lfc.r3{--rc:#e9e6ff}
+.lfc.r0{--rc:#9aa2a9}.lfc.r1{--rc:#4f9fe0}.lfc.r2{--rc:#a46ef0}.lfc.r3{--rc:#ffd23f}
 .lfc.deck .lfF{background:linear-gradient(170deg,#8d959c,#6c747b)}
 .lfc.deck.r1 .lfF{background:linear-gradient(170deg,#4f8fe0,#2a5fae)}
 .lfc.deck.r2 .lfF{background:linear-gradient(170deg,#9c66ea,#6436b0)}
-.lfc.deck.r3 .lfF,.lfc.deck.r3 .lfB{border-color:transparent;background-clip:padding-box}
-.lfc.deck.r3 .lfF{background:linear-gradient(125deg,#ffd1dc,#ffe9b8,#fff8c9,#d4f7d0,#c9ecff,#d9d2ff,#f6d0ff,#ffd1dc);background-size:300% 300%;animation:holo 6s linear infinite;
- outline:2px solid #fff;outline-offset:-2px;box-shadow:0 2px 0 rgba(0,0,0,.55),0 0 10px rgba(220,215,255,.55)}
+.lfc.deck.r3 .lfF{background:linear-gradient(170deg,#f2c234,#b07d0c)}
 .lfc.deck.r3 .lfF .lfNm,.lfc.deck.r3 .lfF .lfPos{background:rgba(20,24,40,.82)}
 .lfc img{border:1px solid rgba(8,20,14,.7)}
 .lfc .lfOvr{background:#0b1410;color:#fff;border:1px solid var(--rc)}
@@ -1402,15 +1400,16 @@ body.lfDragging .lfc.dropHover.dropNo .lfF{box-shadow:0 0 0 3px #e2603a}
 /* a flipped card hides its OVR tab (it would show through mirrored); the back already shows the rating */
 .lfc .lfOvr{backface-visibility:hidden;-webkit-backface-visibility:hidden}.lfc.flip .lfF .lfOvr{visibility:hidden}
 .lfPen,.lfTray{scroll-snap-type:none!important}
-/* legendary cards in the lineup glow: a rainbow halo that cycles, and a shine that sweeps across the front */
-.lfc.r3 .lfF{position:relative;animation:lgGlow 3s linear infinite}
-.lfc.r3 .lfF::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;mix-blend-mode:screen;
- background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 45%,rgba(255,236,170,.35) 50%,transparent 62%) no-repeat;background-size:250% 100%;animation:lgShine 2.6s ease-in-out infinite}
-.lfc.r3 .lfOvr{animation:lgGlow 3s linear infinite}
-@keyframes lgGlow{0%{box-shadow:0 0 0 2px #ff6b9a,0 0 12px 2px #ff6b9a}25%{box-shadow:0 0 0 2px #ffd23f,0 0 12px 2px #ffd23f}50%{box-shadow:0 0 0 2px #5fe0a0,0 0 12px 2px #5fe0a0}75%{box-shadow:0 0 0 2px #6fb8ff,0 0 12px 2px #6fb8ff}100%{box-shadow:0 0 0 2px #ff6b9a,0 0 12px 2px #ff6b9a}}
+/* legendary cards in the lineup: a gold border and a shine that sweeps across the front. The shine runs on one shared
+   clock (--lgD, set on every redraw in 19c-lineup.js) and is only faded out on a turned card, so flipping a card or
+   redrawing the page never restarts it */
+.lfc.r3 .lfF{position:relative;box-shadow:0 0 0 2px #ffd23f,0 0 10px 1px rgba(255,210,63,.55)}
+.lfc.r3 .lfF::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;mix-blend-mode:screen;transition:opacity .15s;
+ background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.6) 45%,rgba(255,236,170,.4) 50%,transparent 62%) no-repeat;background-size:250% 100%;animation:lgShine 2.6s ease-in-out infinite;animation-delay:var(--lgD,0ms)}
+.lfc.r3 .lfOvr{box-shadow:0 0 0 2px #ffd23f}
 @keyframes lgShine{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
-.lfc.r3.flip .lfF::after{display:none}
-@media (prefers-reduced-motion:reduce){.lfc.r3 .lfF,.lfc.r3 .lfOvr,.lfc.r3 .lfF::after{animation:none}.lfc.r3 .lfF{box-shadow:0 0 0 2px #ffd23f,0 0 12px 2px #ffd23f}}
+.lfc.r3.flip .lfF::after{opacity:0}
+@media (prefers-reduced-motion:reduce){.lfc.r3 .lfF::after{animation:none;opacity:0}}
 /* no scrollbar down the right side of the lineup page (it still scrolls) */
 #title:has(#scrLineup:not([hidden])),#title:has(#scrPlay:not([hidden])){scrollbar-width:none}
 #title:has(#scrLineup:not([hidden]))::-webkit-scrollbar,#title:has(#scrPlay:not([hidden]))::-webkit-scrollbar{display:none}
@@ -7155,7 +7154,7 @@ for(const b of $('lnTabs').children)b.addEventListener('click',()=>{if(lfTab==='
 function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you);
   return `<div class="boSlot"><span class="boNum">${i+1}</span><button type="button" class="lfc bo r${c?c.r:0}${boSel===i?' boSel':''}" data-o="${i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}</span></button></div>`}).join('');
  const keep=lfKeepScroll();$('cards').innerHTML=`<div class="boRow">${row}</div>`;keep();$('lnHint').textContent=boSel==null?(matchMedia('(pointer:fine)').matches?'Drag a hitter to a new spot in the order, or tap two hitters to swap them.':'Tap a hitter, then tap the spot you want him to bat in.'):`Now tap the spot for ${T.lineup[boSel].name}.`;lfFit()}
-function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria-pressed',String(b.dataset.t===lfTab));
+function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()%2600)+'ms');for(const b of $('lnTabs').children)b.setAttribute('aria-pressed',String(b.dataset.t===lfTab));
  $('lnNext').textContent=pregame?'NEXT':'DONE';
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
  lnHold();if(lfTab==='order'){boRender(T,key);return}
@@ -7990,7 +7989,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='ea8d02b534',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='82599d9223',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
