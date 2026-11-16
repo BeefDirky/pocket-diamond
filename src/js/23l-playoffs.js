@@ -20,7 +20,7 @@ function tnBadge(){const s=tnMySeries(),st=TN.st;$('tnBadge').hidden=!(st&&st.st
 async function tnOpen(){showScreen('scrTourney');tnSay('');$('tnBody').innerHTML=frSignedIn()?'<p class="tnLead">Loading…</p>':'';tnRender();await tnLoad();tnRender()}
 $('goTourney').addEventListener('click',()=>{ensureAudio();tnOpen()});
 // ---- the screen ----
-function tnRender(){const B=$('tnBody');if(!frSignedIn()){B.innerHTML=`<p class="tnLead">A friends playoff needs an account, so your friends can find you.</p><button class="big" type="button" data-tn="acct">SIGN IN</button>`;return}
+function tnRender(){const B=$('tnBody');if(!frSignedIn()){B.innerHTML=`<p class="tnLead">A tournament needs an account, so your friends can find you.</p><button class="big" type="button" data-tn="acct">SIGN IN</button>`;return}
  const st=TN.st;
  if(!st){B.innerHTML=`<p class="tnLead">An 8-club bracket you play live with your friends. Invite up to 7; CPU clubs fill the empty spots. Seeds come from ranked ratings. Quarterfinals and semifinals are best of 3, the final best of 5, every game 3 innings. It doesn’t change your rating.</p><button class="big" type="button" data-tn="create">CREATE A PLAYOFF</button>`;return}
  if(st.status==='lobby'){B.innerHTML=tnLobbyHtml(st);return}
@@ -89,7 +89,7 @@ function tnBackFromGame(){const o=S.online;if(o&&o.tn){if(o.nr)try{o.nr.leave()}
 function tnLeaveGame(){const t=S.tnGame;if(!t)return;S.tnGame=null;S.cpuEdge=0;if(S.phase!=='over')tnReport(t,0,1)}
 // ---- invites to a playoff ----
 async function tnInbox(){if(!frSignedIn()||FR.inv||TN.inv||frBusy())return;try{const r=await rpc('tourney_inbox');const p=(Array.isArray(r)?r:[]).find(x=>!TN.seen[x.tid]);if(!p)return;TN.seen[p.tid]=1;TN.inv=p;
- $('frInvTxt').innerHTML=`<b>${esc(p.host_name)}</b> invited you to a friends playoff (${p.players}/8 in)`;$('frInvite').hidden=false;$('frInvite').dataset.kind='tn';try{sfx('pop')}catch(e){}}catch(e){}}
+ $('frInvTxt').innerHTML=`<b>${esc(p.host_name)}</b> invited you to a tournament (${p.players}/8 in)`;$('frInvite').hidden=false;$('frInvite').dataset.kind='tn';try{sfx('pop')}catch(e){}}catch(e){}}
 $('frInvGo').addEventListener('click',async e=>{const p=TN.inv;if(!p||$('frInvite').dataset.kind!=='tn')return;e.stopImmediatePropagation();TN.inv=null;$('frInvite').hidden=true;$('frInvite').dataset.kind='';
  try{await rpc('tourney_respond',{p_tid:p.tid,p_accept:true,p_club:MYTEAM?MYTEAM.club:S.you});track('playoff_join')}catch(err){tnOpen().then(()=>tnSay(tnErr(err),true));return}tnOpen()},true);
 $('frInvNo').addEventListener('click',e=>{const p=TN.inv;if(!p||$('frInvite').dataset.kind!=='tn')return;e.stopImmediatePropagation();TN.inv=null;$('frInvite').hidden=true;$('frInvite').dataset.kind='';rpc('tourney_respond',{p_tid:p.tid,p_accept:false,p_club:null}).catch(()=>{})},true);

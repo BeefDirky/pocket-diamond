@@ -1509,6 +1509,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 .hsEmpty{text-align:center;color:var(--dim);font-size:14px;padding:16px}
 .app.deskApp .hsWho b{font-size:17px}.app.deskApp .hsWho small{font-size:12px}
 .acInfo dd{word-break:normal;overflow-wrap:break-word}#acWho{overflow-wrap:anywhere}
+.mpPick .mpTn{grid-column:1/-1;position:relative}
 </style>
 
 <div class="app">
@@ -1833,14 +1834,14 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
         <div class="mpPick">
           <button class="mode" id="goRanked" type="button"><b>RANKED</b></button>
           <button class="mode alt" id="goCustom" type="button"><b>CUS<i class="kT">T</i>OM</b></button>
+          <button class="mode po mpTn" id="goTourney" type="button"><b>TOURNAMENT</b><span class="frBadge" id="tnBadge" hidden>!</span></button>
         </div>
-        <button class="mbtn mpBoard mpPO" id="goTourney" type="button">FRIENDS PLAYOFF<span class="frBadge" id="tnBadge" hidden>!</span></button>
         <div class="mpRow mp3"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button><button class="mbtn mpBoard" type="button" data-hist="scrMulti">HISTORY</button></div>
         <p class="mpNote" id="mpNote" hidden></p>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
       <div class="card wide" id="scrTourney" hidden>
-        <h1>FRIENDS <span>PLAYOFF</span></h1>
+        <h1>TOURNA<span>MENT</span></h1>
         <p class="frMsg" id="tnMsg" aria-live="polite"></p>
         <div id="tnBody"></div>
         <button class="mbtn back" type="button" data-go="scrMulti">Back</button>
@@ -7957,7 +7958,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='509f7c3d7a',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='5086ee68d7',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8517,7 +8518,7 @@ function tnBadge(){const s=tnMySeries(),st=TN.st;$('tnBadge').hidden=!(st&&st.st
 async function tnOpen(){showScreen('scrTourney');tnSay('');$('tnBody').innerHTML=frSignedIn()?'<p class="tnLead">Loading…</p>':'';tnRender();await tnLoad();tnRender()}
 $('goTourney').addEventListener('click',()=>{ensureAudio();tnOpen()});
 // ---- the screen ----
-function tnRender(){const B=$('tnBody');if(!frSignedIn()){B.innerHTML=`<p class="tnLead">A friends playoff needs an account, so your friends can find you.</p><button class="big" type="button" data-tn="acct">SIGN IN</button>`;return}
+function tnRender(){const B=$('tnBody');if(!frSignedIn()){B.innerHTML=`<p class="tnLead">A tournament needs an account, so your friends can find you.</p><button class="big" type="button" data-tn="acct">SIGN IN</button>`;return}
  const st=TN.st;
  if(!st){B.innerHTML=`<p class="tnLead">An 8-club bracket you play live with your friends. Invite up to 7; CPU clubs fill the empty spots. Seeds come from ranked ratings. Quarterfinals and semifinals are best of 3, the final best of 5, every game 3 innings. It doesn’t change your rating.</p><button class="big" type="button" data-tn="create">CREATE A PLAYOFF</button>`;return}
  if(st.status==='lobby'){B.innerHTML=tnLobbyHtml(st);return}
@@ -8586,7 +8587,7 @@ function tnBackFromGame(){const o=S.online;if(o&&o.tn){if(o.nr)try{o.nr.leave()}
 function tnLeaveGame(){const t=S.tnGame;if(!t)return;S.tnGame=null;S.cpuEdge=0;if(S.phase!=='over')tnReport(t,0,1)}
 // ---- invites to a playoff ----
 async function tnInbox(){if(!frSignedIn()||FR.inv||TN.inv||frBusy())return;try{const r=await rpc('tourney_inbox');const p=(Array.isArray(r)?r:[]).find(x=>!TN.seen[x.tid]);if(!p)return;TN.seen[p.tid]=1;TN.inv=p;
- $('frInvTxt').innerHTML=`<b>${esc(p.host_name)}</b> invited you to a friends playoff (${p.players}/8 in)`;$('frInvite').hidden=false;$('frInvite').dataset.kind='tn';try{sfx('pop')}catch(e){}}catch(e){}}
+ $('frInvTxt').innerHTML=`<b>${esc(p.host_name)}</b> invited you to a tournament (${p.players}/8 in)`;$('frInvite').hidden=false;$('frInvite').dataset.kind='tn';try{sfx('pop')}catch(e){}}catch(e){}}
 $('frInvGo').addEventListener('click',async e=>{const p=TN.inv;if(!p||$('frInvite').dataset.kind!=='tn')return;e.stopImmediatePropagation();TN.inv=null;$('frInvite').hidden=true;$('frInvite').dataset.kind='';
  try{await rpc('tourney_respond',{p_tid:p.tid,p_accept:true,p_club:MYTEAM?MYTEAM.club:S.you});track('playoff_join')}catch(err){tnOpen().then(()=>tnSay(tnErr(err),true));return}tnOpen()},true);
 $('frInvNo').addEventListener('click',e=>{const p=TN.inv;if(!p||$('frInvite').dataset.kind!=='tn')return;e.stopImmediatePropagation();TN.inv=null;$('frInvite').hidden=true;$('frInvite').dataset.kind='';rpc('tourney_respond',{p_tid:p.tid,p_accept:false,p_club:null}).catch(()=>{})},true);
