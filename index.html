@@ -7922,7 +7922,7 @@ for(const id of['acEmail','acPass','acUser'])$(id).addEventListener('keydown',e=
 $('acSwap').addEventListener('click',()=>{ACC.mode=ACC.mode==='in'?'up':'in';ACC.msg='';acRender();$('acEmail').focus()});
 // progress saves itself a few seconds after anything changes, and when the app goes to the background
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&ACC.user&&(accMeta().localAt||0)>(accMeta().pushedAt||0)){clearTimeout(ACC.pushT);accPush()}});
-$('acSignOut').addEventListener('click',async()=>{clearTimeout(ACC.pushT);if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut();ACC.user=null;ACC.name='';ACC.pick=false;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
+$('acSignOut').addEventListener('click',async()=>{if(!(await pdConfirm('SIGN OUT?','Are you sure you want to sign out?<br>Your progress is saved to your account.','YES, SIGN OUT','NO')))return;clearTimeout(ACC.pushT);try{if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut()}catch(e){}/* (offline: still signed out here) */ACC.user=null;ACC.name='';ACC.pick=false;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
 // leaving the page: get the last changes up if we can
 addEventListener('visibilitychange',()=>{if(document.hidden&&ACC.user&&(accMeta().localAt||0)>(accMeta().pushedAt||0))accPush()});
 // a remembered session (or a confirmation/reset link) loads the client right away; guests never load it
@@ -8058,7 +8058,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='08187375e6',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='94ed344053',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8888,6 +8888,12 @@ $('dgOut').addEventListener('click',async()=>{DG.hidden=true;DV.pend=null;clearT
 setInterval(()=>{if(DV.pend&&!$('title').hidden){const[k,i]=DV.pend;devShow(k,i)}
  if(ACC.user&&(DV.uid!==ACC.user.id||Date.now()-DV.at>20000))devCheck()},2000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ACC.user){DV.at=0;devCheck()}});
+/* a yes / no question in its own box over everything (resolves true for yes) */
+function pdConfirm(head,html,yes,no){return new Promise(res=>{const w=document.createElement('div');w.className='devGate';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
+ w.innerHTML=`<div class="dgBox"><h3>${head}</h3><p>${html}</p><button type="button" class="big" data-a="1">${yes||'YES'}</button><button type="button" class="mbtn" data-a="0">${no||'NO'}</button></div>`;
+ const done=v=>{w.remove();removeEventListener('keydown',k,true);res(v)},k=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(false)}};
+ w.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)done(b.dataset.a==='1');else if(e.target===w)done(false)});addEventListener('keydown',k,true);
+ document.body.appendChild(w);try{sfx('pop')}catch(e){}w.querySelector('[data-a="0"]').focus()})}
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'],FA_POW_CAP=[70,80,85,95];
 let CARDS=[],CARD_BY={};

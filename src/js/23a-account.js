@@ -89,7 +89,7 @@ for(const id of['acEmail','acPass','acUser'])$(id).addEventListener('keydown',e=
 $('acSwap').addEventListener('click',()=>{ACC.mode=ACC.mode==='in'?'up':'in';ACC.msg='';acRender();$('acEmail').focus()});
 // progress saves itself a few seconds after anything changes, and when the app goes to the background
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&ACC.user&&(accMeta().localAt||0)>(accMeta().pushedAt||0)){clearTimeout(ACC.pushT);accPush()}});
-$('acSignOut').addEventListener('click',async()=>{clearTimeout(ACC.pushT);if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut();ACC.user=null;ACC.name='';ACC.pick=false;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
+$('acSignOut').addEventListener('click',async()=>{if(!(await pdConfirm('SIGN OUT?','Are you sure you want to sign out?<br>Your progress is saved to your account.','YES, SIGN OUT','NO')))return;clearTimeout(ACC.pushT);try{if((accMeta().localAt||0)>(accMeta().pushedAt||0))await accPush();const c=await supaClient();await c.auth.signOut()}catch(e){}/* (offline: still signed out here) */ACC.user=null;ACC.name='';ACC.pick=false;ACC.msg='Signed out. Your progress stays on this device.';acRender()});
 // leaving the page: get the last changes up if we can
 addEventListener('visibilitychange',()=>{if(document.hidden&&ACC.user&&(accMeta().localAt||0)>(accMeta().pushedAt||0))accPush()});
 // a remembered session (or a confirmation/reset link) loads the client right away; guests never load it
