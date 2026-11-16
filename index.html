@@ -1649,6 +1649,19 @@ body.gPause #title{z-index:60;pointer-events:auto}
 #scrLineup #lnHint{align-self:stretch;max-width:none}
 @media (min-width:721px){#scrLineup .lnNav .lnTeamBar .mbtn{font-size:13px;padding:10px 16px}#scrLineup .lnNav .lnTeamBar{margin-left:10px}}
 @media (max-width:380px){#scrLineup>.lnTop h1{font-size:13px}#scrLineup #lnNext{font-size:10px;padding:0 7px;height:44px}#scrLineup.hasX>.lnTop{padding-left:54px;padding-right:62px}}
+/* all five nav buttons the same size and type: one grid (PC: five equal columns; phone: three tabs, then two buttons) */
+#scrLineup .lnNav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;max-width:900px;margin:0 auto}
+#scrLineup .lnNav .lnTabs,body.lnTeam #scrLineup .lnNav .lnTeamBar{display:contents}
+#scrLineup .lnNav button{width:100%;min-width:0;height:48px;padding:0 6px;margin:0;font-family:inherit;font-size:15px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1}
+#scrLineup .lnNav .lnTeamBar .mbtn{font-size:15px;padding:0 6px;margin:0}
+body:not(.lnTeam) #scrLineup .lnNav{grid-template-columns:repeat(3,minmax(0,1fr));max-width:540px}
+@media (max-width:720px){#scrLineup .lnNav{grid-template-columns:repeat(6,minmax(0,1fr))}
+ #scrLineup .lnNav .lnTabs button{grid-column:span 2}#scrLineup .lnNav .lnTeamBar .mbtn{grid-column:span 3}
+ #scrLineup .lnNav button,#scrLineup .lnNav .lnTeamBar .mbtn{height:44px;font-size:13px}
+ body:not(.lnTeam) #scrLineup .lnNav{grid-template-columns:repeat(6,minmax(0,1fr))}}
+#scrLineup .lnNav button{font-size:15px!important}
+@media (max-width:720px){#scrLineup .lnNav button{font-size:13px!important}}
+#scrLineup .lnNav .lnTeamBar .mbtn{border-color:var(--edge)}
 </style>
 
 <div class="app">
