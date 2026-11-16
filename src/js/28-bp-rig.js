@@ -64,6 +64,7 @@ function drawDust(g,now){const dt=Math.min(.05,(now-(dustT||now))/1000);dustT=no
  for(const d of DUST){d.m+=dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.vy+=70*dt;d.vx*=.92;const a=Math.max(0,1-d.m/d.life);if(a<=0)continue;g.globalAlpha=a*.85;g.fillStyle=d.c;g.fillRect(Math.round(d.x),Math.round(d.y),d.s||2,d.s||2)}
  g.globalAlpha=1;DUST=DUST.filter(d=>d.m<d.life)}
 // light towers: on all night, off by day; after a home run each bank blinks off and on, one after another
+const DIVE_UP=.5;/* seconds a diver stays down after the play before he stands */
 function towerOn(i,now){const s=S.lightShow,base=!!S.night;if(!s)return base;const t=now-s-i*380;if(t<0||t>4400)return base;return Math.floor(t/440)%2===(base?0:1)?!base:base}
 // paint each bank's lamp face for its current state over the static signage
 function drawTowerLamps(g,now){if(!S.lightShow)return;for(const[i,t]of TOWERS.entries()){const on=towerOn(i,now);if(on===!!S.night)continue;
@@ -179,7 +180,9 @@ function render(now){
   // during the play they follow it; once the result shows (SINGLE, DOUBLE...) they walk back to their spots right away
   // instead of holding the last frame and jogging in place
   if(inPlay&&ph!=='result')p=fpos(play,i,t);
-  else if((ph==='result'||ph==='reset')&&play&&!play.foul){const a=fpos(play,i,play.end),el=Math.max(0,(now-(S.postAt||now))/1000),off=S.postOff,tgt=off?{x:off*84+(i-4)*3,y:14+i}:POS[i];
+  else if((ph==='result'||ph==='reset')&&play&&!play.foul){const a=fpos(play,i,play.end),off=S.postOff,
+    /* a fielder who ended the play on the ground (a diving catch) stays down a moment, gets up, then walks back */
+    el=Math.max(0,(now-(S.postAt||now))/1000-(play.dive&&play.dive.i===i&&play.end<=play.dive.t+.95?DIVE_UP:0)),tgt=off?{x:off*84+(i-4)*3,y:14+i}:POS[i];
    const d=dist(a,tgt),m=Math.min(d,el*(off?9:i>=6?15:11)*SPEED);p=d>.01?{x:a.x+(tgt.x-a.x)*m/d,y:a.y+(tgt.y-a.y)*m/d}:{...tgt};
    if(ph==='reset'&&!off){const k=ease(clamp((S.pt-260)/240,0,1));p={x:lerp(p.x,POS[i].x,k),y:lerp(p.y,POS[i].y,k)}}
    p.mv=d-m>1&&!(ph==='reset'&&S.pt>260&&!off)}
@@ -210,7 +213,7 @@ function render(now){
     if(e<580)pT=1+e/1055;else{legs='ready';arms='ready'}}
    else if(ph==='ready'){legs='stand';arms=S.pt>350?'set':'down'}
   }
-  const dv=inPlay&&play.dive&&play.dive.i===i&&t>=play.dive.t-.24&&t<=play.dive.t+.95?play.dive:null;
+  const dv=inPlay&&play.dive&&play.dive.i===i&&t>=play.dive.t-.24&&t<=play.dive.t+.95&&!(ph==='result'&&(now-(S.postAt||now))/1000>DIVE_UP)?play.dive:null;
   if(dv||(inPlay&&play.jump&&play.jump.i===i&&t>play.jump.t-.32&&t<play.jump.t+.3))FGL[i]=null;/* (a dive or leap draws its own glove) */
   if(dv){const lf=t<dv.t?Math.sin((t-(dv.t-.24))/.24*Math.PI/2)*4:0;add(q.y,()=>drawDiver(wg,q.x,q.y,fld,{skin,pants:fldPants},dv.dir,lf));continue}
   const jp=inPlay&&play.jump&&play.jump.i===i&&t>play.jump.t-.32&&t<play.jump.t+.3?play.jump:null;
