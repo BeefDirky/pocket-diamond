@@ -1639,3 +1639,21 @@ body:not(.lnTeam) #scrLineup .lnNav{grid-template-columns:repeat(3,minmax(0,1fr)
 #scrLineup .lnNav button{font-size:15px!important}
 @media (max-width:720px){#scrLineup .lnNav button{font-size:13px!important}}
 #scrLineup .lnNav .lnTeamBar .mbtn{border-color:var(--edge)}
+/* Positions: FIELDERS / PITCHERS switch, and the pitchers board (five-man rotation over the bullpen) */
+.lfModes{display:grid;grid-template-columns:1fr 1fr;width:min(360px,100%);margin:0 auto 8px}.lfModes button{padding:8px 6px;font-size:13px}
+.lfWrap.noSide{grid-template-columns:minmax(0,1fr)}
+.lfField.lfStaff{aspect-ratio:auto;max-width:900px;width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 10px 16px;box-sizing:border-box;
+ background:linear-gradient(180deg,#1f5a34,#17462a);background-size:auto;image-rendering:auto}
+.lfStaff h5{margin:0;font-family:var(--f-hud);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--amber);text-align:center}
+.lfStaff .lfRow{display:flex;justify-content:center;gap:10px;width:100%;flex-wrap:nowrap}
+.lfStaff .lfRow .lfc,.lfStaff .lfRotSlot{width:min(104px,calc((100% - 40px) / 5));flex:0 0 auto}
+.lfStaff .lfRotSlot .lfc{width:100%}
+.lfRotSlot{position:relative;padding-top:14px}
+.lfRotSlot .lfNext{position:absolute;top:0;left:50%;transform:translateX(-50%);white-space:nowrap;font-style:normal;font-family:var(--f-hud);font-size:9px;letter-spacing:.08em;color:#14110a;background:var(--amber);padding:1px 5px}
+.lfRotSlot:not(.next){padding-top:14px}
+.lfStaff .lfCap{margin:0 0 6px;font-size:12px;color:#d7e6da;text-align:center;opacity:.8}
+@media (max-width:720px){.lfStaff .lfRow{gap:4px}.lfStaff .lfRow .lfc,.lfStaff .lfRotSlot{width:calc((100% - 16px) / 5)}.lfRotSlot .lfNext{font-size:7px;padding:1px 3px}.lfField.lfStaff{padding:10px 6px 12px}}
+.lfStaff .lfRow .lfRotSlot .lfc{width:100%}
+#scrLineup .lfField.lfStaff{aspect-ratio:auto!important;height:auto!important;max-height:none!important}
+.lfRotSlot,.lfRotSlot:not(.next){padding-top:0;padding-bottom:16px}
+.lfRotSlot .lfNext{top:auto;bottom:0}

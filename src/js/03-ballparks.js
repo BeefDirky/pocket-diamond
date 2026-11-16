@@ -58,7 +58,13 @@ function buildRosters(){
   // knuckleballers: rare, only three in the league
   if(['busan','daejeon','changwon'].includes(k)){const kn=T.staff.find(x=>x.pos==='RP'&&!x.type);if(kn){kn.type='knuckle';kn.vel=Math.min(kn.vel,62);kn.mov=Math.max(kn.mov,88)}}
   // arsenals: starters carry four pitches, relievers three
-  for(const p of T.staff)p.ars=arsFor(p,k);
+  /* the rest of the five-man rotation: four more starters (the next four to start, in order) */
+  {const pr3=mulberry32(hash(k+'rot')),SUR=['KIM','LEE','PARK','CHOI','JUNG','KANG','CHO','YOON','JANG','LIM','HAN','OH','SEO','SHIN','KWON','HWANG','AHN','SONG','JEON','HONG','YOO','KO','MOON','YANG','BAE','BAEK','NAM','NOH','HA','GO'],INI='BCDGHJKMSWY',VOW=['A','E','H','J','K','M','S','W','Y'];
+   const have=new Set([...T.staff.map(x=>x.name),...T.lineup.map(x=>x.name)]);T.rot=[];
+   while(T.rot.length<4){const nm=`${SUR[Math.floor(pr3()*SUR.length)]} ${INI[Math.floor(pr3()*INI.length)]}.${VOW[Math.floor(pr3()*VOW.length)]}.`;if(have.has(nm))continue;have.add(nm);
+    const hand=pr3()<.3?'L':'R',slot=pr3()<.15?'side':'over',q=v=>clamp(Math.round(v+(pr3()*24-12)),40,95);let n;do{n=1+Math.floor(pr3()*89)}while(used.has(n));used.add(n);
+    T.rot.push({name:nm,hand,thr:hand,slot,pos:'SP',no:n,vel:q(slot==='side'?78:85),mov:q(slot==='side'?80:70),ctl:q(68),def:q(55)})}}
+  for(const p of[...T.staff,...T.rot])p.ars=arsFor(p,k);
  }
 }
 /* a speed demon: any pitcher with velocity 90 or more (a knuckleballer never is) */

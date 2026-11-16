@@ -11,10 +11,10 @@ const CLUB_SWITCH_COST=0;// free for now (the code still handles a price)
 const PRISTINE={},BASE_OF={};
 if(MYTEAM)S.you=MYTEAM.club;
 // right after the rosters are built: remember them, then move your players onto your brand
-function myTeamApply(){for(const k of ORDER){const T=TEAMS[k];PRISTINE[k]={L:T.lineup.slice(),P:T.staff.slice()};BASE_OF[k]=k}
+function myTeamApply(){for(const k of ORDER){const T=TEAMS[k];PRISTINE[k]={L:T.lineup.slice(),P:T.staff.slice(),R:(T.rot||[]).slice()};BASE_OF[k]=k}
  if(!MYTEAM||!TEAMS[MYTEAM.club]||!TEAMS[MYTEAM.base]){if(MYTEAM&&(!TEAMS[MYTEAM.club]||!TEAMS[MYTEAM.base]))MYTEAM.base=MYTEAM.club=TEAMS[MYTEAM.club]?MYTEAM.club:'busan';return}
  const a=TEAMS[MYTEAM.club],b=TEAMS[MYTEAM.base];if(a===b)return;
- for(const f of['lineup','staff','pitcher'])[a[f],b[f]]=[b[f],a[f]];
+ for(const f of['lineup','staff','pitcher','rot'])[a[f],b[f]]=[b[f],a[f]];
  BASE_OF[MYTEAM.club]=MYTEAM.base;BASE_OF[MYTEAM.base]=MYTEAM.club}
 // your roster as an online roster spec (whatever kit you wear in a room)
 const myRosterSpec=()=>rosterSpec(MYTEAM?MYTEAM.club:S.you);
