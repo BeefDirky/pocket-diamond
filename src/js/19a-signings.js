@@ -5,7 +5,7 @@ let SIGN={};try{SIGN=JSON.parse(localStorage.getItem('pd-signings')||'{}')||{}}c
 const saveSign=()=>{try{localStorage.setItem('pd-signings',JSON.stringify(SIGN))}catch(e){}};
 function snapOrig(){for(const k of ORDER){const T=TEAMS[k];if(!T.orig)T.orig={L:T.lineup.slice(),P:T.staff.slice(),R:(T.rot||[]).slice()}}}
 function signClone(c,base,lvSpec){const p={...c.p,...cardEff(c,lvSpec)},q={name:p.name,hand:p.hand,thr:p.thr||p.hand,pos:base.pos,natPos:p.pos,no:base.no,signed:c.id,
-  con:p.con,pow:p.pow,spd:p.spd,def:p.def==null?60:p.def,vel:p.vel,mov:p.mov,ctl:p.ctl,slot:p.slot||'over',type:p.type,bat:p.bat||base.bat||'#d9b07a'};
+  con:p.con,pow:p.pow,spd:p.spd,def:p.def==null?60:p.def,vel:p.vel,mov:p.mov,ctl:p.ctl,slot:p.slot||'over',type:p.type,cp:!!p.cp,bat:p.bat||base.bat||'#d9b07a'};
  if(p.skin)SKIN_OVR[q.name]=p.skin;if(lvSpec)q.lvSpec=lvSpec;if(c.pit)q.ars=arsFor({...q,pos:base.pos},c.code||c.k||'fa');return q}
 // where does the original player for this slot live now (lineup order can be shuffled)
 function slotOf(T,orig,pit){const arr=pit?T.staff:T.lineup;return arr.findIndex(p=>p===orig||(p.signedFor===orig.name))}
@@ -22,15 +22,24 @@ function releasePlayer(k,origName,pit){const T=TEAMS[k],orig=pit?origPit(T,origN
 function applySignings(){snapOrig();for(const k in SIGN){if(!TEAMS[k])continue;for(const key in SIGN[k]){const pit=key[0]==='P',nm=key.slice(2),id=SIGN[k][key];
    if(!CARD_BY[id]||!COL.owned[id]){delete SIGN[k][key];continue}signPlayer(k,nm,id,pit,false)}}saveSign();rotApply()}
 const usedCards=k=>new Set([...TEAMS[k].lineup,...(TEAMS[k].benched?[TEAMS[k].benched]:[]),...TEAMS[k].staff,...(TEAMS[k].rot||[])].filter(p=>p&&p.signed).map(p=>p.signed));
-/* ---- the rotation: five starters take turns. After each game your club played (not online), the next one starts ----
-   The order is saved per club ('pd-rot': each slot's original pitcher, today's starter first). */
+/* ---- the rotation: five starters in a set order, the ace first. The ace starts every single game (and every online
+   game); in a series, game 1 goes to the ace, game 2 to the No. 2, and so on round the five. Both clubs work this way.
+   The order is yours to set (drag a starter in Team > Positions > PITCHERS); it's saved per club ('pd-rot'). */
 let ROTO={};try{ROTO=JSON.parse(localStorage.getItem('pd-rot')||'{}')||{}}catch(e){ROTO={}}
 const rotFive=T=>[T.staff[0],...(T.rot||[])];
 const rotName=p=>p.signedFor||p.name;
 function rotSave(k){const T=TEAMS[k];ROTO[k]=rotFive(T).map(rotName);try{localStorage.setItem('pd-rot',JSON.stringify(ROTO));if(typeof accDirty==='function')accDirty()}catch(e){}}
 function rotApply(){for(const k in ROTO){const T=TEAMS[k];if(!T||!T.rot||!Array.isArray(ROTO[k]))continue;const five=rotFive(T),by=n=>five.find(p=>rotName(p)===n);
   const ord=ROTO[k].map(by).filter(Boolean);if(ord.length!==5||new Set(ord).size!==5)continue;T.staff[0]=ord[0];T.rot=ord.slice(1)}}
-function rotAdvance(k){const T=TEAMS[k];if(!T||!T.rot||!T.rot.length)return;const f=rotFive(T);T.staff[0]=f[1];T.rot=[...f.slice(2),f[0]];rotSave(k)}
+/* move a starter to another spot in the order (the rest slide over) */
+function rotMove(k,from,to){const T=TEAMS[k],f=rotFive(T);if(from===to||!f[from]||to<0||to>=f.length)return;const[x]=f.splice(from,1);f.splice(to,0,x);T.staff[0]=f[0];T.rot=f.slice(1);rotSave(k)}
+/* which of the five starts this game: 1 for a single game or online, otherwise the series game number round the five */
+function rotGameIdx(){if(typeof onlineGame==='function'&&onlineGame())return 0;
+ if(S.poGame&&typeof poMySeries==='function'){const sr=poMySeries();if(sr)return(sr.wa+sr.wb)%5}
+ if(S.series&&S.series.len>1)return((S.series.w|0)+(S.series.l|0))%5;return 0}
+/* for this game, the day's starter stands in the ace's spot on the staff; put back when the game ends or you leave */
+function rotUse(){rotRestore();const i=rotGameIdx();if(!i)return;for(const k of[S.you,S.opp]){const T=TEAMS[k];if(!T||!T.rot||!T.rot[i-1])continue;T.rotHold=T.staff[0];T.staff[0]=T.rot[i-1]}}
+function rotRestore(){for(const k of ORDER){const T=TEAMS[k];if(T&&T.rotHold){T.staff[0]=T.rotHold;delete T.rotHold}}}
 /* swap two of the five rotation spots (Team > Positions > PITCHERS: tap two starters) */
 function rotSwap(k,a,b){const T=TEAMS[k],f=rotFive(T);[f[a],f[b]]=[f[b],f[a]];T.staff[0]=f[0];T.rot=f.slice(1);rotSave(k)}
 // ---- online roster spec ----

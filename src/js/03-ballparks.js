@@ -64,6 +64,8 @@ function buildRosters(){
    while(T.rot.length<4){const nm=`${SUR[Math.floor(pr3()*SUR.length)]} ${INI[Math.floor(pr3()*INI.length)]}.${VOW[Math.floor(pr3()*VOW.length)]}.`;if(have.has(nm))continue;have.add(nm);
     const hand=pr3()<.3?'L':'R',slot=pr3()<.15?'side':'over',q=v=>clamp(Math.round(v+(pr3()*24-12)),40,95);let n;do{n=1+Math.floor(pr3()*89)}while(used.has(n));used.add(n);
     T.rot.push({name:nm,hand,thr:hand,slot,pos:'SP',no:n,vel:q(slot==='side'?78:85),mov:q(slot==='side'?80:70),ctl:q(68),def:q(55)})}}
+  /* the closer (CP): the last man in the bullpen, a notch better than the rest */
+  {const cp=T.staff[T.staff.length-1];if(cp&&cp.pos==='RP'){cp.cp=true;for(const f of['vel','mov','ctl'])cp[f]=Math.min(95,cp[f]+5)}}
   for(const p of[...T.staff,...T.rot])p.ars=arsFor(p,k);
  }
 }

@@ -17,6 +17,8 @@ function buildCardDB(){
   /* a free agent's power tops out by rarity: common 70, rare 80, epic 85, legend 95 (a ceiling, not a target) */
   for(const c of F){const cap=FA_POW_CAP[c.r];if(c.p.pow!=null&&c.p.pow>cap){c.p.pow=c.b.pow=cap;c.o=ovr(c.p)}}}
  for(const c of buildBigLeague()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};CARDS.push(c);CARD_BY[c.id]=c}
+ /* closers (CP): the legendary relief cards, so they're the rarer, better relievers */
+ for(const c of CARDS)if(c.set!=='club'&&c.pit&&c.p.pos==='RP'&&c.r>=3)c.p.cp=true
 }
 const ART={};
 function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key];try{return ART[key]=cardArt2(c,tk)}catch(e){console.warn(e)}
@@ -53,7 +55,7 @@ function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],own=COL.owned[c.
   <div class="tcHead"><img alt="" src="${cardLogo(c)}">${c.set==='bl'||c.set==='fa'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(o)}"`}>${lock?'??':o}</span></div>
   <img class="art" alt="" src="${cardArt(c)}">
   <div class="nm">${lock?'???':p.name}</div>
-  <div class="ps"><span>${p.no!=null?'#'+p.no+' ':''}${c.pit?(p.pos==='SP'?'SP':'RP'):p.pos}</span><span>${c.pit?'T':'B'} ${p.hand}</span></div>
+  <div class="ps"><span>${p.no!=null?'#'+p.no+' ':''}${c.pit?(p.pos==='SP'?'SP':p.cp?'CP':'RP'):p.pos}</span><span>${c.pit?'T':'B'} ${p.hand}</span></div>
   <div class="st">${st.map(([k,v,up])=>`<span${up&&!lock?' class="up"':''}>${k}<b${lock||v==null?'':` style="color:${rcol(v)}"`}>${lock||v==null?'–':v}</b></span>`).join('')}</div>
   <div class="rar">${RARITY[c.r]}${tag}</div>
   ${!lock&&own>1&&!opts.noCount?`<em class="cnt">x${own}</em>`:''}${!lock&&n?`<em class="lvB">LV ${n+1}</em>`:''}${opts.isNew?'<em class="new">NEW</em>':''}</div>`}

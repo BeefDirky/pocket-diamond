@@ -1,5 +1,5 @@
 // ---------- game flow ----------
-function startGame(mode){S.gameNo=(S.gameNo||0)+1;if(!onlineGame())applyLevels();tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
+function startGame(mode){S.gameNo=(S.gameNo||0)+1;rotUse();if(!onlineGame())applyLevels();tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
  S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.stamOf={};S.coinGame={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.kLook=[];S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();
@@ -51,7 +51,7 @@ function gameOver(win){if(S.olMenu){S.olMenu=false;$('title').hidden=true;showSc
    if(se.done)$('overT').innerHTML=mw>tw?'<span>SERIES</span> WON':'SERIES LOST';
    $('olSeries').hidden=false;se.tally=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw}`;
    netPresence({rdy:null});nextRender()}}
- histRecord(win,onl);if(!onl&&S.mode!=='bp'&&!S.rkBot)try{rotAdvance(S.you)}catch(e){}/* the next starter in the rotation takes the ball next game */
+ histRecord(win,onl);rotRestore();
  if(!onl&&!S.poGame&&S.mode==='arcade'&&S.series&&S.series.len>1){const se=S.series;if(se.counted!==S.gameNo){se.counted=S.gameNo;win?se.w++:se.l++}
   const need=Math.ceil(se.len/2);se.done=se.w>=need||se.l>=need;$('olSeries').hidden=false;
   if(se.done){$('overT').innerHTML=se.w>se.l?'<span>SERIES</span> WON':'SERIES LOST';$('olSeries').textContent=`${se.w>se.l?you.name+' take':opp.name+' take'} the best of ${se.len}, ${Math.max(se.w,se.l)}-${Math.min(se.w,se.l)}.`}

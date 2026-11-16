@@ -41,7 +41,7 @@ const lfPAt=(T,i)=>i>=0?T.lineup[i]:i<=-10?(T.rot||[])[-10-i]:T.staff[-1-i];
 let lfMode='field';/* Positions shows the FIELDERS (with today's starter) or the PITCHERS (five-man rotation + bullpen) */
 function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c,k):portrait(T,p,k===S.you),o=ovr(p),pit=opt.i<0,fk='f'+opt.i;
  return `<button type="button" class="lfc r${r}${lfFlips.has(fk)?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
-  ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'&&!/^SP\d/.test(opt.pos)?' · SIDE':''))}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
+  ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'&&!/^SP/.test(opt.pos)?' · SIDE':''))}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
 let lfTab='field',boSel=null;
 /* the BATTING ORDER tab starts exactly where the POSITIONS tab starts (so the header and tabs don't jump), and is only
    as tall as it needs to be */
@@ -65,14 +65,14 @@ function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()
  const LP=lfMob()?LF_POS_M:LF_POS;
  T.lineup.forEach((p,i)=>{const pos=LP[p.pos]?p.pos:'DH',[x,y]=LP[pos];field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i,pos})}</div>`});
  {const p=T.staff[0],[x,y]=LP.SP;if(p)field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i:-1,pos:'SP'})}</div>`}
- const pen=T.staff.slice(1).map((p,j)=>lfMini(T,key,p,{i:-2-j,pos:p.pos||'RP'})).join('');
- const rotRow=[T.staff[0],...(T.rot||[])].map((p,j)=>p?`<div class="lfRotSlot${j?'':' next'}">${lfMini(T,key,p,{i:j?-9-j:-1,pos:'SP'+(j+1)})}${j?'':'<i class="lfNext">NEXT START</i>'}</div>`:'').join('');
+ const pen=T.staff.slice(1).map((p,j)=>lfMini(T,key,p,{i:-2-j,pos:p.cp?'CP':p.pos||'RP'})).join('');
+ const rotRow=[T.staff[0],...(T.rot||[])].map((p,j)=>p?`<div class="lfRotSlot" data-r="${j}">${lfMini(T,key,p,{i:j?-9-j:-1,pos:'SP'})}<i class="lfRotN">${j+1}${j?'':' · ACE'}</i></div>`:'').join('');
  let tray='';
  /* flipping a pitcher or hitter on the field shows the matching cards once; the tabs can still switch after that */
- if(mine){if(lnSel!==lfSelWas){if(selPit)lfDeck='pit';else if(selBat)lfDeck='bat'}lfSelWas=lnSel;
+ if(mine){lfDeck=lfMode==='pit'?'pit':'bat';lfSelWas=lnSel;/* (fielders view: your hitter cards; pitchers view: your pitcher cards) */
   if(!CARDS.length)buildCardDB();const used=usedCards(S.you);
   const own=CARDS.filter(c=>COL.owned[c.id]&&c.pit===(lfDeck==='pit')).sort(LF_SORTS[lfSort].f);
-  tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':'RP'):q.pos;
+  tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':q.cp?'CP':'RP'):q.pos;
     const can=lnSel!=null&&!inUse&&(lnSel<0)===c.pit;
     return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlips.has(fk)?' flip':''}" data-id="${c.id}"><span class="lfIn">
      ${lfFace(cardArt(c),c.o,q.name,pos+(c.pit&&q.slot==='side'?' · SIDE':'')+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,'')}</span></button>`}).join('')
@@ -81,10 +81,10 @@ function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()
  const acts='';/* (no "restore original": you swap a player out by dragging another card in) */
  const keep=lfKeepScroll();
  const modes=`<div class="seg lfModes"><button type="button" data-m="field" aria-pressed="${lfMode==='field'}">FIELDERS</button><button type="button" data-m="pit" aria-pressed="${lfMode==='pit'}">PITCHERS</button></div>`;
- const board=lfMode==='pit'?`<div class="lfField lfStaff"><h5>ROTATION</h5><div class="lfRow lfRot">${rotRow}</div><p class="lfCap">SP1 starts your next game; after every game the next starter takes his turn.</p><h5>BULLPEN</h5><div class="lfRow lfPenRow">${pen}</div></div>`
+ const board=lfMode==='pit'?`<div class="lfField lfStaff"><h5>ROTATION</h5><div class="lfRow lfRot">${rotRow}</div><p class="lfCap">Your ace starts every single game. In a series the starters go in this order. Drag a starter to move him in the order.</p><h5>BULLPEN</h5><div class="lfRow lfPenRow">${pen}</div></div>`
   :`<div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>`;
  $('cards').innerHTML=`${modes}<div class="lfWrap noSide">${board}<div class="lfActs" hidden>${acts}</div></div>
-  ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><button type="button" class="mbtn lfSortB">SORT: ${LF_SORTS[lfSort].n}</button><div class="seg lfTabs"><button type="button" data-d="bat" aria-pressed="${lfDeck==='bat'}">Hitters</button><button type="button" data-d="pit" aria-pressed="${lfDeck==='pit'}">Pitchers</button></div></div><div class="lfTray">${tray}</div>`:''}`;
+  ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><button type="button" class="mbtn lfSortB">SORT: ${LF_SORTS[lfSort].n}</button></div><div class="lfTray">${tray}</div>`:''}`;
  $('lnHint').textContent=mine?'Drag one of your cards onto a player to put him in. Tap a card to flip it.':'';lfFit();keep()}
 /* a redraw (flipping a card) keeps the bullpen and card rows where you had scrolled them */
 function lfKeepScroll(){const at={};for(const c of['lfPen','lfTray','boRow']){const e=document.querySelector('#cards .'+c);if(e)at[c]=[e.scrollLeft,e.scrollTop]}
@@ -193,3 +193,19 @@ addEventListener('pointerup',e=>boDragEnd(e,false));addEventListener('pointercan
 /* a swipe on the card tray keeps gliding after you let go, slowing down like a normal scroll */
 function lfGlide(tr,v){if(!tr||Math.abs(v)<.05)return;let last=performance.now();const step=t=>{const dt=Math.min(32,t-last);last=t;tr.scrollLeft-=v*dt;v*=Math.pow(.994,dt);
  if(Math.abs(v)>.02&&tr.isConnected&&!lfDrag.st)requestAnimationFrame(step)};requestAnimationFrame(step)}
+/* ---- PITCHERS view: drag a starter along the rotation to change the order (he's pushed into the spot you drop him on) ---- */
+const rotDrag={st:null,on:false};
+$('cards').addEventListener('pointerdown',e=>{if(lnView!=='mine'||lfTab!=='field'||lfMode!=='pit'||e.button>0)return;const b=e.target.closest('.lfRot .lfRotSlot .lfc');if(!b)return;
+ rotDrag.st={x:e.clientX,y:e.clientY,b,from:+b.closest('.lfRotSlot').dataset.r,pid:e.pointerId}});
+function rotSlotAt(x,y){let best=null,bd=1e9;for(const s of document.querySelectorAll('.lfRot .lfRotSlot')){const r=s.getBoundingClientRect();if(y<r.top-40||y>r.bottom+40)continue;const d=Math.abs(x-(r.left+r.width/2));if(d<bd){bd=d;best=s}}return best}
+addEventListener('pointermove',e=>{const d=rotDrag;if(!d.st||e.pointerId!==d.st.pid)return;
+ if(!d.on){if(Math.hypot(e.clientX-d.st.x,e.clientY-d.st.y)<8)return;d.on=true;const r=d.st.b.getBoundingClientRect();d.w=r.width;d.h=r.height;
+  const g=d.st.b.cloneNode(true);g.classList.remove('flip');g.classList.add('lfGhost');g.style.width=r.width+'px';document.body.appendChild(g);d.g=g;d.st.b.classList.add('dragSrc');document.body.classList.add('lfDragging');
+  try{d.st.b.setPointerCapture(e.pointerId)}catch(_){}}
+ e.preventDefault();d.g.style.transform=`translate(${e.clientX-d.w/2}px,${e.clientY-d.h*.4}px) rotate(-4deg)`;
+ const t=rotSlotAt(e.clientX,e.clientY);if(t!==d.over){if(d.over)d.over.classList.remove('rotHover');d.over=t;if(t&&+t.dataset.r!==d.st.from)t.classList.add('rotHover')}},{passive:false});
+function rotDragEnd(cancel){const d=rotDrag;if(!d.st)return;if(d.on){lfDrag.eat=performance.now()+350;if(d.g)d.g.remove();d.st.b.classList.remove('dragSrc');document.body.classList.remove('lfDragging');
+  if(d.over)d.over.classList.remove('rotHover');const to=d.over?+d.over.dataset.r:null;
+  if(!cancel&&to!=null&&to!==d.st.from){const nm=rotFive(TEAMS[S.you])[d.st.from].name;rotMove(S.you,d.st.from,to);lfFlips.clear();lfFlip=null;try{sfx('glove')}catch(_){}lfSay(`${nm} is now No. ${to+1}${to?'':' (your ace)'}.`);lineupRender()}}
+ rotDrag.st=null;rotDrag.on=false;rotDrag.over=null}
+addEventListener('pointerup',()=>rotDragEnd(false));addEventListener('pointercancel',()=>rotDragEnd(true));

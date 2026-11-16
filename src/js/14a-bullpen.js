@@ -11,7 +11,7 @@ function renderPen(){const k=fldKey(),st=staffOf(k),cur=S.pIdxOf[k]||0,pc=S.pcOf
  $('penSub').textContent=`${TEAMS[k].name} · current pitcher at ${pc} pitches`;
  $('penList').innerHTML=st.map((p,i)=>{const now=i===cur,used=usedOf(k).includes(i);
   const sf=now?clamp(stamFrac(),0,1):1,tag=now?`<span class="st now">PITCHING · ${pc}P<i class="penStam"><i style="width:${Math.round(sf*100)}%;background:${sf<=0?'#e2603a':sf<.25?'#e2603a':sf<.5?'#e6b93a':'#5fc25a'}"></i></i></span>`:used?'<span class="st">USED</span>':'<span class="st ready">READY</span>';
-  const role=p.pos==='SP'?'Starter':isDemon(p)?'Flamethrower':p.type==='knuckle'?'Knuckleballer':'Reliever';
+  const role=p.pos==='SP'?'Starter':p.cp?'Closer':isDemon(p)?'Flamethrower':p.type==='knuckle'?'Knuckleballer':'Reliever';
   return `<button type="button" class="penRow" data-i="${i}" ${now?'aria-current="true"':''} ${now||used?'disabled':''}>
 <span class="no">#${p.no}</span><span class="nm"><b>${p.name}</b><small>${role} · ${p.hand}HP${p.slot==='side'?' · sidearm':''}</small></span>${tag}<span class="ln2"><span class="rt">VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)} STA ${rb(staOf(p))}</span><span class="ars">${arsOf(p).map(a=>`<i>${PITCHES[a].name}</i>`).join('')}</span></span></button>`}).join('')}
 function changePitcher(k,i,quiet){const cur=S.pIdxOf[k]||0;if(i===cur)return;usedOf(k).push(cur);

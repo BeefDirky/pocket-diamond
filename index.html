@@ -1680,6 +1680,13 @@ body:not(.lnTeam) #scrLineup .lnNav{grid-template-columns:repeat(3,minmax(0,1fr)
 #scrLineup .lfField.lfStaff{aspect-ratio:auto!important;height:auto!important;max-height:none!important}
 .lfRotSlot,.lfRotSlot:not(.next){padding-top:0;padding-bottom:16px}
 .lfRotSlot .lfNext{top:auto;bottom:0}
+/* PITCHERS view: the rotation number under each starter (1 · ACE first), and the drag-to-reorder look */
+.lfRotSlot,.lfRotSlot:not(.next){padding:0 0 18px;position:relative}
+.lfRotN{position:absolute;left:0;right:0;bottom:0;text-align:center;font-style:normal;font-family:var(--f-hud);font-size:12px;letter-spacing:.06em;color:#fff;line-height:16px}
+.lfRotSlot[data-r="0"] .lfRotN{color:var(--amber)}
+.lfRot .lfRotSlot .lfc{touch-action:none;cursor:grab}
+.lfRotSlot.rotHover::before{content:"";position:absolute;inset:-4px;border:2px dashed var(--amber);pointer-events:none}
+@media (max-width:720px){.lfRotN{font-size:10px}}
 </style>
 
 <div class="app">
@@ -2419,6 +2426,8 @@ function buildRosters(){
    while(T.rot.length<4){const nm=`${SUR[Math.floor(pr3()*SUR.length)]} ${INI[Math.floor(pr3()*INI.length)]}.${VOW[Math.floor(pr3()*VOW.length)]}.`;if(have.has(nm))continue;have.add(nm);
     const hand=pr3()<.3?'L':'R',slot=pr3()<.15?'side':'over',q=v=>clamp(Math.round(v+(pr3()*24-12)),40,95);let n;do{n=1+Math.floor(pr3()*89)}while(used.has(n));used.add(n);
     T.rot.push({name:nm,hand,thr:hand,slot,pos:'SP',no:n,vel:q(slot==='side'?78:85),mov:q(slot==='side'?80:70),ctl:q(68),def:q(55)})}}
+  /* the closer (CP): the last man in the bullpen, a notch better than the rest */
+  {const cp=T.staff[T.staff.length-1];if(cp&&cp.pos==='RP'){cp.cp=true;for(const f of['vel','mov','ctl'])cp[f]=Math.min(95,cp[f]+5)}}
   for(const p of[...T.staff,...T.rot])p.ars=arsFor(p,k);
  }
 }
@@ -6227,7 +6236,7 @@ function renderPen(){const k=fldKey(),st=staffOf(k),cur=S.pIdxOf[k]||0,pc=S.pcOf
  $('penSub').textContent=`${TEAMS[k].name} · current pitcher at ${pc} pitches`;
  $('penList').innerHTML=st.map((p,i)=>{const now=i===cur,used=usedOf(k).includes(i);
   const sf=now?clamp(stamFrac(),0,1):1,tag=now?`<span class="st now">PITCHING · ${pc}P<i class="penStam"><i style="width:${Math.round(sf*100)}%;background:${sf<=0?'#e2603a':sf<.25?'#e2603a':sf<.5?'#e6b93a':'#5fc25a'}"></i></i></span>`:used?'<span class="st">USED</span>':'<span class="st ready">READY</span>';
-  const role=p.pos==='SP'?'Starter':isDemon(p)?'Flamethrower':p.type==='knuckle'?'Knuckleballer':'Reliever';
+  const role=p.pos==='SP'?'Starter':p.cp?'Closer':isDemon(p)?'Flamethrower':p.type==='knuckle'?'Knuckleballer':'Reliever';
   return `<button type="button" class="penRow" data-i="${i}" ${now?'aria-current="true"':''} ${now||used?'disabled':''}>
 <span class="no">#${p.no}</span><span class="nm"><b>${p.name}</b><small>${role} · ${p.hand}HP${p.slot==='side'?' · sidearm':''}</small></span>${tag}<span class="ln2"><span class="rt">VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)} STA ${rb(staOf(p))}</span><span class="ars">${arsOf(p).map(a=>`<i>${PITCHES[a].name}</i>`).join('')}</span></span></button>`}).join('')}
 function changePitcher(k,i,quiet){const cur=S.pIdxOf[k]||0;if(i===cur)return;usedOf(k).push(cur);
@@ -6930,7 +6939,7 @@ function fullInning(){
 const ord=n=>n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
 
 // ---------- game flow ----------
-function startGame(mode){S.gameNo=(S.gameNo||0)+1;if(!onlineGame())applyLevels();tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
+function startGame(mode){S.gameNo=(S.gameNo||0)+1;rotUse();if(!onlineGame())applyLevels();tsFlush();unduckMusic();if(mode!=='bp'||!parkFromBP)clubSave();
  S.mode=mode||S.mode||'arcade';S.bpOn=S.mode==='bp';applyVolumes();if(OPT.time==='random')decideTime();S.bp={sw:0,hr:0,long:0,n:0};if(!S.bpPitch)S.bpPitch='FB';
  S.orderOf={[S.you]:0,[S.opp]:0};S.pIdxOf={[S.you]:0,[S.opp]:0};S.usedOf={};S.penHint=false;S.pkPend=null;S.celebr=null;S.pcOf={};S.stamOf={};S.coinGame={};S.pRunsOf={};S.pBFOf={};S.myErrs=0;S.myK=0;S.kLook=[];S.wildUntil=0;
  S.half=S.mode==='full'?'top':'bot';setSides();
@@ -6982,7 +6991,7 @@ function gameOver(win){if(S.olMenu){S.olMenu=false;$('title').hidden=true;showSc
    if(se.done)$('overT').innerHTML=mw>tw?'<span>SERIES</span> WON':'SERIES LOST';
    $('olSeries').hidden=false;se.tally=se.done?`${mw>tw?'You take':'They take'} the best of ${se.bo}, ${Math.max(mw,tw)}-${Math.min(mw,tw)}.`:`Best of ${se.bo} · you ${mw}, them ${tw}`;
    netPresence({rdy:null});nextRender()}}
- histRecord(win,onl);if(!onl&&S.mode!=='bp'&&!S.rkBot)try{rotAdvance(S.you)}catch(e){}/* the next starter in the rotation takes the ball next game */
+ histRecord(win,onl);rotRestore();
  if(!onl&&!S.poGame&&S.mode==='arcade'&&S.series&&S.series.len>1){const se=S.series;if(se.counted!==S.gameNo){se.counted=S.gameNo;win?se.w++:se.l++}
   const need=Math.ceil(se.len/2);se.done=se.w>=need||se.l>=need;$('olSeries').hidden=false;
   if(se.done){$('overT').innerHTML=se.w>se.l?'<span>SERIES</span> WON':'SERIES LOST';$('olSeries').textContent=`${se.w>se.l?you.name+' take':opp.name+' take'} the best of ${se.len}, ${Math.max(se.w,se.l)}-${Math.min(se.w,se.l)}.`}
@@ -7096,7 +7105,7 @@ function renderCards(){
  const stat=(l,v)=>`<div class="st"><span>${l}</span><i><u style="width:${Math.min(100,v)}%;background:${rcol(v)}"></u></i><b style="color:${rcol(v)}">${v}</b></div>`;
  const card=(p,slot,i)=>`<button type="button" class="pcard${lnSel===i?' sel':''}${!mine?' ro':''}${p.custom?' mine':''}${p.signed?' signed':''}" data-i="${i}" style="--tc:${T.jersey};--tc2:${T.cap}">
   <div class="pcTop"><span class="slot">${slot}</span><span class="pcPos">${p.pos}${p.custom?' ★':''}${p.signed?' · CARD':''}</span><span class="pcOvr">${ovr(p)}</span></div>
-  <div class="pcMid"><img alt="" src="${portrait(T,p,key===S.you)}"><div class="pcId"><b>${p.name}</b><span>#${p.no} · ${(p.pos==='SP'||p.pos==='RP')?'Throws '+p.hand+(p.slot==='side'?' · sidearm':'')+(isDemon(p)?' · DEMON':p.type==='knuckle'?' · KNUCKLER':''):'B/T '+p.hand+'/'+p.thr}</span></div></div>
+  <div class="pcMid"><img alt="" src="${portrait(T,p,key===S.you)}"><div class="pcId"><b>${p.name}</b><span>#${p.no} · ${(p.pos==='SP'||p.pos==='RP')?'Throws '+p.hand+(p.slot==='side'?' · sidearm':'')+(p.cp?' · CLOSER':'')+(isDemon(p)?' · DEMON':p.type==='knuckle'?' · KNUCKLER':''):'B/T '+p.hand+'/'+p.thr}</span></div></div>
   <div class="pcStats">${(p.pos==='SP'||p.pos==='RP')?stat('VEL',p.vel)+stat('MOV',p.mov)+stat('CTL',p.ctl)+stat('STA',staOf(p)):stat('CON',p.con)+stat('POW',p.pow)+stat('SPD',p.spd)+stat('DEF',p.def)}</div></button>`;
  $('cards').innerHTML=T.lineup.map((p,i)=>card(p,i+1,i)).join('')+T.staff.map((p,k)=>card(p,'',-1-k)).join('');
 }
@@ -7177,7 +7186,7 @@ let SIGN={};try{SIGN=JSON.parse(localStorage.getItem('pd-signings')||'{}')||{}}c
 const saveSign=()=>{try{localStorage.setItem('pd-signings',JSON.stringify(SIGN))}catch(e){}};
 function snapOrig(){for(const k of ORDER){const T=TEAMS[k];if(!T.orig)T.orig={L:T.lineup.slice(),P:T.staff.slice(),R:(T.rot||[]).slice()}}}
 function signClone(c,base,lvSpec){const p={...c.p,...cardEff(c,lvSpec)},q={name:p.name,hand:p.hand,thr:p.thr||p.hand,pos:base.pos,natPos:p.pos,no:base.no,signed:c.id,
-  con:p.con,pow:p.pow,spd:p.spd,def:p.def==null?60:p.def,vel:p.vel,mov:p.mov,ctl:p.ctl,slot:p.slot||'over',type:p.type,bat:p.bat||base.bat||'#d9b07a'};
+  con:p.con,pow:p.pow,spd:p.spd,def:p.def==null?60:p.def,vel:p.vel,mov:p.mov,ctl:p.ctl,slot:p.slot||'over',type:p.type,cp:!!p.cp,bat:p.bat||base.bat||'#d9b07a'};
  if(p.skin)SKIN_OVR[q.name]=p.skin;if(lvSpec)q.lvSpec=lvSpec;if(c.pit)q.ars=arsFor({...q,pos:base.pos},c.code||c.k||'fa');return q}
 // where does the original player for this slot live now (lineup order can be shuffled)
 function slotOf(T,orig,pit){const arr=pit?T.staff:T.lineup;return arr.findIndex(p=>p===orig||(p.signedFor===orig.name))}
@@ -7194,15 +7203,24 @@ function releasePlayer(k,origName,pit){const T=TEAMS[k],orig=pit?origPit(T,origN
 function applySignings(){snapOrig();for(const k in SIGN){if(!TEAMS[k])continue;for(const key in SIGN[k]){const pit=key[0]==='P',nm=key.slice(2),id=SIGN[k][key];
    if(!CARD_BY[id]||!COL.owned[id]){delete SIGN[k][key];continue}signPlayer(k,nm,id,pit,false)}}saveSign();rotApply()}
 const usedCards=k=>new Set([...TEAMS[k].lineup,...(TEAMS[k].benched?[TEAMS[k].benched]:[]),...TEAMS[k].staff,...(TEAMS[k].rot||[])].filter(p=>p&&p.signed).map(p=>p.signed));
-/* ---- the rotation: five starters take turns. After each game your club played (not online), the next one starts ----
-   The order is saved per club ('pd-rot': each slot's original pitcher, today's starter first). */
+/* ---- the rotation: five starters in a set order, the ace first. The ace starts every single game (and every online
+   game); in a series, game 1 goes to the ace, game 2 to the No. 2, and so on round the five. Both clubs work this way.
+   The order is yours to set (drag a starter in Team > Positions > PITCHERS); it's saved per club ('pd-rot'). */
 let ROTO={};try{ROTO=JSON.parse(localStorage.getItem('pd-rot')||'{}')||{}}catch(e){ROTO={}}
 const rotFive=T=>[T.staff[0],...(T.rot||[])];
 const rotName=p=>p.signedFor||p.name;
 function rotSave(k){const T=TEAMS[k];ROTO[k]=rotFive(T).map(rotName);try{localStorage.setItem('pd-rot',JSON.stringify(ROTO));if(typeof accDirty==='function')accDirty()}catch(e){}}
 function rotApply(){for(const k in ROTO){const T=TEAMS[k];if(!T||!T.rot||!Array.isArray(ROTO[k]))continue;const five=rotFive(T),by=n=>five.find(p=>rotName(p)===n);
   const ord=ROTO[k].map(by).filter(Boolean);if(ord.length!==5||new Set(ord).size!==5)continue;T.staff[0]=ord[0];T.rot=ord.slice(1)}}
-function rotAdvance(k){const T=TEAMS[k];if(!T||!T.rot||!T.rot.length)return;const f=rotFive(T);T.staff[0]=f[1];T.rot=[...f.slice(2),f[0]];rotSave(k)}
+/* move a starter to another spot in the order (the rest slide over) */
+function rotMove(k,from,to){const T=TEAMS[k],f=rotFive(T);if(from===to||!f[from]||to<0||to>=f.length)return;const[x]=f.splice(from,1);f.splice(to,0,x);T.staff[0]=f[0];T.rot=f.slice(1);rotSave(k)}
+/* which of the five starts this game: 1 for a single game or online, otherwise the series game number round the five */
+function rotGameIdx(){if(typeof onlineGame==='function'&&onlineGame())return 0;
+ if(S.poGame&&typeof poMySeries==='function'){const sr=poMySeries();if(sr)return(sr.wa+sr.wb)%5}
+ if(S.series&&S.series.len>1)return((S.series.w|0)+(S.series.l|0))%5;return 0}
+/* for this game, the day's starter stands in the ace's spot on the staff; put back when the game ends or you leave */
+function rotUse(){rotRestore();const i=rotGameIdx();if(!i)return;for(const k of[S.you,S.opp]){const T=TEAMS[k];if(!T||!T.rot||!T.rot[i-1])continue;T.rotHold=T.staff[0];T.staff[0]=T.rot[i-1]}}
+function rotRestore(){for(const k of ORDER){const T=TEAMS[k];if(T&&T.rotHold){T.staff[0]=T.rotHold;delete T.rotHold}}}
 /* swap two of the five rotation spots (Team > Positions > PITCHERS: tap two starters) */
 function rotSwap(k,a,b){const T=TEAMS[k],f=rotFive(T);[f[a],f[b]]=[f[b],f[a]];T.staff[0]=f[0];T.rot=f.slice(1);rotSave(k)}
 // ---- online roster spec ----
@@ -7344,7 +7362,7 @@ const lfPAt=(T,i)=>i>=0?T.lineup[i]:i<=-10?(T.rot||[])[-10-i]:T.staff[-1-i];
 let lfMode='field';/* Positions shows the FIELDERS (with today's starter) or the PITCHERS (five-man rotation + bullpen) */
 function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c,k):portrait(T,p,k===S.you),o=ovr(p),pit=opt.i<0,fk='f'+opt.i;
  return `<button type="button" class="lfc r${r}${lfFlips.has(fk)?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
-  ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'&&!/^SP\d/.test(opt.pos)?' · SIDE':''))}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
+  ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'&&!/^SP/.test(opt.pos)?' · SIDE':''))}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
 let lfTab='field',boSel=null;
 /* the BATTING ORDER tab starts exactly where the POSITIONS tab starts (so the header and tabs don't jump), and is only
    as tall as it needs to be */
@@ -7368,14 +7386,14 @@ function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()
  const LP=lfMob()?LF_POS_M:LF_POS;
  T.lineup.forEach((p,i)=>{const pos=LP[p.pos]?p.pos:'DH',[x,y]=LP[pos];field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i,pos})}</div>`});
  {const p=T.staff[0],[x,y]=LP.SP;if(p)field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i:-1,pos:'SP'})}</div>`}
- const pen=T.staff.slice(1).map((p,j)=>lfMini(T,key,p,{i:-2-j,pos:p.pos||'RP'})).join('');
- const rotRow=[T.staff[0],...(T.rot||[])].map((p,j)=>p?`<div class="lfRotSlot${j?'':' next'}">${lfMini(T,key,p,{i:j?-9-j:-1,pos:'SP'+(j+1)})}${j?'':'<i class="lfNext">NEXT START</i>'}</div>`:'').join('');
+ const pen=T.staff.slice(1).map((p,j)=>lfMini(T,key,p,{i:-2-j,pos:p.cp?'CP':p.pos||'RP'})).join('');
+ const rotRow=[T.staff[0],...(T.rot||[])].map((p,j)=>p?`<div class="lfRotSlot" data-r="${j}">${lfMini(T,key,p,{i:j?-9-j:-1,pos:'SP'})}<i class="lfRotN">${j+1}${j?'':' · ACE'}</i></div>`:'').join('');
  let tray='';
  /* flipping a pitcher or hitter on the field shows the matching cards once; the tabs can still switch after that */
- if(mine){if(lnSel!==lfSelWas){if(selPit)lfDeck='pit';else if(selBat)lfDeck='bat'}lfSelWas=lnSel;
+ if(mine){lfDeck=lfMode==='pit'?'pit':'bat';lfSelWas=lnSel;/* (fielders view: your hitter cards; pitchers view: your pitcher cards) */
   if(!CARDS.length)buildCardDB();const used=usedCards(S.you);
   const own=CARDS.filter(c=>COL.owned[c.id]&&c.pit===(lfDeck==='pit')).sort(LF_SORTS[lfSort].f);
-  tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':'RP'):q.pos;
+  tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':q.cp?'CP':'RP'):q.pos;
     const can=lnSel!=null&&!inUse&&(lnSel<0)===c.pit;
     return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlips.has(fk)?' flip':''}" data-id="${c.id}"><span class="lfIn">
      ${lfFace(cardArt(c),c.o,q.name,pos+(c.pit&&q.slot==='side'?' · SIDE':'')+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,'')}</span></button>`}).join('')
@@ -7384,10 +7402,10 @@ function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()
  const acts='';/* (no "restore original": you swap a player out by dragging another card in) */
  const keep=lfKeepScroll();
  const modes=`<div class="seg lfModes"><button type="button" data-m="field" aria-pressed="${lfMode==='field'}">FIELDERS</button><button type="button" data-m="pit" aria-pressed="${lfMode==='pit'}">PITCHERS</button></div>`;
- const board=lfMode==='pit'?`<div class="lfField lfStaff"><h5>ROTATION</h5><div class="lfRow lfRot">${rotRow}</div><p class="lfCap">SP1 starts your next game; after every game the next starter takes his turn.</p><h5>BULLPEN</h5><div class="lfRow lfPenRow">${pen}</div></div>`
+ const board=lfMode==='pit'?`<div class="lfField lfStaff"><h5>ROTATION</h5><div class="lfRow lfRot">${rotRow}</div><p class="lfCap">Your ace starts every single game. In a series the starters go in this order. Drag a starter to move him in the order.</p><h5>BULLPEN</h5><div class="lfRow lfPenRow">${pen}</div></div>`
   :`<div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>`;
  $('cards').innerHTML=`${modes}<div class="lfWrap noSide">${board}<div class="lfActs" hidden>${acts}</div></div>
-  ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><button type="button" class="mbtn lfSortB">SORT: ${LF_SORTS[lfSort].n}</button><div class="seg lfTabs"><button type="button" data-d="bat" aria-pressed="${lfDeck==='bat'}">Hitters</button><button type="button" data-d="pit" aria-pressed="${lfDeck==='pit'}">Pitchers</button></div></div><div class="lfTray">${tray}</div>`:''}`;
+  ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><button type="button" class="mbtn lfSortB">SORT: ${LF_SORTS[lfSort].n}</button></div><div class="lfTray">${tray}</div>`:''}`;
  $('lnHint').textContent=mine?'Drag one of your cards onto a player to put him in. Tap a card to flip it.':'';lfFit();keep()}
 /* a redraw (flipping a card) keeps the bullpen and card rows where you had scrolled them */
 function lfKeepScroll(){const at={};for(const c of['lfPen','lfTray','boRow']){const e=document.querySelector('#cards .'+c);if(e)at[c]=[e.scrollLeft,e.scrollTop]}
@@ -7496,6 +7514,22 @@ addEventListener('pointerup',e=>boDragEnd(e,false));addEventListener('pointercan
 /* a swipe on the card tray keeps gliding after you let go, slowing down like a normal scroll */
 function lfGlide(tr,v){if(!tr||Math.abs(v)<.05)return;let last=performance.now();const step=t=>{const dt=Math.min(32,t-last);last=t;tr.scrollLeft-=v*dt;v*=Math.pow(.994,dt);
  if(Math.abs(v)>.02&&tr.isConnected&&!lfDrag.st)requestAnimationFrame(step)};requestAnimationFrame(step)}
+/* ---- PITCHERS view: drag a starter along the rotation to change the order (he's pushed into the spot you drop him on) ---- */
+const rotDrag={st:null,on:false};
+$('cards').addEventListener('pointerdown',e=>{if(lnView!=='mine'||lfTab!=='field'||lfMode!=='pit'||e.button>0)return;const b=e.target.closest('.lfRot .lfRotSlot .lfc');if(!b)return;
+ rotDrag.st={x:e.clientX,y:e.clientY,b,from:+b.closest('.lfRotSlot').dataset.r,pid:e.pointerId}});
+function rotSlotAt(x,y){let best=null,bd=1e9;for(const s of document.querySelectorAll('.lfRot .lfRotSlot')){const r=s.getBoundingClientRect();if(y<r.top-40||y>r.bottom+40)continue;const d=Math.abs(x-(r.left+r.width/2));if(d<bd){bd=d;best=s}}return best}
+addEventListener('pointermove',e=>{const d=rotDrag;if(!d.st||e.pointerId!==d.st.pid)return;
+ if(!d.on){if(Math.hypot(e.clientX-d.st.x,e.clientY-d.st.y)<8)return;d.on=true;const r=d.st.b.getBoundingClientRect();d.w=r.width;d.h=r.height;
+  const g=d.st.b.cloneNode(true);g.classList.remove('flip');g.classList.add('lfGhost');g.style.width=r.width+'px';document.body.appendChild(g);d.g=g;d.st.b.classList.add('dragSrc');document.body.classList.add('lfDragging');
+  try{d.st.b.setPointerCapture(e.pointerId)}catch(_){}}
+ e.preventDefault();d.g.style.transform=`translate(${e.clientX-d.w/2}px,${e.clientY-d.h*.4}px) rotate(-4deg)`;
+ const t=rotSlotAt(e.clientX,e.clientY);if(t!==d.over){if(d.over)d.over.classList.remove('rotHover');d.over=t;if(t&&+t.dataset.r!==d.st.from)t.classList.add('rotHover')}},{passive:false});
+function rotDragEnd(cancel){const d=rotDrag;if(!d.st)return;if(d.on){lfDrag.eat=performance.now()+350;if(d.g)d.g.remove();d.st.b.classList.remove('dragSrc');document.body.classList.remove('lfDragging');
+  if(d.over)d.over.classList.remove('rotHover');const to=d.over?+d.over.dataset.r:null;
+  if(!cancel&&to!=null&&to!==d.st.from){const nm=rotFive(TEAMS[S.you])[d.st.from].name;rotMove(S.you,d.st.from,to);lfFlips.clear();lfFlip=null;try{sfx('glove')}catch(_){}lfSay(`${nm} is now No. ${to+1}${to?'':' (your ace)'}.`);lineupRender()}}
+ rotDrag.st=null;rotDrag.on=false;rotDrag.over=null}
+addEventListener('pointerup',()=>rotDragEnd(false));addEventListener('pointercancel',()=>rotDragEnd(true));
 // ---------- the Imugi Labs mark on the main menu: a fixed pixel bitmap (the logo put through a pixel filter at 49x23, with the
 // middle line one pixel longer at each end), so it looks the same on every device. Each '#' is one lit pixel ----------
 {const P=['..............#####################..............',
@@ -8256,7 +8290,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='46c4438b7a',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='bbaf8dce55',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -9130,6 +9164,8 @@ function buildCardDB(){
   /* a free agent's power tops out by rarity: common 70, rare 80, epic 85, legend 95 (a ceiling, not a target) */
   for(const c of F){const cap=FA_POW_CAP[c.r];if(c.p.pow!=null&&c.p.pow>cap){c.p.pow=c.b.pow=cap;c.o=ovr(c.p)}}}
  for(const c of buildBigLeague()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};CARDS.push(c);CARD_BY[c.id]=c}
+ /* closers (CP): the legendary relief cards, so they're the rarer, better relievers */
+ for(const c of CARDS)if(c.set!=='club'&&c.pit&&c.p.pos==='RP'&&c.r>=3)c.p.cp=true
 }
 const ART={};
 function cardArt(c,tk){const key=c.id+(tk?'@'+tk:'');if(ART[key])return ART[key];try{return ART[key]=cardArt2(c,tk)}catch(e){console.warn(e)}
@@ -9166,7 +9202,7 @@ function cardHTML(c,opts){opts=opts||{};const T=c.T||TEAMS[c.k],own=COL.owned[c.
   <div class="tcHead"><img alt="" src="${cardLogo(c)}">${c.set==='bl'||c.set==='fa'?`<span class="city">${T.city}</span>`:''}<span class="ovr"${lock?'':` style="color:${rcol(o)}"`}>${lock?'??':o}</span></div>
   <img class="art" alt="" src="${cardArt(c)}">
   <div class="nm">${lock?'???':p.name}</div>
-  <div class="ps"><span>${p.no!=null?'#'+p.no+' ':''}${c.pit?(p.pos==='SP'?'SP':'RP'):p.pos}</span><span>${c.pit?'T':'B'} ${p.hand}</span></div>
+  <div class="ps"><span>${p.no!=null?'#'+p.no+' ':''}${c.pit?(p.pos==='SP'?'SP':p.cp?'CP':'RP'):p.pos}</span><span>${c.pit?'T':'B'} ${p.hand}</span></div>
   <div class="st">${st.map(([k,v,up])=>`<span${up&&!lock?' class="up"':''}>${k}<b${lock||v==null?'':` style="color:${rcol(v)}"`}>${lock||v==null?'–':v}</b></span>`).join('')}</div>
   <div class="rar">${RARITY[c.r]}${tag}</div>
   ${!lock&&own>1&&!opts.noCount?`<em class="cnt">x${own}</em>`:''}${!lock&&n?`<em class="lvB">LV ${n+1}</em>`:''}${opts.isNew?'<em class="new">NEW</em>':''}</div>`}
@@ -10654,7 +10690,7 @@ addEventListener('keydown',e=>{
  else if((e.key==='w'||e.key==='W')&&!e.repeat)doPickoff(2)
  else if((e.key==='i'||e.key==='I')&&!e.repeat)doIBB()
 });
-const toTitle=()=>{if(S.rkBot){if(S.phase!=='over')botLeave();botClear()}if(S.tnGame)tnLeaveGame();phGameLeft('menu');setTimeout(myTeamRestore,0);S.series=null;rkStop();if(S.online&&S.online.inGame)resumeClear();$('clkS').hidden=true;unduckMusic();S.celebr=null;restoreNetRosters();if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
+const toTitle=()=>{rotRestore();if(S.rkBot){if(S.phase!=='over')botLeave();botClear()}if(S.tnGame)tnLeaveGame();phGameLeft('menu');setTimeout(myTeamRestore,0);S.series=null;rkStop();if(S.online&&S.online.inGame)resumeClear();$('clkS').hidden=true;unduckMusic();S.celebr=null;restoreNetRosters();if(S.online&&S.online.inGame){S.online.inGame=false;clearTimeout(S.online.lostT);netPresence({pt:null,dc:null,ing:null})}stopRamp();$('parkBtn').hidden=true;S.bpOn=false;S.bpFly=[];applyVolumes();$('bpBar').hidden=true;$('actsBat').classList.remove('withBP');S.bpBalls=[];setTimeout(applyVolumes,0);S.fwUntil=0;S.play=null;S.bases=[null,null,null];S.jumbo=null;S.cheerUntil=0;hideBanner();$('tag').hidden=true;$('over').hidden=true;$('title').hidden=false;showScreen('scrMain');setPhase('title');setCam('full');updateHUD()};
 let pendingMode=null;
 const MODE_NAME={online:'ONLINE 1v1',arcade:'ARCADE',full:'FULL GAME',bp:'BATTING PRACTICE',playoffs:'PLAYOFFS',watch:'WATCH A GAME'};
 function drawOpp(){const pool=ORDER.filter(t=>t!==S.you);S.opp=pick(pool);syncPicker();updateOppLine()}

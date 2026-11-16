@@ -1657,3 +1657,10 @@ body:not(.lnTeam) #scrLineup .lnNav{grid-template-columns:repeat(3,minmax(0,1fr)
 #scrLineup .lfField.lfStaff{aspect-ratio:auto!important;height:auto!important;max-height:none!important}
 .lfRotSlot,.lfRotSlot:not(.next){padding-top:0;padding-bottom:16px}
 .lfRotSlot .lfNext{top:auto;bottom:0}
+/* PITCHERS view: the rotation number under each starter (1 · ACE first), and the drag-to-reorder look */
+.lfRotSlot,.lfRotSlot:not(.next){padding:0 0 18px;position:relative}
+.lfRotN{position:absolute;left:0;right:0;bottom:0;text-align:center;font-style:normal;font-family:var(--f-hud);font-size:12px;letter-spacing:.06em;color:#fff;line-height:16px}
+.lfRotSlot[data-r="0"] .lfRotN{color:var(--amber)}
+.lfRot .lfRotSlot .lfc{touch-action:none;cursor:grab}
+.lfRotSlot.rotHover::before{content:"";position:absolute;inset:-4px;border:2px dashed var(--amber);pointer-events:none}
+@media (max-width:720px){.lfRotN{font-size:10px}}
