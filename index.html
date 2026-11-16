@@ -1561,6 +1561,13 @@ body.gPause #title{z-index:60;pointer-events:auto}
 .dgBox h3{font-family:var(--f-px);font-weight:400;font-size:15px;color:var(--amber);margin:0;line-height:1.4}
 .dgBox p{margin:0;font-size:15px;line-height:1.45;color:var(--chalk)}.dgBox p b{color:var(--amber);font-weight:400}
 .dgBox .big,.dgBox .mbtn{width:100%;text-align:center;justify-content:center}.dgBox .dgMsg{font-size:13px;color:var(--dim);min-height:1em}
+/* small phones (iPhone SE and narrower): toggle rows and the create-a-player rows shrink to fit instead of running off the card */
+@media (max-width:380px){
+ .opt{grid-template-columns:78px minmax(0,1fr) 26px;gap:6px}
+ .opt .seg{min-width:0}.opt .seg button{width:auto;flex:1 1 0;min-width:0;padding-left:2px;padding-right:2px;font-size:11px}.edGrid{font-size:12px}
+ .edGrid{grid-template-columns:64px minmax(0,1fr)}.edGrid>*{min-width:0}.edGrid .seg{min-width:0;flex-wrap:wrap}.edGrid .seg button{flex:1 1 0;min-width:0;padding-left:3px;padding-right:3px}
+ .edGrid input,.edGrid select{width:100%}
+}
 </style>
 
 <div class="app">

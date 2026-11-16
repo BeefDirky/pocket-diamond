@@ -31,8 +31,19 @@ try:
   # the host readies, then signs two card players from the room's EDIT LINEUP: that un-readies it and the guest must learn them
   A.click('#olGo');A.wait_for_timeout(500)
   A.click('#olEdit');A.wait_for_timeout(400);assert A.is_visible('#scrLineup') and not A.is_visible('#lnClub'),'EDIT LINEUP did not open the lineup'
-  for slot in ('3','-1'):
-   A.click('#cards .lfField .lfc[data-i="%s"]'%slot);A.click('#cards .lfTray .lfc.deck:not(.used)');A.wait_for_timeout(450);A.click('#cards .lfTray .lfc.flip [data-sign]');A.wait_for_timeout(200)
+  # sign two cards by dragging them from YOUR CARDS onto a player (a card that can't play there is turned away; try the next)
+  def drag(src, dst):
+   A.locator(src).scroll_into_view_if_needed();sb=A.locator(src).bounding_box();A.locator(dst).scroll_into_view_if_needed();db=A.locator(dst).bounding_box();sb=A.locator(src).bounding_box()
+   A.mouse.move(sb['x']+sb['width']/2,sb['y']+sb['height']/2);A.mouse.down()
+   for k in range(1,13):A.mouse.move(sb['x']+sb['width']/2+(db['x']+db['width']/2-sb['x']-sb['width']/2)*k/12,sb['y']+sb['height']/2+(db['y']+db['height']/2-sb['y']-sb['height']/2)*k/12);A.wait_for_timeout(16)
+   A.mouse.up();A.wait_for_timeout(350)
+  for slot,deck in (('3','bat'),('-1','pit')):
+   A.click('#cards .lfTabs [data-d=%s]'%deck);A.wait_for_timeout(250);done=False
+   for k in range(A.locator('#cards .lfTray .lfc.deck:not(.used)').count()):
+    before=A.locator('#cards .lfTray .lfc.deck.used').count()
+    drag('#cards .lfTray .lfc.deck:not(.used) >> nth=%d'%k,'#cards .lfc[data-i="%s"]'%slot)
+    if A.locator('#cards .lfTray .lfc.deck.used').count()>before:done=True;break
+   assert done,'could not sign a card into slot '+slot
   A.keyboard.press('Escape');A.wait_for_timeout(800)
   assert A.is_visible('#olRoom') and A.evaluate("__pd.S.you")=='seoul','not back in the room'
   assert A.inner_text('#olGo').strip()=='READY','editing the lineup should un-ready you'
