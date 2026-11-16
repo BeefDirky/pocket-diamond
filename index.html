@@ -1310,7 +1310,14 @@ canvas.shake{animation:packShake .6s steps(6)}
 .app.deskApp .lgDoc p{font-size:16px}.app.deskApp .lgDoc h3{font-size:16px}
 /* ---- the signed-in account page ---- */
 #acSignedIn{display:flex;flex-direction:column;gap:12px}#acSignedIn[hidden]{display:none}
-.acHero{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 2px}
+.acHero{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;gap:12px;padding:16px 14px;min-height:86px;
+ background:#1b4f96 center/100% 100% no-repeat;image-rendering:pixelated;border:3px solid #0b130e;box-shadow:inset 0 0 0 2px var(--maEdge,#c7871a),0 4px 0 var(--edge)}
+.acHero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;backdrop-filter:blur(1.2px);-webkit-backdrop-filter:blur(1.2px);background:rgba(8,20,14,.3)}
+.acHeroLogo{width:60px;height:60px;object-fit:contain;image-rendering:pixelated;flex:none;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.6))}
+.acHeroTx{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.acHeroLogo:not([hidden])+.acHeroTx{align-items:flex-start}
+.acHero b,.acHero small{text-shadow:2px 0 #0b130e,-2px 0 #0b130e,0 2px #0b130e,0 -2px #0b130e,2px 2px #0b130e,-2px -2px #0b130e}
+.acHero small{color:#f4ead0!important}
 .acHero b{font-family:var(--f-px);font-weight:400;font-size:20px;color:var(--amber);word-break:break-all;text-align:center}
 .acHero small{font-family:var(--f-hud);font-size:12px;letter-spacing:.12em;color:var(--dim)}
 .acTiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
@@ -1607,7 +1614,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
           <button class="ghost acSwap" id="acSwap" type="button"></button>
         </div>
         <div class="acPane" id="acSignedIn" hidden>
-          <div class="acHero"><b id="acName"></b><small id="acSince"></small></div>
+          <div class="acHero" id="acHero"><img class="acHeroLogo" id="acHeroLogo" alt="" hidden><div class="acHeroTx"><b id="acName"></b><small id="acSince"></small></div></div>
           <div class="acTiles">
             <div><b id="acRating">—</b><span>RANKED RATING</span><small id="acRec"></small></div>
             <div><b id="acCoins">0</b><span>COINS</span></div>
@@ -7911,9 +7918,13 @@ const acDate=t=>{const d=t?new Date(t):null;return d&&!isNaN(d)?d.toLocaleDateSt
 function acDetails(){const u=ACC.user;if(!u)return;const made=u.created_at;
  $('acCreated').textContent=acDate(made);$('acSince').textContent=made?`MEMBER SINCE ${new Date(made).toLocaleDateString(undefined,{year:'numeric',month:'short'}).toUpperCase()}`:'';
  $('acCoins').textContent=coinFmt(WAL.coins||0);$('acCards').textContent=Object.keys(COL.owned||{}).filter(k=>COL.owned[k]>0).length;
- const club=MYTEAM&&TEAMS[MYTEAM.club];$('acClub').innerHTML=club?`<img class="acLogo" alt="" src="${LOGO_URL[MYTEAM.club]||''}">${esc(club.name)}`:'—';
+ const club=MYTEAM&&TEAMS[MYTEAM.club];acBanner();$('acClub').innerHTML=club?`<img class="acLogo" alt="" src="${LOGO_URL[MYTEAM.club]||''}">${esc(club.name)}`:'—';
  if(acDetails.uid!==u.id||Date.now()-(acDetails.at||0)>60000){acDetails.uid=u.id;acDetails.at=Date.now();
   rpc('my_rating').then(r=>{if(!r||!ACC.user||ACC.user.id!==u.id)return;acDetails.r=r;acRatingShow()}).catch(()=>{})}else acRatingShow()}
+/* the banner at the top: your club's paint swirl behind your club logo and username */
+function acBanner(){const k=MYTEAM&&TEAMS[MYTEAM.club]?MYTEAM.club:'',h=$('acHero'),l=$('acHeroLogo');
+ try{if(h.dataset.club!==k){h.dataset.club=k;h.style.backgroundImage=`url(${maSwirl(k)})`;h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}}catch(e){}
+ l.hidden=!k;if(k)l.src=LOGO_URL[k]||''}
 function acRatingShow(){const r=acDetails.r;if(!r)return;$('acRating').textContent=r.rating;$('acRec').textContent=r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet'}
 $('acProfile').addEventListener('click',()=>{if(!ACC.user)return;lbOpen();lbProfile(ACC.user.id)});
 // ---------- username filter: offensive names are refused here and, the same way, by the server (migration 010) ----------
@@ -7989,7 +8000,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='82599d9223',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='7e6fe74988',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
