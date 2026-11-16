@@ -1608,3 +1608,21 @@ body.gPause #title{z-index:60;pointer-events:auto}
 .psGrid div{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;background:var(--edge);border:2px solid var(--panel-hi)}
 .psGrid b{font-family:var(--f-px);font-weight:400;font-size:17px;color:var(--chalk)}.psGrid span{font-family:var(--f-hud);font-size:10px;letter-spacing:.1em;color:var(--dim)}
 @media (max-width:420px){.psT{font-size:12px}.psNm small{display:none}.psNm b{max-width:100%}.psGrid{grid-template-columns:repeat(4,minmax(0,1fr))}.psGrid b{font-size:15px}}
+/* Edit Lineup: NEXT / DONE sits in the top right corner (mirroring the back arrow), and the header is packed tighter */
+#scrLineup{gap:6px}
+#scrLineup #lnHint{width:100%;text-align:center;margin:0}
+#scrLineup .lnTabs{margin-bottom:2px}
+#scrLineup .lnFoot{margin-top:6px}
+#scrLineup #lnNext{position:absolute;top:8px;right:8px;z-index:4;height:46px;width:auto;min-width:0;padding:0 14px;margin:0;font-size:14px;display:flex;align-items:center;justify-content:center}
+.app.deskApp #scrLineup #lnNext{transform:scale(var(--uiZ,1));transform-origin:top right;right:10px;top:10px;padding:0 20px;font-size:15px}
+.lfSide h4{text-align:center}
+/* the tab row: POSITIONS / BATTING ORDER / STATS, then INVENTORY and CHANGE CLUB beside them (a second row on phones) */
+#scrLineup .lnNav{display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:6px;width:100%}
+#scrLineup .lnNav .lnTabs{margin:0;flex:0 1 520px}
+#scrLineup .lnNav .lnTeamBar{margin:0;gap:6px;flex:0 0 auto}
+#scrLineup .lnNav .lnTeamBar .mbtn{flex:0 0 auto;padding:10px 14px;font-size:12px;display:flex;align-items:center}
+@media (max-width:720px){#scrLineup .lnNav .lnTabs{flex:1 1 100%}#scrLineup .lnNav .lnTeamBar{flex:1 1 100%}#scrLineup .lnNav .lnTeamBar .mbtn{flex:1;justify-content:center;padding:8px 6px;font-size:11px}
+ #scrLineup>.lnTop h1{white-space:nowrap}#scrLineup #lnNext{font-size:12px;padding:0 10px}}
+#scrLineup #lnHint{align-self:stretch;max-width:none}
+@media (min-width:721px){#scrLineup .lnNav .lnTeamBar .mbtn{font-size:13px;padding:10px 16px}#scrLineup .lnNav .lnTeamBar{margin-left:10px}}
+@media (max-width:380px){#scrLineup>.lnTop h1{font-size:13px}#scrLineup #lnNext{font-size:10px;padding:0 7px;height:44px}#scrLineup.hasX>.lnTop{padding-left:54px;padding-right:62px}}
