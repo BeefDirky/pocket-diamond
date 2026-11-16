@@ -6318,15 +6318,21 @@ function simulateContact(err,hand,b){
  const bar=!sweet&&Math.random()<(.01+.12*Math.pow(q,4)*(.55+b.pow/110))*(perf?2:1);
  if(bar){EV=Math.max(EV,clamp(99+(b.pow-50)*.2+randn()*4,95,117));L=rand(21,34)}
  else if(perf){EV+=5}
+ /* big power: from 90 power up, a PERFECT or GOOD swing that's put in play leaves the park this often in all
+      PERFECT  90 power 50% ... 100 power 100%      GOOD  90 power 25% ... 100 power 80%
+    hrP is the extra push on top of the home runs those swings already hit (measured: perfect 38-56%, good 12-15%) */
+ const good=!perf&&Math.abs(err)<=WIN*GOODK,hrP=sweet||b.pow<90?0:perf?.19+.081*(b.pow-90):good?.15+.0615*(b.pow-90):0;
+ const gone=hrP>0&&Math.random()<hrP;
+ if(gone){EV=Math.max(EV,clamp(109+(b.pow-90)*.4+randn()*1.5,107,118));L=rand(25,31)}
  const pull=hand==='R'?-1:1;
  const tm=Math.min(1.25,Math.abs(err)/WIN);
- const s=pull*(Math.sign(-err)*Math.pow(tm,.75)*50+3)+randn()*6;
+ let s=pull*(Math.sign(-err)*Math.pow(tm,.75)*50+3)+randn()*6;if(gone)s=clamp(s,-36,36);/* (gone means fair) */
  const dir={x:Math.sin(s*RAD),y:Math.cos(s*RAD)};
  const P={err,q,EV,L,s};S.lastBB=P;
  if(S.mode==='bp')return buildBP(P,dir,b);
  // fouls: fewer than MLB's ~half of contact, which made at-bats drag. Late or early contact fouls off more;
  // a PERFECT swing almost always stays fair
- if(!sweet&&Math.random()<(perf?.05:.2+.4*(1-q)+(S.strikes===2?.04:0))){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
+ if(!sweet&&!gone&&Math.random()<(perf?.05:.2+.4*(1-q)+(S.strikes===2?.04:0))){const fs=(Math.random()<.5?-1:1)*rand(48,160);return buildFoul(P,{x:Math.sin(fs*RAD),y:Math.cos(fs*RAD)})}
  if(Math.abs(s)>45)return buildFoul(P,dir);
  if(L<10)return buildGrounder(P,dir,b);
  return buildAir(P,dir,b);
@@ -8061,7 +8067,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='e8e819b827',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='d4b8362f3e',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
