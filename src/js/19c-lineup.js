@@ -40,7 +40,10 @@ function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c,k):port
  return `<button type="button" class="lfc r${r}${lfFlips.has(fk)?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
   ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'?' · SIDE':''))}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
 let lfTab='field',boSel=null;
-for(const b of $('lnTabs').children)b.addEventListener('click',()=>{lfTab=b.dataset.t;boSel=null;lfMove=false;lineupRender()});
+/* the BATTING ORDER tab keeps the page exactly as tall as the POSITIONS tab, so the header and tabs don't jump */
+let lfFieldH=0;
+function lnHold(){const c=$('scrLineup');if(lfTab==='order'){if(lfFieldH)c.style.minHeight=lfFieldH+'px'}else c.style.minHeight=''}
+for(const b of $('lnTabs').children)b.addEventListener('click',()=>{if(lfTab==='field'&&!$('scrLineup').hidden)lfFieldH=$('scrLineup').offsetHeight;lfTab=b.dataset.t;boSel=null;lfMove=false;lineupRender()});
 /* the batting order: the nine hitters in a row, in order. Tap one, then tap the spot he should bat in: they swap */
 function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you);
   return `<div class="boSlot"><span class="boNum">${i+1}</span><button type="button" class="lfc bo r${c?c.r:0}${boSel===i?' boSel':''}" data-o="${i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}</span></button></div>`}).join('');
@@ -48,7 +51,7 @@ function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),ar
 function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria-pressed',String(b.dataset.t===lfTab));
  $('lnNext').textContent=pregame?'NEXT':'DONE';
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
- if(lfTab==='order'){boRender(T,key);return}
+ lnHold();if(lfTab==='order'){boRender(T,key);return}
  if(!mine)lfMove=false;
  if(lfFlipsOf!==lnView+key){lfFlipsOf=lnView+key;lfFlips.clear();lfFlip=null}
  if(lfFlip&&!lfFlips.has(lfFlip))lfFlip=null;
@@ -69,7 +72,7 @@ function lineupRender(){for(const b of $('lnTabs').children)b.setAttribute('aria
      ${lfFace(cardArt(c),c.o,q.name,pos+(c.pit&&q.slot==='side'?' · SIDE':'')+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,'')}</span></button>`}).join('')
    :`<p class="lfEmpty">No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Card Collection to get players.</p>`}
  const sel=lnSel==null?null:lnSel>=0?T.lineup[lnSel]:T.staff[-1-lnSel];
- const acts=mine&&sel?`${sel.signed?`<button type="button" class="mbtn lfRestore">Restore original</button>`:''}`:'';
+ const acts='';/* (no "restore original": you swap a player out by dragging another card in) */
  const keep=lfKeepScroll();
  $('cards').innerHTML=`<div class="lfWrap"><div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>
   <div class="lfSide"><h4>BULLPEN</h4><div class="lfPen">${pen}</div><div class="lfActs">${acts}</div></div></div>
@@ -107,7 +110,7 @@ $('cards').addEventListener('click',e=>{
  const fk='f'+i;if(lfFlips.has(fk)){lfFlips.delete(fk);if(lfFlip===fk)lfFlip=[...lfFlips].reverse().find(k=>k[0]==='f')||null}else{lfFlips.add(fk);lfFlip=fk}lfMove=false;
  if(lnView!=='mine'||!b.closest('.lfField,.lfPen')){lineupRender();return}
  b.classList.toggle('flip',lfFlips.has(fk));lnSel=lfFlip&&lfFlip[0]==='f'?+lfFlip.slice(1):null;const T2=TEAMS[S.you],sel=lnSel==null?null:lnSel>=0?T2.lineup[lnSel]:T2.staff[-1-lnSel],a=document.querySelector('#cards .lfActs');
- if(a)a.innerHTML=sel&&sel.signed?`<button type="button" class="mbtn lfRestore">Restore original</button>`:''});
+ if(a)a.innerHTML=''});
 /* rotating a phone or resizing across the phone breakpoint redraws the field to match */
 {let lfWasMob=lfMob();addEventListener('resize',()=>{const m=lfMob();if(m!==lfWasMob){lfWasMob=m;if(!$('scrLineup').hidden&&typeof lineupRender==='function')lineupRender()}else if(!$('scrLineup').hidden)lfFit()})}
 
