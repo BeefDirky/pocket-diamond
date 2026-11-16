@@ -133,12 +133,16 @@ function qLnSync(){const on=!!(Q.on&&Q.fromLn);$('lnPlay').textContent=on?'IN QU
  if(on){const est=$('qEst')?$('qEst').textContent:'';$('lnQ').textContent=`LOOKING FOR OPPONENT · ${fmtClock((Date.now()-Q.t0)/1000)}${est?' · '+est:''} · TAP TO CANCEL`}}
 function qCancelQuiet(){if(!Q.on)return;track('queue_cancelled',{wait_secs:Math.round((Date.now()-Q.t0)/1000)});qStop();rpc('queue_leave').catch(()=>{})}
 function qLeaving(id){if(Q.on&&Q.fromLn&&id!=='scrLineup'&&id!=='scrQueue')qCancelQuiet()}
+/* join the queue as this device (the server turns away a device that another one has taken over; without migration
+   015 the older call is used) */
+async function qJoin(){const a={p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER};
+ try{return await rpc('queue_join',{...a,p_device:DV.id})}catch(e){if(/queue_join|could not find|schema cache|function/i.test((e&&e.message)||'')&&!/another device/.test(e.message||''))return rpc('queue_join',a);throw e}}
 async function qStart(fromLn){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=Date.now();Q.fromLn=!!fromLn;track('queue_joined',{club:S.you});qSay('LOOKING FOR OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
  if(!Q.fromLn){showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop)}clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000);qEst();qLnSync()},250);qLnSync();$('qTime').textContent='0:00';
  rpc('my_rating').then(r=>{if(Q.gen===gen&&r)$('qRate').textContent=`YOUR RATING ${r.rating}${r.games?` · ${r.wins}-${r.losses}`:''}`}).catch(()=>{});
- try{let r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});
+ try{let r=await qJoin();
   while(Q.on&&Q.gen===gen){if(r&&r.queue==='matched'){qMatched(r.info,gen);return}
-   if(r&&r.queue==='gone'){r=await rpc('queue_join',{p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER});continue}
+   if(r&&r.queue==='gone'){r=await qJoin();continue}
    if(r&&r.waiting>1)qSay('LOOKING FOR OPPONENT',`3 innings · you bat and pitch · ${r.waiting} in the queue`);qEst(r);
    if(await qBotTry(gen))return;
    await new Promise(res=>setTimeout(res,2000));if(!Q.on||Q.gen!==gen)return;r=await rpc('queue_poll')}}

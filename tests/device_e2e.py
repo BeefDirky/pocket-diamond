@@ -84,6 +84,25 @@ with sync_playwright() as p:
     PA.click('#dgHere'); PA.wait_for_timeout(4500)
     PB.evaluate("__x('DV.at=0;devCheck()')"); PB.wait_for_timeout(1500)
     check(PA.evaluate("__x('DV.state')") == 'ok' and PB.is_visible('#devGate'), 'PLAY HERE INSTEAD takes it back; the second device is told')
+    # ranked: the replaced device is turned away by the server
+    check('another device' in PB.evaluate("__x(\"qJoin().then(()=>'joined',e=>e.message)\")"), 'the replaced device can\'t join the ranked queue')
+    # a replaced device still saves what it earned, unless the other device saved since (a fake cloud save table)
+    fake = '''__x(`supaClient().then(c=>{window.__saves=window.__saves||{at:'2026-01-01T00:00:00.000Z',n:0};const S0=window.__saves;
+      c.from=()=>({select(){return this},eq(){return this},upsert(o){S0.at=o.updated_at;S0.n++;return this},maybeSingle:async()=>({data:{updated_at:S0.at},error:null})});
+      const m=accMeta();m.syncedAt=S0.at;m.localAt=Date.now()+5;m.pushedAt=Date.now()-5;accSetMeta(m)})`)'''
+    PB.evaluate(fake); PB.wait_for_timeout(200)
+    PB.evaluate("__x('accPush()')"); PB.wait_for_timeout(500)
+    check(PB.evaluate("window.__saves.n") == 1, 'replaced device: unsaved progress is still saved when nobody else saved since')
+    PB.evaluate("window.__saves.at='2026-02-02T00:00:00.000Z';__x('(()=>{const m=accMeta();m.localAt=Date.now()+5;accSetMeta(m)})()')")
+    PB.evaluate("__x('accPush()')"); PB.wait_for_timeout(500)
+    check(PB.evaluate("window.__saves.n") == 1, '...but not over a newer save from the other device')
+    # a second tab of the same browser takes over at once; the older tab says so (and offers no sign-out)
+    PA2 = ca.new_page(); PA2.on('pageerror', lambda e: errs.append('A2 ' + str(e)))
+    PA2.goto('http://localhost:8767/index.html'); PA2.wait_for_timeout(2500); signin(PA2); PA2.wait_for_timeout(3500)
+    check(PA2.evaluate("__x('DV.state')") == 'ok' and PA2.evaluate("document.getElementById('devGate').hidden"), 'a new tab takes over without asking')
+    check(PA2.evaluate("__x('DV.id')") != PA.evaluate("__x('DV.id')") and PA2.evaluate("__x('DV.base')") == PA.evaluate("__x('DV.base')"), 'each tab has its own id, same browser')
+    PA.wait_for_timeout(1500)
+    check(PA.is_visible('#devGate') and 'ANOTHER TAB' in PA.text_content('#dgHead') and not PA.is_visible('#dgOut'), 'the older tab is told at once: ' + PA.text_content('#dgHead'))
     PB.click('#dgOut'); PB.wait_for_timeout(800)
     check(PB.evaluate("__x('!ACC.user')") and PB.evaluate("document.getElementById('devGate').hidden"), 'SIGN OUT signs that device out')
     check(not errs, 'no page errors ' + str(errs[:3]))

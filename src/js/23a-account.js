@@ -22,7 +22,11 @@ const hasProgress=o=>['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-wal
 function accDirty(){const m=accMeta();m.localAt=Date.now();accSetMeta(m);if(ACC.user){clearTimeout(ACC.pushT);ACC.pushT=setTimeout(accPush,4000)}}
 /* DV.lock: another device has taken over this account, so this one stops saving to it (see 23p-devices.js) */
 const DV={lock:false};
-async function accPush(){if(!ACC.user||ACC.state==='conflict'||DV.lock)return;try{const c=await supaClient(),at=new Date().toISOString();
+async function accPush(){if(!ACC.user||ACC.state==='conflict')return;try{const c=await supaClient(),at=new Date().toISOString();
+  /* another device has the account: still save what this one earned, but only if that device hasn't saved anything
+     since this one last did (otherwise its newer save wins and nothing is overwritten) */
+  if(DV.lock){const {data:row,error:e1}=await c.from('saves').select('updated_at').eq('user_id',ACC.user.id).maybeSingle();if(e1)throw e1;
+   if(row&&!sameT(row.updated_at,accMeta().syncedAt))return}
   const {data:saved,error}=await c.from('saves').upsert({user_id:ACC.user.id,data:localBlob(),updated_at:at}).select('updated_at').maybeSingle();if(error)throw error;
   const m=accMeta();m.uid=ACC.user.id;m.syncedAt=(saved&&saved.updated_at)||at;m.pushedAt=Date.now();accSetMeta(m);ACC.msg='';acRender()}
  catch(e){ACC.msg=/relation|saves/.test(e.message||'')?'Cloud saves are not set up on the server yet.':'Could not reach the cloud; your progress is safe on this device and will upload later.';acRender();clearTimeout(ACC.pushT);ACC.pushT=setTimeout(accPush,30000)/* (try again in 30 s) */}}

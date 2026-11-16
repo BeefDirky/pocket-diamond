@@ -15,6 +15,10 @@ select pg_temp.ok((public.device_peek('phone-aaaaaaaa')->>'mine')::boolean, 'the
 select pg_temp.ok((public.device_check('pc-bbbbbbbbbb','Windows PC · Chrome',true)->>'took')::boolean, 'the PC takes over when asked');
 select pg_temp.ok(not (public.device_peek('phone-aaaaaaaa')->>'mine')::boolean, 'the phone sees it was replaced');
 select pg_temp.ok(public.device_peek('phone-aaaaaaaa')->>'label'='Windows PC · Chrome', '...by the PC');
+select pg_temp.ok(public.device_peek('phone-aaaaaaaa')->>'device'='pc-bbbbbbbbbb', '...and gets its id (to spot another tab of the same browser)');
+select pg_temp.fails($$select public.queue_join('seoul', array['busan'], 'test', 'phone-aaaaaaaa')$$, 'the replaced device can''t join ranked');
+select pg_temp.ok((public.queue_join('seoul', array['busan'], 'test', 'pc-bbbbbbbbbb')->>'queue') is not null, 'the device holding the account can');
+select public.queue_leave();
 select pg_temp.ok(not (public.device_check('phone-aaaaaaaa','iPhone · Chrome')->>'mine')::boolean, 'a plain check-in from the phone does not take it back');
 reset role;
 update public.active_devices set seen_at = now() - interval '5 minutes' where user_id = '11111111-1111-1111-1111-111111111111';
