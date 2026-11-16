@@ -1519,3 +1519,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
 #scrMain .mmSm.mmInv{isolation:isolate}
 #scrMain .mmSm.mmInv::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;backdrop-filter:blur(1.2px);-webkit-backdrop-filter:blur(1.2px);background:rgba(8,20,14,.2)}
 #acClub{display:inline-flex;align-items:center;gap:6px}.acLogo{width:1.6em;height:1.6em;margin:-.3em 0;object-fit:contain;image-rendering:pixelated;flex:none}
+/* banner: just the logo and a big, slanted username */
+.acHero #acSince{display:none}
+.acHeroLogo{width:88px;height:88px;margin:-8px 0}
+.acHero b{font-size:clamp(24px,7vw,34px);transform:skewX(-12deg);letter-spacing:.02em;line-height:1.1;word-break:normal;white-space:nowrap}.acHeroTx{flex:1 1 auto;max-width:max-content;padding-right:6px}

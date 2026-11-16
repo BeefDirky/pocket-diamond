@@ -1542,6 +1542,10 @@ body.gPause #title{z-index:60;pointer-events:auto}
 #scrMain .mmSm.mmInv{isolation:isolate}
 #scrMain .mmSm.mmInv::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;backdrop-filter:blur(1.2px);-webkit-backdrop-filter:blur(1.2px);background:rgba(8,20,14,.2)}
 #acClub{display:inline-flex;align-items:center;gap:6px}.acLogo{width:1.6em;height:1.6em;margin:-.3em 0;object-fit:contain;image-rendering:pixelated;flex:none}
+/* banner: just the logo and a big, slanted username */
+.acHero #acSince{display:none}
+.acHeroLogo{width:88px;height:88px;margin:-8px 0}
+.acHero b{font-size:clamp(24px,7vw,34px);transform:skewX(-12deg);letter-spacing:.02em;line-height:1.1;word-break:normal;white-space:nowrap}.acHeroTx{flex:1 1 auto;max-width:max-content;padding-right:6px}
 </style>
 
 <div class="app">
@@ -7924,7 +7928,9 @@ function acDetails(){const u=ACC.user;if(!u)return;const made=u.created_at;
 /* the banner at the top: your club's paint swirl behind your club logo and username */
 function acBanner(){const k=MYTEAM&&TEAMS[MYTEAM.club]?MYTEAM.club:'',h=$('acHero'),l=$('acHeroLogo');
  try{if(h.dataset.club!==k){h.dataset.club=k;h.style.backgroundImage=`url(${maSwirl(k)})`;h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}}catch(e){}
- l.hidden=!k;if(k)l.src=LOGO_URL[k]||''}
+ l.hidden=!k;if(k)l.src=LOGO_URL[k]||'';
+ /* a long username steps its type down until it fits on one line */
+ requestAnimationFrame(()=>{const n=$('acName');n.style.fontSize='';let f=parseFloat(getComputedStyle(n).fontSize),i=0;while(n.scrollWidth>n.parentElement.clientWidth+1&&f>14&&i++<20){f-=1;n.style.fontSize=f+'px'}})}
 function acRatingShow(){const r=acDetails.r;if(!r)return;$('acRating').textContent=r.rating;$('acRec').textContent=r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet'}
 $('acProfile').addEventListener('click',()=>{if(!ACC.user)return;lbOpen();lbProfile(ACC.user.id)});
 // ---------- username filter: offensive names are refused here and, the same way, by the server (migration 010) ----------
@@ -8000,7 +8006,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='7e6fe74988',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='2ad053110e',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
