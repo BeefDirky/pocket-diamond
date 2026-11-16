@@ -141,7 +141,7 @@ function acDetails(){const u=ACC.user;if(!u)return;const made=u.created_at;
 /* the banner at the top: your club's paint swirl behind your club logo and username */
 function acBanner(){const k=MYTEAM&&TEAMS[MYTEAM.club]?MYTEAM.club:'',h=$('acHero'),l=$('acHeroLogo');
  try{if(h.dataset.club!==k){h.dataset.club=k;h.style.backgroundImage=`url(${maSwirl(k)})`;h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}}catch(e){}
- l.hidden=!k;if(k)l.src=LOGO_URL[k]||'';
+ l.hidden=!k;if(k)l.src=LOGO_URL[k]||'';$('acHeroClub').textContent=k?`${TEAMS[k].city} ${TEAMS[k].name}`:'';$('acHeroClub').hidden=!k;
  /* a long username steps its type down until it fits on one line */
  requestAnimationFrame(()=>{const n=$('acName');n.style.fontSize='';let f=parseFloat(getComputedStyle(n).fontSize),i=0;while(n.scrollWidth>n.parentElement.clientWidth+1&&f>14&&i++<20){f-=1;n.style.fontSize=f+'px'}})}
 function acRatingShow(){const r=acDetails.r;if(!r)return;$('acRating').textContent=r.rating;$('acRec').textContent=r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet'}

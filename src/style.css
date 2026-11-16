@@ -1524,3 +1524,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
 .acHeroLogo{width:88px;height:88px;margin:-8px 0}
 .acHero b{font-size:clamp(24px,7vw,34px);transform:skewX(-12deg);letter-spacing:.02em;line-height:1.1;word-break:normal;white-space:nowrap}.acHeroTx{flex:1 1 auto;max-width:max-content;padding-right:6px}
 #scrMain .mmSm .pkBadge{text-shadow:none}
+/* banner: logo and name sit together on the left; the club's full name in small print under the username */
+.acHero{justify-content:flex-start}
+.acHeroTx,.acHeroLogo:not([hidden])+.acHeroTx{align-items:flex-start;text-align:left}
+.acHero .acHeroClub{font-family:var(--f-px);font-size:11px;letter-spacing:.08em;color:#f4ead0;margin-top:2px}
