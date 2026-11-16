@@ -40,10 +40,11 @@ function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c,k):port
  return `<button type="button" class="lfc r${r}${lfFlips.has(fk)?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
   ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'?' · SIDE':''))}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
 let lfTab='field',boSel=null;
-/* the BATTING ORDER tab keeps the page exactly as tall as the POSITIONS tab, so the header and tabs don't jump */
-let lfFieldH=0;
-function lnHold(){const c=$('scrLineup');if(lfTab==='order'){if(lfFieldH)c.style.minHeight=lfFieldH+'px'}else c.style.minHeight=''}
-for(const b of $('lnTabs').children)b.addEventListener('click',()=>{if(lfTab==='field'&&!$('scrLineup').hidden)lfFieldH=$('scrLineup').offsetHeight;lfTab=b.dataset.t;boSel=null;lfMove=false;lineupRender()});
+/* the BATTING ORDER tab starts exactly where the POSITIONS tab starts (so the header and tabs don't jump), and is only
+   as tall as it needs to be */
+let lfFieldTop=null;
+function lnHold(){const c=$('scrLineup'),o=lfTab==='order';c.classList.toggle('boTab',o);c.style.marginTop=o&&lfFieldTop!=null?Math.max(0,lfFieldTop)+'px':''}
+for(const b of $('lnTabs').children)b.addEventListener('click',()=>{if(lfTab==='field'&&!$('scrLineup').hidden){const c=$('scrLineup'),t=$('title');lfFieldTop=c.getBoundingClientRect().top-t.getBoundingClientRect().top+t.scrollTop-parseFloat(getComputedStyle(t).paddingTop)}lfTab=b.dataset.t;boSel=null;lfMove=false;lineupRender()});
 /* the batting order: the nine hitters in a row, in order. Tap one, then tap the spot he should bat in: they swap */
 function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you);
   return `<div class="boSlot"><span class="boNum">${i+1}</span><button type="button" class="lfc bo r${c?c.r:0}${boSel===i?' boSel':''}" data-o="${i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}</span></button></div>`}).join('');

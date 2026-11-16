@@ -1508,4 +1508,4 @@ body.gPause #title{z-index:60;pointer-events:auto}
 @keyframes shopHolo{to{background-position:300% 0}}
 @keyframes shopShine{0%{background-position:0 0,130% 0}60%,100%{background-position:0 0,-130% 0}}
 @media (prefers-reduced-motion:reduce){#scrMain .mmSm.mmShop,#scrMain .mmSm.mmShop::before,#scrMain .mmSm.mmInv.mmNew{animation:none}}
-#scrLineup .lnFoot{margin-top:auto}
+.overlay:has(#scrLineup.boTab:not([hidden])){align-items:flex-start}
