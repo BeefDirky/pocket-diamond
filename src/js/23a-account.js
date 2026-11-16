@@ -20,7 +20,9 @@ const saveVal=v=>v==null||/^\s*(\{\s*\}|\[\s*\]|null|)\s*$/.test(String(v))?null
 const sameSave=(a,b)=>SAVE_KEYS.filter(k=>k!=='pd-opts2').every(k=>saveVal(a[k])===saveVal(b[k]));
 const hasProgress=o=>['pd-cards','pd-signings','pd-playoffs','pd-custom','pd-wallet'].some(k=>saveVal(o[k])!=null);
 function accDirty(){const m=accMeta();m.localAt=Date.now();accSetMeta(m);if(ACC.user){clearTimeout(ACC.pushT);ACC.pushT=setTimeout(accPush,4000)}}
-async function accPush(){if(!ACC.user||ACC.state==='conflict')return;try{const c=await supaClient(),at=new Date().toISOString();
+/* DV.lock: another device has taken over this account, so this one stops saving to it (see 23p-devices.js) */
+const DV={lock:false};
+async function accPush(){if(!ACC.user||ACC.state==='conflict'||DV.lock)return;try{const c=await supaClient(),at=new Date().toISOString();
   const {data:saved,error}=await c.from('saves').upsert({user_id:ACC.user.id,data:localBlob(),updated_at:at}).select('updated_at').maybeSingle();if(error)throw error;
   const m=accMeta();m.uid=ACC.user.id;m.syncedAt=(saved&&saved.updated_at)||at;m.pushedAt=Date.now();accSetMeta(m);ACC.msg='';acRender()}
  catch(e){ACC.msg=/relation|saves/.test(e.message||'')?'Cloud saves are not set up on the server yet.':'Could not reach the cloud; your progress is safe on this device and will upload later.';acRender();clearTimeout(ACC.pushT);ACC.pushT=setTimeout(accPush,30000)/* (try again in 30 s) */}}

@@ -44,7 +44,7 @@ $('frList').addEventListener('click',async e=>{const b=e.target.closest('button'
 // ---- invites ----
 async function frChannel(){const u=frSignedIn()&&ACC.user.id;if(FR.chFor===u)return;FR.chFor=u;
  const c=await supaClient();if(FR.ch){try{c.removeChannel(FR.ch)}catch(e){}FR.ch=null}if(!u)return;
- const ch=c.channel('pd-u-'+u);ch.on('broadcast',{event:'invite'},m=>frGotInvite(m.payload||{}));ch.on('broadcast',{event:'reply'},m=>frGotReply(m.payload||{}));ch.subscribe(()=>{});FR.ch=ch;frLoad()}
+ const ch=c.channel('pd-u-'+u);ch.on('broadcast',{event:'invite'},m=>frGotInvite(m.payload||{}));ch.on('broadcast',{event:'reply'},m=>frGotReply(m.payload||{}));ch.on('broadcast',{event:'device'},m=>{if(typeof devNudge==='function')devNudge(m.payload||{})});ch.subscribe(()=>{});FR.ch=ch;frLoad()}
 async function frSend(to,event,payload){const c=await supaClient(),ch=c.channel('pd-u-'+to);
  await new Promise(res=>{const t=setTimeout(res,4000);ch.subscribe(s=>{if(s==='SUBSCRIBED'){ch.send({type:'broadcast',event,payload}).finally(()=>{clearTimeout(t);res()})}})});
  setTimeout(()=>{try{c.removeChannel(ch)}catch(e){}},500)}
