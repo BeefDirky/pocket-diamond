@@ -54,11 +54,19 @@ function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in fro
  const Z=4,sw=sp.c.width*Z,sh=sp.c.height*Z,x0=Math.round((128-sw)/2),y0=150-sh;
  o.save();if(lefty){o.translate(128,0);o.scale(-1,1)}o.drawImage(sp.c,x0,y0,sw,sh);o.restore();
  /* the club logo on the front of the cap (drawn after the mirror, so it never reads backwards) */
+ /* a free agent's plain helmet gets a shiny glare near the front instead of a logo */
+ if(!tk&&sp.cap){const q=sp.cap,r1=q.span[q.y+1]||q.span[q.y],r2=q.span[q.y+2]||r1,G1=(cx,cy,a)=>{const px=x0+cx*Z;o.fillStyle=`rgba(255,255,255,${a})`;o.fillRect(lefty?128-px-Z:px,y0+cy*Z,Z,Z)};
+  G1(r1[1]-3,q.y+1,.85);G1(r1[1]-2,q.y+1,.85);G1(r2[1]-4,q.y+2,.6);G1(r2[1]-1,q.y+2,.35)}
  const mk=tk&&CAP_MARKS[tk];
  if(mk&&sp.cap){const q=sp.cap,mw=Math.max(...mk.m.map(r=>r.length)),mh=mk.m.length;
   const gx=Math.round(q.cx-mw/2),gy=Math.max(q.y,Math.round(q.cy-mh/2));/* cell position on the sprite */
-  mk.m.forEach((r,j)=>{for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;o.fillStyle=mk.p[ch];
-   const sx=gx+(lefty?mw-1-i:i),px=x0+sx*Z;o.fillRect(lefty?128-px-Z:px,y0+(gy+j)*Z,Z,Z)}})}
+  /* wrap it round the dome: columns squeeze and darken toward the sides and dip a little, like a printed cap front */
+  const half=mw/2,TH=1.05,edge=u=>Math.sin(u*TH)/Math.sin(TH);
+  mk.m.forEach((r,j)=>{for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;
+   const ii=lefty?mw-1-i:i,ua=(ii-half)/half,ub=(ii+1-half)/half,um=(ua+ub)/2;
+   const xa=x0+(gx+half+edge(ua)*half)*Z,xb=x0+(gx+half+edge(ub)*half)*Z,dy=Math.round(um*um*3);
+   o.fillStyle=shade(mk.p[ch],-.32*um*um);const L0=Math.round(xa),L1=Math.round(xb);
+   o.fillRect(lefty?128-L1:L0,y0+(gy+j)*Z+dy,Math.max(1,L1-L0),Z)}})}
  return out.toDataURL()}
 /* a sprite drawn at 1 px per cell with an ink rim, plus where its cap sits (for the logo); cached per pose + colours */
 const SPR_CACHE={},SPR_GLOVE='#a0602e';
@@ -72,5 +80,5 @@ function spriteCanvas(pose,pal){const key=pose+JSON.stringify(pal);if(SPR_CACHE[
  g.putImageData(new ImageData(o,W,H),0,0);
  /* the middle of the dome: average the middle of each cap row, leaving out the bottom rows where the brim sticks out */
  let cap=null;if(cx1>=0){const ys=Object.keys(span).map(Number).filter(y=>y<=cy1-2),mids=(ys.length?ys:Object.keys(span).map(Number)).map(y=>(span[y][0]+span[y][1])/2);
-  cap={x:cx0,y:cy0,w:cx1-cx0+1,h:cy1-cy0+1,cx:mids.reduce((a,b)=>a+b,0)/mids.length+.5,cy:(cy0+cy1+1)/2}}
+  cap={span,x:cx0,y:cy0,w:cx1-cx0+1,h:cy1-cy0+1,cx:mids.reduce((a,b)=>a+b,0)/mids.length+.5,cy:(cy0+cy1+1)/2}}
  return SPR_CACHE[key]={c:cv,cap}}
