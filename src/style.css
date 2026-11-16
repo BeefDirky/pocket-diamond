@@ -1583,3 +1583,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
  #scrShop .shopTxt b{font-size:11px}#scrShop .shopTxt p{font-size:12px}#scrShop .shopBuy{font-size:12px;padding:10px 6px}}
 @media (prefers-reduced-motion:reduce){#scrShop .shopArt::after{animation:none;opacity:0}}
 #fpClub{display:inline-flex;align-items:center;gap:6px}#scrFrProf .fpMsg{margin:0;font-size:13px;color:var(--dim);text-align:center}#scrFrProf .fpMsg:empty{display:none}#scrFrProf .acBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* friend page: just the ranked tile under the banner, full width */
+.fpTiles{grid-template-columns:1fr}
+/* REMOVE FRIEND: a small text button, not a full-size one */
+.frMore{grid-template-columns:1fr auto;align-items:center}.frMore .mbtn[data-rm]{font-size:10px;padding:6px 10px;opacity:.8;min-height:0;letter-spacing:.06em}
