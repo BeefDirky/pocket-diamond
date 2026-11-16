@@ -1586,6 +1586,26 @@ body.gPause #title{z-index:60;pointer-events:auto}
 @media (min-width:721px){.lfTray .lfc.lfHole{height:170px}}
 .lfTray .lfEmpty{left:0;right:0;width:auto;max-width:none}
 @media (min-width:721px){.lfTray:has(.lfHole){flex-wrap:nowrap;overflow:hidden}.lfTray .lfEmpty{font-size:16px}}
+/* shop v2: two equal pack cards, each a centred column (pack, name, blurb, price button on the same line in both) */
+#scrShop .shopRow{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
+#scrShop .shopItem{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 16px 16px;text-align:center;position:relative}
+#scrShop .shopArt{position:relative;width:120px;height:168px;flex:none;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45));transition:transform .15s}
+@media (hover:hover){#scrShop .shopItem:hover .shopArt{transform:translateY(-3px) rotate(-1.5deg)}}
+#scrShop .shopArt canvas{width:120px;height:168px;image-rendering:pixelated;display:block}
+#scrShop .shopArt::after{content:"";position:absolute;inset:7px 6px;pointer-events:none;mix-blend-mode:screen;
+ background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.45) 47%,transparent 60%) repeat-x;background-size:250% 100%;animation:shine 3.2s linear infinite}
+#scrShop .shopTxt{align-items:center;gap:6px;flex:1 1 auto}
+#scrShop .shopTxt b{font-size:13px;line-height:1.3}
+#scrShop .shopTxt p{font-size:13px;max-width:30ch}
+#scrShop .shopBuy{width:100%;gap:8px;font-size:14px;padding:12px 10px}
+#scrShop .shopBuy span{opacity:.85}
+#scrShop .shopBuy .coinIc{margin:0}
+#scrShop .shopItem.bl{border-color:#4a6cc0;background:linear-gradient(180deg,#0d1730,var(--edge) 55%)}
+.shopInv{width:100%;text-align:center;justify-content:center}#scrShop .shopMsg:empty{display:none}
+@media (max-width:560px){#scrShop .shopRow{gap:10px}#scrShop .shopItem{padding:14px 10px 12px}#scrShop .shopArt,#scrShop .shopArt canvas{width:92px;height:129px}
+ #scrShop .shopTxt b{font-size:11px}#scrShop .shopTxt p{font-size:12px}#scrShop .shopBuy{font-size:12px;padding:10px 6px}}
+@media (prefers-reduced-motion:reduce){#scrShop .shopArt::after{animation:none;opacity:0}}
+#fpClub{display:inline-flex;align-items:center;gap:6px}#scrFrProf .fpMsg{margin:0;font-size:13px;color:var(--dim);text-align:center}#scrFrProf .fpMsg:empty{display:none}#scrFrProf .acBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 </style>
 
 <div class="app">
@@ -1853,6 +1873,19 @@ body.gPause #title{z-index:60;pointer-events:auto}
         <div class="lnFoot"><div class="lnTeamBar" id="lnTeamBar"><button class="mbtn" id="lnInv" type="button">INVENTORY</button><button class="mbtn" id="lnClub" type="button">CHANGE CLUB</button></div><button class="big" id="lnNext" type="button">NEXT</button></div>
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
+      <div class="card" id="scrFrProf" hidden>
+        <h1>FRIEND <span>PROFILE</span></h1>
+        <div class="acHero" id="fpHero"><img class="acHeroLogo" id="fpLogo" alt="" hidden><div class="acHeroTx"><b id="fpName"></b><small class="acHeroClub" id="fpClubN"></small></div></div>
+        <div class="acTiles">
+          <div><b id="fpRating">—</b><span>RANKED RATING</span><small id="fpRec"></small></div>
+          <div><b id="fpCoins">—</b><span>COINS</span></div>
+          <div><b id="fpCards">—</b><span>CARDS OWNED</span></div>
+          <div><b class="fpClubT" id="fpClub">—</b><span>CLUB</span></div>
+        </div>
+        <p class="fpMsg" id="fpMsg" aria-live="polite"></p>
+        <div class="acBtns"><button class="mbtn" id="fpRanked" type="button">RANKED PROFILE</button><button class="mbtn" id="fpInvite" type="button">INVITE TO PLAY</button></div>
+        <button class="mbtn back" type="button" data-go="scrFriends">Back</button>
+      </div>
       <div class="card" id="scrPlay" hidden>
         <h1 id="plMode">ARCADE</h1>
         <div class="plTeam"><img id="plLogo" alt=""><div class="plId"><b id="plName"></b><span id="plSub"></span></div><div class="plOvr"><small>TEAM OVR</small><b id="plOvr">0</b></div></div>
@@ -1875,14 +1908,16 @@ body.gPause #title{z-index:60;pointer-events:auto}
       <div class="card wide" id="scrShop" hidden>
         <div class="ckTop"><h1>SH<span>OP</span></h1><span class="shopBal" id="shopBal"></span></div>
         <div class="shopRow">
-          <div class="shopItem"><canvas id="shopCvK" width="48" height="64"></canvas><div class="shopTxt"><b>FREE AGENT PACK</b><p>Five free agents, at least one Rare or better. Sign them to any club; duplicates level them up.</p>
-            <button class="big shopBuy" type="button" data-set="fa"><i class="coinIc"></i>200 · BUY</button></div></div>
-          <div class="shopItem bl"><canvas id="shopCvB" width="48" height="64"></canvas><div class="shopTxt"><b>BIG LEAGUE PACK</b><p>One big-league star, Rare or better, rated well above the free agents.</p>
-            <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>500 · BUY</button></div></div>
+          <div class="shopItem"><div class="shopArt"><canvas id="shopCvK" width="40" height="56"></canvas></div>
+            <div class="shopTxt"><b>FREE AGENT PACK</b><p>Five free agents, at least one Rare or better. Duplicates level your players up.</p></div>
+            <button class="big shopBuy" type="button" data-set="fa"><i class="coinIc"></i>200<span>· BUY</span></button></div>
+          <div class="shopItem bl"><div class="shopArt"><canvas id="shopCvB" width="40" height="56"></canvas></div>
+            <div class="shopTxt"><b>BIG LEAGUE PACK</b><p>One Big League star: Epic (85%) or Legendary (15%).</p></div>
+            <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>500<span>· BUY</span></button></div>
         </div>
         <div class="shopOwn" id="shopOwn" hidden><span id="shopOwnTxt"></span><button class="mbtn" type="button" id="shopOpenOwn">OPEN ONE</button></div>
         <p class="shopMsg" id="shopMsg" aria-live="polite"></p>
-        <div class="tiles"><button class="tile" type="button" id="shopToInv"><span>Inventory</span></button></div>
+        <button class="mbtn shopInv" type="button" id="shopToInv">INVENTORY</button>
         <button class="mbtn back" type="button" id="shopBack" data-go="scrMain">Back</button>
       </div>
       <div class="reveal" id="reveal" hidden>
@@ -7002,7 +7037,7 @@ let Q_URL=null;function qLogo(){if(Q_URL)return Q_URL;const c=document.createEle
 function refreshMenu(){const y=TEAMS[S.you],o=TEAMS[S.opp];$('mLogoY').src=LOGO_URL[S.you];$('mLogoO').src=qLogo();$('mNameY').textContent=`${y.city} ${y.name}`;$('mNameO').textContent='RANDOM';const st=STADIUMS[S.you];$('mMatch').textContent=`The ${y.city} ${y.name} (${y.kcity} ${y.kname}) host a random opponent at ${st.name}, ${st.kname}. ${S.night?'Night game under the lights.':'Day game in the sun.'}`}
 function rebuildPark(){NIGHT_MASK=null;NIGHT_BEAMS=null;setStadium();FIELD=buildField();SIGNS=buildSigns();DECOR=buildDecor();S.vendors=null;S.bb=null;S.fidg=[]}
 function showScreen(id){if(id!=='scrLineup'&&$('scrLineup')&&!$('scrLineup').hidden&&typeof lfFlips!=='undefined'){lfFlips.clear();lfFlip=null}/* leaving the team page: every card is face up next time */qLeaving(id);roomLineupBack(id);roomKitRestore(id);if(pendingMode==='watch'&&id!=='scrTeams'){pendingMode=null;myTeamRestore()}/* backed out of picking a team to watch: your own club again */if(pendingMode==='brand'&&id!=='scrTeams')brandCancel();if(id==='scrTeams'&&pendingMode==='brand'){$('tsPrev').hidden=$('tsNext').hidden=false}
- document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb','scrLegal','scrPlay','scrFriends','scrTourney','scrHist'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
+ document.body.classList.toggle('lnTeam',id==='scrLineup'&&!pregame&&!lineFromPause);if(id&&id!==showScreen.last)track('screen_viewed',{screen:id});showScreen.last=id;if(id==='scrTeams'&&!pendingMode&&!parkFromBP){$('playGo').hidden=true;const h=document.querySelector('#scrTeams h1');if(h)h.innerHTML='CLUBS<small>SELECT YOUR TEAM</small>'}if(id==='scrMain'||id==='scrSingle')pendingMode=null;for(const k of['scrMain','scrSingle','scrAbout','scrTeams','scrLineup','scrHow','scrOpts','scrEdit','scrPause','scrCards','scrPick','scrBracket','scrOnline','scrAcct','scrSpons','scrShop','scrMulti','scrQueue','scrBoard','scrFb','scrLegal','scrPlay','scrFriends','scrTourney','scrHist','scrFrProf'])$(k).hidden=k!==id;if(id==='scrShop')shopRender();if(id==='scrSpons')adsRender();if(id==='scrAcct')acRender();if(id==='scrEdit')syncEditor();if(id==='scrOpts')syncOpts();if(id==='scrCards')renderBinder();if(id==='scrLineup'){lnSel=null;lfFlip=null;renderCards()}if(id==='scrMain'||id==='scrSingle')refreshMenu();$('title').scrollTop=0}
 const isDesk=()=>isLandscape();
 // PC menu scale: 1 at about 720 px tall (1.5 on 1080p), up to 1.65 on big screens (never wider than the screen allows);
 // the main menu grows a fifth as much (1.1 on 1080p)
@@ -8080,7 +8115,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='93fb87aa2e',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='86af36d073',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8577,7 +8612,7 @@ $('frSend').addEventListener('click',()=>frAdd($('frName').value));
 $('frName').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')frAdd($('frName').value)});
 $('frList').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b||FR.busy)return;const d=b.dataset;
  if(d.open){FR.open=FR.open===d.open?null:d.open;frRender();return}
- if(d.prof){lbOpen();lbProfile(d.prof);return}
+ if(d.prof){frProfile(d.prof);return}
  if(d.inv){frInvite(d.inv);return}
  FR.busy=true;try{
   if(d.acc){await rpc('friend_respond',{p_other:d.acc,p_accept:true});frSay('Friend added.');track('friend_accept')}
@@ -8622,6 +8657,21 @@ setInterval(()=>{frChannel().catch(()=>{});if(frSignedIn()&&!$('title').hidden&&
 // "+ ADD FRIEND" on a leaderboard profile
 $('lbpCard').addEventListener('click',async e=>{const b=e.target.closest('[data-add]');if(!b)return;b.disabled=true;b.textContent='SENDING…';
  try{const r=await rpc('friend_request',{p_username:b.dataset.add});b.textContent=r.status==='accepted'?'FRIENDS':'REQUEST SENT';track('friend_request',{result:r.status,from:'profile'});frLoad()}catch(err){b.textContent=frErr(err);b.disabled=false}});
+// ---- a friend's profile: the same banner and tiles as your own Account page (no email, dates, username or saving) ----
+let FP=null;
+async function frProfile(id){const f=FR.list.find(x=>x.user_id===id);FP=id;FR.open=null;showScreen('scrFrProf');
+ const set=(k,v)=>{$(k).textContent=v};$('fpName').textContent=f?f.username:'';set('fpRating',f&&f.rating!=null?f.rating:'—');set('fpRec','');set('fpCoins','—');set('fpCards','—');$('fpClub').textContent='—';$('fpMsg').textContent='';
+ fpBanner('');const[st]=f?frStatus(id):['off'];$('fpInvite').disabled=st==='off'||st==='g';
+ try{const r=await rpc('friend_profile',{p_user:id});if(FP!==id||!r)return;
+  $('fpName').textContent=r.username||(f&&f.username)||'';set('fpRating',r.rating);set('fpRec',r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet');
+  set('fpCoins',r.coins!=null?coinFmt(r.coins):'—');set('fpCards',r.cards!=null?r.cards:'—');
+  const T=r.club&&TEAMS[r.club];$('fpClub').innerHTML=T?`<img class="acLogo" alt="" src="${LOGO_URL[r.club]||''}">${esc(T.name)}`:'—';fpBanner(T?r.club:'')}
+ catch(e){if(FP===id)$('fpMsg').textContent=/friend_profile|schema cache|function/i.test((e&&e.message)||'')?'Profiles aren’t set up on the server yet.':frErr(e)}}
+function fpBanner(k){const h=$('fpHero'),l=$('fpLogo');try{h.style.backgroundImage=`url(${maSwirl(k)})`;h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}catch(e){}
+ l.hidden=!k;if(k)l.src=LOGO_URL[k]||'';$('fpClubN').textContent=k?`${TEAMS[k].city} ${TEAMS[k].name}`:'';$('fpClubN').hidden=!k;
+ requestAnimationFrame(()=>{const n=$('fpName');n.style.fontSize='';let fs=parseFloat(getComputedStyle(n).fontSize),i=0;while(n.scrollWidth>n.parentElement.clientWidth+1&&fs>14&&i++<20){fs-=1;n.style.fontSize=fs+'px'}})}
+$('fpRanked').addEventListener('click',()=>{if(FP){lbOpen();lbProfile(FP)}});
+$('fpInvite').addEventListener('click',()=>{if(FP)frInvite(FP)});
 // ---------- friends playoff: an 8-club bracket played live with your friends (server: migration 014) ----------
 // The host creates it and invites friends; START fills the empty spots with CPU clubs and seeds everyone by ranked
 // rating. Quarterfinals and semifinals are best of 3, the final best of 5, every game 3 innings with the higher seed home.
@@ -8986,14 +9036,35 @@ function renderBinder(){
  updatePackBadge();
 }
 function updatePackBadge(){for(const id of['pkBadge','pkBadge2']){const b=$(id);if(!b)continue;b.hidden=COL.packs<=0;b.textContent=COL.packs}}
-function drawPack(cv,set){const g=cv.getContext('2d'),bl=set==='bl',T=bl?{jersey:'#1d3f7a',cap:'#c8202a'}:{jersey:'#4b535c',cap:'#ffbf3c'};g.clearRect(0,0,48,64);
- g.fillStyle='#1b1f24';g.fillRect(2,2,44,60);g.fillStyle=T.jersey;g.fillRect(4,4,40,56);g.fillStyle=T.cap;g.fillRect(4,4,40,8);g.fillRect(4,52,40,8);
- g.fillStyle='rgba(255,255,255,.25)';for(let x=4;x<44;x+=4){g.fillRect(x,4,2,2);g.fillRect(x+2,58,2,2)}
- g.fillStyle='#ffbf3c';g.fillRect(8,16,32,24);g.fillStyle='#1b1f24';g.fillRect(10,18,28,20);
- g.fillStyle='#f4f1e8';g.beginPath();g.moveTo(24,20);g.lineTo(34,28);g.lineTo(24,36);g.lineTo(14,28);g.closePath();g.fill();
- g.fillStyle='#c48c56';g.beginPath();g.moveTo(24,24);g.lineTo(29,28);g.lineTo(24,32);g.lineTo(19,28);g.closePath();g.fill();
- g.fillStyle='#ffbf3c';g.font='6px "Press Start 2P", monospace';g.textAlign='center';g.fillText(bl?'BIG LG':'FREE AG',24,48);g.textAlign='left';
- if(bl){g.fillStyle='#f4f1e8';for(const[x,y]of[[8,7],[24,7],[40,7],[16,55],[32,55]])g.fillRect(x-1,y-1,3,3)}}
+/* a sealed foil pack, drawn pixel by pixel on a 40x56 canvas: crimped ends, a foil body with diagonal sheen bands, and
+   a badge in the middle (Free Agent: a baseball on a gold diamond; Big League: a gold star on navy and red) */
+function drawPack(cv,set){if(!cv)return;cv.width=40;cv.height=56;const g=cv.getContext('2d'),bl=set==='bl';g.clearRect(0,0,40,56);
+ const C=bl?{body:'#1c3b78',dark:'#12285a',band:'#c8202a',bandD:'#8e1219',crimp:'#e9e6ff',crimpD:'#9aa6c8',hi:'rgba(255,255,255,.16)'}
+  :{body:'#3d5a4c',dark:'#28403a',band:'#ffbf3c',bandD:'#c7871a',crimp:'#f4ead0',crimpD:'#b8ab88',hi:'rgba(255,255,255,.14)'};
+ const R=(c,x,y,w,h)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+ /* crimped top and bottom seals (teeth every other pixel) */
+ for(const y0 of[1,49]){R(C.crimpD,3,y0,34,6);R(C.crimp,3,y0+1,34,4);for(let x=3;x<37;x+=2){R(C.crimpD,x,y0+(y0<10?0:5),1,1)}for(let x=4;x<37;x+=3)R(C.crimpD,x,y0+2,1,2)}
+ /* body */
+ R('#0b130e',2,7,36,42);R(C.dark,3,7,34,42);R(C.body,4,7,32,42);
+ g.save();g.beginPath();g.rect(4,7,32,42);g.clip();g.fillStyle=C.hi;for(let k=-56;k<56;k+=11){g.beginPath();g.moveTo(k,49);g.lineTo(k+4,49);g.lineTo(k+4+42,7);g.lineTo(k+42,7);g.closePath();g.fill()}g.restore();
+ /* coloured bands near the seals */
+ R(C.band,4,9,32,4);R(C.bandD,4,12,32,1);R(C.band,4,43,32,4);R(C.bandD,4,43,32,1);
+ /* the badge */
+ const cx=20,cy=28;
+ const dia=(r,c)=>{g.fillStyle=c;for(let dy=-r;dy<=r;dy++){const w=r-Math.abs(dy);g.fillRect(cx-w,cy+dy,w*2+1,1)}};
+ if(!bl){dia(12,'#0b130e');dia(11,C.band);dia(9,C.bandD);dia(8,'#1b2a24');
+  /* baseball */
+  g.fillStyle='#0b130e';for(let dy=-6;dy<=6;dy++){const w=Math.round(Math.sqrt(36-dy*dy));g.fillRect(cx-w,cy+dy,w*2+1,1)}
+  g.fillStyle='#f4f1e8';for(let dy=-5;dy<=5;dy++){const w=Math.round(Math.sqrt(25-dy*dy));g.fillRect(cx-w,cy+dy,w*2+1,1)}
+  g.fillStyle='#d9d2c0';for(let dy=-5;dy<=5;dy++){const w=Math.round(Math.sqrt(25-dy*dy));g.fillRect(cx+w-1,cy+dy,1,1)}
+  g.fillStyle='#c8202a';for(const[x,y]of[[-3,-4],[-4,-2],[-4,0],[-4,2],[-3,4],[3,-4],[4,-2],[4,0],[4,2],[3,4]])g.fillRect(cx+x,cy+y,1,1)}
+ else{g.fillStyle='#0b130e';g.fillRect(cx-11,cy-11,23,23);R(C.band,cx-10,cy-10,21,21);R(C.bandD,cx-10,cy+9,21,2);R('#12285a',cx-8,cy-8,17,17);
+  /* a five-point star, from a polygon rasterised by the canvas then re-snapped to whole pixels */
+  const st=(r1,r2,c,ox,oy)=>{g.fillStyle=c;g.beginPath();for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,r=k%2?r2:r1;g.lineTo(Math.round(cx+ox+Math.cos(a)*r),Math.round(cy+oy+Math.sin(a)*r))}g.closePath();g.fill()};
+  st(8,3.4,'#0b130e',0,1);st(7,3,'#ffd23f',0,0);st(3,1.3,'#fff3b0',-1,-1);
+  for(const x of[-9,9])R('#ffd23f',cx+x,cy-16,2,2);R('#ffd23f',cx-1,cy-17,2,2)}
+ /* outline sparkle */
+ R('rgba(255,255,255,.55)',6,15,1,3);R('rgba(255,255,255,.55)',5,16,3,1)}
 function rollCard(minR,set){set=set||'fa';const w=set==='bl'?[0,0,85,15]:[60,28,10,2.6];let r;do{let x=Math.random()*w.reduce((a,b)=>a+b),i=0;while(x>w[i]){x-=w[i];i++}r=i}while(r<minR);
  const all=CARDS.filter(c=>c.set===set);let pool=all.filter(c=>c.r===r);if(!pool.length)pool=all;return pick(pool)}
 function openPack(set,paid){set=set||'fa';

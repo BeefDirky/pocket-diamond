@@ -187,6 +187,19 @@
         <div class="lnFoot"><div class="lnTeamBar" id="lnTeamBar"><button class="mbtn" id="lnInv" type="button">INVENTORY</button><button class="mbtn" id="lnClub" type="button">CHANGE CLUB</button></div><button class="big" id="lnNext" type="button">NEXT</button></div>
         <button class="mbtn back" type="button" data-go="scrSingle">Back</button>
       </div>
+      <div class="card" id="scrFrProf" hidden>
+        <h1>FRIEND <span>PROFILE</span></h1>
+        <div class="acHero" id="fpHero"><img class="acHeroLogo" id="fpLogo" alt="" hidden><div class="acHeroTx"><b id="fpName"></b><small class="acHeroClub" id="fpClubN"></small></div></div>
+        <div class="acTiles">
+          <div><b id="fpRating">—</b><span>RANKED RATING</span><small id="fpRec"></small></div>
+          <div><b id="fpCoins">—</b><span>COINS</span></div>
+          <div><b id="fpCards">—</b><span>CARDS OWNED</span></div>
+          <div><b class="fpClubT" id="fpClub">—</b><span>CLUB</span></div>
+        </div>
+        <p class="fpMsg" id="fpMsg" aria-live="polite"></p>
+        <div class="acBtns"><button class="mbtn" id="fpRanked" type="button">RANKED PROFILE</button><button class="mbtn" id="fpInvite" type="button">INVITE TO PLAY</button></div>
+        <button class="mbtn back" type="button" data-go="scrFriends">Back</button>
+      </div>
       <div class="card" id="scrPlay" hidden>
         <h1 id="plMode">ARCADE</h1>
         <div class="plTeam"><img id="plLogo" alt=""><div class="plId"><b id="plName"></b><span id="plSub"></span></div><div class="plOvr"><small>TEAM OVR</small><b id="plOvr">0</b></div></div>
@@ -209,14 +222,16 @@
       <div class="card wide" id="scrShop" hidden>
         <div class="ckTop"><h1>SH<span>OP</span></h1><span class="shopBal" id="shopBal"></span></div>
         <div class="shopRow">
-          <div class="shopItem"><canvas id="shopCvK" width="48" height="64"></canvas><div class="shopTxt"><b>FREE AGENT PACK</b><p>Five free agents, at least one Rare or better. Sign them to any club; duplicates level them up.</p>
-            <button class="big shopBuy" type="button" data-set="fa"><i class="coinIc"></i>200 · BUY</button></div></div>
-          <div class="shopItem bl"><canvas id="shopCvB" width="48" height="64"></canvas><div class="shopTxt"><b>BIG LEAGUE PACK</b><p>One big-league star, Rare or better, rated well above the free agents.</p>
-            <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>500 · BUY</button></div></div>
+          <div class="shopItem"><div class="shopArt"><canvas id="shopCvK" width="40" height="56"></canvas></div>
+            <div class="shopTxt"><b>FREE AGENT PACK</b><p>Five free agents, at least one Rare or better. Duplicates level your players up.</p></div>
+            <button class="big shopBuy" type="button" data-set="fa"><i class="coinIc"></i>200<span>· BUY</span></button></div>
+          <div class="shopItem bl"><div class="shopArt"><canvas id="shopCvB" width="40" height="56"></canvas></div>
+            <div class="shopTxt"><b>BIG LEAGUE PACK</b><p>One Big League star: Epic (85%) or Legendary (15%).</p></div>
+            <button class="big shopBuy" type="button" data-set="bl"><i class="coinIc"></i>500<span>· BUY</span></button></div>
         </div>
         <div class="shopOwn" id="shopOwn" hidden><span id="shopOwnTxt"></span><button class="mbtn" type="button" id="shopOpenOwn">OPEN ONE</button></div>
         <p class="shopMsg" id="shopMsg" aria-live="polite"></p>
-        <div class="tiles"><button class="tile" type="button" id="shopToInv"><span>Inventory</span></button></div>
+        <button class="mbtn shopInv" type="button" id="shopToInv">INVENTORY</button>
         <button class="mbtn back" type="button" id="shopBack" data-go="scrMain">Back</button>
       </div>
       <div class="reveal" id="reveal" hidden>

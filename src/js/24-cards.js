@@ -68,14 +68,35 @@ function renderBinder(){
  updatePackBadge();
 }
 function updatePackBadge(){for(const id of['pkBadge','pkBadge2']){const b=$(id);if(!b)continue;b.hidden=COL.packs<=0;b.textContent=COL.packs}}
-function drawPack(cv,set){const g=cv.getContext('2d'),bl=set==='bl',T=bl?{jersey:'#1d3f7a',cap:'#c8202a'}:{jersey:'#4b535c',cap:'#ffbf3c'};g.clearRect(0,0,48,64);
- g.fillStyle='#1b1f24';g.fillRect(2,2,44,60);g.fillStyle=T.jersey;g.fillRect(4,4,40,56);g.fillStyle=T.cap;g.fillRect(4,4,40,8);g.fillRect(4,52,40,8);
- g.fillStyle='rgba(255,255,255,.25)';for(let x=4;x<44;x+=4){g.fillRect(x,4,2,2);g.fillRect(x+2,58,2,2)}
- g.fillStyle='#ffbf3c';g.fillRect(8,16,32,24);g.fillStyle='#1b1f24';g.fillRect(10,18,28,20);
- g.fillStyle='#f4f1e8';g.beginPath();g.moveTo(24,20);g.lineTo(34,28);g.lineTo(24,36);g.lineTo(14,28);g.closePath();g.fill();
- g.fillStyle='#c48c56';g.beginPath();g.moveTo(24,24);g.lineTo(29,28);g.lineTo(24,32);g.lineTo(19,28);g.closePath();g.fill();
- g.fillStyle='#ffbf3c';g.font='6px "Press Start 2P", monospace';g.textAlign='center';g.fillText(bl?'BIG LG':'FREE AG',24,48);g.textAlign='left';
- if(bl){g.fillStyle='#f4f1e8';for(const[x,y]of[[8,7],[24,7],[40,7],[16,55],[32,55]])g.fillRect(x-1,y-1,3,3)}}
+/* a sealed foil pack, drawn pixel by pixel on a 40x56 canvas: crimped ends, a foil body with diagonal sheen bands, and
+   a badge in the middle (Free Agent: a baseball on a gold diamond; Big League: a gold star on navy and red) */
+function drawPack(cv,set){if(!cv)return;cv.width=40;cv.height=56;const g=cv.getContext('2d'),bl=set==='bl';g.clearRect(0,0,40,56);
+ const C=bl?{body:'#1c3b78',dark:'#12285a',band:'#c8202a',bandD:'#8e1219',crimp:'#e9e6ff',crimpD:'#9aa6c8',hi:'rgba(255,255,255,.16)'}
+  :{body:'#3d5a4c',dark:'#28403a',band:'#ffbf3c',bandD:'#c7871a',crimp:'#f4ead0',crimpD:'#b8ab88',hi:'rgba(255,255,255,.14)'};
+ const R=(c,x,y,w,h)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+ /* crimped top and bottom seals (teeth every other pixel) */
+ for(const y0 of[1,49]){R(C.crimpD,3,y0,34,6);R(C.crimp,3,y0+1,34,4);for(let x=3;x<37;x+=2){R(C.crimpD,x,y0+(y0<10?0:5),1,1)}for(let x=4;x<37;x+=3)R(C.crimpD,x,y0+2,1,2)}
+ /* body */
+ R('#0b130e',2,7,36,42);R(C.dark,3,7,34,42);R(C.body,4,7,32,42);
+ g.save();g.beginPath();g.rect(4,7,32,42);g.clip();g.fillStyle=C.hi;for(let k=-56;k<56;k+=11){g.beginPath();g.moveTo(k,49);g.lineTo(k+4,49);g.lineTo(k+4+42,7);g.lineTo(k+42,7);g.closePath();g.fill()}g.restore();
+ /* coloured bands near the seals */
+ R(C.band,4,9,32,4);R(C.bandD,4,12,32,1);R(C.band,4,43,32,4);R(C.bandD,4,43,32,1);
+ /* the badge */
+ const cx=20,cy=28;
+ const dia=(r,c)=>{g.fillStyle=c;for(let dy=-r;dy<=r;dy++){const w=r-Math.abs(dy);g.fillRect(cx-w,cy+dy,w*2+1,1)}};
+ if(!bl){dia(12,'#0b130e');dia(11,C.band);dia(9,C.bandD);dia(8,'#1b2a24');
+  /* baseball */
+  g.fillStyle='#0b130e';for(let dy=-6;dy<=6;dy++){const w=Math.round(Math.sqrt(36-dy*dy));g.fillRect(cx-w,cy+dy,w*2+1,1)}
+  g.fillStyle='#f4f1e8';for(let dy=-5;dy<=5;dy++){const w=Math.round(Math.sqrt(25-dy*dy));g.fillRect(cx-w,cy+dy,w*2+1,1)}
+  g.fillStyle='#d9d2c0';for(let dy=-5;dy<=5;dy++){const w=Math.round(Math.sqrt(25-dy*dy));g.fillRect(cx+w-1,cy+dy,1,1)}
+  g.fillStyle='#c8202a';for(const[x,y]of[[-3,-4],[-4,-2],[-4,0],[-4,2],[-3,4],[3,-4],[4,-2],[4,0],[4,2],[3,4]])g.fillRect(cx+x,cy+y,1,1)}
+ else{g.fillStyle='#0b130e';g.fillRect(cx-11,cy-11,23,23);R(C.band,cx-10,cy-10,21,21);R(C.bandD,cx-10,cy+9,21,2);R('#12285a',cx-8,cy-8,17,17);
+  /* a five-point star, from a polygon rasterised by the canvas then re-snapped to whole pixels */
+  const st=(r1,r2,c,ox,oy)=>{g.fillStyle=c;g.beginPath();for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,r=k%2?r2:r1;g.lineTo(Math.round(cx+ox+Math.cos(a)*r),Math.round(cy+oy+Math.sin(a)*r))}g.closePath();g.fill()};
+  st(8,3.4,'#0b130e',0,1);st(7,3,'#ffd23f',0,0);st(3,1.3,'#fff3b0',-1,-1);
+  for(const x of[-9,9])R('#ffd23f',cx+x,cy-16,2,2);R('#ffd23f',cx-1,cy-17,2,2)}
+ /* outline sparkle */
+ R('rgba(255,255,255,.55)',6,15,1,3);R('rgba(255,255,255,.55)',5,16,3,1)}
 function rollCard(minR,set){set=set||'fa';const w=set==='bl'?[0,0,85,15]:[60,28,10,2.6];let r;do{let x=Math.random()*w.reduce((a,b)=>a+b),i=0;while(x>w[i]){x-=w[i];i++}r=i}while(r<minR);
  const all=CARDS.filter(c=>c.set===set);let pool=all.filter(c=>c.r===r);if(!pool.length)pool=all;return pick(pool)}
 function openPack(set,paid){set=set||'fa';

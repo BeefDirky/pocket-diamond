@@ -1563,3 +1563,23 @@ body.gPause #title{z-index:60;pointer-events:auto}
 @media (min-width:721px){.lfTray .lfc.lfHole{height:170px}}
 .lfTray .lfEmpty{left:0;right:0;width:auto;max-width:none}
 @media (min-width:721px){.lfTray:has(.lfHole){flex-wrap:nowrap;overflow:hidden}.lfTray .lfEmpty{font-size:16px}}
+/* shop v2: two equal pack cards, each a centred column (pack, name, blurb, price button on the same line in both) */
+#scrShop .shopRow{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
+#scrShop .shopItem{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 16px 16px;text-align:center;position:relative}
+#scrShop .shopArt{position:relative;width:120px;height:168px;flex:none;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45));transition:transform .15s}
+@media (hover:hover){#scrShop .shopItem:hover .shopArt{transform:translateY(-3px) rotate(-1.5deg)}}
+#scrShop .shopArt canvas{width:120px;height:168px;image-rendering:pixelated;display:block}
+#scrShop .shopArt::after{content:"";position:absolute;inset:7px 6px;pointer-events:none;mix-blend-mode:screen;
+ background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.45) 47%,transparent 60%) repeat-x;background-size:250% 100%;animation:shine 3.2s linear infinite}
+#scrShop .shopTxt{align-items:center;gap:6px;flex:1 1 auto}
+#scrShop .shopTxt b{font-size:13px;line-height:1.3}
+#scrShop .shopTxt p{font-size:13px;max-width:30ch}
+#scrShop .shopBuy{width:100%;gap:8px;font-size:14px;padding:12px 10px}
+#scrShop .shopBuy span{opacity:.85}
+#scrShop .shopBuy .coinIc{margin:0}
+#scrShop .shopItem.bl{border-color:#4a6cc0;background:linear-gradient(180deg,#0d1730,var(--edge) 55%)}
+.shopInv{width:100%;text-align:center;justify-content:center}#scrShop .shopMsg:empty{display:none}
+@media (max-width:560px){#scrShop .shopRow{gap:10px}#scrShop .shopItem{padding:14px 10px 12px}#scrShop .shopArt,#scrShop .shopArt canvas{width:92px;height:129px}
+ #scrShop .shopTxt b{font-size:11px}#scrShop .shopTxt p{font-size:12px}#scrShop .shopBuy{font-size:12px;padding:10px 6px}}
+@media (prefers-reduced-motion:reduce){#scrShop .shopArt::after{animation:none;opacity:0}}
+#fpClub{display:inline-flex;align-items:center;gap:6px}#scrFrProf .fpMsg{margin:0;font-size:13px;color:var(--dim);text-align:center}#scrFrProf .fpMsg:empty{display:none}#scrFrProf .acBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}

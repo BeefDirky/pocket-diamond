@@ -88,6 +88,15 @@ with sync_playwright() as p:
     check(PA.evaluate("document.querySelector('[data-inv]').disabled"), 'an offline friend can\'t be invited')
     for pg, other in ((PA, B), (PB, A)): pg.evaluate(f"__x(\"LIVE.who={{'{other}':'m'}};frRender()\")")
     check('ONLINE' in PA.text_content('#frList') and not PA.evaluate("document.querySelector('[data-inv]').disabled"), 'an online friend shows ONLINE and can be invited')
+    # a friend's profile: banner and tiles like the Account page, with their saved club/coins/cards
+    with con.cursor() as c: c.execute("insert into public.saves values (%s, %s, now()) on conflict (user_id) do update set data=excluded.data", (B, json.dumps({'pd-myteam': '{"club":"busan","base":"busan"}', 'pd-wallet': '{"coins":777}', 'pd-cards': '{"owned":{"fa:1":1,"fa:2":3}}'})))
+    PA.click('[data-open]'); PA.click('.frMore [data-prof]'); PA.wait_for_timeout(900)
+    check(PA.is_visible('#scrFrProf') and PA.text_content('#fpName') == 'Rival', 'PROFILE opens the friend page')
+    check(PA.text_content('#fpCoins') == '777' and PA.text_content('#fpCards') == '2' and 'SEAGULLS' in PA.text_content('#fpClub') and PA.is_visible('#fpLogo'), 'with their coins, cards and club: ' + PA.text_content('#fpCoins') + ' / ' + PA.text_content('#fpCards') + ' / ' + PA.text_content('#fpClub'))
+    check(not PA.is_visible('#scrFrProf #acWho') and 'Email' not in PA.text_content('#scrFrProf'), 'no email or account details')
+    PA.screenshot(path='/tmp/claude-0/-home-claude/d1296d13-62c3-546f-a67b-c3c55b7eebde/scratchpad/fp.png')
+    PA.click('#scrFrProf .mbtn.back') if PA.is_visible('#scrFrProf .mbtn.back') else PA.evaluate("__x(\"showScreen('scrFriends')\")"); PA.wait_for_timeout(400)
+    PA.evaluate(f"__x(\"LIVE.who={{'{B}':'m'}};frRender()\")")
     # first an invite that gets NOT NOW: the sender's room says so
     PA.click('[data-inv]'); PA.wait_for_timeout(1500)
     PB.wait_for_selector('#frInvite:not([hidden])', timeout=9000); PB.click('#frInvNo')

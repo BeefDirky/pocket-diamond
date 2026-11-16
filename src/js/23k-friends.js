@@ -33,7 +33,7 @@ $('frSend').addEventListener('click',()=>frAdd($('frName').value));
 $('frName').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')frAdd($('frName').value)});
 $('frList').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b||FR.busy)return;const d=b.dataset;
  if(d.open){FR.open=FR.open===d.open?null:d.open;frRender();return}
- if(d.prof){lbOpen();lbProfile(d.prof);return}
+ if(d.prof){frProfile(d.prof);return}
  if(d.inv){frInvite(d.inv);return}
  FR.busy=true;try{
   if(d.acc){await rpc('friend_respond',{p_other:d.acc,p_accept:true});frSay('Friend added.');track('friend_accept')}
@@ -78,3 +78,18 @@ setInterval(()=>{frChannel().catch(()=>{});if(frSignedIn()&&!$('title').hidden&&
 // "+ ADD FRIEND" on a leaderboard profile
 $('lbpCard').addEventListener('click',async e=>{const b=e.target.closest('[data-add]');if(!b)return;b.disabled=true;b.textContent='SENDING…';
  try{const r=await rpc('friend_request',{p_username:b.dataset.add});b.textContent=r.status==='accepted'?'FRIENDS':'REQUEST SENT';track('friend_request',{result:r.status,from:'profile'});frLoad()}catch(err){b.textContent=frErr(err);b.disabled=false}});
+// ---- a friend's profile: the same banner and tiles as your own Account page (no email, dates, username or saving) ----
+let FP=null;
+async function frProfile(id){const f=FR.list.find(x=>x.user_id===id);FP=id;FR.open=null;showScreen('scrFrProf');
+ const set=(k,v)=>{$(k).textContent=v};$('fpName').textContent=f?f.username:'';set('fpRating',f&&f.rating!=null?f.rating:'—');set('fpRec','');set('fpCoins','—');set('fpCards','—');$('fpClub').textContent='—';$('fpMsg').textContent='';
+ fpBanner('');const[st]=f?frStatus(id):['off'];$('fpInvite').disabled=st==='off'||st==='g';
+ try{const r=await rpc('friend_profile',{p_user:id});if(FP!==id||!r)return;
+  $('fpName').textContent=r.username||(f&&f.username)||'';set('fpRating',r.rating);set('fpRec',r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet');
+  set('fpCoins',r.coins!=null?coinFmt(r.coins):'—');set('fpCards',r.cards!=null?r.cards:'—');
+  const T=r.club&&TEAMS[r.club];$('fpClub').innerHTML=T?`<img class="acLogo" alt="" src="${LOGO_URL[r.club]||''}">${esc(T.name)}`:'—';fpBanner(T?r.club:'')}
+ catch(e){if(FP===id)$('fpMsg').textContent=/friend_profile|schema cache|function/i.test((e&&e.message)||'')?'Profiles aren’t set up on the server yet.':frErr(e)}}
+function fpBanner(k){const h=$('fpHero'),l=$('fpLogo');try{h.style.backgroundImage=`url(${maSwirl(k)})`;h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}catch(e){}
+ l.hidden=!k;if(k)l.src=LOGO_URL[k]||'';$('fpClubN').textContent=k?`${TEAMS[k].city} ${TEAMS[k].name}`:'';$('fpClubN').hidden=!k;
+ requestAnimationFrame(()=>{const n=$('fpName');n.style.fontSize='';let fs=parseFloat(getComputedStyle(n).fontSize),i=0;while(n.scrollWidth>n.parentElement.clientWidth+1&&fs>14&&i++<20){fs-=1;n.style.fontSize=fs+'px'}})}
+$('fpRanked').addEventListener('click',()=>{if(FP){lbOpen();lbProfile(FP)}});
+$('fpInvite').addEventListener('click',()=>{if(FP)frInvite(FP)});
