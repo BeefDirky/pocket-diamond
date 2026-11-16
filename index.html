@@ -1532,6 +1532,10 @@ body.gPause #title{z-index:60;pointer-events:auto}
 @keyframes shopShine{0%{background-position:0 0,130% 0}60%,100%{background-position:0 0,-130% 0}}
 @media (prefers-reduced-motion:reduce){#scrMain .mmSm.mmShop,#scrMain .mmSm.mmShop::before,#scrMain .mmSm.mmInv.mmNew{animation:none}}
 .overlay:has(#scrLineup.boTab:not([hidden])){align-items:flex-start}
+/* the TEAM swirl sits back a little: softened and faded slightly so the label leads */
+#scrMain .mmSm.mmInv{isolation:isolate}
+#scrMain .mmSm.mmInv::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;backdrop-filter:blur(1.2px);-webkit-backdrop-filter:blur(1.2px);background:rgba(8,20,14,.2)}
+#acClub{display:inline-flex;align-items:center;gap:6px}.acLogo{width:1.6em;height:1.6em;margin:-.3em 0;object-fit:contain;image-rendering:pixelated;flex:none}
 </style>
 
 <div class="app">
@@ -7908,7 +7912,7 @@ const acDate=t=>{const d=t?new Date(t):null;return d&&!isNaN(d)?d.toLocaleDateSt
 function acDetails(){const u=ACC.user;if(!u)return;const made=u.created_at;
  $('acCreated').textContent=acDate(made);$('acSince').textContent=made?`MEMBER SINCE ${new Date(made).toLocaleDateString(undefined,{year:'numeric',month:'short'}).toUpperCase()}`:'';
  $('acCoins').textContent=coinFmt(WAL.coins||0);$('acCards').textContent=Object.keys(COL.owned||{}).filter(k=>COL.owned[k]>0).length;
- const club=MYTEAM&&TEAMS[MYTEAM.club];$('acClub').textContent=club?club.name:'—';
+ const club=MYTEAM&&TEAMS[MYTEAM.club];$('acClub').innerHTML=club?`<img class="acLogo" alt="" src="${LOGO_URL[MYTEAM.club]||''}">${esc(club.name)}`:'—';
  if(acDetails.uid!==u.id||Date.now()-(acDetails.at||0)>60000){acDetails.uid=u.id;acDetails.at=Date.now();
   rpc('my_rating').then(r=>{if(!r||!ACC.user||ACC.user.id!==u.id)return;acDetails.r=r;acRatingShow()}).catch(()=>{})}else acRatingShow()}
 function acRatingShow(){const r=acDetails.r;if(!r)return;$('acRating').textContent=r.rating;$('acRec').textContent=r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet'}
@@ -7986,7 +7990,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='e67e4b21ba',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='ea8d02b534',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

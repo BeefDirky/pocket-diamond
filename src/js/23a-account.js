@@ -135,7 +135,7 @@ const acDate=t=>{const d=t?new Date(t):null;return d&&!isNaN(d)?d.toLocaleDateSt
 function acDetails(){const u=ACC.user;if(!u)return;const made=u.created_at;
  $('acCreated').textContent=acDate(made);$('acSince').textContent=made?`MEMBER SINCE ${new Date(made).toLocaleDateString(undefined,{year:'numeric',month:'short'}).toUpperCase()}`:'';
  $('acCoins').textContent=coinFmt(WAL.coins||0);$('acCards').textContent=Object.keys(COL.owned||{}).filter(k=>COL.owned[k]>0).length;
- const club=MYTEAM&&TEAMS[MYTEAM.club];$('acClub').textContent=club?club.name:'—';
+ const club=MYTEAM&&TEAMS[MYTEAM.club];$('acClub').innerHTML=club?`<img class="acLogo" alt="" src="${LOGO_URL[MYTEAM.club]||''}">${esc(club.name)}`:'—';
  if(acDetails.uid!==u.id||Date.now()-(acDetails.at||0)>60000){acDetails.uid=u.id;acDetails.at=Date.now();
   rpc('my_rating').then(r=>{if(!r||!ACC.user||ACC.user.id!==u.id)return;acDetails.r=r;acRatingShow()}).catch(()=>{})}else acRatingShow()}
 function acRatingShow(){const r=acDetails.r;if(!r)return;$('acRating').textContent=r.rating;$('acRec').textContent=r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet'}

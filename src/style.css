@@ -1509,3 +1509,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
 @keyframes shopShine{0%{background-position:0 0,130% 0}60%,100%{background-position:0 0,-130% 0}}
 @media (prefers-reduced-motion:reduce){#scrMain .mmSm.mmShop,#scrMain .mmSm.mmShop::before,#scrMain .mmSm.mmInv.mmNew{animation:none}}
 .overlay:has(#scrLineup.boTab:not([hidden])){align-items:flex-start}
+/* the TEAM swirl sits back a little: softened and faded slightly so the label leads */
+#scrMain .mmSm.mmInv{isolation:isolate}
+#scrMain .mmSm.mmInv::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;backdrop-filter:blur(1.2px);-webkit-backdrop-filter:blur(1.2px);background:rgba(8,20,14,.2)}
+#acClub{display:inline-flex;align-items:center;gap:6px}.acLogo{width:1.6em;height:1.6em;margin:-.3em 0;object-fit:contain;image-rendering:pixelated;flex:none}
