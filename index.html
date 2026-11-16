@@ -1514,6 +1514,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 /* paused: nothing but the pause menu takes a press, and the game behind it is blurred */
 body.gPause .app>*:not(.stage),body.gPause .stage>*:not(#title):not(#upd){pointer-events:none!important;filter:blur(3px) brightness(.8)}
 body.gPause #title{z-index:60;pointer-events:auto}
+.mmSpons[hidden]{display:none!important}/* sponsors is switched off for now (remove hidden on the button to bring it back); feedback then sits alone, the same width as one of the small buttons, centered */.mmPair:has(.mmSpons[hidden]){grid-template-columns:1fr 1fr}.mmPair:has(.mmSpons[hidden]) .mmFb{grid-column:1 / span 2;justify-self:center;width:calc(50% - 6px)}
 </style>
 
 <div class="app">
@@ -1565,7 +1566,7 @@ body.gPause #title{z-index:60;pointer-events:auto}
           <div class="mmPair"><button class="mmSm mmInv" id="goInv" type="button">TEAM</button><button class="mmSm mmShop" id="goShop" type="button">SHOP<em class="pkBadge" id="pkBadge2" hidden></em></button></div>
           <div class="mmPair"><button class="mmSm" id="goHow" type="button" data-go="scrHow">TUTORIAL</button><button class="mmSm" type="button" id="goAcct" data-go="scrAcct">ACCOUNT</button></div>
           <div class="mmPair"><button class="mmSm" type="button" data-go="scrOpts">OPTIONS</button><button class="mmSm" type="button" data-go="scrAbout">ABOUT</button></div>
-          <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmSpons" type="button" data-go="scrSpons">SPONSORS</button></div>
+          <div class="mmPair"><button class="mmSm mmFb" id="goFb" type="button">FEEDBACK</button><button class="mmSm mmSpons" type="button" data-go="scrSpons" hidden>SPONSORS</button></div>
         </nav>
         <div class="coinBal" id="coinBal" title="Coins: win games and hit home runs to earn them"><i class="coinIc"></i><b>0</b> COINS</div>
         <small class="mmAcct" id="mmAcct">GUEST · SAVED ON THIS DEVICE</small>

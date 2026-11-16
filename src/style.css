@@ -1491,3 +1491,4 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 /* paused: nothing but the pause menu takes a press, and the game behind it is blurred */
 body.gPause .app>*:not(.stage),body.gPause .stage>*:not(#title):not(#upd){pointer-events:none!important;filter:blur(3px) brightness(.8)}
 body.gPause #title{z-index:60;pointer-events:auto}
+.mmSpons[hidden]{display:none!important}/* sponsors is switched off for now (remove hidden on the button to bring it back); feedback then sits alone, the same width as one of the small buttons, centered */.mmPair:has(.mmSpons[hidden]){grid-template-columns:1fr 1fr}.mmPair:has(.mmSpons[hidden]) .mmFb{grid-column:1 / span 2;justify-self:center;width:calc(50% - 6px)}
