@@ -59,7 +59,7 @@ function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in fro
   G1(r1[1]-3,q.y+1,.85);G1(r1[1]-2,q.y+1,.85);G1(r2[1]-4,q.y+2,.6);G1(r2[1]-1,q.y+2,.35)}
  const mk=tk&&CAP_MARKS[tk];
  if(mk&&sp.cap){const q=sp.cap,mw=Math.max(...mk.m.map(r=>r.length)),mh=mk.m.length;
-  const gx=Math.round(q.cx-mw/2),gy=Math.max(q.y,Math.round(q.cy-mh/2));/* cell position on the sprite */
+  const gx=Math.round(q.cx+q.w*.14-mw/2),gy=Math.max(q.y,Math.round(q.cy-mh/2));/* cell position on the sprite */
   /* wrap it round the dome: columns squeeze and darken toward the sides and dip a little, like a printed cap front */
   const half=mw/2,TH=1.05,edge=u=>Math.sin(u*TH)/Math.sin(TH);
   mk.m.forEach((r,j)=>{for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;
