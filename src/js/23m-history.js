@@ -43,3 +43,8 @@ function histDetail(x,me,op){const[a,b]=x.ln||[];const n=Math.max((a||[]).length
  return `<div class="hsMore">${line}<div class="hsStats"><span><b>${x.h}</b> HITS</span><span><b>${x.hr}</b> HR</span><span><b>${x.k}</b> K</span>${me?`<span>AS ${esc(me.city+' '+me.name)}</span>`:''}</div></div>`}
 $('hsTabs').addEventListener('click',e=>{const b=e.target.closest('[data-ht]');if(!b)return;histTab=b.dataset.ht;histOpen=null;histRender()});
 $('hsList').addEventListener('click',e=>{const b=e.target.closest('[data-hi]');if(!b)return;const id=+b.dataset.hi;histOpen=histOpen===id?null:id;histRender()});
+/* iPhone browsers can nudge the menu sideways on the first scroll (the toolbar folds away and the page settles); the menus
+   never scroll sideways, so any sideways offset is put straight back */
+document.addEventListener('scroll',e=>{const t=e.target===document?document.scrollingElement:e.target;if(t&&t.scrollLeft&&(t.id==='title'||t===document.scrollingElement||t===document.body))t.scrollLeft=0},true);
+addEventListener('scroll',()=>{if(scrollX)scrollTo(0,scrollY)},{passive:true});
+if(window.visualViewport)visualViewport.addEventListener('resize',()=>{const t=$('title');if(t&&t.scrollLeft)t.scrollLeft=0;if(scrollX)scrollTo(0,scrollY)});

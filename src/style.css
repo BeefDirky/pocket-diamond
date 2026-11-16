@@ -924,7 +924,7 @@ body.inMenu .olNet{display:none!important}
  .lfc{width:52px;padding:2px}.lfc .lfNm{font-size:8px}.lfc .lfPos{font-size:8px}.lfc .lfOvr,.lfc .lfOrd{font-size:8px}
  .lfField{max-height:none}.lfTray .lfc{flex-basis:64px;width:64px}
 }
-#scrLineup.card.wide{max-width:min(1120px,97vw);width:97vw}
+#scrLineup.card.wide{max-width:min(1120px,100%);width:100%;box-sizing:border-box}/* (97vw was wider than the space inside the menu, so phones could nudge it sideways) */
 .lfWrap{grid-template-columns:minmax(0,1fr) 170px}
 .lfField{max-height:66vh;aspect-ratio:1.15/1}
 .lfField .lfc{width:62px}
@@ -1487,3 +1487,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 .app.deskApp .hsWho b{font-size:17px}.app.deskApp .hsWho small{font-size:12px}
 .acInfo dd{word-break:normal;overflow-wrap:break-word}#acWho{overflow-wrap:anywhere}
 .mpPick .mpTn{grid-column:1/-1;position:relative}
+
+/* paused: nothing but the pause menu takes a press, and the game behind it is blurred */
+body.gPause .app>*:not(.stage),body.gPause .stage>*:not(#title):not(#upd){pointer-events:none!important;filter:blur(3px) brightness(.8)}
+body.gPause #title{z-index:60;pointer-events:auto}

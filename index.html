@@ -947,7 +947,7 @@ body.inMenu .olNet{display:none!important}
  .lfc{width:52px;padding:2px}.lfc .lfNm{font-size:8px}.lfc .lfPos{font-size:8px}.lfc .lfOvr,.lfc .lfOrd{font-size:8px}
  .lfField{max-height:none}.lfTray .lfc{flex-basis:64px;width:64px}
 }
-#scrLineup.card.wide{max-width:min(1120px,97vw);width:97vw}
+#scrLineup.card.wide{max-width:min(1120px,100%);width:100%;box-sizing:border-box}/* (97vw was wider than the space inside the menu, so phones could nudge it sideways) */
 .lfWrap{grid-template-columns:minmax(0,1fr) 170px}
 .lfField{max-height:66vh;aspect-ratio:1.15/1}
 .lfField .lfc{width:62px}
@@ -1510,6 +1510,10 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
 .app.deskApp .hsWho b{font-size:17px}.app.deskApp .hsWho small{font-size:12px}
 .acInfo dd{word-break:normal;overflow-wrap:break-word}#acWho{overflow-wrap:anywhere}
 .mpPick .mpTn{grid-column:1/-1;position:relative}
+
+/* paused: nothing but the pause menu takes a press, and the game behind it is blurred */
+body.gPause .app>*:not(.stage),body.gPause .stage>*:not(#title):not(#upd){pointer-events:none!important;filter:blur(3px) brightness(.8)}
+body.gPause #title{z-index:60;pointer-events:auto}
 </style>
 
 <div class="app">
@@ -1836,7 +1840,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#title::-webkit-scrollbar,#title
           <button class="mode alt" id="goCustom" type="button"><b>CUS<i class="kT">T</i>OM</b></button>
           <button class="mode po mpTn" id="goTourney" type="button"><b>TOURNAMENT</b><span class="frBadge" id="tnBadge" hidden>!</span></button>
         </div>
-        <div class="mpRow mp3"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button><button class="mbtn mpBoard" type="button" data-hist="scrMulti">HISTORY</button></div>
+        <div class="mpRow"><button class="mbtn mpBoard" id="goBoard" type="button">LEADERBOARD</button><button class="mbtn mpBoard" id="goFriends" type="button">FRIENDS<span class="frBadge" id="frBadge" hidden></span></button></div>
         <p class="mpNote" id="mpNote" hidden></p>
         <button class="mbtn back" type="button" data-go="scrMain">Back</button>
       </div>
@@ -6932,17 +6936,20 @@ const canPause=()=>!(S.online&&S.online.inGame)&&S.phase!=='title'&&S.phase!=='o
 const canMenu=()=>onlineGame()&&S.phase!=='over'&&!S.olMenu&&$('title').hidden&&$('over').hidden;
 function olMenuOpen(){if(!canMenu())return;S.olMenu=true;document.querySelector('#scrPause h1').innerHTML='GAME <span>MENU</span>';
  $('pauseInfo').textContent=`Online games can't pause: the game keeps going while this is open.${S.online.ranked?' Leaving a ranked game is a loss.':''}`;
- $('pQuit').querySelector('span').textContent=S.online.ranked?'Forfeit':'Leave';$('title').hidden=false;showScreen('scrPause')}
-function olMenuClose(){if(!S.olMenu)return;S.olMenu=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain')}
+ $('pQuit').querySelector('span').textContent=S.online.ranked?'Forfeit':'Leave';$('title').hidden=false;showScreen('scrPause');pauseLook()}
+function olMenuClose(){if(!S.olMenu)return;S.olMenu=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');pauseLook()}
 function pauseGame(){if(canMenu()){olMenuOpen();return}if(!canPause())return;document.querySelector('#scrPause h1').innerHTML='GAME <span>PAUSED</span>';$('pQuit').querySelector('span').textContent=S.rkBot?'Forfeit':'Quit';S.paused=true;pausedAt=performance.now();
  const y=TEAMS[S.you],o=TEAMS[S.opp];$('pauseInfo').textContent=`${S.rkBot?`Ranked vs CPU level ${S.rkBot.lv} (leaving is a loss)`:S.mode==='full'?'Full game':'Arcade'} · ${o.name} ${S.target||0}, ${y.name} ${S.runs||0} · ${S.mode==='full'?(S.half==='top'?'Top':'Bottom'):'Bottom'} of the ${ord(S.inning||1)}`;
  try{if(AC&&AC.state==='running')AC.suspend()}catch(e){}
- $('title').hidden=false;showScreen('scrPause')}
+ $('title').hidden=false;showScreen('scrPause');pauseLook()}
 function resumeGame(){if(S.olMenu){olMenuClose();return}if(!S.paused)return;const gap=performance.now()-pausedAt;
  if(S.pitch&&S.pitch.releaseAt)S.pitch.releaseAt+=gap;if(S.pitch&&S.meterT0)S.meterT0+=gap;if(S.swing){S.swing.at+=gap;if(S.swing.contactAt)S.swing.contactAt+=gap}
  for(const k of['cheerUntil','fwUntil','umpPunch','flame','wildUntil'])if(S[k])S[k]+=gap;
- S.paused=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}}
+ S.paused=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}pauseLook()}
 function openOptionsInGame(){if(S.phase==='title'||S.phase==='over'){showScreen('scrOpts');return}if(!S.paused)pauseGame();optsFromGame=true;showScreen('scrOpts')}
+/* while paused (or the online game menu is open) only the menu can be pressed; the game behind it is blurred */
+function pauseLook(){const on=!!(S.paused||S.olMenu)&&!$('title').hidden;document.body.classList.toggle('gPause',on)}
+setInterval(pauseLook,200);
 $('optBack').addEventListener('click',()=>{if(optsFromGame&&(S.paused||S.olMenu)){optsFromGame=false;showScreen('scrPause')}else showScreen('scrMain')});
 $('pauseBtn').addEventListener('click',e=>{e.stopPropagation();pauseGame()});
 $('pauseBtn').addEventListener('pointerdown',e=>e.stopPropagation());
@@ -7958,7 +7965,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='5086ee68d7',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='0472eec402',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8638,6 +8645,11 @@ function histDetail(x,me,op){const[a,b]=x.ln||[];const n=Math.max((a||[]).length
  return `<div class="hsMore">${line}<div class="hsStats"><span><b>${x.h}</b> HITS</span><span><b>${x.hr}</b> HR</span><span><b>${x.k}</b> K</span>${me?`<span>AS ${esc(me.city+' '+me.name)}</span>`:''}</div></div>`}
 $('hsTabs').addEventListener('click',e=>{const b=e.target.closest('[data-ht]');if(!b)return;histTab=b.dataset.ht;histOpen=null;histRender()});
 $('hsList').addEventListener('click',e=>{const b=e.target.closest('[data-hi]');if(!b)return;const id=+b.dataset.hi;histOpen=histOpen===id?null:id;histRender()});
+/* iPhone browsers can nudge the menu sideways on the first scroll (the toolbar folds away and the page settles); the menus
+   never scroll sideways, so any sideways offset is put straight back */
+document.addEventListener('scroll',e=>{const t=e.target===document?document.scrollingElement:e.target;if(t&&t.scrollLeft&&(t.id==='title'||t===document.scrollingElement||t===document.body))t.scrollLeft=0},true);
+addEventListener('scroll',()=>{if(scrollX)scrollTo(0,scrollY)},{passive:true});
+if(window.visualViewport)visualViewport.addEventListener('resize',()=>{const t=$('title');if(t&&t.scrollLeft)t.scrollLeft=0;if(scrollX)scrollTo(0,scrollY)});
 // ---------- trading cards: every player in the league is a collectible card ----------
 const RARITY=['COMMON','RARE','EPIC','LEGEND'],FA_POW_CAP=[70,80,85,95];
 let CARDS=[],CARD_BY={};
@@ -8716,7 +8728,7 @@ function drawPack(cv,set){const g=cv.getContext('2d'),bl=set==='bl',T=bl?{jersey
  g.fillStyle='#c48c56';g.beginPath();g.moveTo(24,24);g.lineTo(29,28);g.lineTo(24,32);g.lineTo(19,28);g.closePath();g.fill();
  g.fillStyle='#ffbf3c';g.font='6px "Press Start 2P", monospace';g.textAlign='center';g.fillText(bl?'BIG LG':'FREE AG',24,48);g.textAlign='left';
  if(bl){g.fillStyle='#f4f1e8';for(const[x,y]of[[8,7],[24,7],[40,7],[16,55],[32,55]])g.fillRect(x-1,y-1,3,3)}}
-function rollCard(minR,set){set=set||'fa';const w=set==='bl'?[0,70,24,6]:[60,28,10,2.6];let r;do{let x=Math.random()*w.reduce((a,b)=>a+b),i=0;while(x>w[i]){x-=w[i];i++}r=i}while(r<minR);
+function rollCard(minR,set){set=set||'fa';const w=set==='bl'?[0,0,85,15]:[60,28,10,2.6];let r;do{let x=Math.random()*w.reduce((a,b)=>a+b),i=0;while(x>w[i]){x-=w[i];i++}r=i}while(r<minR);
  const all=CARDS.filter(c=>c.set===set);let pool=all.filter(c=>c.r===r);if(!pool.length)pool=all;return pick(pool)}
 function openPack(set,paid){set=set||'fa';
  if(!paid&&COL.packs<=0)return;if(!CARDS.length)buildCardDB();
@@ -8795,10 +8807,12 @@ function blLogo(code){if(BL_LOGO[code])return BL_LOGO[code];const T=blTeam(code)
 function buildBigLeague(){const out=[];
  BL_BATS.forEach((b,i)=>{const[code,name,hand,pos,sk,con,pow,spd,def]=b;out.push({id:'bl:b'+i,set:'bl',code,T:blTeam(code),pit:false,p:{name:name.toUpperCase(),hand,thr:hand==='L'?'L':'R',pos,con,pow,spd,def,skin:BL_SKIN[sk]||BL_SKIN['?'],bat:'#d9b07a'}})});
  BL_ARMS.forEach((a,i)=>{const[code,name,hand,role,sk,vel,mov,ctl]=a;out.push({id:'bl:p'+i,set:'bl',code,T:blTeam(code),pit:true,p:{name:name.toUpperCase(),hand,thr:hand,pos:role,vel,mov,ctl,def:null,skin:BL_SKIN[sk]||BL_SKIN['?'],slot:'over'}})});
- // a star set: no commons. Top 15% legend, next 35% epic, the rest rare
+ // a star set: every card is epic or legendary. Hitters and pitchers each: the top 10 by OVR are legendary, the rest
+ // (20 each) epic. Hitters' power is capped by rarity: epic 80-90, legendary up to 95 (OVR is worked out after the cap)
  const o=c=>c.pit?Math.round(c.p.vel*.4+c.p.mov*.35+c.p.ctl*.25):Math.round(c.p.con*.3+c.p.pow*.3+c.p.spd*.15+c.p.def*.25);
- out.forEach(c=>c.o=o(c));const s=out.map(c=>c.o).sort((a,b)=>b-a),L=s[Math.floor(s.length*.15)],E=s[Math.floor(s.length*.5)];
- out.forEach(c=>c.r=c.o>=L?3:c.o>=E?2:1);return out}
+ out.forEach(c=>c.o=o(c));
+ for(const pit of[false,true]){const g=out.filter(c=>c.pit===pit).sort((a,b)=>b.o-a.o||a.id.localeCompare(b.id));g.forEach((c,i)=>c.r=i<10?3:2)}
+ out.forEach(c=>{if(!c.pit){c.p.pow=c.r===3?Math.min(95,c.p.pow):Math.max(80,Math.min(90,c.p.pow));c.o=o(c)}});return out}
 // ---------- card art v2: a big original pixel portrait, drawn on a 64x80 grid then doubled to 128x160 ----------
 // Every player gets an original cartoon figure: pose from his ratings, face/hair/beard from a hash of his card id.
 function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;

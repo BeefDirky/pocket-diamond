@@ -81,17 +81,20 @@ const canPause=()=>!(S.online&&S.online.inGame)&&S.phase!=='title'&&S.phase!=='o
 const canMenu=()=>onlineGame()&&S.phase!=='over'&&!S.olMenu&&$('title').hidden&&$('over').hidden;
 function olMenuOpen(){if(!canMenu())return;S.olMenu=true;document.querySelector('#scrPause h1').innerHTML='GAME <span>MENU</span>';
  $('pauseInfo').textContent=`Online games can't pause: the game keeps going while this is open.${S.online.ranked?' Leaving a ranked game is a loss.':''}`;
- $('pQuit').querySelector('span').textContent=S.online.ranked?'Forfeit':'Leave';$('title').hidden=false;showScreen('scrPause')}
-function olMenuClose(){if(!S.olMenu)return;S.olMenu=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain')}
+ $('pQuit').querySelector('span').textContent=S.online.ranked?'Forfeit':'Leave';$('title').hidden=false;showScreen('scrPause');pauseLook()}
+function olMenuClose(){if(!S.olMenu)return;S.olMenu=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');pauseLook()}
 function pauseGame(){if(canMenu()){olMenuOpen();return}if(!canPause())return;document.querySelector('#scrPause h1').innerHTML='GAME <span>PAUSED</span>';$('pQuit').querySelector('span').textContent=S.rkBot?'Forfeit':'Quit';S.paused=true;pausedAt=performance.now();
  const y=TEAMS[S.you],o=TEAMS[S.opp];$('pauseInfo').textContent=`${S.rkBot?`Ranked vs CPU level ${S.rkBot.lv} (leaving is a loss)`:S.mode==='full'?'Full game':'Arcade'} · ${o.name} ${S.target||0}, ${y.name} ${S.runs||0} · ${S.mode==='full'?(S.half==='top'?'Top':'Bottom'):'Bottom'} of the ${ord(S.inning||1)}`;
  try{if(AC&&AC.state==='running')AC.suspend()}catch(e){}
- $('title').hidden=false;showScreen('scrPause')}
+ $('title').hidden=false;showScreen('scrPause');pauseLook()}
 function resumeGame(){if(S.olMenu){olMenuClose();return}if(!S.paused)return;const gap=performance.now()-pausedAt;
  if(S.pitch&&S.pitch.releaseAt)S.pitch.releaseAt+=gap;if(S.pitch&&S.meterT0)S.meterT0+=gap;if(S.swing){S.swing.at+=gap;if(S.swing.contactAt)S.swing.contactAt+=gap}
  for(const k of['cheerUntil','fwUntil','umpPunch','flame','wildUntil'])if(S[k])S[k]+=gap;
- S.paused=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}}
+ S.paused=false;optsFromGame=false;$('title').hidden=true;showScreen('scrMain');try{if(AC&&AC.state!=='running'&&AC.state!=='closed')AC.resume()}catch(e){}pauseLook()}
 function openOptionsInGame(){if(S.phase==='title'||S.phase==='over'){showScreen('scrOpts');return}if(!S.paused)pauseGame();optsFromGame=true;showScreen('scrOpts')}
+/* while paused (or the online game menu is open) only the menu can be pressed; the game behind it is blurred */
+function pauseLook(){const on=!!(S.paused||S.olMenu)&&!$('title').hidden;document.body.classList.toggle('gPause',on)}
+setInterval(pauseLook,200);
 $('optBack').addEventListener('click',()=>{if(optsFromGame&&(S.paused||S.olMenu)){optsFromGame=false;showScreen('scrPause')}else showScreen('scrMain')});
 $('pauseBtn').addEventListener('click',e=>{e.stopPropagation();pauseGame()});
 $('pauseBtn').addEventListener('pointerdown',e=>e.stopPropagation());

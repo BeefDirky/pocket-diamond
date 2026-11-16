@@ -52,7 +52,9 @@ function blLogo(code){if(BL_LOGO[code])return BL_LOGO[code];const T=blTeam(code)
 function buildBigLeague(){const out=[];
  BL_BATS.forEach((b,i)=>{const[code,name,hand,pos,sk,con,pow,spd,def]=b;out.push({id:'bl:b'+i,set:'bl',code,T:blTeam(code),pit:false,p:{name:name.toUpperCase(),hand,thr:hand==='L'?'L':'R',pos,con,pow,spd,def,skin:BL_SKIN[sk]||BL_SKIN['?'],bat:'#d9b07a'}})});
  BL_ARMS.forEach((a,i)=>{const[code,name,hand,role,sk,vel,mov,ctl]=a;out.push({id:'bl:p'+i,set:'bl',code,T:blTeam(code),pit:true,p:{name:name.toUpperCase(),hand,thr:hand,pos:role,vel,mov,ctl,def:null,skin:BL_SKIN[sk]||BL_SKIN['?'],slot:'over'}})});
- // a star set: no commons. Top 15% legend, next 35% epic, the rest rare
+ // a star set: every card is epic or legendary. Hitters and pitchers each: the top 10 by OVR are legendary, the rest
+ // (20 each) epic. Hitters' power is capped by rarity: epic 80-90, legendary up to 95 (OVR is worked out after the cap)
  const o=c=>c.pit?Math.round(c.p.vel*.4+c.p.mov*.35+c.p.ctl*.25):Math.round(c.p.con*.3+c.p.pow*.3+c.p.spd*.15+c.p.def*.25);
- out.forEach(c=>c.o=o(c));const s=out.map(c=>c.o).sort((a,b)=>b-a),L=s[Math.floor(s.length*.15)],E=s[Math.floor(s.length*.5)];
- out.forEach(c=>c.r=c.o>=L?3:c.o>=E?2:1);return out}
+ out.forEach(c=>c.o=o(c));
+ for(const pit of[false,true]){const g=out.filter(c=>c.pit===pit).sort((a,b)=>b.o-a.o||a.id.localeCompare(b.id));g.forEach((c,i)=>c.r=i<10?3:2)}
+ out.forEach(c=>{if(!c.pit){c.p.pow=c.r===3?Math.min(95,c.p.pow):Math.max(80,Math.min(90,c.p.pow));c.o=o(c)}});return out}
