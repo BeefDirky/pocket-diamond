@@ -8031,7 +8031,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='4e5f7835c2',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='2093b0cac2',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8576,7 +8576,7 @@ $('lbpCard').addEventListener('click',async e=>{const b=e.target.closest('[data-
 // custom room whose code the series keeps. After each game your phone reports the score. Nothing here touches ranked.
 const TN={st:null,busy:false,poll:0,seen:{},inv:null};
 const TN_ROUND=['','QUARTERFINALS','SEMIFINALS','FINAL'];
-const tnErr=e=>{const m=(e&&e.message)||'';return/tourney_|function .* does not exist|schema cache/i.test(m)?'Friends playoffs aren’t set up on the server yet.':m||'Could not reach the server.'};
+const tnErr=e=>{const m=(e&&e.message)||'';return/tourney_|function .* does not exist|schema cache/i.test(m)?'Tournaments aren’t set up on the server yet.':m||'Could not reach the server.'};
 function tnSay(t,bad){const m=$('tnMsg');m.textContent=t||'';m.classList.toggle('bad',!!bad)}
 const tnP=seed=>TN.st&&TN.st.players.find(p=>p.seed===seed);
 const tnMe=()=>TN.st&&TN.st.players.find(p=>p.me);
@@ -8593,15 +8593,15 @@ $('goTourney').addEventListener('click',()=>{ensureAudio();tnOpen()});
 // ---- the screen ----
 function tnRender(){const B=$('tnBody');if(!frSignedIn()){B.innerHTML=`<p class="tnLead">A tournament needs an account, so your friends can find you.</p><button class="big" type="button" data-tn="acct">SIGN IN</button>`;return}
  const st=TN.st;
- if(!st){B.innerHTML=`<p class="tnLead">An 8-club bracket you play live with your friends. Invite up to 7; CPU clubs fill the empty spots. Seeds come from ranked ratings. Quarterfinals and semifinals are best of 3, the final best of 5, every game 3 innings. It doesn’t change your rating.</p><button class="big" type="button" data-tn="create">CREATE A PLAYOFF</button>`;return}
+ if(!st){B.innerHTML=`<p class="tnLead">An 8-club bracket you play live with your friends. Invite up to 7; CPU clubs fill the empty spots. Seeds come from ranked ratings. Quarterfinals and semifinals are best of 3, the final best of 5, every game 3 innings. It doesn’t change your rating.</p><button class="big" type="button" data-tn="create">CREATE A TOURNAMENT</button>`;return}
  if(st.status==='lobby'){B.innerHTML=tnLobbyHtml(st);return}
- B.innerHTML=tnYouHtml(st)+tnBracketHtml(st)+`<div class="tnFoot">${st.status==='done'?`<button class="big" type="button" data-tn="again">NEW PLAYOFF</button><button class="mbtn" type="button" data-tn="close">DONE</button>`:`<button class="mbtn" type="button" data-tn="leave">LEAVE PLAYOFF</button>`}</div>`}
+ B.innerHTML=tnYouHtml(st)+tnBracketHtml(st)+`<div class="tnFoot">${st.status==='done'?`<button class="big" type="button" data-tn="again">NEW TOURNAMENT</button><button class="mbtn" type="button" data-tn="close">DONE</button>`:`<button class="mbtn" type="button" data-tn="leave">LEAVE TOURNAMENT</button>`}</div>`}
 function tnLobbyHtml(st){const J=st.players.filter(p=>p.status==='joined'),I=st.players.filter(p=>p.status==='invited');
  const rows=J.map(p=>`<li><b>${esc(p.name)}</b><small>${p.rating} · ${esc(tnClubName(p.club))}</small></li>`).join('')+I.map(p=>`<li class="inv"><b>${esc(p.name)}</b><small>INVITED…</small></li>`).join('')+Array.from({length:Math.max(0,8-J.length-I.length)},()=>'<li class="cpu"><b>CPU</b><small>FILLS IN AT START</small></li>').join('');
- let html=`<p class="tnLead">${st.host?'Invite your friends, then start. Empty spots become CPU clubs.':`Waiting for <b>${esc(st.host_name)}</b> to start the playoff…`}</p><h4>PLAYERS · ${J.length} / 8${I.length?` · ${I.length} INVITED`:''}</h4>${tnPreviewHtml(J)}`;
+ let html=`<p class="tnLead">${st.host?'Invite your friends, then start. Empty spots become CPU clubs.':`Waiting for <b>${esc(st.host_name)}</b> to start the tournament…`}</p><h4>PLAYERS · ${J.length} / 8${I.length?` · ${I.length} INVITED`:''}</h4>${tnPreviewHtml(J)}`;
  if(st.host){const taken=new Set(st.players.filter(p=>p.status!=='left').map(p=>p.user_id));const fr=(FR.list||[]).filter(f=>f.state==='friend');
   html+=`<h4>INVITE FRIENDS</h4>${fr.length?`<ul class="tnInv">${fr.map(f=>{const[s,l]=frStatus(f.user_id),inv=taken.has(f.user_id);return `<li><i class="frDot ${s}"></i><b>${esc(f.username)}</b><small>${l}</small><button type="button" class="mbtn" data-tninv="${f.user_id}"${inv||J.length>=8?' disabled':''}>${inv?'INVITED':'INVITE'}</button></li>`}).join('')}</ul>`:`<p class="tnLead">Add friends on the Friends page to invite them.</p>`}
-   <button class="big" type="button" data-tn="start">START${J.length<8?` · CPU FILLS ${8-J.length}`:''}</button><button class="mbtn tnLeave" type="button" data-tn="leave">CANCEL PLAYOFF</button>`}
+   <button class="big" type="button" data-tn="start">START${J.length<8?` · CPU FILLS ${8-J.length}`:''}</button><button class="mbtn tnLeave" type="button" data-tn="leave">CANCEL TOURNAMENT</button>`}
  else html+=`<button class="mbtn tnLeave" type="button" data-tn="leave">LEAVE</button>`;
  return html}
 /* the lobby's bracket: players seeded by rating as they join (1 v 8, 4 v 5, 2 v 7, 3 v 6), CPU clubs in the open spots.
@@ -8618,8 +8618,8 @@ function tnSeriesBox(s,st){const me=tnMe(),a=tnP(s.seed_a),b=tnP(s.seed_b),mine=
 function tnBracketHtml(st){const col=r=>{const ss=st.series.filter(s=>s.round===r),n=[4,2,1][r-1];const boxes=ss.map(s=>tnSeriesBox(s,st)).join('')+Array.from({length:n-ss.length},()=>'<div class="tnSer tbd"><div class="tnTeam"><span class="tnSeed"></span><i class="tnLogo"></i><span class="tnNm">TBD</span></div><div class="tnTeam"><span class="tnSeed"></span><i class="tnLogo"></i><span class="tnNm">TBD</span></div></div>').join('');
   return `<div class="tnCol r${r}"><h4>${TN_ROUND[r]}</h4><div class="tnStack">${boxes}</div></div>`};return `<div class="tnBracket">${col(1)}${col(2)}${col(3)}</div>`}
 function tnYouHtml(st){const me=tnMe(),s=tnMySeries();
- if(st.status==='done'){const c=tnP(st.champion);return `<div class="tnYou champ"><small>CHAMPION</small><b>${tnLabel(c)}</b>${c&&c.me?'<p>You won the playoff!</p>':''}</div>`}
- if(!me||me.status==='left')return `<div class="tnYou"><p>You left this playoff. You can still follow the bracket.</p></div>`;
+ if(st.status==='done'){const c=tnP(st.champion);return `<div class="tnYou champ"><small>CHAMPION</small><b>${tnLabel(c)}</b>${c&&c.me?'<p>You won the tournament!</p>':''}</div>`}
+ if(!me||me.status==='left')return `<div class="tnYou"><p>You left this tournament. You can still follow the bracket.</p></div>`;
  if(!s)return `<div class="tnYou"><p>Waiting for the bracket…</p></div>`;
  const iA=s.seed_a===me.seed,opp=tnP(iA?s.seed_b:s.seed_a),mw=iA?s.wins_a:s.wins_b,tw=iA?s.wins_b:s.wins_a;
  if(s.status==='done')return `<div class="tnYou"><small>${TN_ROUND[s.round]}</small><p>${s.winner===me.seed?`You beat ${tnLabel(opp)} ${mw}-${tw}. Waiting for the other ${s.round===1?'quarterfinals':'semifinal'} to finish…`:`Out: ${tnLabel(opp)} won ${tw}-${mw}. Follow the rest of the bracket below.`}</p></div>`;
@@ -8652,8 +8652,8 @@ function tnPlay(){const st=TN.st,s=tnMySeries(),me=tnMe();if(!st||!s||s.status!=
 async function tnReport(tg,my,their){if(!tg||my===their)return;try{const r=await rpc('tourney_report',{p_series:tg.sid,p_game:tg.g,p_my_runs:my,p_their_runs:their});track('playoff_game_end',{round:tg.round,game:tg.g,won:my>their});TN.lastReport=r}catch(e){tnSay(tnErr(e),true)}
  await tnLoad()}
 /* (called by the game-over code) a playoff game ended: report it, and point the results card back at the bracket */
-function tnGameOver(){const t=S.tnGame;if(t&&t.bot){S.tnGame=null;S.cpuEdge=0;tnReport(t,S.runs,S.target);$('again').hidden=true;$('toLobby').hidden=false;$('toLobby').textContent='BACK TO THE PLAYOFF';return true}
- const o=S.online;if(o&&o.tn&&!o.tnDone){o.tnDone=true;const home=o.me==='home',my=home?S.runs:S.target,their=home?S.target:S.runs;tnReport(o.tn,my,their);$('toLobby').textContent='BACK TO THE PLAYOFF';return true}
+function tnGameOver(){const t=S.tnGame;if(t&&t.bot){S.tnGame=null;S.cpuEdge=0;tnReport(t,S.runs,S.target);$('again').hidden=true;$('toLobby').hidden=false;$('toLobby').textContent='BACK TO THE TOURNAMENT';return true}
+ const o=S.online;if(o&&o.tn&&!o.tnDone){o.tnDone=true;const home=o.me==='home',my=home?S.runs:S.target,their=home?S.target:S.runs;tnReport(o.tn,my,their);$('toLobby').textContent='BACK TO THE TOURNAMENT';return true}
  return false}
 function tnBackFromGame(){const o=S.online;if(o&&o.tn){if(o.nr)try{o.nr.leave()}catch(e){}S.online=null}tnOpen()}
 // leaving a CPU playoff game early (main menu / quit) counts as a loss in that game
