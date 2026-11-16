@@ -11,8 +11,10 @@ const onMenus=()=>{const t=document.getElementById('title');return !!(t&&!t.hidd
 const MENU_VOL=.5;// the menu theme sits about 6 dB under the organ (the Music slider scales both)
 function musicScene(){if(!AC||!BUS.organ)return;const m=onMenus(),t0=AC.currentTime;
  for(const[g,v]of[[BUS.menu.gain,m?MENU_VOL:0],[BUS.organ.gain,m?0:1]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+.9)}}
+/* music at 100% (it was .7 here, and .95 for the organ cues: both halved) */
+const MUSIC_MAX=.35;
 function applyVolumes(){if(!AC)return;const bpq=!!S.bpOn,ts=inTeamSel(),t0=AC.currentTime;musicScene();// the club-select screen is quiet: no organ, no crowd
- const mv=(bpq||ts||S.rampSrc||S.musicDuck)?0:OPT.music/100*.7,cv2=(bpq||ts)?0:OPT.crowd/100*.4;
+ const mv=(bpq||ts||S.rampSrc||S.musicDuck)?0:OPT.music/100*MUSIC_MAX,cv2=(bpq||ts)?0:OPT.crowd/100*.4;
  const fd=(AC.state!=='running'||performance.now()<AUD_FADE_UNTIL)?2.2:.35;// the first time sound starts, music and crowd fade in slowly
  for(const[g,v]of[[BUS.music.gain,mv],[BUS.crowd.gain,cv2]]){g.cancelScheduledValues(t0);g.setValueAtTime(g.value,t0);g.linearRampToValueAtTime(v,t0+fd)}if(BUS.amb)BUS.amb.gain.value=bpq?Math.max(.15,OPT.crowd/100)*.9:0;BUS.sfx.gain.value=OPT.sfx/100;MASTER.gain.value=muted?0:1}
 function b64buf(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer}
@@ -51,7 +53,7 @@ function organRamp(){organCue(BUF.charge&&(S.hypeN=(S.hypeN||0)+1)%2===0?'charge
 // any organ cue over the music: the background music fades out, the cue plays, the music comes back after
 function organCue(k){if(!AC||!BUF[k]||muted||S.bpOn)return;if(S.rampSrc){S.rampNext=k;return}/* one is playing: this one waits for it to finish */const t=AC.currentTime,mg=BUS.music.gain;
  mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.7);
- const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=Math.max(.25,OPT.music/100)*.95;src.connect(g).connect(MASTER);src.start(t+.35);S.rampSrc=src;
+ const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=Math.max(.25,OPT.music/100)*.475;src.connect(g).connect(MASTER);src.start(t+.35);S.rampSrc=src;
  src.onended=()=>{if(S.rampSrc!==src)return;S.rampSrc=null;{const nx=S.rampNext;S.rampNext=null;if(nx&&!S.bpOn&&S.phase!=='title'&&S.phase!=='over'){organCue(nx);return}}const t2=AC.currentTime;mg.cancelScheduledValues(t2);mg.setValueAtTime(0,t2);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t2+1.8)}}
 function crowdClip(k,vol){if(!AC||!BUF[k]||muted||S.bpOn)return;const src=AC.createBufferSource(),g=AC.createGain();src.buffer=BUF[k];g.gain.value=vol;src.connect(g).connect(BUS.crowd);src.start();return src}
 // someone reached base: the home crowd roars, and is much quieter for the visitors
@@ -62,7 +64,7 @@ let chantSrc=null,nextChant=0;
 function crowdChant(){if(chantSrc||S.mode==='bp')return;chantSrc=crowdClip('chant',1.9);if(chantSrc)chantSrc.onended=()=>{chantSrc=null}}
 // home-run horn: the music fades out under it and comes back in when the next pitch is on its way
 function duckMusic(){if(!AC||!BUS.music||S.musicDuck)return;S.musicDuck=true;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(0,t+.6)}
-function unduckMusic(){if(!S.musicDuck)return;S.musicDuck=false;if(!AC||!BUS.music||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*.7,t+1.8)}
+function unduckMusic(){if(!S.musicDuck)return;S.musicDuck=false;if(!AC||!BUS.music||S.rampSrc)return;const t=AC.currentTime,mg=BUS.music.gain;mg.cancelScheduledValues(t);mg.setValueAtTime(mg.value,t);mg.linearRampToValueAtTime(S.bpOn?0:OPT.music/100*MUSIC_MAX,t+1.8)}
 function stopRamp(){S.rampNext=null;if(S.rampSrc){const s0=S.rampSrc;S.rampSrc=null;try{s0.stop()}catch(e){}applyVolumes()}}
 function playSample(k,vol,rate){if(!AC||!BUF[k])return false;const src=AC.createBufferSource(),gn=AC.createGain();src.buffer=BUF[k];src.playbackRate.value=rate||1;gn.gain.value=vol;src.connect(gn).connect(BUS.sfx);src.start();return true}
 function noise(dur,type,freq,vol,swell){if(!AC||!BUS.sfx)return;/* sound not switched on yet: stay silent */
