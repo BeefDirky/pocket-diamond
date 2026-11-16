@@ -69,4 +69,4 @@ function pdConfirm(head,html,yes,no){return new Promise(res=>{const w=document.c
  w.innerHTML=`<div class="dgBox"><h3>${head}</h3><p>${html}</p><button type="button" class="big" data-a="1">${yes||'YES'}</button><button type="button" class="mbtn" data-a="0">${no||'NO'}</button></div>`;
  const done=v=>{w.remove();removeEventListener('keydown',k,true);res(v)},k=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(false)}};
  w.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)done(b.dataset.a==='1');else if(e.target===w)done(false)});addEventListener('keydown',k,true);
- document.body.appendChild(w);try{sfx('pop')}catch(e){}w.querySelector('[data-a="0"]').focus()})}
+ document.body.appendChild(w);w.querySelector('[data-a="0"]').focus()})}
