@@ -2313,11 +2313,12 @@ function buildRosters(){
  }
 }
 /* a speed demon: any pitcher with velocity 90 or more (a knuckleballer never is) */
-/* STAMINA: how long a pitcher lasts. Every pitcher has one, worked out from his name and role (so both phones in an
-   online game always agree): starters 58-90, relievers 42-72; flamethrowers tire a little sooner, knuckleballers go forever.
-   A card can also carry its own (p.sta). */
-function staOf(p){if(!p)return 60;if(p.sta!=null)return p.sta;const h=hash((p.name||'')+'sta'),sp=p.pos!=='RP';
- return clamp((sp?58+h%33:42+h%31)+(p.type==='knuckle'?10:0)-(p.type!=='knuckle'&&(p.type==='demon'||(p.vel||0)>=90)?6:0),30,99)}
+/* STAMINA: how long a pitcher lasts. Every pitcher has one, worked out from his name (so both phones in an online game
+   always agree), 58-90 for starters and relievers alike: the number is measured against his own role, so a reliever's
+   tank is 35% of a starter's with the same STAMINA (100 vs 100, 70 vs 70; see stamMax). Flamethrowers tire a little
+   sooner, knuckleballers go forever. A card can also carry its own (p.sta). */
+function staOf(p){if(!p)return 60;if(p.sta!=null)return p.sta;const h=hash((p.name||'')+'sta');
+ return clamp((58+h%33)+(p.type==='knuckle'?10:0)-(p.type!=='knuckle'&&(p.type==='demon'||(p.vel||0)>=90)?6:0),30,99)}
 const isDemon=p=>!!p&&p.type!=='knuckle'&&(p.type==='demon'||(p.vel||0)>=90);
 function arsFor(p,k){const h=hash((k||'')+p.name+'ars');
  if(p.type==='knuckle')return['FB','KN','CH'];
@@ -8079,7 +8080,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='ea763376c4',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='93fb87aa2e',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
