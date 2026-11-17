@@ -1690,7 +1690,8 @@ body:not(.lnTeam) #scrLineup .lnNav{grid-template-columns:repeat(3,minmax(0,1fr)
 
 /* LEGENDARY: the card art has a clear backdrop and the shop button's pastel holo slides behind the player (art tagged #lg
    in 24b-card-art.js); the frame is that same holo instead of gold */
-img[src$="#lg"]{background:linear-gradient(120deg,#ffd0e2,#ffe8b5,#cdf4dc,#c8e6fb,#ddd0fc,#ffd0e2) 0 0/300% 100%;animation:shopHolo 6s linear infinite}
+img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animation:lgSwirl 9s linear infinite}
+@keyframes lgSwirl{from{background-position:0 0}to{background-position:0 -166.667%}}
 .tc.r3,.lfc.r3{--rc:#e3d2ff}
 .tc.r3:not(.lock){border-image:linear-gradient(135deg,#ffd0e2,#ffe8b5,#cdf4dc,#c8e6fb,#ddd0fc,#ffd0e2) 1;box-shadow:inset 0 0 0 2px rgba(0,0,0,.35),0 0 10px rgba(221,208,252,.55)}
 .lfc.r3 .lfF{box-shadow:0 0 0 2px #e3d2ff,0 0 10px 1px rgba(221,208,252,.6)}
@@ -1703,6 +1704,10 @@ img[src$="#lg"]{background:linear-gradient(120deg,#ffd0e2,#ffe8b5,#cdf4dc,#c8e6f
 .lfc .lfOvr{transform:translateX(-50%) scale(1.18);transform-origin:50% 60%}
 .tc .ovr{font-size:13px;padding:4px 5px}
 .zoomCard .tc .ovr{font-size:19px}
+/* card borders one pixel thicker */
+.tc{border-width:4px}
+.lfF,.lfB{border-width:3px}
+@media (max-width:720px){.lfField .lfF,.lfField .lfB{border-width:2px}}
 </style>
 
 <div class="app">
@@ -7636,14 +7641,16 @@ $('cards').addEventListener('click',e=>{if(lfTab!=='stats')return;const b=e.targ
 // come with you (and the club you take over gets the players you left behind, so nobody is on two teams). You change
 // the players themselves on the TEAM screen, by signing cards you own into the lineup.
 //   MYTEAM = {club: the brand you play as, base: the club whose roster you own (your first club)}
-const MYTEAM=(()=>{try{const m=JSON.parse(localStorage.getItem('pd-myteam')||'null');if(m&&/^[a-z]+$/.test(m.club)&&/^[a-z]+$/.test(m.base))return m}catch(e){}return null})();
+let MYTEAM=(()=>{try{const m=JSON.parse(localStorage.getItem('pd-myteam')||'null');if(m&&/^[a-z]+$/.test(m.club)&&/^[a-z]+$/.test(m.base))return m}catch(e){}return null})();
 const saveMyTeam=()=>{try{localStorage.setItem('pd-myteam',JSON.stringify(MYTEAM))}catch(e){}};
 const CLUB_SWITCH_COST=0;// free for now (the code still handles a price)
 // every club's own roster exactly as built (before any swap), so either phone online can rebuild anyone's team
 const PRISTINE={},BASE_OF={};
 if(MYTEAM)S.you=MYTEAM.club;
 // right after the rosters are built: remember them, then move your players onto your brand
-function myTeamApply(){for(const k of ORDER){const T=TEAMS[k];PRISTINE[k]={L:T.lineup.slice(),P:T.staff.slice(),R:(T.rot||[]).slice()};BASE_OF[k]=k}
+function myTeamApply(){for(const k of ORDER){const T=TEAMS[k];PRISTINE[k]={L:T.lineup.slice(),P:T.staff.slice(),R:(T.rot||[]).slice(),pit:T.pitcher};BASE_OF[k]=k}
+ myTeamSwap()}
+function myTeamSwap(){
  if(!MYTEAM||!TEAMS[MYTEAM.club]||!TEAMS[MYTEAM.base]){if(MYTEAM&&(!TEAMS[MYTEAM.club]||!TEAMS[MYTEAM.base]))MYTEAM.base=MYTEAM.club=TEAMS[MYTEAM.club]?MYTEAM.club:'busan';return}
  const a=TEAMS[MYTEAM.club],b=TEAMS[MYTEAM.base];if(a===b)return;
  for(const f of['lineup','staff','pitcher','rot'])[a[f],b[f]]=[b[f],a[f]];
@@ -7666,7 +7673,7 @@ function brandSync(){if(pendingMode!=='brand')return;const T=TEAMS[S.you],same=M
  $('tsOvr').hidden=true}// (a club's rating would describe its players, not yours)
 function brandDone(){$('playGo').disabled=false;$('tsOvr').hidden=false;const card=$('scrTeams');for(const b of card.querySelectorAll(':scope>.xClose'))b.hidden=false}
 function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON.stringify({club:S.you,base:S.you}));localStorage.setItem('pd-club',S.you)}catch(e){}
-  track('club_chosen',{club:S.you});pendingMode=null;brandDone();location.reload();return}
+  track('club_chosen',{club:S.you});pendingMode=null;brandDone();brandLive(S.you,S.you);$('goInv').classList.remove('mmNew');showScreen('scrMain');return}
  if(S.you===MYTEAM.club)return;
  if(CLUB_SWITCH_COST&&WAL.coins<CLUB_SWITCH_COST){$('oppLine').innerHTML=`Switching clubs costs ${coinFmt(CLUB_SWITCH_COST)} coins. You have ${coinFmt(WAL.coins)}: win some games first.`;return}
  if(CLUB_SWITCH_COST&&!brandArm){brandArm=1;brandSync();clearTimeout(brandConfirm.t);brandConfirm.t=setTimeout(()=>{brandArm=0;brandSync()},4000);return}
@@ -7675,7 +7682,16 @@ function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON
  if(SIGN[from]){SIGN[to]=SIGN[from];delete SIGN[from];saveSign()}
  track('club_changed',{from,to,cost:CLUB_SWITCH_COST});
  try{localStorage.setItem('pd-myteam',JSON.stringify({club:to,base:MYTEAM.base}));localStorage.setItem('pd-club',to)}catch(e){}
- pendingMode=null;brandDone();location.reload()}
+ if(ROTO[from]){ROTO[to]=ROTO[from];delete ROTO[from];try{localStorage.setItem('pd-rot',JSON.stringify(ROTO))}catch(e){}}
+ pendingMode=null;brandDone();brandLive(to,MYTEAM.base);teamOpen('scrMain')}
+/* switch clubs on the spot (no reload): put every club's roster back as built, wear the new brand, swap your players
+   onto it, re-sign your cards, then repaint everything that shows your club */
+function brandLive(club,base){MYTEAM={club,base};saveMyTeam();
+ for(const k of ORDER){const T=TEAMS[k],o=PRISTINE[k];if(!o)continue;T.lineup=o.L.slice();T.staff=o.P.slice();T.rot=o.R.slice();T.pitcher=o.pit;T.orig=null;T.benched=null;T.rotHold=null;BASE_OF[k]=k}
+ myTeamSwap();applySignings();
+ S.you=club;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==S.you);
+ applyCustom();syncPicker();parkDirty();tsFlush();updateHUD();
+ try{maPaint()}catch(e){}try{thApply()}catch(e){}try{acBanner()}catch(e){}try{accDirty()}catch(e){}}
 // leaving the club-select screen without switching puts your own club back
 function brandCancel(){if(pendingMode!=='brand')return;pendingMode=null;brandDone();if(MYTEAM&&S.you!==MYTEAM.club){S.you=MYTEAM.club;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==S.you);syncPicker();applyCustom();updateHUD();TS.dirty=false}}
 // ---- the TEAM screen: your lineup (sign cards into it), plus the inventory and the club switch ----
@@ -8306,7 +8322,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='ad0c69e364',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='ab986190fc',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -9438,6 +9454,17 @@ function spriteCanvas(pose,pal){const key=pose+JSON.stringify(pal);if(SPR_CACHE[
  let cap=null;if(cx1>=0){const ys=Object.keys(span).map(Number).filter(y=>y<=cy1-2),mids=(ys.length?ys:Object.keys(span).map(Number)).map(y=>(span[y][0]+span[y][1])/2);
   cap={span,x:cx0,y:cy0,w:cx1-cx0+1,h:cy1-cy0+1,cx:mids.reduce((a,b)=>a+b,0)/mids.length+.5,cy:(cy0+cy1+1)/2}}
  return SPR_CACHE[key]={c:cv,cap}}
+
+/* LEGENDARY backdrop: the pastel paint swirl, made to repeat top to bottom so it can scroll forever. Drawn once, set as
+   --lgSwirl; CSS stretches it (smoothly, so it's soft) behind every legendary card's art and slides it up in a loop. */
+function lgSwirlURL(){const W=48,H=120,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
+ const P=CARD_SWIRL[3].map(h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16))),n=P.length,img=g.createImageData(W,H),d=img.data,TAU=Math.PI*2;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const f=y/H*TAU,u0=x/W*1.5;let u=u0+.5*Math.sin(f*2+u0*1.3)+.18*Math.cos(f*3-u0*2);
+  let t=(u*.45+.32*Math.sin(f+u*.9)+.22*Math.cos(2*f+u*2.2)+.12*Math.sin(u*4.1+3*Math.cos(f)))%1;if(t<0)t+=1;
+  const ft=t*n,i0=Math.floor(ft)%n,i1=(i0+1)%n,a=ft-Math.floor(ft),k=(y*W+x)*4;
+  for(let c=0;c<3;c++)d[k+c]=P[i0][c]*(1-a)+P[i1][c]*a;d[k+3]=255}
+ g.putImageData(img,0,0);return cv.toDataURL()}
+try{document.documentElement.style.setProperty('--lgSwirl',`url(${lgSwirlURL()})`)}catch(e){}
 /* ---------- player sprites for the cards: small classic pixel ballplayers, one per pose ----------
    Each map is drawn cell by cell (k ink, c cap, C brim, s skin, S skin shade, w white, W gray, a team trim, A dark trim,
    g glove, G glove shade, r ball stitches) and recoloured for the club; the club logo goes on the cap front. */

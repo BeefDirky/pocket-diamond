@@ -4,14 +4,16 @@
 // come with you (and the club you take over gets the players you left behind, so nobody is on two teams). You change
 // the players themselves on the TEAM screen, by signing cards you own into the lineup.
 //   MYTEAM = {club: the brand you play as, base: the club whose roster you own (your first club)}
-const MYTEAM=(()=>{try{const m=JSON.parse(localStorage.getItem('pd-myteam')||'null');if(m&&/^[a-z]+$/.test(m.club)&&/^[a-z]+$/.test(m.base))return m}catch(e){}return null})();
+let MYTEAM=(()=>{try{const m=JSON.parse(localStorage.getItem('pd-myteam')||'null');if(m&&/^[a-z]+$/.test(m.club)&&/^[a-z]+$/.test(m.base))return m}catch(e){}return null})();
 const saveMyTeam=()=>{try{localStorage.setItem('pd-myteam',JSON.stringify(MYTEAM))}catch(e){}};
 const CLUB_SWITCH_COST=0;// free for now (the code still handles a price)
 // every club's own roster exactly as built (before any swap), so either phone online can rebuild anyone's team
 const PRISTINE={},BASE_OF={};
 if(MYTEAM)S.you=MYTEAM.club;
 // right after the rosters are built: remember them, then move your players onto your brand
-function myTeamApply(){for(const k of ORDER){const T=TEAMS[k];PRISTINE[k]={L:T.lineup.slice(),P:T.staff.slice(),R:(T.rot||[]).slice()};BASE_OF[k]=k}
+function myTeamApply(){for(const k of ORDER){const T=TEAMS[k];PRISTINE[k]={L:T.lineup.slice(),P:T.staff.slice(),R:(T.rot||[]).slice(),pit:T.pitcher};BASE_OF[k]=k}
+ myTeamSwap()}
+function myTeamSwap(){
  if(!MYTEAM||!TEAMS[MYTEAM.club]||!TEAMS[MYTEAM.base]){if(MYTEAM&&(!TEAMS[MYTEAM.club]||!TEAMS[MYTEAM.base]))MYTEAM.base=MYTEAM.club=TEAMS[MYTEAM.club]?MYTEAM.club:'busan';return}
  const a=TEAMS[MYTEAM.club],b=TEAMS[MYTEAM.base];if(a===b)return;
  for(const f of['lineup','staff','pitcher','rot'])[a[f],b[f]]=[b[f],a[f]];
@@ -34,7 +36,7 @@ function brandSync(){if(pendingMode!=='brand')return;const T=TEAMS[S.you],same=M
  $('tsOvr').hidden=true}// (a club's rating would describe its players, not yours)
 function brandDone(){$('playGo').disabled=false;$('tsOvr').hidden=false;const card=$('scrTeams');for(const b of card.querySelectorAll(':scope>.xClose'))b.hidden=false}
 function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON.stringify({club:S.you,base:S.you}));localStorage.setItem('pd-club',S.you)}catch(e){}
-  track('club_chosen',{club:S.you});pendingMode=null;brandDone();location.reload();return}
+  track('club_chosen',{club:S.you});pendingMode=null;brandDone();brandLive(S.you,S.you);$('goInv').classList.remove('mmNew');showScreen('scrMain');return}
  if(S.you===MYTEAM.club)return;
  if(CLUB_SWITCH_COST&&WAL.coins<CLUB_SWITCH_COST){$('oppLine').innerHTML=`Switching clubs costs ${coinFmt(CLUB_SWITCH_COST)} coins. You have ${coinFmt(WAL.coins)}: win some games first.`;return}
  if(CLUB_SWITCH_COST&&!brandArm){brandArm=1;brandSync();clearTimeout(brandConfirm.t);brandConfirm.t=setTimeout(()=>{brandArm=0;brandSync()},4000);return}
@@ -43,7 +45,16 @@ function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON
  if(SIGN[from]){SIGN[to]=SIGN[from];delete SIGN[from];saveSign()}
  track('club_changed',{from,to,cost:CLUB_SWITCH_COST});
  try{localStorage.setItem('pd-myteam',JSON.stringify({club:to,base:MYTEAM.base}));localStorage.setItem('pd-club',to)}catch(e){}
- pendingMode=null;brandDone();location.reload()}
+ if(ROTO[from]){ROTO[to]=ROTO[from];delete ROTO[from];try{localStorage.setItem('pd-rot',JSON.stringify(ROTO))}catch(e){}}
+ pendingMode=null;brandDone();brandLive(to,MYTEAM.base);teamOpen('scrMain')}
+/* switch clubs on the spot (no reload): put every club's roster back as built, wear the new brand, swap your players
+   onto it, re-sign your cards, then repaint everything that shows your club */
+function brandLive(club,base){MYTEAM={club,base};saveMyTeam();
+ for(const k of ORDER){const T=TEAMS[k],o=PRISTINE[k];if(!o)continue;T.lineup=o.L.slice();T.staff=o.P.slice();T.rot=o.R.slice();T.pitcher=o.pit;T.orig=null;T.benched=null;T.rotHold=null;BASE_OF[k]=k}
+ myTeamSwap();applySignings();
+ S.you=club;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==S.you);
+ applyCustom();syncPicker();parkDirty();tsFlush();updateHUD();
+ try{maPaint()}catch(e){}try{thApply()}catch(e){}try{acBanner()}catch(e){}try{accDirty()}catch(e){}}
 // leaving the club-select screen without switching puts your own club back
 function brandCancel(){if(pendingMode!=='brand')return;pendingMode=null;brandDone();if(MYTEAM&&S.you!==MYTEAM.club){S.you=MYTEAM.club;if(S.opp===S.you)S.opp=ORDER.find(k=>k!==S.you);syncPicker();applyCustom();updateHUD();TS.dirty=false}}
 // ---- the TEAM screen: your lineup (sign cards into it), plus the inventory and the club switch ----

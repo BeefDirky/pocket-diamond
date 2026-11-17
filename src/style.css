@@ -1667,7 +1667,8 @@ body:not(.lnTeam) #scrLineup .lnNav{grid-template-columns:repeat(3,minmax(0,1fr)
 
 /* LEGENDARY: the card art has a clear backdrop and the shop button's pastel holo slides behind the player (art tagged #lg
    in 24b-card-art.js); the frame is that same holo instead of gold */
-img[src$="#lg"]{background:linear-gradient(120deg,#ffd0e2,#ffe8b5,#cdf4dc,#c8e6fb,#ddd0fc,#ffd0e2) 0 0/300% 100%;animation:shopHolo 6s linear infinite}
+img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animation:lgSwirl 9s linear infinite}
+@keyframes lgSwirl{from{background-position:0 0}to{background-position:0 -166.667%}}
 .tc.r3,.lfc.r3{--rc:#e3d2ff}
 .tc.r3:not(.lock){border-image:linear-gradient(135deg,#ffd0e2,#ffe8b5,#cdf4dc,#c8e6fb,#ddd0fc,#ffd0e2) 1;box-shadow:inset 0 0 0 2px rgba(0,0,0,.35),0 0 10px rgba(221,208,252,.55)}
 .lfc.r3 .lfF{box-shadow:0 0 0 2px #e3d2ff,0 0 10px 1px rgba(221,208,252,.6)}
@@ -1680,3 +1681,7 @@ img[src$="#lg"]{background:linear-gradient(120deg,#ffd0e2,#ffe8b5,#cdf4dc,#c8e6f
 .lfc .lfOvr{transform:translateX(-50%) scale(1.18);transform-origin:50% 60%}
 .tc .ovr{font-size:13px;padding:4px 5px}
 .zoomCard .tc .ovr{font-size:19px}
+/* card borders one pixel thicker */
+.tc{border-width:4px}
+.lfF,.lfB{border-width:3px}
+@media (max-width:720px){.lfField .lfF,.lfField .lfB{border-width:2px}}

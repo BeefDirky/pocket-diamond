@@ -88,3 +88,14 @@ function spriteCanvas(pose,pal){const key=pose+JSON.stringify(pal);if(SPR_CACHE[
  let cap=null;if(cx1>=0){const ys=Object.keys(span).map(Number).filter(y=>y<=cy1-2),mids=(ys.length?ys:Object.keys(span).map(Number)).map(y=>(span[y][0]+span[y][1])/2);
   cap={span,x:cx0,y:cy0,w:cx1-cx0+1,h:cy1-cy0+1,cx:mids.reduce((a,b)=>a+b,0)/mids.length+.5,cy:(cy0+cy1+1)/2}}
  return SPR_CACHE[key]={c:cv,cap}}
+
+/* LEGENDARY backdrop: the pastel paint swirl, made to repeat top to bottom so it can scroll forever. Drawn once, set as
+   --lgSwirl; CSS stretches it (smoothly, so it's soft) behind every legendary card's art and slides it up in a loop. */
+function lgSwirlURL(){const W=48,H=120,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
+ const P=CARD_SWIRL[3].map(h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16))),n=P.length,img=g.createImageData(W,H),d=img.data,TAU=Math.PI*2;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const f=y/H*TAU,u0=x/W*1.5;let u=u0+.5*Math.sin(f*2+u0*1.3)+.18*Math.cos(f*3-u0*2);
+  let t=(u*.45+.32*Math.sin(f+u*.9)+.22*Math.cos(2*f+u*2.2)+.12*Math.sin(u*4.1+3*Math.cos(f)))%1;if(t<0)t+=1;
+  const ft=t*n,i0=Math.floor(ft)%n,i1=(i0+1)%n,a=ft-Math.floor(ft),k=(y*W+x)*4;
+  for(let c=0;c<3;c++)d[k+c]=P[i0][c]*(1-a)+P[i1][c]*a;d[k+3]=255}
+ g.putImageData(img,0,0);return cv.toDataURL()}
+try{document.documentElement.style.setProperty('--lgSwirl',`url(${lgSwirlURL()})`)}catch(e){}
