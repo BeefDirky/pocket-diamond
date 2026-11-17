@@ -184,8 +184,8 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .mmLogo h1{font-size:clamp(30px,9vw,54px);line-height:1.05;letter-spacing:.02em;text-shadow:3px 3px 0 var(--edge),-2px -2px 0 var(--edge),2px -2px 0 var(--edge),-2px 2px 0 var(--edge)}
 .mmLogo small{font-size:11px;letter-spacing:.24em;color:var(--chalk);text-shadow:1px 1px 0 var(--edge)}
 .mmBtns{display:flex;flex-direction:column;gap:12px}
-.mmBtn{font-family:var(--f-px);font-size:clamp(16px,4.6vw,22px);padding:20px 16px;background:var(--amber);color:var(--edge);border:3px solid var(--edge);box-shadow:0 5px 0 var(--edge);cursor:pointer;letter-spacing:.04em}
-.mmBtn.alt{background:var(--chalk)}
+.mmBtn{font-family:var(--f-px);font-size:clamp(16px,4.6vw,22px);padding:20px 16px;background:var(--chalk);color:var(--edge);border:3px solid var(--edge);box-shadow:0 5px 0 var(--edge);cursor:pointer;letter-spacing:.04em}
+.mmBtn.alt{background:var(--amber)}/* (single player is the cream one, multiplayer the highlight colour) */
 .mmBtn:active,.mmSm:active{transform:translateY(3px);box-shadow:0 2px 0 var(--edge)}
 .mmPair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .mmSm{font-family:var(--f-px);font-size:12px;padding:14px 10px;background:rgba(8,20,14,.88);color:var(--chalk);border:3px solid var(--edge);box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--panel-hi);cursor:pointer;letter-spacing:.08em}
@@ -1740,6 +1740,18 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .app.deskApp .kz.kzUp{position:fixed;width:auto;z-index:6}
 .app.deskApp .kz.kzUp canvas{width:var(--kzW,114px);height:calc(var(--kzW,114px) * 98 / 76)}
 .app.deskApp .kz.kzUp b{font-size:14px;height:18px}
+/* phones: the score bug packs in tighter so it takes less of the screen */
+@media (max-width:720px){
+ .app:not(.deskApp) .bug{gap:5px;padding:4px 5px}
+ .app:not(.deskApp) .bugSc{padding-right:5px}
+ .app:not(.deskApp) .bugSc div{gap:3px}
+ .app:not(.deskApp) .bugSc span{min-width:33px}
+ .app:not(.deskApp) .bugSc b{min-width:0;margin-left:2px}
+ .app:not(.deskApp) .bugSc div.up span::after{margin-left:1px}
+ .app:not(.deskApp) .bugCnt div{gap:3px}
+ .app:not(.deskApp) .bug .bulbs{gap:2px}
+ .app:not(.deskApp) .pcBox{gap:6px;padding:3px 5px}
+}
 </style>
 
 <div class="app">
@@ -6288,7 +6300,7 @@ function togglePen(){if(!$('penPanel').hidden){closePen();return}if(!canPen())re
 function renderPen(){const k=fldKey(),st=staffOf(k),cur=S.pIdxOf[k]||0,pc=S.pcOf[k]||0;
  $('penSub').textContent=`${TEAMS[k].name} · current pitcher at ${pc} pitches`;
  $('penList').innerHTML=st.map((p,i)=>{const now=i===cur,used=usedOf(k).includes(i);
-  const sf=now?clamp(stamFrac(),0,1):1,tag=now?`<span class="st now">PITCHING · ${pc}P<i class="penStam"><i style="width:${Math.round(sf*100)}%;background:${sf<=0?'#e2603a':sf<.25?'#e2603a':sf<.5?'#e6b93a':'#5fc25a'}"></i></i></span>`:used?'<span class="st">USED</span>':'<span class="st ready">READY</span>';
+  const sf=now?clamp(stamFrac(),0,1):1,tag=now?`<span class="st now">PITCHING · ${pc}P<i class="penStam"><i style="width:${Math.round(sf*100)}%;background:${stamCol(sf)}"></i></i></span>`:used?'<span class="st">USED</span>':'<span class="st ready">READY</span>';
   const role=p.pos==='SP'?'Starter':p.cp?'Closer':isDemon(p)?'Flamethrower':p.type==='knuckle'?'Knuckleballer':'Reliever';
   return `<button type="button" class="penRow" data-i="${i}" ${now?'aria-current="true"':''} ${now||used?'disabled':''}>
 <span class="no">#${p.no}</span><span class="nm"><b>${p.name}</b><small>${role} · ${p.hand}HP${p.slot==='side'?' · sidearm':''}</small></span>${tag}<span class="ln2"><span class="rt">VEL ${rb(p.vel)} MOV ${rb(p.mov)} CTL ${rb(p.ctl)} STA ${rb(staOf(p))}</span><span class="ars">${arsOf(p).map(a=>`<i>${PITCHES[a].name}</i>`).join('')}</span></span></button>`}).join('')}
@@ -6364,8 +6376,11 @@ function stamSpend(p){if(S.mode==='bp'||!p)return;const k=fldKey();
 const STAM_PA={'1B':-2.5,IFH:-2.5,'2B':-5,'3B':-7.5,HR:-12,IPHR:-12,BB:-2,HBP:-2,K:2,KL:2};
 function stamResult(code,k){const d=STAM_PA[code];if(S.mode==='bp'||!d||!k||!TEAMS[k])return;S.stamOf=S.stamOf||{};
  const mx=stamMax(staffOf(k)[S.pIdxOf[k]||0]);S.stamOf[k]=clamp(stamOf(k)+d,0,mx);stamHUD()}
+/* stamina colour: green when fresh, yellow at half, red when spent, blending smoothly in between */
+function stamCol(f){const G=[95,194,90],Y=[230,185,58],R=[226,96,58],t=clamp(f,0,1),[a,b,u]=t>=.5?[Y,G,(t-.5)*2]:[R,Y,t*2];
+ return `rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*u)).join(',')})`}
 function stamHUD(){const el=$('pStam');if(!el)return;const bp=S.mode==='bp'||S.phase==='title';el.hidden=bp;if(bp)return;
- const f=clamp(stamFrac(),0,1);el.firstElementChild.style.width=`${Math.round(f*100)}%`;
+ const f=clamp(stamFrac(),0,1);el.firstElementChild.style.width=`${Math.round(f*100)}%`;el.firstElementChild.style.background=stamCol(f);
  el.className='stam'+(f<=0?' out':f<.25?' low':f<.5?' mid':'');el.title=`Stamina ${Math.round(f*100)}%`}
 // sweat: drops fly off the cap and fall when he's under a third of his tank; faster and more of them when gassed
 function drawSweat(g,x,y,now){if(S.mode==='bp'||S.phase==='title')return;const f=stamFrac();if(f>=.33)return;
@@ -8352,7 +8367,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='386049dbd7',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='bfecc0758e',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

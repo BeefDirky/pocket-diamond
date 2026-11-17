@@ -161,8 +161,8 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .mmLogo h1{font-size:clamp(30px,9vw,54px);line-height:1.05;letter-spacing:.02em;text-shadow:3px 3px 0 var(--edge),-2px -2px 0 var(--edge),2px -2px 0 var(--edge),-2px 2px 0 var(--edge)}
 .mmLogo small{font-size:11px;letter-spacing:.24em;color:var(--chalk);text-shadow:1px 1px 0 var(--edge)}
 .mmBtns{display:flex;flex-direction:column;gap:12px}
-.mmBtn{font-family:var(--f-px);font-size:clamp(16px,4.6vw,22px);padding:20px 16px;background:var(--amber);color:var(--edge);border:3px solid var(--edge);box-shadow:0 5px 0 var(--edge);cursor:pointer;letter-spacing:.04em}
-.mmBtn.alt{background:var(--chalk)}
+.mmBtn{font-family:var(--f-px);font-size:clamp(16px,4.6vw,22px);padding:20px 16px;background:var(--chalk);color:var(--edge);border:3px solid var(--edge);box-shadow:0 5px 0 var(--edge);cursor:pointer;letter-spacing:.04em}
+.mmBtn.alt{background:var(--amber)}/* (single player is the cream one, multiplayer the highlight colour) */
 .mmBtn:active,.mmSm:active{transform:translateY(3px);box-shadow:0 2px 0 var(--edge)}
 .mmPair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .mmSm{font-family:var(--f-px);font-size:12px;padding:14px 10px;background:rgba(8,20,14,.88);color:var(--chalk);border:3px solid var(--edge);box-shadow:0 4px 0 var(--edge),inset 0 0 0 2px var(--panel-hi);cursor:pointer;letter-spacing:.08em}
@@ -1717,3 +1717,15 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .app.deskApp .kz.kzUp{position:fixed;width:auto;z-index:6}
 .app.deskApp .kz.kzUp canvas{width:var(--kzW,114px);height:calc(var(--kzW,114px) * 98 / 76)}
 .app.deskApp .kz.kzUp b{font-size:14px;height:18px}
+/* phones: the score bug packs in tighter so it takes less of the screen */
+@media (max-width:720px){
+ .app:not(.deskApp) .bug{gap:5px;padding:4px 5px}
+ .app:not(.deskApp) .bugSc{padding-right:5px}
+ .app:not(.deskApp) .bugSc div{gap:3px}
+ .app:not(.deskApp) .bugSc span{min-width:33px}
+ .app:not(.deskApp) .bugSc b{min-width:0;margin-left:2px}
+ .app:not(.deskApp) .bugSc div.up span::after{margin-left:1px}
+ .app:not(.deskApp) .bugCnt div{gap:3px}
+ .app:not(.deskApp) .bug .bulbs{gap:2px}
+ .app:not(.deskApp) .pcBox{gap:6px;padding:3px 5px}
+}

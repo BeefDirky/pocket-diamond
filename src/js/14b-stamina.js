@@ -25,8 +25,11 @@ function stamSpend(p){if(S.mode==='bp'||!p)return;const k=fldKey();
 const STAM_PA={'1B':-2.5,IFH:-2.5,'2B':-5,'3B':-7.5,HR:-12,IPHR:-12,BB:-2,HBP:-2,K:2,KL:2};
 function stamResult(code,k){const d=STAM_PA[code];if(S.mode==='bp'||!d||!k||!TEAMS[k])return;S.stamOf=S.stamOf||{};
  const mx=stamMax(staffOf(k)[S.pIdxOf[k]||0]);S.stamOf[k]=clamp(stamOf(k)+d,0,mx);stamHUD()}
+/* stamina colour: green when fresh, yellow at half, red when spent, blending smoothly in between */
+function stamCol(f){const G=[95,194,90],Y=[230,185,58],R=[226,96,58],t=clamp(f,0,1),[a,b,u]=t>=.5?[Y,G,(t-.5)*2]:[R,Y,t*2];
+ return `rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*u)).join(',')})`}
 function stamHUD(){const el=$('pStam');if(!el)return;const bp=S.mode==='bp'||S.phase==='title';el.hidden=bp;if(bp)return;
- const f=clamp(stamFrac(),0,1);el.firstElementChild.style.width=`${Math.round(f*100)}%`;
+ const f=clamp(stamFrac(),0,1);el.firstElementChild.style.width=`${Math.round(f*100)}%`;el.firstElementChild.style.background=stamCol(f);
  el.className='stam'+(f<=0?' out':f<.25?' low':f<.5?' mid':'');el.title=`Stamina ${Math.round(f*100)}%`}
 // sweat: drops fly off the cap and fall when he's under a third of his tank; faster and more of them when gassed
 function drawSweat(g,x,y,now){if(S.mode==='bp'||S.phase==='title')return;const f=stamFrac();if(f>=.33)return;
