@@ -38,11 +38,12 @@ try:
    for k in range(1,13):A.mouse.move(sb['x']+sb['width']/2+(db['x']+db['width']/2-sb['x']-sb['width']/2)*k/12,sb['y']+sb['height']/2+(db['y']+db['height']/2-sb['y']-sb['height']/2)*k/12);A.wait_for_timeout(16)
    A.mouse.up();A.wait_for_timeout(350)
   for slot,deck in (('3','bat'),('-1','pit')):
-   A.click('#cards .lfTabs [data-d=%s]'%deck);A.wait_for_timeout(250);done=False
-   for k in range(A.locator('#cards .lfTray .lfc.deck:not(.used)').count()):
-    before=A.locator('#cards .lfTray .lfc.deck.used').count()
-    drag('#cards .lfTray .lfc.deck:not(.used) >> nth=%d'%k,'#cards .lfc[data-i="%s"]'%slot)
-    if A.locator('#cards .lfTray .lfc.deck.used').count()>before:done=True;break
+   A.click('#cards .lfModes [data-m=%s]'%('field' if deck=='bat' else 'pit'));A.wait_for_timeout(250);done=False
+   # (the tray only lists cards not in the lineup yet, so a signed card drops out of it)
+   for k in range(A.locator('#cards .lfTray .lfc.deck').count()):
+    before=A.locator('#cards .lfTray .lfc.deck').count()
+    drag('#cards .lfTray .lfc.deck >> nth=%d'%k,'#cards .lfc[data-i="%s"]'%slot)
+    if A.locator('#cards .lfTray .lfc.deck').count()<before:done=True;break
    assert done,'could not sign a card into slot '+slot
   A.keyboard.press('Escape');A.wait_for_timeout(800)
   assert A.is_visible('#olRoom') and A.evaluate("__pd.S.you")=='seoul','not back in the room'
