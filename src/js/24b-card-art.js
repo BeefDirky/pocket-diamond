@@ -51,7 +51,10 @@ function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in fro
  /* the swirl, softened: blown up smoothly, then a light blur, so it sits behind the crisp player */
  o.imageSmoothingEnabled=true;o.drawImage(L,0,0,128,160);if(!LEG)softBlur(o,128,160,3);o.imageSmoothingEnabled=false;
  if(c.r>=3){const Q=(x,y,col)=>{o.fillStyle=col;o.fillRect(x*4,y*4,4,4)};for(const[sx,sy]of[[3,4],[28,9],[27,28]]){Q(sx,sy,'#fff3b0');Q(sx-1,sy,'#ffcf4a');Q(sx+1,sy,'#ffcf4a');Q(sx,sy-1,'#ffcf4a');Q(sx,sy+1,'#ffcf4a')}}
- const sk=p.skin||skinOf(p.name),sp=spriteCanvas(pose,{k:INK,c:T.cap,C:T.brim||shade(T.cap,-.3),s:sk,S:shade(sk,-.15),w:'#f4f5f7',W:'#b8bcc4',a:T.jersey,A:shade(T.jersey,-.3),g:SPR_GLOVE,G:shade(SPR_GLOVE,-.35),r:'#d24a3a'});
+ /* his own glove and bat colours (the bat from his player data, the glove picked from his name) */
+ const glv=SPR_GLOVES[hash(p.name+'glove')%SPR_GLOVES.length],bat0=p.bat==='#1c1c1f'?'#1c1c1f':p.bat==='#5a2a1e'?['#5a2a1e','#7a3a22','#8a5a32'][hash(p.name+'bat')%3]:['#d9b07a','#e8c890','#c48a4e','#b5763c'][hash(p.name+'bat')%4],batDk=(()=>{const n=parseInt(bat0.slice(1),16);return ((n>>16)*.3+((n>>8)&255)*.59+(n&255)*.11)<60})(),
+  batC=batDk?'#33363e':bat0,batB=batDk?'#626877':shade(bat0,-.22);
+ const sk=p.skin||skinOf(p.name),sp=spriteCanvas(pose,{k:INK,c:T.cap,C:T.brim||shade(T.cap,-.3),s:sk,S:shade(sk,-.15),w:'#f4f5f7',W:'#b8bcc4',a:T.jersey,A:shade(T.jersey,-.3),g:glv,G:shade(glv,-.35),b:batC,B:batB,r:'#d24a3a'});
  const Z=4,sw=sp.c.width*Z,sh=sp.c.height*Z,x0=Math.round((128-sw)/2),y0=150-sh;
  o.save();if(lefty){o.translate(128,0);o.scale(-1,1)}o.drawImage(sp.c,x0,y0,sw,sh);o.restore();
  /* the club logo on the front of the cap (drawn after the mirror, so it never reads backwards) */
@@ -75,7 +78,7 @@ function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in fro
    o.fillRect(lefty?128-L1:L0,y0+(gy+j)*Z+dy,Math.max(1,L1-L0),Z)}})}
  return out.toDataURL()+(LEG?'#lg':'')}
 /* a sprite drawn at 1 px per cell with an ink rim, plus where its cap sits (for the logo); cached per pose + colours */
-const SPR_CACHE={},SPR_GLOVE='#a0602e';
+const SPR_CACHE={},SPR_GLOVE='#a0602e',SPR_GLOVES=['#a0602e','#7a4520','#c98a44','#2b2b31','#8e3a24','#d8a860','#5b3b22','#b9572a','#3a2a5a','#1f3a6a'];
 function spriteCanvas(pose,pal){const key=pose+JSON.stringify(pal);if(SPR_CACHE[key])return SPR_CACHE[key];
  const S=SPRITES[pose],M=S.m,W=Math.max(...M.map(r=>r.length))+2,H=M.length+2,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
  let cx0=99,cx1=-1,cy0=99,cy1=-1;const span={};

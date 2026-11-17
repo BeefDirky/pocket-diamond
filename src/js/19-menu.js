@@ -22,12 +22,9 @@ for(const[k,id]of[['con','edCon'],['pow','edPow'],['spd','edSpd'],['def','edDef'
 $('edSave').addEventListener('click',()=>{CUSTOM.name=($('edName').value||'ROOKIE').toUpperCase().slice(0,10);CUSTOM.no=clamp(+$('edNo').value||0,0,99);CUSTOM.slot=+$('edSlot').value;CUSTOM.active=true;saveCustom();applyCustom();updateHUD();showScreen('scrLineup')});
 $('edRemove').addEventListener('click',()=>{CUSTOM.active=false;saveCustom();applyCustom();updateHUD();showScreen('scrLineup')});
 const PORTRAIT={};
-function portrait(T,p,home){
- const key=T.name+p.name+(home?1:0);if(PORTRAIT[key])return PORTRAIT[key];
- const c=document.createElement('canvas');c.width=16;c.height=23;const g=c.getContext('2d');
- drawPlayer(g,8,21,T,{legs:'stand',arms:(p.pos==='SP'||p.pos==='RP')?'set':'down',skin:skinOf(p.name),pants:home?'#eeeae0':'#a9b0b5',glove:p.pos!=='DH'&&p.pos!=='SP'&&p.pos!=='RP',flip:p.thr==='R'});
- return PORTRAIT[key]=c.toDataURL();
-}
+/* a player with no card of his own still gets the card-style pixel art, in his club's kit (cached like card art) */
+function portrait(T,p,home){const k=ORDER.find(x=>TEAMS[x]===T)||S.you;
+ return cardArt({id:'pl:'+k+':'+p.name,p,pit:p.pos==='SP'||p.pos==='RP',r:0},k)}
 function renderCards(){
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
  $('lnTitle').textContent=`${T.city} ${T.name}`;
