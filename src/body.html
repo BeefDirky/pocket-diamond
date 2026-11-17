@@ -83,6 +83,8 @@
             <dt>Progress</dt><dd id="acSync"></dd>
           </dl>
           <button class="mbtn acHistB" type="button" data-hist="scrAcct">GAME HISTORY</button><div class="acBtns"><button class="mbtn" id="acProfile" type="button">RANKED PROFILE</button><button class="mbtn" id="acSignOut" type="button">SIGN OUT</button></div>
+          <button class="mbtn acAdminB" id="acAdmin" type="button" hidden>ADMIN</button>
+          <button class="ghost acDel" id="acDelete" type="button">Delete account</button>
         </div>
         <div class="acPane" id="acPickName" hidden>
           <p class="acLead" id="acPickTxt">Choose your username. It's how other players see you, and no one else can have it.</p>
@@ -343,9 +345,17 @@
         <div class="seg fbKind" id="fbKind" role="radiogroup" aria-label="Kind"><button type="button" data-v="bug" aria-pressed="true">Bug</button><button type="button" data-v="idea" aria-pressed="false">Suggestion</button><button type="button" data-v="other" aria-pressed="false">Other</button></div>
         <textarea class="acIn fbText" id="fbText" maxlength="2000" rows="6" placeholder="What happened? What did you expect? (For a bug: what were you doing right before?)"></textarea>
         <input class="acIn" id="fbContact" type="text" maxlength="200" placeholder="EMAIL OR REDDIT NAME (OPTIONAL)" autocomplete="email" spellcheck="false">
+        <label class="fbShot" id="fbShotRow" hidden><input type="checkbox" id="fbShot"> <span>Attach a screenshot of the game</span><img id="fbShotImg" alt=""></label>
         <button class="big" id="fbSend" type="button">SEND</button>
         <p class="acMsg" id="fbMsg" aria-live="polite"></p>
         <button class="mbtn back" id="fbBack" type="button" data-go="scrMain">Back</button>
+      </div>
+      <div class="card" id="scrAdmin" hidden>
+        <h1><span>ADMIN</span></h1>
+        <div class="seg adTabs" id="adTabs" role="tablist"><button type="button" data-t="fb" aria-pressed="true">Feedback</button><button type="button" data-t="err" aria-pressed="false">Errors</button><button type="button" data-t="pl" aria-pressed="false">Players</button><button type="button" data-t="flag" aria-pressed="false">Switches</button></div>
+        <div class="adBody" id="adBody"></div>
+        <p class="acMsg" id="adMsg" aria-live="polite"></p>
+        <button class="mbtn back" type="button" data-go="scrAcct">Back</button>
       </div>
       <div class="card" id="scrOpts" hidden>
         <h1><span>OPTIONS</span></h1>

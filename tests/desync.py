@@ -13,7 +13,7 @@ try:
  with sync_playwright() as p:
   exe='/usr/bin/google-chrome' if os.path.exists('/usr/bin/google-chrome') else None
   b=p.chromium.launch(executable_path=exe,args=['--no-sandbox','--disable-background-timer-throttling','--disable-renderer-backgrounding','--disable-backgrounding-occluded-windows'])
-  ctx=b.new_context(viewport={'width':800,'height':1000},service_workers='block')
+  ctx=b.new_context(viewport={'width':800,'height':1400},service_workers='block')
   ctx.add_init_script("(()=>{const F=3,pn=performance.now.bind(performance),t0=pn();performance.now=()=>t0+(pn()-t0)*F;const raf=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=cb=>raf(()=>cb(performance.now()));})();"+mock+";localStorage.setItem('pd-opts2',JSON.stringify({music:0,crowd:0,sfx:0,time:'day'}));if(!localStorage.getItem('pd-cards')){const o={};for(let i=0;i<30;i++){o['bl:b'+i]=1;o['bl:p'+i]=1}localStorage.setItem('pd-cards',JSON.stringify({packs:0,owned:o,seen:{}}))}")
   A=ctx.new_page();B=ctx.new_page();errs=[]
   # each player owns a team: A plays Seoul's own roster; B rebranded to Busan but owns Daegu's players
@@ -29,20 +29,24 @@ try:
   B.evaluate("__pd.S.you='seoul'");B.click('#olPick [data-t=busan]');B.wait_for_timeout(800)
   print('A:',A.inner_text('#olStatus'),'| B:',B.inner_text('#olStatus'))
   # the host readies, then signs two card players from the room's EDIT LINEUP: that un-readies it and the guest must learn them
+  # A owns a few free-agent cards to sign (a fresh player has none)
+  A.evaluate("(()=>{const k=__pd.cards();let np=0;k.CARDS.filter(c=>c.set==='fa'&&c.r<3).forEach(c=>{if(c.pit?np++<3:['1B','3B','LF','IF','CI','UT'].includes(c.p.pos)||/1B/.test((c.p.alt||[]).join()))k.COL.owned[c.id]=1});k.saveCol()})()")
   A.click('#olGo');A.wait_for_timeout(500)
   A.click('#olEdit');A.wait_for_timeout(400);assert A.is_visible('#scrLineup') and not A.is_visible('#lnClub'),'EDIT LINEUP did not open the lineup'
   # sign two cards by dragging them from YOUR CARDS onto a player (a card that can't play there is turned away; try the next)
   def drag(src, dst):
    A.locator(src).scroll_into_view_if_needed();sb=A.locator(src).bounding_box();A.locator(dst).scroll_into_view_if_needed();db=A.locator(dst).bounding_box();sb=A.locator(src).bounding_box()
-   A.mouse.move(sb['x']+sb['width']/2,sb['y']+sb['height']/2);A.mouse.down()
-   for k in range(1,13):A.mouse.move(sb['x']+sb['width']/2+(db['x']+db['width']/2-sb['x']-sb['width']/2)*k/12,sb['y']+sb['height']/2+(db['y']+db['height']/2-sb['y']-sb['height']/2)*k/12);A.wait_for_timeout(16)
+   sx=sb['x']+sb['width']/2;sy=min(sb['y']+sb['height']/2,A.viewport_size['height']-12)  # (grab the card where it's on screen)
+   A.mouse.move(sx,sy);A.mouse.down()
+   for k in range(1,13):A.mouse.move(sx+(db['x']+db['width']/2-sx)*k/12,sy+(db['y']+db['height']/2-sy)*k/12);A.wait_for_timeout(16)
    A.mouse.up();A.wait_for_timeout(350)
   for slot,deck in (('3','bat'),('-1','pit')):
-   A.click('#cards .lfTabs [data-d=%s]'%deck);A.wait_for_timeout(250);done=False
-   for k in range(A.locator('#cards .lfTray .lfc.deck:not(.used)').count()):
-    before=A.locator('#cards .lfTray .lfc.deck.used').count()
-    drag('#cards .lfTray .lfc.deck:not(.used) >> nth=%d'%k,'#cards .lfc[data-i="%s"]'%slot)
-    if A.locator('#cards .lfTray .lfc.deck.used').count()>before:done=True;break
+   A.click('#cards .lfModes [data-m=%s]'%('field' if deck=='bat' else 'pit'));A.wait_for_timeout(250);done=False
+   # (the lineup says "<name> is in at <pos>" when a card is signed)
+   for k in range(A.locator('#cards .lfTray .lfc.deck').count()):
+    A.evaluate("document.getElementById('lfMsg').textContent=''")
+    drag('#cards .lfTray .lfc.deck >> nth=%d'%k,'#cards .lfc[data-i="%s"]'%slot)
+    if ' is in at ' in (A.text_content('#lfMsg') or ''):done=True;break
    assert done,'could not sign a card into slot '+slot
   A.keyboard.press('Escape');A.wait_for_timeout(800)
   assert A.is_visible('#olRoom') and A.evaluate("__pd.S.you")=='seoul','not back in the room'
