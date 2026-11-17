@@ -29,6 +29,8 @@ try:
   B.evaluate("__pd.S.you='seoul'");B.click('#olPick [data-t=busan]');B.wait_for_timeout(800)
   print('A:',A.inner_text('#olStatus'),'| B:',B.inner_text('#olStatus'))
   # the host readies, then signs two card players from the room's EDIT LINEUP: that un-readies it and the guest must learn them
+  # A owns a few free-agent cards to sign (a fresh player has none)
+  A.evaluate("(()=>{const k=__pd.cards();k.CARDS.filter(c=>c.set==='fa'&&c.r<3).filter((c,i,a)=>a.filter(x=>x.pit===c.pit).indexOf(c)<6).forEach(c=>k.COL.owned[c.id]=1);k.saveCol()})()")
   A.click('#olGo');A.wait_for_timeout(500)
   A.click('#olEdit');A.wait_for_timeout(400);assert A.is_visible('#scrLineup') and not A.is_visible('#lnClub'),'EDIT LINEUP did not open the lineup'
   # sign two cards by dragging them from YOUR CARDS onto a player (a card that can't play there is turned away; try the next)
