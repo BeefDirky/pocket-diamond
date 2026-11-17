@@ -1694,3 +1694,10 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
  font-family:var(--f-px);font-size:7px;letter-spacing:.06em;color:#fff;background:rgba(11,20,16,.82);padding:2px 4px 1px;line-height:1;border:1px solid var(--rc)}
 .lfField .lfc .lfSide{font-size:6px;top:10px;padding:1px 3px}
 .lfc.flip .lfF .lfSide{visibility:hidden}
+/* bullpen: the label sits a little higher above the cards, and closers (CP) stand apart in a thin box */
+.lfStaff .lfCap+h5{margin-bottom:14px}
+.lfStaff .lfRow .lfCpBox{display:block;flex:0 0 auto;width:min(104px,calc((100% - 56px) / 5));margin-left:6px;outline:1px solid rgba(255,255,255,.6);outline-offset:4px;border-radius:2px}
+.lfStaff .lfRow .lfCpBox+.lfCpBox{margin-left:0}
+.lfStaff .lfRow .lfCpBox .lfc{width:100%}
+.lfStaff .lfPenRow:has(.lfCpBox)>.lfc{width:min(104px,calc((100% - 56px) / 5))}
+@media (max-width:720px){.lfStaff .lfRow .lfCpBox,.lfStaff .lfPenRow:has(.lfCpBox)>.lfc{width:calc((100% - 34px) / 5)}.lfStaff .lfRow .lfCpBox{margin-left:6px;outline-offset:3px}}

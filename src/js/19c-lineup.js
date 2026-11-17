@@ -65,7 +65,7 @@ function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()
  const LP=lfMob()?LF_POS_M:LF_POS;
  T.lineup.forEach((p,i)=>{const pos=LP[p.pos]?p.pos:'DH',[x,y]=LP[pos];field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i,pos})}</div>`});
  {const p=T.staff[0],[x,y]=LP.SP;if(p)field+=`<div class="lfSlot" style="left:${x}%;top:${y}%">${lfMini(T,key,p,{i:-1,pos:'SP'})}</div>`}
- const pen=T.staff.slice(1).map((p,j)=>lfMini(T,key,p,{i:-2-j,pos:p.cp?'CP':p.pos||'RP'})).join('');
+ const pen=T.staff.slice(1).map((p,j)=>{const m=lfMini(T,key,p,{i:-2-j,pos:p.cp?'CP':p.pos||'RP'});return p.cp?`<span class="lfCpBox">${m}</span>`:m}).join('');/* closers sit a little apart, in a thin box */
  const rotRow=[T.staff[0],...(T.rot||[])].map((p,j)=>p?`<div class="lfRotSlot" data-r="${j}">${lfMini(T,key,p,{i:j?-9-j:-1,pos:'SP'})}<i class="lfRotN">${j+1}${j?'':' · ACE'}</i></div>`:'').join('');
  let tray='';
  /* flipping a pitcher or hitter on the field shows the matching cards once; the tabs can still switch after that */
