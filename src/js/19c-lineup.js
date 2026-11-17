@@ -33,7 +33,7 @@ function lfCard(k,p){if(!CARDS.length)buildCardDB();if(p.signed&&CARD_BY[p.signe
 /* the back of a card: his ratings as bars */
 function lfStats(p,pit){const rows=pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl],['STA',staOf(p)]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
  return rows.map(([l,v])=>`<span class="lfSt"><i>${l}</i><b style="color:${rcol(v)}">${v}</b><u><s style="width:${v}%;background:${rcol(v)}"></s></u></span>`).join('')}
-function lfFace(art,o,nm,pos){return `<span class="lfF"><span class="lfOvr" style="--oc:${rcol(o)}"><small>OVR</small>${o}</span><img alt="" src="${art}"><span class="lfNm">${nm}</span><span class="lfPos">${pos}</span></span>`}
+function lfFace(art,o,nm,pos,side){return `<span class="lfF"><span class="lfOvr" style="--oc:${rcol(o)}"><small>OVR</small>${o}</span>${side?'<span class="lfSide">SIDE ARM</span>':''}<img alt="" src="${art}"><span class="lfNm">${nm}</span><span class="lfPos">${pos}</span></span>`}
 function lfBackFace(p,pit,o,pos,extra,order){return `<span class="lfB"><span class="lfBNm">${p.name}</span><span class="lfBSub">${pos} · ${p.hand||p.thr||'R'}${p.slot==='side'?' · SIDEARM':''}${order?` · BATS ${order}${['','ST','ND','RD'][order]||'TH'}`:''}</span><span class="lfBOvr" style="color:${rcol(o)}">${o}<small>OVR</small></span>${lfStats(p,pit)}${extra||''}</span>`}
 let lfFlip=null,lfMove=false,lfSelWas=null;const lfFlips=new Set();let lfFlipsOf='';
 /* slot numbers on the Positions tab: 0-8 the lineup, -1 today's starter (SP1), -2..-6 the bullpen, -10..-13 SP2-SP5 */
@@ -41,7 +41,7 @@ const lfPAt=(T,i)=>i>=0?T.lineup[i]:i<=-10?(T.rot||[])[-10-i]:T.staff[-1-i];
 let lfMode='field';/* Positions shows the FIELDERS (with today's starter) or the PITCHERS (five-man rotation + bullpen) */
 function lfMini(T,k,p,opt){const c=lfCard(k,p),r=c?c.r:0,art=c?cardArt(c,k):portrait(T,p,k===S.you),o=ovr(p),pit=opt.i<0,fk='f'+opt.i;
  return `<button type="button" class="lfc r${r}${lfFlips.has(fk)?' flip':''}${p.signed?' signed':''}" data-i="${opt.i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">
-  ${lfFace(art,o,p.name,opt.pos+(pit&&p.slot==='side'&&!/^SP/.test(opt.pos)?' · SIDE':''))}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
+  ${lfFace(art,o,p.name,opt.pos,pit&&p.slot==='side')}${lfBackFace(p,pit,o,opt.pos,'',opt.i>=0?opt.i+1:0)}</span></button>`}
 let lfTab='field',boSel=null;
 /* the BATTING ORDER tab starts exactly where the POSITIONS tab starts (so the header and tabs don't jump), and is only
    as tall as it needs to be */
@@ -75,7 +75,7 @@ function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()
   tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':q.cp?'CP':'RP'):q.pos;
     const can=lnSel!=null&&!inUse&&(lnSel<0)===c.pit;
     return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlips.has(fk)?' flip':''}" data-id="${c.id}"><span class="lfIn">
-     ${lfFace(cardArt(c),c.o,q.name,pos+(c.pit&&q.slot==='side'?' · SIDE':'')+(inUse?' · IN':''))}${lfBackFace(q,c.pit,c.o,pos,'')}</span></button>`}).join('')
+     ${lfFace(cardArt(c),c.o,q.name,pos+(inUse?' · IN':''),c.pit&&q.slot==='side')}${lfBackFace(q,c.pit,c.o,pos,'')}</span></button>`}).join('')
    :`${'<div class="lfc lfHole" aria-hidden="true"></div>'.repeat(8)}<p class="lfEmpty">No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Shop to get players.</p>`}
  const sel=lnSel==null?null:lfPAt(T,lnSel);
  const acts='';/* (no "restore original": you swap a player out by dragging another card in) */

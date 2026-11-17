@@ -1688,3 +1688,9 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 /* the cards out on the field: thicker again, so the frame reads clearly */
 .lfField .lfF,.lfField .lfB{border-width:4px}
 @media (max-width:720px){.lfField .lfF,.lfField .lfB{border-width:3px}}
+/* a sidearm pitcher's lineup card says so just under the OVR box, over the art */
+.lfF{position:relative}
+.lfc .lfSide{position:absolute;left:50%;top:calc(100% * 0 + 12px);transform:translateX(-50%);z-index:2;white-space:nowrap;pointer-events:none;
+ font-family:var(--f-px);font-size:7px;letter-spacing:.06em;color:#fff;background:rgba(11,20,16,.82);padding:2px 4px 1px;line-height:1;border:1px solid var(--rc)}
+.lfField .lfc .lfSide{font-size:6px;top:10px;padding:1px 3px}
+.lfc.flip .lfF .lfSide{visibility:hidden}
