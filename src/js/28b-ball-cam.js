@@ -40,9 +40,16 @@ function bcPlace(box){box.style.top='';box.classList.toggle('inGame',S.mode!=='b
 // The live pitch comes in as a dot that grows as it nears the plate; where it crosses stays marked (red = strike,
 // green = ball) with the call under it, and every earlier pitch of this at-bat stays as a small numbered dot.
 const KZ_PX=17;// px per foot
+/* on PC the pitch map sits right above the pitcher's info block, centered on it and as big as the room above allows */
+let kzAt=0;
+function kzPlace(box){const now=performance.now();if(now-kzAt<250)return;kzAt=now;
+ const mp=document.querySelector('.app.deskApp>.matchup>.muPit'),r=mp&&mp.getBoundingClientRect();
+ if(!r||!r.width||!r.height){if(box.classList.contains('kzUp')){box.classList.remove('kzUp');box.style.removeProperty('--kzW');box.style.right=box.style.bottom=''}return}
+ const pc=document.querySelector('.pcBox'),top=pc?pc.getBoundingClientRect().bottom+10:90,room=r.top-12-top,w=Math.round(Math.max(90,Math.min(250,(room-30)*76/98)));
+ box.classList.add('kzUp');box.style.setProperty('--kzW',w+'px');box.style.right=Math.round(innerWidth-r.right+(r.width-w-10)/2)+'px';box.style.bottom=Math.round(innerHeight-r.top+12)+'px'}
 function drawZone(now){const box=$('kz');
  const show=S.phase&&['choose','windup','pitch','result','play'].includes(S.phase)&&S.mode!=='bp'&&OPT.zone!==false;
- if(!show){if(!box.hidden)box.hidden=true;return}if(box.hidden)box.hidden=false;
+ if(!show){if(!box.hidden)box.hidden=true;return}if(box.hidden)box.hidden=false;kzPlace(box);
  const c=$('kzC'),g=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,gy=H-6,X=x=>Math.round(cx+x*KZ_PX),Y=h=>Math.round(gy-h*KZ_PX);
  g.clearRect(0,0,W,H);
  // plate and zone (3x3)

@@ -1713,3 +1713,7 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 #scrMain .mmSm.mmShop::before{background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.6) 45%,rgba(255,255,255,.2) 52%,transparent 64%) no-repeat;background-size:250% 100%;animation:shopShine1 2.8s ease-in-out infinite}
 @keyframes shopShine1{0%{background-position:130% 0}60%,100%{background-position:-130% 0}}
 @media (prefers-reduced-motion:reduce){#scrMain .mmSm.mmShop,#scrMain .mmSm.mmShop::before{animation:none}}
+/* PC: the pitch map moves up over the pitcher's info block and grows (placed by kzPlace in 28b-ball-cam.js) */
+.app.deskApp .kz.kzUp{position:fixed;width:auto;z-index:6}
+.app.deskApp .kz.kzUp canvas{width:var(--kzW,114px);height:calc(var(--kzW,114px) * 98 / 76)}
+.app.deskApp .kz.kzUp b{font-size:14px;height:18px}
