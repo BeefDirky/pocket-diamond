@@ -21,7 +21,7 @@ const CAP_MARKS={
  gwangju:{p:{o:'#6e1d3a',S:'#3e0f20',i:'#f49ab0',e:'#5ad06a',k:'#1b1f24',w:'#fff4e0',p:'#f49ab0'},m:['o.......o','oi.....io','oooSoSooo','ooeoooeoo','SwwwpwwwS','.owwkwwo.','..ooooo..']},
  daegu:{p:{y:'#ffc83a',D:'#c48a10'},m:['y..y..y','yy.y.yy','yyyyyyy','yDyyyDy','yyyyyyy']},
  daejeon:{p:{b:'#4a6ad0',l:'#c9d6ff',k:'#1b1f24'},m:['bb....bb','bbbbbbbb','bkbbbbkb','bbllllbb','.blkklb.','..bbbb..']},
- suwon:{p:{p:'#a070e0',P:'#7a48c8',L:'#c9a6ff',y:'#ffd23a',b:'#fff1c9',w:'#fff6b0'},m:['...pppp...','..pLpppPP.','..pLppP.PP','..pwppP...','.yybyyyy..','pppppppppP']},
+ suwon:{p:{p:'#a070e0',P:'#7a48c8',L:'#c9a6ff',y:'#ffd23a',b:'#fff1c9',w:'#fff6b0'},m:['..ppp...','.pLppPP.','.pwpP..P','.yybyy..','pppppppP']},
  changwon:{p:{g:'#4cc06a',k:'#1b1f24',w:'#ffffff'},m:['..gggg..','.ggkgggg','gggggggg','ggw.w.w.','ggg.....','gggw.w..','.gggg...']},
  ulsan:{p:{b:'#6cc4ff',w:'#ffffff',k:'#1b1f24'},m:['.w...w....','..w.w.....','.bbbbb...b','bbbbbbb.bb','bkbbbbbbbb','wwwwwbbb..','.wwww.....']},
  jeju:{p:{g:'#2f7a3a',o:'#fff1d6',w:'#f28a1e'},m:['..gg...','...g...','.ooooo.','oowoooo','ooooooo','.ooooo.']},
