@@ -41,14 +41,15 @@ function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in fro
  const p=c.p,T=tk?TEAMS[tk]:CARD_KIT,bl=!!tk&&false,rr=mulberry32(hash(c.id+'chibi'));
  const R=(x,y,w,h,col,ctx)=>{(ctx||g).fillStyle=col;(ctx||g).fillRect(x|0,y|0,w|0,h|0)},P=(x,y,col,ctx)=>R(x,y,1,1,col,ctx);
  // ---- backdrop: the abstract paint swirl, in the club's colours (or his rarity's colours with no club) ----
- cardSwirl(g,G,GH,tk?maPalette(tk):CARD_SWIRL[Math.min(3,c.r|0)],c.id);
+ const LEG=c.r>=3;/* legendaries leave the backdrop clear: the page puts a moving holo behind them */
+ if(!LEG)cardSwirl(g,G,GH,tk?maPalette(tk):CARD_SWIRL[Math.min(3,c.r|0)],c.id);
  g.fillStyle='rgba(0,0,0,.28)';g.fillRect(9,36,14,1);g.fillRect(11,37,10,1);
  // ---- the player: a classic pixel sprite (24b1-sprites.js), recoloured for the club ----
  const lefty=p.hand==='L',v=hash(c.id);
  const pose=c.pit?['pitchSet','pitchKick','pitchThrow'][v%3]:p.pos==='C'?'catch':p.def>=88&&v%3===1?(v%2?'field':'field2'):['batUp','batUp2','batUp3','swing'][v%4];
  const out=document.createElement('canvas');out.width=128;out.height=160;const o=out.getContext('2d');
  /* the swirl, softened: blown up smoothly, then a light blur, so it sits behind the crisp player */
- o.imageSmoothingEnabled=true;o.drawImage(L,0,0,128,160);softBlur(o,128,160,3);o.imageSmoothingEnabled=false;
+ o.imageSmoothingEnabled=true;o.drawImage(L,0,0,128,160);if(!LEG)softBlur(o,128,160,3);o.imageSmoothingEnabled=false;
  if(c.r>=3){const Q=(x,y,col)=>{o.fillStyle=col;o.fillRect(x*4,y*4,4,4)};for(const[sx,sy]of[[3,4],[28,9],[27,28]]){Q(sx,sy,'#fff3b0');Q(sx-1,sy,'#ffcf4a');Q(sx+1,sy,'#ffcf4a');Q(sx,sy-1,'#ffcf4a');Q(sx,sy+1,'#ffcf4a')}}
  const sk=p.skin||skinOf(p.name),sp=spriteCanvas(pose,{k:INK,c:T.cap,C:T.brim||shade(T.cap,-.3),s:sk,S:shade(sk,-.15),w:'#f4f5f7',W:'#b8bcc4',a:T.jersey,A:shade(T.jersey,-.3),g:SPR_GLOVE,G:shade(SPR_GLOVE,-.35),r:'#d24a3a'});
  const Z=4,sw=sp.c.width*Z,sh=sp.c.height*Z,x0=Math.round((128-sw)/2),y0=150-sh;
@@ -72,7 +73,7 @@ function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in fro
    const xa=x0+(gx+half+edge(ua)*half)*Z,xb=x0+(gx+half+edge(ub)*half)*Z,dy=Math.round(um*um*3);
    o.fillStyle=shade(mk.p[ch],-.32*um*um);const L0=Math.round(xa),L1=Math.round(xb);
    o.fillRect(lefty?128-L1:L0,y0+(gy+j)*Z+dy,Math.max(1,L1-L0),Z)}})}
- return out.toDataURL()}
+ return out.toDataURL()+(LEG?'#lg':'')}
 /* a sprite drawn at 1 px per cell with an ink rim, plus where its cap sits (for the logo); cached per pose + colours */
 const SPR_CACHE={},SPR_GLOVE='#a0602e';
 function spriteCanvas(pose,pal){const key=pose+JSON.stringify(pal);if(SPR_CACHE[key])return SPR_CACHE[key];
