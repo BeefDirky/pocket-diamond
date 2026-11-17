@@ -1707,3 +1707,9 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .lfc .lfF{box-shadow:0 0 0 2px var(--rc),0 3px 0 1px rgba(0,0,0,.55)}
 /* your username on the account banner is always white, whatever the club */
 #acHero #acName{color:#fff!important}
+/* SHOP: the pastel paint swirl (the legendary-card one), drifting slowly; a soft shine still passes over */
+#scrMain .mmSm.mmShop{background:var(--shopSwirl) 0 0/240px 100% repeat-x #f6e8ff;animation:shopSwirl 10s linear infinite}
+@keyframes shopSwirl{from{background-position:0 0}to{background-position:-240px 0}}
+#scrMain .mmSm.mmShop::before{background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.6) 45%,rgba(255,255,255,.2) 52%,transparent 64%) no-repeat;background-size:250% 100%;animation:shopShine1 2.8s ease-in-out infinite}
+@keyframes shopShine1{0%{background-position:130% 0}60%,100%{background-position:-130% 0}}
+@media (prefers-reduced-motion:reduce){#scrMain .mmSm.mmShop,#scrMain .mmSm.mmShop::before{animation:none}}

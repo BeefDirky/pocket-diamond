@@ -101,4 +101,12 @@ function lgSwirlURL(){const W=48,H=120,cv=document.createElement('canvas');cv.wi
   const ft=t*n,i0=Math.floor(ft)%n,i1=(i0+1)%n,a=ft-Math.floor(ft),k=(y*W+x)*4;
   for(let c=0;c<3;c++)d[k+c]=P[i0][c]*(1-a)+P[i1][c]*a;d[k+3]=255}
  g.putImageData(img,0,0);return cv.toDataURL()}
-try{document.documentElement.style.setProperty('--lgSwirl',`url(${lgSwirlURL()})`)}catch(e){}
+/* the SHOP button's swirl: the same pastels, made to repeat left to right so it can drift sideways forever */
+function shopSwirlURL(){const W=72,H=36,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
+ const P=CARD_SWIRL[3].map(h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16))),n=P.length,img=g.createImageData(W,H),d=img.data,TAU=Math.PI*2;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const f=x/W*TAU,v0=y/H*1.4;let v=v0+.45*Math.sin(f*2+v0*1.6)+.2*Math.cos(f*3-v0*2.4);
+  let t=(v*.5+.3*Math.sin(f+v*1.1)+.22*Math.cos(2*f+v*2)+.12*Math.sin(v*4.3+3*Math.cos(f)))%1;if(t<0)t+=1;
+  const ft=t*n,i0=Math.floor(ft)%n,i1=(i0+1)%n,a=ft-Math.floor(ft),k=(y*W+x)*4;
+  for(let c=0;c<3;c++)d[k+c]=P[i0][c]*(1-a)+P[i1][c]*a;d[k+3]=255}
+ g.putImageData(img,0,0);return cv.toDataURL()}
+try{document.documentElement.style.setProperty('--lgSwirl',`url(${lgSwirlURL()})`);document.documentElement.style.setProperty('--shopSwirl',`url(${shopSwirlURL()})`)}catch(e){}
