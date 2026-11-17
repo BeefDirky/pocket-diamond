@@ -3,6 +3,7 @@
    players for the card sprites (24b1-sprites.js), picking the closest card pose for what each player is doing. This is
    a first try: the cards only have 10 still poses, so runs, swings and deliveries step between them instead of animating. */
 const LOOK_CARD=(()=>{try{return /[?&]look=card\b/.test(location.search)||localStorage.getItem('pd-look')==='card'}catch(e){return false}})();
+const LK_SC=.72;/* drawn smaller than the card art: about the size of the current players */
 if(LOOK_CARD){
  const lkSpr=(pose,T,skin,flip)=>{const t=T||UMP,sk=skin||SKINS[1],k=ORDER.find(x=>TEAMS[x]===t);
   const glv='#a0602e',bat='#d9b07a';
@@ -17,8 +18,9 @@ if(LOOK_CARD){
     let gx=Math.round(cp.cx+fr*cp.w*.14-mw/2),gy=Math.max(cp.y+1,Math.round(cp.cy-mh/2));
     mk.m.forEach((r,j)=>{for(let i=0;i<r.length;i++){if(r[i]==='.')continue;const sx=gx+i;q.fillStyle=mk.p[r[i]];q.fillRect(o.flip?W-1-sx:sx,gy+j,1,1)}})}
    LKC.set(key,c)}
-  g.fillStyle='rgba(6,18,10,.3)';g.fillRect(Math.round(X)-7,Math.round(Y),15,1);g.fillRect(Math.round(X)-5,Math.round(Y)+1,11,1);
-  g.drawImage(c,Math.round(X-c.width/2),Math.round(Y-c.height+2))};
+  const w=Math.round(c.width*LK_SC),h=Math.round(c.height*LK_SC),sm=g.imageSmoothingEnabled;g.imageSmoothingEnabled=false;
+  g.fillStyle='rgba(6,18,10,.3)';g.fillRect(Math.round(X)-5,Math.round(Y),11,1);g.fillRect(Math.round(X)-4,Math.round(Y)+1,9,1);
+  g.drawImage(c,Math.round(X-w/2),Math.round(Y-h+2),w,h);g.imageSmoothingEnabled=sm};
  /* which card pose fits what the player is doing */
  const lkPose=o=>{const L=o.legs||'stand',A=o.arms||'down',f=((o.frame|0)%4+4)%4;
   if(A==='bat'||A==='bunt')return L==='stride'||L==='follow'?'swing':'batUp';
