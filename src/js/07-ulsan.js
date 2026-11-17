@@ -172,16 +172,14 @@ function buildField(){H_NIGHT=false;
      gi=Math.hypot(Math.max(ru-ra,0),Math.max(rv-ra,0))+Math.min(Math.max(ru-ra,rv-ra),0)-RC,grassIn=gi<0&&bd>=14;
     /* the dirt arc runs out just past the foul lines and stops there */
     const fo=(Math.abs(x)-y)/Math.SQRT2,arc=dm<95&&y>-2&&fo<=6;
-    /* where the base paths meet the home-plate circle, the dirt flows round in a smooth curve (no notches) */
-    const fa=fo-6,fb=r-13,fk=8,fh=Math.max(fk-Math.abs(fa-fb),0)/fk,fil=r<40&&y>-16&&fo>0?Math.min(fa,fb)-fh*fh*fk/4:1;
-    const dirt=(arc&&!grassIn)||fil<0||r<13||md<9;
+    const dirt=(arc&&!grassIn)||r<13||md<9;
     if(dirt){const n=rng();col=n<.14?C.d2:n<.2?C.d3:C.d1;
      /* a little more shape: the mound's top is a touch lighter and its slope darker, and the dirt is darker right
         where it meets the grass (the lip) */
      const lip=C=>n<.6?C.d2:C.mL;
      if(md<9){if(md<3.2)col=n<.3?C.d1:C.d3;else if(md>7.4)col=lip(C)}
      else if(arc&&r>=13&&((gi<0&&bd>=12.6&&bd<14)||(gi>=0&&gi<1.4&&bd>=14)||dm>93.6||fo>4.6))col=lip(C);/* (no lip inside the home-plate circle) */
-     else if(!(arc&&!grassIn)&&fil>-1.4)col=lip(C)}
+     else if(!(arc&&!grassIn)&&r>11.6)col=lip(C)}/* (the circle's own edge, only where no base path runs on) */
     else{const k=mowK(x,y,r);col=k?C.g1:C.g2;if(rng()<.05)col=C.g3}
    }
   }
