@@ -36,8 +36,9 @@ try:
   # sign two cards by dragging them from YOUR CARDS onto a player (a card that can't play there is turned away; try the next)
   def drag(src, dst):
    A.locator(src).scroll_into_view_if_needed();sb=A.locator(src).bounding_box();A.locator(dst).scroll_into_view_if_needed();db=A.locator(dst).bounding_box();sb=A.locator(src).bounding_box()
-   A.mouse.move(sb['x']+sb['width']/2,sb['y']+sb['height']/2);A.mouse.down()
-   for k in range(1,13):A.mouse.move(sb['x']+sb['width']/2+(db['x']+db['width']/2-sb['x']-sb['width']/2)*k/12,sb['y']+sb['height']/2+(db['y']+db['height']/2-sb['y']-sb['height']/2)*k/12);A.wait_for_timeout(16)
+   sx=sb['x']+sb['width']/2;sy=min(sb['y']+sb['height']/2,A.viewport_size['height']-12)  # (grab the card where it's on screen)
+   A.mouse.move(sx,sy);A.mouse.down()
+   for k in range(1,13):A.mouse.move(sx+(db['x']+db['width']/2-sx)*k/12,sy+(db['y']+db['height']/2-sy)*k/12);A.wait_for_timeout(16)
    A.mouse.up();A.wait_for_timeout(350)
   for slot,deck in (('3','bat'),('-1','pit')):
    A.click('#cards .lfModes [data-m=%s]'%('field' if deck=='bat' else 'pit'));A.wait_for_timeout(250);done=False
