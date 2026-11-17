@@ -33,6 +33,8 @@
     <div class="penPanel" id="penPanel" hidden><div class="penHead"><b>BULLPEN</b><span id="penSub"></span><button type="button" id="penClose" aria-label="Close bullpen">✕</button></div><div class="penList" id="penList"></div></div>
     <div class="ballCam" id="ballCam" hidden><canvas id="ballCamCv"></canvas><span id="ballCamTxt"></span><i>BALL CAM</i></div>
     <div class="netToast" id="netToast" role="status" aria-live="polite" hidden></div>
+    <div class="wuTag" id="wuTag" hidden aria-live="polite"><small id="wuHead">NOW BATTING</small><b id="wuName"></b><em id="wuSong" hidden></em></div>
+    <div class="cpShow" id="cpShow" hidden aria-hidden="true"><i class="cpBeam l"></i><i class="cpBeam r"></i><div class="cpTxt"><small>NOW ENTERING</small><b id="cpName"></b><span><em id="cpClub"></em> · CLOSER</span></div><i class="cpFlash"></i></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
     <div class="upd" id="upd" hidden role="status"><span>New version available. Please refresh your browser.</span><button type="button" id="updGo">REFRESH</button></div>
     <div class="afk" id="afk" hidden><b>ARE YOU STILL THERE?</b><span id="afkT"></span><small>Tap anywhere to keep playing</small></div>
@@ -366,6 +368,7 @@
         <div class="opt"><span>Fit color scheme</span><div class="seg" id="optFit"><button type="button" data-v="on">On</button><button type="button" data-v="off" aria-pressed="true">Off</button></div><b></b></div>
         <div class="opt"><span>Game time</span><div class="seg" id="optTime"><button type="button" data-v="day">Day</button><button type="button" data-v="night">Night</button><button type="button" data-v="random">Random</button></div><b></b></div>
         <div class="opt" id="optBpWaitRow" hidden><span>Next pitch</span><div class="seg" id="optBpWait"><button type="button" data-v="now">Right away</button><button type="button" data-v="wait">After the ball stops</button></div><b></b></div>
+        <div class="opt"><span>Walk-up music</span><div class="seg" id="optWalk"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
         <div class="opt"><span>Strike zone</span><div class="seg" id="optZone"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
         <div class="opt"><span>Ball cam</span><div class="seg" id="optBallCam"><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div><b></b></div>
         <button class="mbtn back" type="button" id="optBack">Back</button>

@@ -87,12 +87,24 @@ def build_legal():
         html = LEGAL_PAGE.format(title=title, doc=m.group(1), pa=cur if doc == 'privacy' else '', ta=cur if doc == 'terms' else '')
         open(os.path.join(ROOT, doc + '.html'), 'w', encoding='utf-8').write(html)
 
+def music_pack():
+    # audio/music/pack.json: walk-up songs and pitcher entrances (only what the game needs: entries with a song or an effect)
+    p = os.path.join(ROOT, 'audio/music/pack.json')
+    if not os.path.exists(p):
+        return 'null'
+    P = json.load(open(p, encoding='utf-8'))
+    out = {}
+    for sec in ('walkup', 'entrance', 'sfx'):
+        out[sec] = {k: {kk: vv for kk, vv in v.items() if kk != 'who'} for k, v in (P.get(sec) or {}).items() if v.get('file') or v.get('fx')}
+    return json.dumps(out, ensure_ascii=False, separators=(',', ':'))
+
 def main():
     js = source_js()
     # the game's own version (same for both builds): ranked submissions carry it, and both phones must match
     assert js.count('__PD_VER__') == 1
     pd_ver = hashlib.sha1(js.encode()).hexdigest()[:10]
     js = js.replace('__PD_VER__', pd_ver)
+    js = js.replace('/*@MUSICPACK*/null', music_pack(), 1)
     # the running game compares its own version with this file to offer a refresh when a new one is out
     open(os.path.join(ROOT, 'version.json'), 'w').write(json.dumps({'v': pd_ver}) + '\n')
     cfg = json.loads(rd('tools/config.json'))

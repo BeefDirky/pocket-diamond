@@ -1764,3 +1764,35 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 /* admin page: the list area never collapses to nothing, whatever squeezes the card */
 #scrAdmin{flex-shrink:0;height:auto!important;max-height:none!important;min-height:min-content}
 #scrAdmin .paBody{flex:0 0 auto;min-height:120px}
+/* ---- music pack: the NOW BATTING / NOW PITCHING tag, and the closer's stadium show ---- */
+.wuTag{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+ padding:7px 14px 8px;background:rgba(8,12,24,.86);border:3px solid transparent;border-image:linear-gradient(90deg,#ffb3d9,#b5d8ff,#c9ffd9,#fff1a8,#ffb3d9) 1;
+ font-family:var(--f-hud);color:#fff;white-space:nowrap;box-shadow:0 4px 0 rgba(0,0,0,.4);opacity:0}
+.wuTag small{font-size:10px;letter-spacing:.14em;color:#ffe08a}
+.wuTag b{font-family:var(--f-px);font-weight:400;font-size:clamp(11px,2.6vw,15px);text-shadow:2px 2px 0 #000}
+.wuTag em{font-style:normal;font-size:11px;color:#c9e6ff}
+.wuTag.in{animation:wuIn .35s steps(5) forwards}.wuTag.out{animation:wuOut .3s steps(4) forwards}
+@keyframes wuIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes wuOut{from{opacity:1}to{opacity:0;transform:translate(-50%,8px)}}
+.cpShow{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:hidden;opacity:0}
+.cpShow.go{animation:cpDark 5.2s linear forwards}
+/* lights out (0-.5s), the show, lights back on at 3.7s, gone by 5.2s */
+@keyframes cpDark{0%{opacity:0;background:rgba(0,0,0,0)}9%{opacity:1;background:rgba(2,3,10,.78)}70%{opacity:1;background:rgba(2,3,10,.74)}72%{background:rgba(255,255,255,.55)}76%{background:rgba(2,3,10,.2)}88%{opacity:1;background:rgba(0,0,0,0)}100%{opacity:0;background:rgba(0,0,0,0)}}
+.cpBeam{position:absolute;bottom:-6%;width:34%;height:130%;transform-origin:50% 100%;opacity:0;mix-blend-mode:screen;filter:blur(5px);
+ background:linear-gradient(0deg,rgba(255,250,225,.6),rgba(255,250,225,.12) 70%,rgba(255,250,225,0));clip-path:polygon(44% 100%,56% 100%,100% 0,0 0)}
+.cpBeam.l{left:2%}.cpBeam.r{right:2%}
+.cpShow.go .cpBeam.l{animation:cpSwL 3.4s ease-in-out .45s 1 forwards}
+.cpShow.go .cpBeam.r{animation:cpSwR 3.4s ease-in-out .45s 1 forwards}
+@keyframes cpSwL{0%{opacity:0;transform:rotate(-38deg)}12%{opacity:1}50%{transform:rotate(30deg)}88%{opacity:1;transform:rotate(-8deg)}100%{opacity:0;transform:rotate(-8deg)}}
+@keyframes cpSwR{0%{opacity:0;transform:rotate(38deg)}12%{opacity:1}50%{transform:rotate(-30deg)}88%{opacity:1;transform:rotate(8deg)}100%{opacity:0;transform:rotate(8deg)}}
+.cpTxt{position:absolute;left:0;right:0;top:34%;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;opacity:0;color:#fff}
+.cpShow.go .cpTxt{animation:cpTxt 5.2s steps(1) forwards}
+@keyframes cpTxt{0%,22%{opacity:0;transform:scale(1.25)}23%{opacity:1;transform:scale(1.25)}25%,68%{opacity:1;transform:scale(1)}74%,100%{opacity:0}}
+.cpTxt small{font-family:var(--f-hud);font-size:12px;letter-spacing:.3em;color:var(--cpA)}
+.cpTxt b{font-family:var(--f-px);font-weight:400;font-size:clamp(18px,5.6vw,34px);text-shadow:3px 3px 0 var(--cpB),-2px -2px 0 #000,0 0 18px var(--cpA)}
+.cpTxt span{font-family:var(--f-hud);font-size:13px;letter-spacing:.18em;padding:4px 10px;background:var(--cpB);border:2px solid var(--cpA)}
+.cpTxt em{font-style:normal}
+.cpFlash{position:absolute;inset:0;background:#fff;opacity:0}
+.cpShow.go .cpFlash{animation:cpFl 5.2s linear forwards}
+@keyframes cpFl{0%,70%{opacity:0}71%{opacity:.9}73%{opacity:0}75%{opacity:.7}77%{opacity:0}79%{opacity:.5}81%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.cpShow.go .cpFlash{animation:none}}
