@@ -1782,6 +1782,8 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .adHist{display:flex;gap:10px;align-items:center;font-size:12px}.adHist span:first-child{width:130px}.adHist span:nth-child(2){flex:1}
 .adFlag{display:flex;gap:8px;align-items:center}.adFlag b{width:110px;font-size:13px}.adFlag .acIn{flex:1;margin:0}
 .adFlag .mbtn{width:70px;background:#3a3}.adFlag .mbtn.adOff{background:#c33}
+.adQuick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.adQuick .mbtn{flex:1;min-width:70px;padding:8px 4px}
+.adTabs{display:flex;flex-wrap:wrap;gap:4px}.adTabs button{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:11px;white-space:nowrap}
 </style>
 
 <div class="app">
@@ -2214,7 +2216,7 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
       </div>
       <div class="card" id="scrAdmin" hidden>
         <h1><span>ADMIN</span></h1>
-        <div class="seg adTabs" id="adTabs" role="tablist"><button type="button" data-t="fb" aria-pressed="true">Feedback</button><button type="button" data-t="err" aria-pressed="false">Errors</button><button type="button" data-t="pl" aria-pressed="false">Players</button><button type="button" data-t="flag" aria-pressed="false">Switches</button></div>
+        <div class="seg adTabs" id="adTabs" role="tablist"><button type="button" data-t="fb" aria-pressed="true">Feedback</button><button type="button" data-t="err" aria-pressed="false">Errors</button><button type="button" data-t="coins" aria-pressed="false">Add coins</button><button type="button" data-t="pl" aria-pressed="false">Players</button><button type="button" data-t="flag" aria-pressed="false">Switches</button></div>
         <div class="adBody" id="adBody"></div>
         <p class="acMsg" id="adMsg" aria-live="polite"></p>
         <button class="mbtn back" type="button" data-go="scrAcct">Back</button>
@@ -8424,7 +8426,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='0334a2982a',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='6a7e09a5c6',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -9380,6 +9382,11 @@ async function adRender(){const B=$('adBody'),M=$('adMsg');M.textContent='Loadin
   else if(AD.tab==='err'){const r=await rpc('admin_errors',{p_limit:150});
    B.innerHTML=r.length?r.map(e=>`<div class="adRow"><div class="adHd">${adWhen(e.created_at)} · v${esc(e.version||'?')} · ${esc(e.username||'guest')}</div><p class="adTxt">${esc(e.message)}</p>
      <details><summary>stack &amp; device</summary><pre>${esc((e.stack||'')+'\n'+JSON.stringify(e.device||{},null,1))}</pre></details></div>`).join(''):'<p class="adSm">No errors logged.</p>';M.textContent=''}
+  else if(AD.tab==='coins'){/* the quick way: a username and an amount */
+   B.innerHTML=`<div class="adRow"><p class="adSm">Add coins (and packs) to any account. They arrive within a couple of minutes while that player is in the game, with a "gift for you" note.</p>
+    <div class="adGift"><input class="acIn" id="adCUser" placeholder="USERNAME" spellcheck="false" autocomplete="off"><input class="acIn" id="adCAmt" type="number" min="1" max="1000000" placeholder="COINS"><input class="acIn" id="adCPacks" type="number" min="0" max="100" placeholder="PACKS"><input class="acIn" id="adCNote" maxlength="120" placeholder="NOTE (OPTIONAL)"><button class="mbtn" id="adCGo" type="button">ADD COINS</button></div>
+    <div class="adQuick">${[100,500,1000,5000].map(n=>`<button class="mbtn" type="button" data-amt="${n}">+${coinFmt(n)}</button>`).join('')}</div></div>`;
+   for(const i of B.querySelectorAll('input'))i.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('adCGo').click()});M.textContent=''}
   else if(AD.tab==='pl'){B.innerHTML=`<div class="adFind"><input class="acIn" id="adName" placeholder="USERNAME" spellcheck="false" autocomplete="off" value="${esc(AD.q||'')}"><button class="mbtn" id="adGo" type="button">FIND</button></div><div id="adPl"></div>`;
    $('adName').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('adGo').click()});$('adGo').addEventListener('click',()=>{AD.q=$('adName').value.trim();adPlayer()});M.textContent='';if(AD.q)adPlayer()}
   else{const f=await rpc('get_flags');
@@ -9400,6 +9407,14 @@ $('adBody').addEventListener('click',async e=>{const M=$('adMsg');
  const fl=e.target.closest('[data-flag]');if(fl){const k=fl.dataset.flag,on=fl.dataset.on!=='1',msg=$('adBody').querySelector(`[data-msg="${k}"]`).value;
   if(!on&&!await pdConfirm(`TURN ${FLAG_NAMES[k].toUpperCase()} OFF?`,'Every player is blocked from it within a few minutes, until you turn it back on.','TURN OFF','CANCEL'))return;
   try{await rpc('admin_set_flag',{p_key:k,p_on:on,p_msg:msg||null});await flagsLoad();adRender()}catch(er){M.textContent='Could not change it: '+er.message}return}
+ const qa=e.target.closest('[data-amt]');if(qa){$('adCAmt').value=qa.dataset.amt;return}
+ if(e.target.closest('#adCGo')){const u=$('adCUser').value.trim(),c=+$('adCAmt').value||0,p=+$('adCPacks').value||0,n=$('adCNote').value;
+  if(!u){M.textContent='Enter a username.';return}if(c<=0&&p<=0){M.textContent='Enter an amount.';return}
+  let pl;try{pl=await rpc('admin_player',{p_username:u})}catch(er){M.textContent='Could not look them up: '+er.message;return}
+  if(!pl){M.textContent=`No player called “${u}”.`;return}
+  if(!await pdConfirm('ADD COINS?',`${c?`<b>${coinFmt(c)}</b> coins `:''}${p?`<b>${p}</b> pack${p>1?'s':''} `:''}to <b>${esc(pl.username)}</b>?`,'ADD','CANCEL'))return;
+  try{await rpc('admin_gift',{p_user:pl.user_id,p_coins:c,p_packs:p,p_note:n||null});M.textContent=`Sent to ${pl.username}. They get it within a couple of minutes while playing.`;$('adCAmt').value='';$('adCPacks').value=''}
+  catch(er){M.textContent='Could not send: '+er.message}return}
  if(e.target.closest('#adSend')&&AD.pl){const c=+$('adCoins').value||0,p=+$('adPacks').value||0,n=$('adNote').value;if(c<=0&&p<=0){M.textContent='Enter coins or packs.';return}
   if(!await pdConfirm('SEND GIFT?',`${c?c+' coins ':''}${p?p+' packs ':''}to <b>${esc(AD.pl.username)}</b>. They get it the next time their game checks in (within a couple of minutes while they play).`,'SEND','CANCEL'))return;
   try{await rpc('admin_gift',{p_user:AD.pl.user_id,p_coins:c,p_packs:p,p_note:n||null});M.textContent='Gift sent.';adPlayer()}catch(er){M.textContent='Could not send: '+er.message}return}

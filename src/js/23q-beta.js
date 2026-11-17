@@ -88,6 +88,11 @@ async function adRender(){const B=$('adBody'),M=$('adMsg');M.textContent='Loadin
   else if(AD.tab==='err'){const r=await rpc('admin_errors',{p_limit:150});
    B.innerHTML=r.length?r.map(e=>`<div class="adRow"><div class="adHd">${adWhen(e.created_at)} · v${esc(e.version||'?')} · ${esc(e.username||'guest')}</div><p class="adTxt">${esc(e.message)}</p>
      <details><summary>stack &amp; device</summary><pre>${esc((e.stack||'')+'\n'+JSON.stringify(e.device||{},null,1))}</pre></details></div>`).join(''):'<p class="adSm">No errors logged.</p>';M.textContent=''}
+  else if(AD.tab==='coins'){/* the quick way: a username and an amount */
+   B.innerHTML=`<div class="adRow"><p class="adSm">Add coins (and packs) to any account. They arrive within a couple of minutes while that player is in the game, with a "gift for you" note.</p>
+    <div class="adGift"><input class="acIn" id="adCUser" placeholder="USERNAME" spellcheck="false" autocomplete="off"><input class="acIn" id="adCAmt" type="number" min="1" max="1000000" placeholder="COINS"><input class="acIn" id="adCPacks" type="number" min="0" max="100" placeholder="PACKS"><input class="acIn" id="adCNote" maxlength="120" placeholder="NOTE (OPTIONAL)"><button class="mbtn" id="adCGo" type="button">ADD COINS</button></div>
+    <div class="adQuick">${[100,500,1000,5000].map(n=>`<button class="mbtn" type="button" data-amt="${n}">+${coinFmt(n)}</button>`).join('')}</div></div>`;
+   for(const i of B.querySelectorAll('input'))i.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('adCGo').click()});M.textContent=''}
   else if(AD.tab==='pl'){B.innerHTML=`<div class="adFind"><input class="acIn" id="adName" placeholder="USERNAME" spellcheck="false" autocomplete="off" value="${esc(AD.q||'')}"><button class="mbtn" id="adGo" type="button">FIND</button></div><div id="adPl"></div>`;
    $('adName').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('adGo').click()});$('adGo').addEventListener('click',()=>{AD.q=$('adName').value.trim();adPlayer()});M.textContent='';if(AD.q)adPlayer()}
   else{const f=await rpc('get_flags');
@@ -108,6 +113,14 @@ $('adBody').addEventListener('click',async e=>{const M=$('adMsg');
  const fl=e.target.closest('[data-flag]');if(fl){const k=fl.dataset.flag,on=fl.dataset.on!=='1',msg=$('adBody').querySelector(`[data-msg="${k}"]`).value;
   if(!on&&!await pdConfirm(`TURN ${FLAG_NAMES[k].toUpperCase()} OFF?`,'Every player is blocked from it within a few minutes, until you turn it back on.','TURN OFF','CANCEL'))return;
   try{await rpc('admin_set_flag',{p_key:k,p_on:on,p_msg:msg||null});await flagsLoad();adRender()}catch(er){M.textContent='Could not change it: '+er.message}return}
+ const qa=e.target.closest('[data-amt]');if(qa){$('adCAmt').value=qa.dataset.amt;return}
+ if(e.target.closest('#adCGo')){const u=$('adCUser').value.trim(),c=+$('adCAmt').value||0,p=+$('adCPacks').value||0,n=$('adCNote').value;
+  if(!u){M.textContent='Enter a username.';return}if(c<=0&&p<=0){M.textContent='Enter an amount.';return}
+  let pl;try{pl=await rpc('admin_player',{p_username:u})}catch(er){M.textContent='Could not look them up: '+er.message;return}
+  if(!pl){M.textContent=`No player called “${u}”.`;return}
+  if(!await pdConfirm('ADD COINS?',`${c?`<b>${coinFmt(c)}</b> coins `:''}${p?`<b>${p}</b> pack${p>1?'s':''} `:''}to <b>${esc(pl.username)}</b>?`,'ADD','CANCEL'))return;
+  try{await rpc('admin_gift',{p_user:pl.user_id,p_coins:c,p_packs:p,p_note:n||null});M.textContent=`Sent to ${pl.username}. They get it within a couple of minutes while playing.`;$('adCAmt').value='';$('adCPacks').value=''}
+  catch(er){M.textContent='Could not send: '+er.message}return}
  if(e.target.closest('#adSend')&&AD.pl){const c=+$('adCoins').value||0,p=+$('adPacks').value||0,n=$('adNote').value;if(c<=0&&p<=0){M.textContent='Enter coins or packs.';return}
   if(!await pdConfirm('SEND GIFT?',`${c?c+' coins ':''}${p?p+' packs ':''}to <b>${esc(AD.pl.username)}</b>. They get it the next time their game checks in (within a couple of minutes while they play).`,'SEND','CANCEL'))return;
   try{await rpc('admin_gift',{p_user:AD.pl.user_id,p_coins:c,p_packs:p,p_note:n||null});M.textContent='Gift sent.';adPlayer()}catch(er){M.textContent='Could not send: '+er.message}return}
