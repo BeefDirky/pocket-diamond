@@ -169,7 +169,7 @@ function buildField(){H_NIGHT=false;
     const bd=Math.min(Math.hypot(x-63.64,y-63.64),Math.hypot(x,y-127.28),Math.hypot(x+63.64,y-63.64));
     /* (a rounded square: distance outside its edge, in feet, with soft round corners) */
     const ru=Math.abs((x+(y-63.64))/Math.SQRT2),rv=Math.abs((x-(y-63.64))/Math.SQRT2),RC=11,ra=(63.64-9)/Math.SQRT2-RC,
-     gi=Math.hypot(Math.max(ru-ra,0),Math.max(rv-ra,0))+Math.min(Math.max(ru-ra,rv-ra),0)-RC,grassIn=gi<0&&bd>=14;
+     gr=Math.hypot(Math.max(ru-ra,0),Math.max(rv-ra,0))+Math.min(Math.max(ru-ra,rv-ra),0)-RC,gs=Math.abs(x)+Math.abs(y-63.64)-(63.64-9),gi=y<32?gs:gr,grassIn=gi<0&&bd>=14;/* (the corner by home stays sharp, so the grass runs right up to the plate circle) */
     /* the dirt arc runs out just past the foul lines and stops there */
     const fo=(Math.abs(x)-y)/Math.SQRT2,arc=dm<95&&y>-2&&fo<=6;
     const dirt=(arc&&!grassIn)||r<13||md<9;
@@ -177,9 +177,9 @@ function buildField(){H_NIGHT=false;
      /* a little more shape: the mound's top is a touch lighter and its slope darker, and the dirt is darker right
         where it meets the grass (the lip) */
      const lip=C=>n<.6?C.d2:C.mL;
-     if(md<9){if(md<3.2)col=n<.3?C.d1:C.d3;else if(md>7.4)col=lip(C)}
-     else if(arc&&r>=13&&((gi<0&&bd>=12.6&&bd<14)||(gi>=0&&gi<1.4&&bd>=14)||dm>93.6||fo>4.6))col=lip(C);/* (no lip inside the home-plate circle) */
-     else if(!(arc&&!grassIn)&&r>11.6)col=lip(C)}/* (the circle's own edge, only where no base path runs on) */
+     if(md<9){if(md<3.2)col=n<.3?C.d1:C.d3;else if(md>8.2)col=lip(C)}
+     else if(arc&&r>=13&&((gi<0&&bd>=13.2&&bd<14)||(gi>=0&&gi<.8&&bd>=14)||dm>94.2||fo>5.2))col=lip(C);/* (no lip inside the home-plate circle) */
+     else if(!(arc&&!grassIn)&&r>12.2)col=lip(C)}/* (the circle's own edge, only where no base path runs on) */
     else{const k=mowK(x,y,r);col=k?C.g1:C.g2;if(rng()<.05)col=C.g3}
    }
   }
