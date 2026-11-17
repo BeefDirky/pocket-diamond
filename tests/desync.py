@@ -42,11 +42,11 @@ try:
    A.mouse.up();A.wait_for_timeout(350)
   for slot,deck in (('3','bat'),('-1','pit')):
    A.click('#cards .lfModes [data-m=%s]'%('field' if deck=='bat' else 'pit'));A.wait_for_timeout(250);done=False
-   # (the tray only lists cards not in the lineup yet, so a signed card drops out of it)
+   # (the lineup says "<name> is in at <pos>" when a card is signed)
    for k in range(A.locator('#cards .lfTray .lfc.deck').count()):
-    before=A.locator('#cards .lfTray .lfc.deck').count()
+    A.evaluate("document.getElementById('lfMsg').textContent=''")
     drag('#cards .lfTray .lfc.deck >> nth=%d'%k,'#cards .lfc[data-i="%s"]'%slot)
-    if A.locator('#cards .lfTray .lfc.deck').count()<before:done=True;break
+    if ' is in at ' in (A.text_content('#lfMsg') or ''):done=True;break
    assert done,'could not sign a card into slot '+slot
   A.keyboard.press('Escape');A.wait_for_timeout(800)
   assert A.is_visible('#olRoom') and A.evaluate("__pd.S.you")=='seoul','not back in the room'
