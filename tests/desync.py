@@ -30,7 +30,7 @@ try:
   print('A:',A.inner_text('#olStatus'),'| B:',B.inner_text('#olStatus'))
   # the host readies, then signs two card players from the room's EDIT LINEUP: that un-readies it and the guest must learn them
   # A owns a few free-agent cards to sign (a fresh player has none)
-  A.evaluate("(()=>{const k=__pd.cards();const seen={};k.CARDS.filter(c=>c.set==='fa'&&c.r<3).forEach(c=>{const pos=c.pit?'P'+(seen.P|0):c.p.pos;if(seen[pos])return;seen[pos]=1;if(c.pit)seen.P=(seen.P|0)+1;if(!c.pit||seen.P<=3)k.COL.owned[c.id]=1});k.saveCol()})()")
+  A.evaluate("(()=>{const k=__pd.cards();let np=0;k.CARDS.filter(c=>c.set==='fa'&&c.r<3).forEach(c=>{if(c.pit?np++<3:['1B','3B','LF','IF','CI','UT'].includes(c.p.pos)||/1B/.test((c.p.alt||[]).join()))k.COL.owned[c.id]=1});k.saveCol()})()")
   A.click('#olGo');A.wait_for_timeout(500)
   A.click('#olEdit');A.wait_for_timeout(400);assert A.is_visible('#scrLineup') and not A.is_visible('#lnClub'),'EDIT LINEUP did not open the lineup'
   # sign two cards by dragging them from YOUR CARDS onto a player (a card that can't play there is turned away; try the next)
