@@ -66,7 +66,7 @@ function buildField(){H_NIGHT=false;
  const g=c.getContext('2d');const img=g.createImageData(W,H),d=img.data;
  const rng=mulberry32(11);
  const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
- const C={g1:hex(ST.grass[0]),g2:hex(ST.grass[1]),g3:hex(ST.grass[2]),d1:hex('#c48c56'),d2:hex('#b8804a'),d3:hex('#cc9763'),tr:hex('#a26a3c'),tr2:hex('#956135'),
+ const C={g1:hex(ST.grass[0]),g2:hex(ST.grass[1]),g3:hex(ST.grass[2]),d1:hex('#c48c56'),d2:hex('#b8804a'),d3:hex('#cc9763'),mL:hex('#ad7643'),tr:hex('#a26a3c'),tr2:hex('#956135'),
   conc:hex('#3a4650'),seat:hex('#2d4f6e'),seat2:hex('#28465f'),aisle:hex('#4a5560'),pad:hex(ST.pad),pad2:hex(ST.pad2),sea:hex('#1d5f8f'),sea2:hex('#174f78'),wave:hex('#7fbfe3'),wh1:hex('#4c6378'),dugA:hex('#6b737b'),dugB:hex('#646c74'),dugE:hex('#3c434a'),wh2:hex('#3b4f62'),whB:hex('#c9d6df'),orG:hex('#6b7f3a'),orG2:hex('#62763a'),orT:hex('#2f7a3a'),orT2:hex('#3c8f44'),orF:hex('#ff9a1f'),bas:hex('#38383d'),bas2:hex('#2a2a2e'),lawn1:hex('#5aa94c'),lawn2:hex('#52a145'),deck:hex('#9a7350'),deck2:hex('#86623f'),table:hex('#e8e1cf'),pool:hex('#45b8e0'),poolHi:hex('#9be0f5'),tile:hex('#e8e4da'),tile2:hex('#d6d1c4'),st1:hex('#8a8f94'),st2:hex('#7a7f85'),mortar:hex('#5a5e62'),tr1:hex('#2f6b2f'),tr2:hex('#245a27'),tr3:hex('#1c4a20'),trHi:hex('#3f8040'),hy1:hex('#e0b52a'),hy2:hex('#c9a227'),hyE:hex('#2b2b30'),chalk:hex('#f3eee0'),pole:hex('#ffd23f')};
  const shirts=['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f38d2e','#f1ecdc','#6c7a86','#a8c6d8','#2b2b30','#7fbf6a','#c9a0dc'].map(hex);
  const skins=SKINS.map(hex);
@@ -164,10 +164,14 @@ function buildField(){H_NIGHT=false;
    else if(dOut<wallT)col=dOut<1.5?C.pad2:C.pad;
    else if((fair&&r>fenceDist(th)-14-8*0)||(!fair&&dOut<wallT+(ST.bowl?14/FT/K-wallT+wallT:12)))col=rng()<.2?C.tr2:C.tr;
    else{
-    const dm=Math.hypot(x,y-60.5);
-    const grassIn=Math.abs(x)+Math.abs(y-63.64)<63.64-9;
-    const dirt=(dm<95&&Math.abs(th)<=50&&y>-2&&!grassIn)||r<13||dm<9;
-    if(dirt){const n=rng();col=n<.14?C.d2:n<.2?C.d3:C.d1}
+    const dm=Math.hypot(x,y-60.5),md=Math.hypot(x,y-57.2);/* the mound sits in front of the rubber, so the rubber is toward its back */
+    const gi=Math.abs(x)+Math.abs(y-63.64)-(63.64-9),grassIn=gi<0;
+    const dirt=(dm<95&&Math.abs(th)<=50&&y>-2&&!grassIn)||r<13||md<9;
+    if(dirt){const n=rng();col=n<.14?C.d2:n<.2?C.d3:C.d1;
+     /* a little more shape: the mound's top is a touch lighter and its slope darker, and the dirt is darker right
+        where it meets the grass (the lip) */
+     if(md<9){if(md<3.2)col=n<.3?C.d1:C.d3;else if(md>7.4)col=n<.5?C.d2:C.mL}
+     else if((gi>=0&&gi<1.4&&dm<95)||(dm>93.4&&dm<95&&Math.abs(th)<=50&&!grassIn&&r>=13)||(r>11.6&&r<13&&!(dm<95&&Math.abs(th)<=50&&y>-2)))col=n<.6?C.d2:C.mL}
     else{const k=mowK(x,y,r);col=k?C.g1:C.g2;if(rng()<.05)col=C.g3}
    }
   }
@@ -210,7 +214,10 @@ function buildField(){H_NIGHT=false;
  diamondAt(BASES[1].x,BASES[1].y);diamondAt(BASES[2].x,BASES[2].y);diamondAt(BASES[3].x,BASES[3].y);
  const hp=P(0,0);const hx=Math.round(hp.x),hy=Math.round(hp.y);
  g.fillRect(hx-4,hy-4,9,4);g.fillRect(hx-3,hy,7,1);g.fillRect(hx-2,hy+1,5,1);g.fillRect(hx-1,hy+2,3,1);g.fillRect(hx,hy+3,1,1);
- const rb=P(0,60.5);g.fillRect(Math.round(rb.x)-3,Math.round(rb.y),6,2);
+ const rb=P(0,61.6);g.fillRect(Math.round(rb.x)-3,Math.round(rb.y),6,2);/* the rubber: its front edge 60ft 6in from home, toward the back of the mound */
+ // the catcher's box behind the plate, and the coaches' boxes outside first and third
+ {const a=P(-2.4,-3),b=P(2.4,-8);g.strokeStyle='rgba(243,238,224,.4)';g.lineWidth=1;g.beginPath();g.moveTo(Math.round(a.x)+.5,Math.round(a.y)+.5);g.lineTo(Math.round(a.x)+.5,Math.round(b.y)+.5);g.lineTo(Math.round(b.x)+.5,Math.round(b.y)+.5);g.lineTo(Math.round(b.x)+.5,Math.round(a.y)+.5);g.stroke()}
+ for(const sd of[1,-1]){const c0=P(sd*80,56),c1=P(sd*86,68);g.strokeStyle='rgba(243,238,224,.45)';g.strokeRect(Math.round(Math.min(c0.x,c1.x))+.5,Math.round(Math.min(c0.y,c1.y))+.5,Math.round(Math.abs(c1.x-c0.x)),Math.round(Math.abs(c1.y-c0.y)))}
  const boxOutline=(x0,x1)=>{const a=P(x0,3),b=P(x1,-3);g.strokeStyle='rgba(243,238,224,.85)';g.lineWidth=1;g.strokeRect(Math.round(Math.min(a.x,b.x))+.5,Math.round(a.y)+.5,Math.round(Math.abs(b.x-a.x)),Math.round(b.y-a.y))};
  boxOutline(-5.2,-1.2);boxOutline(1.2,5.2);
  // on-deck circles

@@ -1729,3 +1729,5 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
  .app:not(.deskApp) .bug .bulbs{gap:2px}
  .app:not(.deskApp) .pcBox{gap:6px;padding:3px 5px}
 }
+/* account / friend banners: the live paint swirl canvas sits behind everything in the banner */
+.acHero>.maArt{position:absolute;inset:0;width:100%;height:100%;z-index:-2;image-rendering:pixelated;pointer-events:none}

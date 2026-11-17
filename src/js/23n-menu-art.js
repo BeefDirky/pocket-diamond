@@ -32,4 +32,12 @@ function maPaint(){const club=(typeof MYTEAM!=='undefined'&&MYTEAM&&MYTEAM.club)
 let maLast=0;
 function maTick(now){requestAnimationFrame(maTick);if(now-maLast<80||document.hidden||!maCv||$('title').hidden||$('scrMain').hidden)return;maLast=now;
  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;maDraw(maCv.getContext('2d'),maFor,(now%MA_LOOP)/MA_LOOP)}
-maPaint();setInterval(maPaint,1000);requestAnimationFrame(maTick);
+/* banners (your account, a friend's profile) get the same live swirl: a canvas behind the banner, drawn while it's on screen */
+const MA_LIVE=new Map();
+function maLive(el,club){let cv=el.querySelector(':scope>.maArt');if(!cv){cv=document.createElement('canvas');cv.className='maArt';cv.width=MA_W;cv.height=MA_H;cv.setAttribute('aria-hidden','true');el.prepend(cv)}
+ const L=MA_LIVE.get(el)||{cv};L.club=club||'';MA_LIVE.set(el,L);maDraw(cv.getContext('2d'),L.club,(performance.now()%MA_LOOP)/MA_LOOP)}
+let maLiveAt=0;
+function maLiveTick(now){requestAnimationFrame(maLiveTick);if(now-maLiveAt<80||document.hidden||!MA_LIVE.size)return;maLiveAt=now;
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ for(const[el,L]of MA_LIVE)if(el.offsetParent)maDraw(L.cv.getContext('2d'),L.club,(now%MA_LOOP)/MA_LOOP)}
+maPaint();setInterval(maPaint,1000);requestAnimationFrame(maTick);requestAnimationFrame(maLiveTick);

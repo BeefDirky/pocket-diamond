@@ -1752,6 +1752,8 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
  .app:not(.deskApp) .bug .bulbs{gap:2px}
  .app:not(.deskApp) .pcBox{gap:6px;padding:3px 5px}
 }
+/* account / friend banners: the live paint swirl canvas sits behind everything in the banner */
+.acHero>.maArt{position:absolute;inset:0;width:100%;height:100%;z-index:-2;image-rendering:pixelated;pointer-events:none}
 </style>
 
 <div class="app">
@@ -5536,7 +5538,7 @@ function buildField(){H_NIGHT=false;
  const g=c.getContext('2d');const img=g.createImageData(W,H),d=img.data;
  const rng=mulberry32(11);
  const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
- const C={g1:hex(ST.grass[0]),g2:hex(ST.grass[1]),g3:hex(ST.grass[2]),d1:hex('#c48c56'),d2:hex('#b8804a'),d3:hex('#cc9763'),tr:hex('#a26a3c'),tr2:hex('#956135'),
+ const C={g1:hex(ST.grass[0]),g2:hex(ST.grass[1]),g3:hex(ST.grass[2]),d1:hex('#c48c56'),d2:hex('#b8804a'),d3:hex('#cc9763'),mL:hex('#ad7643'),tr:hex('#a26a3c'),tr2:hex('#956135'),
   conc:hex('#3a4650'),seat:hex('#2d4f6e'),seat2:hex('#28465f'),aisle:hex('#4a5560'),pad:hex(ST.pad),pad2:hex(ST.pad2),sea:hex('#1d5f8f'),sea2:hex('#174f78'),wave:hex('#7fbfe3'),wh1:hex('#4c6378'),dugA:hex('#6b737b'),dugB:hex('#646c74'),dugE:hex('#3c434a'),wh2:hex('#3b4f62'),whB:hex('#c9d6df'),orG:hex('#6b7f3a'),orG2:hex('#62763a'),orT:hex('#2f7a3a'),orT2:hex('#3c8f44'),orF:hex('#ff9a1f'),bas:hex('#38383d'),bas2:hex('#2a2a2e'),lawn1:hex('#5aa94c'),lawn2:hex('#52a145'),deck:hex('#9a7350'),deck2:hex('#86623f'),table:hex('#e8e1cf'),pool:hex('#45b8e0'),poolHi:hex('#9be0f5'),tile:hex('#e8e4da'),tile2:hex('#d6d1c4'),st1:hex('#8a8f94'),st2:hex('#7a7f85'),mortar:hex('#5a5e62'),tr1:hex('#2f6b2f'),tr2:hex('#245a27'),tr3:hex('#1c4a20'),trHi:hex('#3f8040'),hy1:hex('#e0b52a'),hy2:hex('#c9a227'),hyE:hex('#2b2b30'),chalk:hex('#f3eee0'),pole:hex('#ffd23f')};
  const shirts=['#e8d7c3','#3f82e6','#e0473d','#f5c935','#f38d2e','#f1ecdc','#6c7a86','#a8c6d8','#2b2b30','#7fbf6a','#c9a0dc'].map(hex);
  const skins=SKINS.map(hex);
@@ -5634,10 +5636,14 @@ function buildField(){H_NIGHT=false;
    else if(dOut<wallT)col=dOut<1.5?C.pad2:C.pad;
    else if((fair&&r>fenceDist(th)-14-8*0)||(!fair&&dOut<wallT+(ST.bowl?14/FT/K-wallT+wallT:12)))col=rng()<.2?C.tr2:C.tr;
    else{
-    const dm=Math.hypot(x,y-60.5);
-    const grassIn=Math.abs(x)+Math.abs(y-63.64)<63.64-9;
-    const dirt=(dm<95&&Math.abs(th)<=50&&y>-2&&!grassIn)||r<13||dm<9;
-    if(dirt){const n=rng();col=n<.14?C.d2:n<.2?C.d3:C.d1}
+    const dm=Math.hypot(x,y-60.5),md=Math.hypot(x,y-57.2);/* the mound sits in front of the rubber, so the rubber is toward its back */
+    const gi=Math.abs(x)+Math.abs(y-63.64)-(63.64-9),grassIn=gi<0;
+    const dirt=(dm<95&&Math.abs(th)<=50&&y>-2&&!grassIn)||r<13||md<9;
+    if(dirt){const n=rng();col=n<.14?C.d2:n<.2?C.d3:C.d1;
+     /* a little more shape: the mound's top is a touch lighter and its slope darker, and the dirt is darker right
+        where it meets the grass (the lip) */
+     if(md<9){if(md<3.2)col=n<.3?C.d1:C.d3;else if(md>7.4)col=n<.5?C.d2:C.mL}
+     else if((gi>=0&&gi<1.4&&dm<95)||(dm>93.4&&dm<95&&Math.abs(th)<=50&&!grassIn&&r>=13)||(r>11.6&&r<13&&!(dm<95&&Math.abs(th)<=50&&y>-2)))col=n<.6?C.d2:C.mL}
     else{const k=mowK(x,y,r);col=k?C.g1:C.g2;if(rng()<.05)col=C.g3}
    }
   }
@@ -5680,7 +5686,10 @@ function buildField(){H_NIGHT=false;
  diamondAt(BASES[1].x,BASES[1].y);diamondAt(BASES[2].x,BASES[2].y);diamondAt(BASES[3].x,BASES[3].y);
  const hp=P(0,0);const hx=Math.round(hp.x),hy=Math.round(hp.y);
  g.fillRect(hx-4,hy-4,9,4);g.fillRect(hx-3,hy,7,1);g.fillRect(hx-2,hy+1,5,1);g.fillRect(hx-1,hy+2,3,1);g.fillRect(hx,hy+3,1,1);
- const rb=P(0,60.5);g.fillRect(Math.round(rb.x)-3,Math.round(rb.y),6,2);
+ const rb=P(0,61.6);g.fillRect(Math.round(rb.x)-3,Math.round(rb.y),6,2);/* the rubber: its front edge 60ft 6in from home, toward the back of the mound */
+ // the catcher's box behind the plate, and the coaches' boxes outside first and third
+ {const a=P(-2.4,-3),b=P(2.4,-8);g.strokeStyle='rgba(243,238,224,.4)';g.lineWidth=1;g.beginPath();g.moveTo(Math.round(a.x)+.5,Math.round(a.y)+.5);g.lineTo(Math.round(a.x)+.5,Math.round(b.y)+.5);g.lineTo(Math.round(b.x)+.5,Math.round(b.y)+.5);g.lineTo(Math.round(b.x)+.5,Math.round(a.y)+.5);g.stroke()}
+ for(const sd of[1,-1]){const c0=P(sd*80,56),c1=P(sd*86,68);g.strokeStyle='rgba(243,238,224,.45)';g.strokeRect(Math.round(Math.min(c0.x,c1.x))+.5,Math.round(Math.min(c0.y,c1.y))+.5,Math.round(Math.abs(c1.x-c0.x)),Math.round(Math.abs(c1.y-c0.y)))}
  const boxOutline=(x0,x1)=>{const a=P(x0,3),b=P(x1,-3);g.strokeStyle='rgba(243,238,224,.85)';g.lineWidth=1;g.strokeRect(Math.round(Math.min(a.x,b.x))+.5,Math.round(a.y)+.5,Math.round(Math.abs(b.x-a.x)),Math.round(b.y-a.y))};
  boxOutline(-5.2,-1.2);boxOutline(1.2,5.2);
  // on-deck circles
@@ -8288,7 +8297,7 @@ function acDetails(){const u=ACC.user;if(!u)return;const made=u.created_at;
   rpc('my_rating').then(r=>{if(!r||!ACC.user||ACC.user.id!==u.id)return;acDetails.r=r;acRatingShow()}).catch(()=>{})}else acRatingShow()}
 /* the banner at the top: your club's paint swirl behind your club logo and username */
 function acBanner(){const k=MYTEAM&&TEAMS[MYTEAM.club]?MYTEAM.club:'',h=$('acHero'),l=$('acHeroLogo');
- try{if(h.dataset.club!==k){h.dataset.club=k;h.style.backgroundImage=`url(${maSwirl(k)})`;h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}}catch(e){}
+ try{if(h.dataset.club!==k){maLive(h,k);h.dataset.club=k;h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}}catch(e){}
  l.hidden=!k;if(k)l.src=LOGO_URL[k]||'';$('acHeroClub').textContent=k?`${TEAMS[k].city} ${TEAMS[k].name}`:'';$('acHeroClub').hidden=!k;
  /* a long username steps its type down until it fits on one line */
  requestAnimationFrame(()=>{const n=$('acName');n.style.fontSize='';let f=parseFloat(getComputedStyle(n).fontSize),i=0;while(n.scrollWidth>n.parentElement.clientWidth+1&&f>14&&i++<20){f-=1;n.style.fontSize=f+'px'}})}
@@ -8367,7 +8376,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='fc15b1884c',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='44969b7345',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -8918,7 +8927,7 @@ async function frProfile(id){const f=FR.list.find(x=>x.user_id===id);FP=id;FR.op
   $('fpName').textContent=r.username||(f&&f.username)||'';set('fpRating',r.rating);set('fpRec',r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet');
   fpBanner(r.club&&TEAMS[r.club]?r.club:'')}
  catch(e){if(FP===id)$('fpMsg').textContent=/friend_profile|schema cache|function/i.test((e&&e.message)||'')?'Profiles aren’t set up on the server yet.':frErr(e)}}
-function fpBanner(k){const h=$('fpHero'),l=$('fpLogo');try{h.style.backgroundImage=`url(${maSwirl(k)})`;h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}catch(e){}
+function fpBanner(k){const h=$('fpHero'),l=$('fpLogo');try{maLive(h,k);h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}catch(e){}
  l.hidden=!k;if(k)l.src=LOGO_URL[k]||'';$('fpName').style.color=k?fpNameColor(TEAMS[k]):'';$('fpClubN').textContent=k?`${TEAMS[k].city} ${TEAMS[k].name}`:'';$('fpClubN').hidden=!k;
  requestAnimationFrame(()=>{const n=$('fpName');n.style.fontSize='';let fs=parseFloat(getComputedStyle(n).fontSize),i=0;while(n.scrollWidth>n.parentElement.clientWidth+1&&fs>14&&i++<20){fs-=1;n.style.fontSize=fs+'px'}})}
 /* the friend's name in his club's colour: the brightest of its colours, lifted toward white if it's too dark to read */
@@ -9109,7 +9118,15 @@ function maPaint(){const club=(typeof MYTEAM!=='undefined'&&MYTEAM&&MYTEAM.club)
 let maLast=0;
 function maTick(now){requestAnimationFrame(maTick);if(now-maLast<80||document.hidden||!maCv||$('title').hidden||$('scrMain').hidden)return;maLast=now;
  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;maDraw(maCv.getContext('2d'),maFor,(now%MA_LOOP)/MA_LOOP)}
-maPaint();setInterval(maPaint,1000);requestAnimationFrame(maTick);
+/* banners (your account, a friend's profile) get the same live swirl: a canvas behind the banner, drawn while it's on screen */
+const MA_LIVE=new Map();
+function maLive(el,club){let cv=el.querySelector(':scope>.maArt');if(!cv){cv=document.createElement('canvas');cv.className='maArt';cv.width=MA_W;cv.height=MA_H;cv.setAttribute('aria-hidden','true');el.prepend(cv)}
+ const L=MA_LIVE.get(el)||{cv};L.club=club||'';MA_LIVE.set(el,L);maDraw(cv.getContext('2d'),L.club,(performance.now()%MA_LOOP)/MA_LOOP)}
+let maLiveAt=0;
+function maLiveTick(now){requestAnimationFrame(maLiveTick);if(now-maLiveAt<80||document.hidden||!MA_LIVE.size)return;maLiveAt=now;
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ for(const[el,L]of MA_LIVE)if(el.offsetParent)maDraw(L.cv.getContext('2d'),L.club,(now%MA_LOOP)/MA_LOOP)}
+maPaint();setInterval(maPaint,1000);requestAnimationFrame(maTick);requestAnimationFrame(maLiveTick);
 /* ---------- Options > Fit color scheme: the menus take on your club's colors ----------
    The stylesheet's own colors are re-tinted: the dark greens of the panels, edges and muted text take your club's main
    color, and the amber highlights take its second color. Each color keeps its own lightness, so every dark stays as dark

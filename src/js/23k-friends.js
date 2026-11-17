@@ -87,7 +87,7 @@ async function frProfile(id){const f=FR.list.find(x=>x.user_id===id);FP=id;FR.op
   $('fpName').textContent=r.username||(f&&f.username)||'';set('fpRating',r.rating);set('fpRec',r.games?`${r.wins}-${r.losses} this season`:'no ranked games yet');
   fpBanner(r.club&&TEAMS[r.club]?r.club:'')}
  catch(e){if(FP===id)$('fpMsg').textContent=/friend_profile|schema cache|function/i.test((e&&e.message)||'')?'Profiles aren’t set up on the server yet.':frErr(e)}}
-function fpBanner(k){const h=$('fpHero'),l=$('fpLogo');try{h.style.backgroundImage=`url(${maSwirl(k)})`;h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}catch(e){}
+function fpBanner(k){const h=$('fpHero'),l=$('fpLogo');try{maLive(h,k);h.style.setProperty('--maEdge',k?(TEAMS[k].cap||'#c7871a'):'#c7871a')}catch(e){}
  l.hidden=!k;if(k)l.src=LOGO_URL[k]||'';$('fpName').style.color=k?fpNameColor(TEAMS[k]):'';$('fpClubN').textContent=k?`${TEAMS[k].city} ${TEAMS[k].name}`:'';$('fpClubN').hidden=!k;
  requestAnimationFrame(()=>{const n=$('fpName');n.style.fontSize='';let fs=parseFloat(getComputedStyle(n).fontSize),i=0;while(n.scrollWidth>n.parentElement.clientWidth+1&&fs>14&&i++<20){fs-=1;n.style.fontSize=fs+'px'}})}
 /* the friend's name in his club's colour: the brightest of its colours, lifted toward white if it's too dark to read */
