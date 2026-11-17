@@ -29,7 +29,8 @@ function lfFieldArt(){const m=lfMob();if(lfFieldC[m])return lfFieldC[m];const W=
  for(const[x,y]of[B1,B2,B3])g.fillRect(Math.round(x)-1,Math.round(y)-1,3,3);g.fillRect(Math.round(hx)-1,hy-1,3,2);g.fillRect(Math.round(hx)-1,Math.round(hy-d*.707),2,1);
  return lfFieldC[m]=c.toDataURL()}
 // the card for a roster player: his collectible card if there is one, else the club's portrait
-function lfCard(k,p){if(!CARDS.length)buildCardDB();if(p.signed&&CARD_BY[p.signed])return CARD_BY[p.signed];return CARDS.find(c=>c.k===k&&c.p===p)||CARDS.find(c=>c.k===k&&c.p.name===p.name)||null}
+function lfCard(k,p){if(!CARDS.length)buildCardDB();if(p.signed&&CARD_BY[p.signed])return CARD_BY[p.signed];const b=(typeof BASE_OF!=='undefined'&&BASE_OF[k])||k;/* the players' own club: after a club switch your roster wears another brand */
+ return CARDS.find(c=>c.k===b&&c.p===p)||CARDS.find(c=>c.k===b&&c.p.name===p.name)||CARDS.find(c=>c.k===k&&c.p.name===p.name)||null}
 /* the back of a card: his ratings as bars */
 function lfStats(p,pit){const rows=pit?[['VEL',p.vel],['MOV',p.mov],['CTL',p.ctl],['STA',staOf(p)]]:[['CON',p.con],['POW',p.pow],['SPD',p.spd],['DEF',p.def]];
  return rows.map(([l,v])=>`<span class="lfSt"><i>${l}</i><b style="color:${rcol(v)}">${v}</b><u><s style="width:${v}%;background:${rcol(v)}"></s></u></span>`).join('')}
