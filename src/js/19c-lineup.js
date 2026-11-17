@@ -71,12 +71,12 @@ function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()
  /* flipping a pitcher or hitter on the field shows the matching cards once; the tabs can still switch after that */
  if(mine){lfDeck=lfMode==='pit'?'pit':'bat';lfSelWas=lnSel;/* (fielders view: your hitter cards; pitchers view: your pitcher cards) */
   if(!CARDS.length)buildCardDB();const used=usedCards(S.you);
-  const own=CARDS.filter(c=>COL.owned[c.id]&&c.pit===(lfDeck==='pit')).sort(LF_SORTS[lfSort].f);
+  const allOwn=CARDS.filter(c=>COL.owned[c.id]&&c.pit===(lfDeck==='pit')),own=allOwn.filter(c=>!used.has(c.id)).sort(LF_SORTS[lfSort].f);/* the tray only offers cards you can still put in (cards already in the lineup don't show here; the inventory shows them all) */
   tray=own.length?own.map(c=>{const q=c.p,inUse=used.has(c.id),fk='d'+c.id,pos=c.pit?(q.pos==='SP'?'SP':q.cp?'CP':'RP'):q.pos;
     const can=lnSel!=null&&!inUse&&(lnSel<0)===c.pit;
     return `<button type="button" class="lfc deck r${c.r}${inUse?' used':''}${lfFlips.has(fk)?' flip':''}" data-id="${c.id}"><span class="lfIn">
      ${lfFace(cardArt(c),c.o,q.name,pos+(inUse?' · IN':''),c.pit&&q.slot==='side')}${lfBackFace(q,c.pit,c.o,pos,'')}</span></button>`}).join('')
-   :`${'<div class="lfc lfHole" aria-hidden="true"></div>'.repeat(8)}<p class="lfEmpty">No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Shop to get players.</p>`}
+   :`${'<div class="lfc lfHole" aria-hidden="true"></div>'.repeat(8)}<p class="lfEmpty">${allOwn.length?`All your ${lfDeck==='pit'?'pitcher':'hitter'} cards are in the lineup. Open packs in the Shop to get more players.`:`No ${lfDeck==='pit'?'pitcher':'hitter'} cards yet. Open packs in the Shop to get players.`}</p>`}
  const sel=lnSel==null?null:lfPAt(T,lnSel);
  const acts='';/* (no "restore original": you swap a player out by dragging another card in) */
  const keep=lfKeepScroll();
