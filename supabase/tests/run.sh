@@ -38,3 +38,5 @@ $P -tA -d pd_test -f supabase/tests/playoffs_test.sql 2>&1 | sed "s/^psql:[^ ]* 
 $P -tA -d pd_test -f supabase/tests/device_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$"
 # migration 016: a friend's profile
 $P -tA -d pd_test -f supabase/tests/friend_profile_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$"
+# migration 018: beta tools
+$P -tA -d pd_test -f supabase/tests/beta_test.sql 2>&1 | sed "s/^psql:[^ ]* NOTICE:  //" | grep -v "^$"

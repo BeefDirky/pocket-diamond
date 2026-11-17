@@ -15,7 +15,10 @@ $('fbSend').addEventListener('click',async()=>{const msg=$('fbText').value.trim(
  $('fbSend').disabled=true;$('fbMsg').textContent='Sending…';const dev=fbDevice();
  track('feedback_sent',{kind:fbKindV,message:msg.slice(0,2000),contact,...dev});
  let ok=false,why='';
- if(supaOK())try{const c=await supaClient();const {error}=await c.from('feedback').insert({kind:fbKindV,message:msg.slice(0,2000),contact,username:ACC.name||null,version:PD_VER,device:dev});if(error)throw error;ok=true}catch(e){why=String(e&&e.message||e)}
+ if(supaOK())try{const c=await supaClient(),row={kind:fbKindV,message:msg.slice(0,2000),contact,username:ACC.name||null,version:PD_VER,device:dev};
+   /* the recent-events log and the optional screenshot (23q-beta.js); if the server doesn't take them yet (migration 018), send the message alone */
+   let {error}=await c.from('feedback').insert({...row,extra:fbExtra(),shot:fbShotSel()});
+   if(error&&/extra|shot|column/i.test(error.message||''))({error}=await c.from('feedback').insert(row));if(error)throw error;ok=true}catch(e){why=String(e&&e.message||e)}
  if(ok||phOn()){$('fbMsg').textContent='Thanks! Sent.';$('fbText').value='';setTimeout(()=>{if(!$('scrFb').hidden)$('fbBack').click()},1400)}
  else{$('fbSend').disabled=false;$('fbMsg').textContent=/many messages/i.test(why)?why:'Couldn\'t send it right now. Check your connection and try again.'}});
 // ---- a new version: compare this build with the one the site serves now (version.json, never cached) ----

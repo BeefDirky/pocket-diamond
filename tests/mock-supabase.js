@@ -1,4 +1,4 @@
-(()=>{const bc=new BroadcastChannel('mocksupa2');window.__off=false;
+(()=>{try{localStorage.setItem('pd-beta','1');localStorage.setItem('pd-wn','*')}catch(e){}/* (no beta / what's-new notes in tests) */const bc=new BroadcastChannel('mocksupa2');window.__off=false;
 function mkChan(name){const h={};let subCb=null;
  bc.addEventListener('message',e=>{const m=e.data;if(m.room!==name||window.__off)return;(h['b:'+m.event]||[]).forEach(f=>setTimeout(()=>f({payload:m.payload}),15));if(m.event==='__join')(h['p:join']||[]).forEach(f=>f({}))});
  const C={on(t,f,cb){h[(t==='broadcast'?'b:':'p:')+f.event]=(h[(t==='broadcast'?'b:':'p:')+f.event]||[]).concat(cb);return C},

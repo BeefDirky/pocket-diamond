@@ -135,7 +135,7 @@ function qCancelQuiet(){if(!Q.on)return;track('queue_cancelled',{wait_secs:Math.
 function qLeaving(id){if(Q.on&&Q.fromLn&&id!=='scrLineup'&&id!=='scrQueue')qCancelQuiet()}
 /* join the queue as this device (the server turns away a device that another one has taken over; without migration
    015 the older call is used) */
-async function qJoin(){const a={p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER};
+async function qJoin(){if(typeof flagOff==='function'&&flagOff('ranked')){qStop();showScreen('scrMulti');flagBlock('ranked');return}const a={p_club:S.you,p_clubs:ORDER.filter(k=>k!==S.you),p_version:PD_VER};
  try{return await rpc('queue_join',{...a,p_device:DV.id})}catch(e){if(/queue_join|could not find|schema cache|function/i.test((e&&e.message)||'')&&!/another device/.test(e.message||''))return rpc('queue_join',a);throw e}}
 async function qStart(fromLn){const gen=++Q.gen;Q.est=null;Q.n=0;Q.on=true;Q.t0=Date.now();Q.fromLn=!!fromLn;track('queue_joined',{club:S.you});qSay('LOOKING FOR OPPONENT','3 innings · you bat and pitch');$('qRate').textContent='';$('qCancel').disabled=false;
  if(!Q.fromLn){showScreen('scrQueue');if(!Q.raf)Q.raf=requestAnimationFrame(qBallLoop)}clearInterval(Q.tick);Q.tick=setInterval(()=>{$('qTime').textContent=fmtClock((Date.now()-Q.t0)/1000);qEst();qLnSync()},250);qLnSync();$('qTime').textContent='0:00';
