@@ -1741,26 +1741,26 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .dgBox .bnList{text-align:left;margin:0 0 10px;padding-left:18px;font-size:13px;line-height:1.45}
 .dgBox .bnList li{margin:3px 0}
 #scrAdmin{max-width:760px}
-.adTabs{margin:6px 0 10px}
-.adBody{max-height:min(62vh,640px);overflow:auto;text-align:left;display:flex;flex-direction:column;gap:8px}
-.adRow{background:rgba(0,0,0,.28);border:2px solid #000;padding:8px 10px}
-.adHd{font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;opacity:.9}
-.adHd select{margin-left:auto;font:inherit;background:#111;color:#eee;border:1px solid #555}
-.adK{font-family:var(--f-px);font-size:9px;padding:2px 4px;background:#555}
-.adK.bug{background:#b33}.adK.idea{background:#357}
-.adTxt{margin:6px 0;white-space:pre-wrap;word-break:break-word;font-size:14px}
-.adSm{font-size:11px;opacity:.75;margin:4px 0}
-.adShot{max-width:100%;max-height:300px;border:2px solid #000;display:block;margin:6px 0}
-.adRow pre{font-size:10px;max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-all;background:rgba(0,0,0,.35);padding:6px}
-.adRow summary{cursor:pointer;font-size:11px;opacity:.8}
-.adFind,.adGift{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}
-.adFind .acIn{flex:1;min-width:140px;margin:0}.adGift .acIn{width:110px;margin:0}.adGift #adNote{flex:1;min-width:140px}
-.adH5{font-family:var(--f-px);font-size:10px;margin:8px 0 2px;opacity:.8}
-.adHist{display:flex;gap:10px;align-items:center;font-size:12px}.adHist span:first-child{width:130px}.adHist span:nth-child(2){flex:1}
-.adFlag{display:flex;gap:8px;align-items:center}.adFlag b{width:110px;font-size:13px}.adFlag .acIn{flex:1;margin:0}
-.adFlag .mbtn{width:70px;background:#3a3}.adFlag .mbtn.adOff{background:#c33}
-.adQuick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.adQuick .mbtn{flex:1;min-width:70px;padding:8px 4px}
-.adTabs{display:flex;flex-wrap:wrap;gap:4px}.adTabs button{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:11px;white-space:nowrap}
+.paTabs{margin:6px 0 10px}
+.paBody{max-height:min(62vh,640px);overflow:auto;text-align:left;display:flex;flex-direction:column;gap:8px}
+.paRow{background:rgba(0,0,0,.28);border:2px solid #000;padding:8px 10px}
+.paHd{font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;opacity:.9}
+.paHd select{margin-left:auto;font:inherit;background:#111;color:#eee;border:1px solid #555}
+.paK{font-family:var(--f-px);font-size:9px;padding:2px 4px;background:#555}
+.paK.bug{background:#b33}.paK.idea{background:#357}
+.paTxt{margin:6px 0;white-space:pre-wrap;word-break:break-word;font-size:14px}
+.paSm{font-size:11px;opacity:.75;margin:4px 0}
+.paShot{max-width:100%;max-height:300px;border:2px solid #000;display:block;margin:6px 0}
+.paRow pre{font-size:10px;max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-all;background:rgba(0,0,0,.35);padding:6px}
+.paRow summary{cursor:pointer;font-size:11px;opacity:.8}
+.paFind,.paGift{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.paFind .acIn{flex:1;min-width:140px;margin:0}.paGift .acIn{width:110px;margin:0}.paGift #paNote{flex:1;min-width:140px}
+.paH5{font-family:var(--f-px);font-size:10px;margin:8px 0 2px;opacity:.8}
+.paHist{display:flex;gap:10px;align-items:center;font-size:12px}.paHist span:first-child{width:130px}.paHist span:nth-child(2){flex:1}
+.paFlag{display:flex;gap:8px;align-items:center}.paFlag b{width:110px;font-size:13px}.paFlag .acIn{flex:1;margin:0}
+.paFlag .mbtn{width:70px;background:#3a3}.paFlag .mbtn.paOff{background:#c33}
+.paQuick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.paQuick .mbtn{flex:1;min-width:70px;padding:8px 4px}
+.paTabs{display:flex;flex-wrap:wrap;gap:4px}.paTabs button{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:11px;white-space:nowrap}
 /* admin page: the list area never collapses to nothing, whatever squeezes the card */
 #scrAdmin{flex-shrink:0;height:auto!important;max-height:none!important;min-height:min-content}
-#scrAdmin .adBody{flex:0 0 auto;min-height:120px}
+#scrAdmin .paBody{flex:0 0 auto;min-height:120px}
