@@ -13,7 +13,7 @@ try:
  with sync_playwright() as p:
   exe='/usr/bin/google-chrome' if os.path.exists('/usr/bin/google-chrome') else None
   b=p.chromium.launch(executable_path=exe,args=['--no-sandbox','--disable-background-timer-throttling','--disable-renderer-backgrounding','--disable-backgrounding-occluded-windows'])
-  ctx=b.new_context(viewport={'width':800,'height':1000},service_workers='block')
+  ctx=b.new_context(viewport={'width':800,'height':1400},service_workers='block')
   ctx.add_init_script("(()=>{const F=3,pn=performance.now.bind(performance),t0=pn();performance.now=()=>t0+(pn()-t0)*F;const raf=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=cb=>raf(()=>cb(performance.now()));})();"+mock+";localStorage.setItem('pd-opts2',JSON.stringify({music:0,crowd:0,sfx:0,time:'day'}));if(!localStorage.getItem('pd-cards')){const o={};for(let i=0;i<30;i++){o['bl:b'+i]=1;o['bl:p'+i]=1}localStorage.setItem('pd-cards',JSON.stringify({packs:0,owned:o,seen:{}}))}")
   A=ctx.new_page();B=ctx.new_page();errs=[]
   # each player owns a team: A plays Seoul's own roster; B rebranded to Busan but owns Daegu's players
@@ -30,7 +30,7 @@ try:
   print('A:',A.inner_text('#olStatus'),'| B:',B.inner_text('#olStatus'))
   # the host readies, then signs two card players from the room's EDIT LINEUP: that un-readies it and the guest must learn them
   # A owns a few free-agent cards to sign (a fresh player has none)
-  A.evaluate("(()=>{const k=__pd.cards();k.CARDS.filter(c=>c.set==='fa'&&c.r<3).filter((c,i,a)=>a.filter(x=>x.pit===c.pit).indexOf(c)<6).forEach(c=>k.COL.owned[c.id]=1);k.saveCol()})()")
+  A.evaluate("(()=>{const k=__pd.cards();const seen={};k.CARDS.filter(c=>c.set==='fa'&&c.r<3).forEach(c=>{const pos=c.pit?'P'+(seen.P|0):c.p.pos;if(seen[pos])return;seen[pos]=1;if(c.pit)seen.P=(seen.P|0)+1;if(!c.pit||seen.P<=3)k.COL.owned[c.id]=1});k.saveCol()})()")
   A.click('#olGo');A.wait_for_timeout(500)
   A.click('#olEdit');A.wait_for_timeout(400);assert A.is_visible('#scrLineup') and not A.is_visible('#lnClub'),'EDIT LINEUP did not open the lineup'
   # sign two cards by dragging them from YOUR CARDS onto a player (a card that can't play there is turned away; try the next)
