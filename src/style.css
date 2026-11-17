@@ -1761,3 +1761,6 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .adFlag .mbtn{width:70px;background:#3a3}.adFlag .mbtn.adOff{background:#c33}
 .adQuick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.adQuick .mbtn{flex:1;min-width:70px;padding:8px 4px}
 .adTabs{display:flex;flex-wrap:wrap;gap:4px}.adTabs button{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:11px;white-space:nowrap}
+/* admin page: the list area never collapses to nothing, whatever squeezes the card */
+#scrAdmin{flex-shrink:0;height:auto!important;max-height:none!important;min-height:min-content}
+#scrAdmin .adBody{flex:0 0 auto;min-height:120px}
