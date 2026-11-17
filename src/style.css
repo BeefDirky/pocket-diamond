@@ -1685,3 +1685,6 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .tc{border-width:4px}
 .lfF,.lfB{border-width:3px}
 @media (max-width:720px){.lfField .lfF,.lfField .lfB{border-width:2px}}
+/* the cards out on the field: thicker again, so the frame reads clearly */
+.lfField .lfF,.lfField .lfB{border-width:4px}
+@media (max-width:720px){.lfField .lfF,.lfField .lfB{border-width:3px}}
