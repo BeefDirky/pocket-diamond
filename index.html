@@ -5637,13 +5637,18 @@ function buildField(){H_NIGHT=false;
    else if((fair&&r>fenceDist(th)-14-8*0)||(!fair&&dOut<wallT+(ST.bowl?14/FT/K-wallT+wallT:12)))col=rng()<.2?C.tr2:C.tr;
    else{
     const dm=Math.hypot(x,y-60.5),md=Math.hypot(x,y-57.2);/* the mound sits in front of the rubber, so the rubber is toward its back */
-    const gi=Math.abs(x)+Math.abs(y-63.64)-(63.64-9),grassIn=gi<0;
-    const dirt=(dm<95&&Math.abs(th)<=50&&y>-2&&!grassIn)||r<13||md<9;
+    /* infield grass: the diamond inside the base paths, with round dirt cut-outs around 1st, 2nd and 3rd */
+    const gi=Math.abs(x)+Math.abs(y-63.64)-(63.64-9),bd=Math.min(Math.hypot(x-63.64,y-63.64),Math.hypot(x,y-127.28),Math.hypot(x+63.64,y-63.64)),grassIn=gi<0&&bd>=13;
+    /* the dirt arc runs out just past the foul lines and stops there */
+    const fo=(Math.abs(x)-y)/Math.SQRT2,arc=dm<95&&y>-2&&fo<=6;
+    const dirt=(arc&&!grassIn)||r<13||md<9;
     if(dirt){const n=rng();col=n<.14?C.d2:n<.2?C.d3:C.d1;
      /* a little more shape: the mound's top is a touch lighter and its slope darker, and the dirt is darker right
         where it meets the grass (the lip) */
-     if(md<9){if(md<3.2)col=n<.3?C.d1:C.d3;else if(md>7.4)col=n<.5?C.d2:C.mL}
-     else if((gi>=0&&gi<1.4&&dm<95)||(dm>93.4&&dm<95&&Math.abs(th)<=50&&!grassIn&&r>=13)||(r>11.6&&r<13&&!(dm<95&&Math.abs(th)<=50&&y>-2)))col=n<.6?C.d2:C.mL}
+     const lip=C=>n<.6?C.d2:C.mL;
+     if(md<9){if(md<3.2)col=n<.3?C.d1:C.d3;else if(md>7.4)col=lip(C)}
+     else if(arc&&((gi<0&&bd>=11.6&&bd<13)||(gi>=0&&gi<1.4&&bd>=13)||dm>93.6||fo>4.6))col=lip(C);
+     else if(!arc&&r>11.6)col=lip(C)}
     else{const k=mowK(x,y,r);col=k?C.g1:C.g2;if(rng()<.05)col=C.g3}
    }
   }
@@ -5682,14 +5687,16 @@ function buildField(){H_NIGHT=false;
  // chalk + bases
  const P=(x,y)=>toPx(x,y);
  g.fillStyle='#f3eee0';
- const diamondAt=(wx,wy)=>{const p=P(wx,wy);const cx=Math.round(p.x),cy=Math.round(p.y);for(let k=-4;k<=4;k++){const w=4-Math.abs(k);g.fillRect(cx-w,cy+k,w*2+1,1)}};
+ const diamondAt=(wx,wy)=>{const p=P(wx,wy);const cx=Math.round(p.x),cy=Math.round(p.y);/* a white bag with a soft shadow under it */g.fillStyle='rgba(60,36,18,.35)';for(let k=-4;k<=5;k++){const w=5-Math.abs(k-.5)|0;g.fillRect(cx-w,cy+k+1,w*2+1,1)}g.fillStyle='#f3eee0';for(let k=-4;k<=4;k++){const w=4-Math.abs(k);g.fillRect(cx-w,cy+k,w*2+1,1)}};
  diamondAt(BASES[1].x,BASES[1].y);diamondAt(BASES[2].x,BASES[2].y);diamondAt(BASES[3].x,BASES[3].y);
  const hp=P(0,0);const hx=Math.round(hp.x),hy=Math.round(hp.y);
  g.fillRect(hx-4,hy-4,9,4);g.fillRect(hx-3,hy,7,1);g.fillRect(hx-2,hy+1,5,1);g.fillRect(hx-1,hy+2,3,1);g.fillRect(hx,hy+3,1,1);
  const rb=P(0,61.6);g.fillRect(Math.round(rb.x)-3,Math.round(rb.y),6,2);/* the rubber: its front edge 60ft 6in from home, toward the back of the mound */
  // the catcher's box behind the plate, and the coaches' boxes outside first and third
- {const a=P(-2.4,-3),b=P(2.4,-8);g.strokeStyle='rgba(243,238,224,.4)';g.lineWidth=1;g.beginPath();g.moveTo(Math.round(a.x)+.5,Math.round(a.y)+.5);g.lineTo(Math.round(a.x)+.5,Math.round(b.y)+.5);g.lineTo(Math.round(b.x)+.5,Math.round(b.y)+.5);g.lineTo(Math.round(b.x)+.5,Math.round(a.y)+.5);g.stroke()}
- for(const sd of[1,-1]){const c0=P(sd*80,56),c1=P(sd*86,68);g.strokeStyle='rgba(243,238,224,.45)';g.strokeRect(Math.round(Math.min(c0.x,c1.x))+.5,Math.round(Math.min(c0.y,c1.y))+.5,Math.round(Math.abs(c1.x-c0.x)),Math.round(Math.abs(c1.y-c0.y)))}
+ {const a=P(-2.4,-3),b=P(2.4,-8);g.strokeStyle='rgba(243,238,224,.85)';g.lineWidth=1;g.beginPath();g.moveTo(Math.round(a.x)+.5,Math.round(a.y)+.5);g.lineTo(Math.round(a.x)+.5,Math.round(b.y)+.5);g.lineTo(Math.round(b.x)+.5,Math.round(b.y)+.5);g.lineTo(Math.round(b.x)+.5,Math.round(a.y)+.5);g.stroke()}
+ for(const sd of[1,-1]){/* coaches' boxes: open brackets just outside the line by first and third */
+  const A=P(sd*78,58),B=P(sd*84,58),C2=P(sd*84,70),D=P(sd*78,70);g.strokeStyle='rgba(243,238,224,.8)';g.lineWidth=1;g.beginPath();
+  g.moveTo(Math.round(A.x)+.5,Math.round(A.y)+.5);g.lineTo(Math.round(B.x)+.5,Math.round(B.y)+.5);g.lineTo(Math.round(C2.x)+.5,Math.round(C2.y)+.5);g.lineTo(Math.round(D.x)+.5,Math.round(D.y)+.5);g.stroke()}
  const boxOutline=(x0,x1)=>{const a=P(x0,3),b=P(x1,-3);g.strokeStyle='rgba(243,238,224,.85)';g.lineWidth=1;g.strokeRect(Math.round(Math.min(a.x,b.x))+.5,Math.round(a.y)+.5,Math.round(Math.abs(b.x-a.x)),Math.round(b.y-a.y))};
  boxOutline(-5.2,-1.2);boxOutline(1.2,5.2);
  // on-deck circles
@@ -8376,7 +8383,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='44969b7345',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='b2c11d4513',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
