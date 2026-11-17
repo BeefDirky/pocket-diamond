@@ -64,7 +64,7 @@ function cardArt2(c,tk){/* tk: a club key to dress him in that club's kit in fro
  const mk=tk&&CAP_MARKS[tk];
  if(mk&&sp.cap){const q=sp.cap,mw=Math.max(...mk.m.map(r=>r.length)),mh=mk.m.length;
   /* which way the cap faces (its brim side): right, unless the sprite says otherwise */
-  const fr=SPRITES[pose].fr||1;
+  const fr=SPRITES[pose].fr!=null?SPRITES[pose].fr:1;/* 0 = dead centre (the catcher faces you) */
   let gx=Math.round(q.cx+fr*q.w*.14-mw/2),gy=Math.max(q.y+1,Math.round(q.cy-mh/2));
   /* keep every part of the mark inside the cap's edge: slide it back (or down) until nothing pokes out */
   const fits=(X,Y)=>mk.m.every((r,j)=>{const sp2=q.span[Y+j];for(let i=0;i<r.length;i++){if(r[i]==='.')continue;if(!sp2||X+i<sp2[0]||X+i>sp2[1])return false}return true});
