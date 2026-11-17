@@ -1726,6 +1726,8 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 @media (max-width:720px){.lfStaff .lfRow .lfCpBox,.lfStaff .lfPenRow:has(.lfCpBox)>.lfc{width:calc((100% - 34px) / 5)}.lfStaff .lfRow .lfCpBox{margin-left:6px;outline-offset:3px}}
 /* epic cards: no sliding colour band across the card (the diagonal shine stays) */
 .tc.r2:not(.lock)::before{content:none;animation:none}
+/* every lineup card gets the legendary's frame weight: its border plus a 2px ring in its rarity colour */
+.lfc .lfF{box-shadow:0 0 0 2px var(--rc),0 3px 0 1px rgba(0,0,0,.55)}
 </style>
 
 <div class="app">
