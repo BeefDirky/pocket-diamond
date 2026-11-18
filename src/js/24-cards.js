@@ -5,10 +5,12 @@ let COL={packs:3,owned:{},seen:{},lv:{},mig:1};
 try{const v=JSON.parse(localStorage.getItem('pd-cards')||'null');if(v&&typeof v==='object')COL={packs:v.packs|0,owned:v.owned||{},seen:v.seen||{},lv:v.lv||{},mig:v.mig|0}}catch(e){}
 const saveCol=()=>{try{localStorage.setItem('pd-cards',JSON.stringify(COL))}catch(e){}};
 function buildCardDB(){
- CARDS=[];for(const k of ORDER){const T=TEAMS[k];
-  T.lineup.forEach((p,i)=>{const q=p.custom?T.benched:p;if(q)CARDS.push({id:k+':'+i,k,p:q,pit:false,set:'club'})});
+ /* each club's own players, as built: after a club switch your roster wears another club's kit, but a card always
+    belongs to the club the player came from (so its id and rarity are the same whatever club you play as) */
+ CARDS=[];for(const k of ORDER){const T=TEAMS[k],O=typeof PRISTINE!=='undefined'&&PRISTINE[k];
+  (O?O.L:T.lineup).forEach((p,i)=>{const q=p.custom?T.benched:p;if(q)CARDS.push({id:k+':'+i,k,p:q,pit:false,set:'club'})});
   /* (in the club's original order, so a card's id never follows the rotation around) */
-  ((T.orig&&T.orig.P)||T.staff||[T.pitcher]).forEach((p,j)=>CARDS.push({id:k+':p'+j,k,p,pit:true,set:'club'}));((T.orig&&T.orig.R)||T.rot||[]).forEach((p,j)=>CARDS.push({id:k+':r'+j,k,p,pit:true,set:'club'}))}
+  (O?O.P:(T.orig&&T.orig.P)||T.staff||[T.pitcher]).forEach((p,j)=>CARDS.push({id:k+':p'+j,k,p,pit:true,set:'club'}));(O?O.R:(T.orig&&T.orig.R)||T.rot||[]).forEach((p,j)=>CARDS.push({id:k+':r'+j,k,p,pit:true,set:'club'}))}
  const sorted=CARDS.map(c=>ovr(c.p)).sort((a,b)=>b-a),cut=f=>sorted[Math.floor(sorted.length*f)];
  const L=cut(.08),E=cut(.25),Rr=cut(.55);
  for(const c of CARDS){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};const o=ovr(c.p);c.o=o;c.r=o>=L?3:o>=E?2:o>=Rr?1:0;if(c.p.type&&c.r<2)c.r=2;CARD_BY[c.id]=c}
