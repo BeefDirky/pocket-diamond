@@ -46,6 +46,7 @@ function brandConfirm(){if(brandFirst){try{localStorage.setItem('pd-myteam',JSON
  track('club_changed',{from,to,cost:CLUB_SWITCH_COST});
  try{localStorage.setItem('pd-myteam',JSON.stringify({club:to,base:MYTEAM.base}));localStorage.setItem('pd-club',to)}catch(e){}
  if(ROTO[from]){ROTO[to]=ROTO[from];delete ROTO[from];try{localStorage.setItem('pd-rot',JSON.stringify(ROTO))}catch(e){}}
+ if(ORDO[from]){ORDO[to]=ORDO[from];delete ORDO[from];try{localStorage.setItem('pd-order',JSON.stringify(ORDO))}catch(e){}}
  pendingMode=null;brandDone();brandLive(to,MYTEAM.base);teamOpen('scrMain')}
 /* switch clubs on the spot (no reload): put every club's roster back as built, wear the new brand, swap your players
    onto it, re-sign your cards, then repaint everything that shows your club */

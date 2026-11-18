@@ -99,7 +99,7 @@ function lfFit(){for(const e of document.querySelectorAll('#cards .lfNm')){e.sty
 $('cards').addEventListener('click',e=>{
  if(lfDrag.eat>performance.now()){e.stopImmediatePropagation();return}
  const bo=e.target.closest('.lfc.bo');if(bo){const i=+bo.dataset.o,L=TEAMS[S.you].lineup;
-  if(boSel==null)boSel=i;else if(boSel===i)boSel=null;else{[L[boSel],L[i]]=[L[i],L[boSel]];boSel=null;const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}
+  if(boSel==null)boSel=i;else if(boSel===i)boSel=null;else{[L[boSel],L[i]]=[L[i],L[boSel]];boSel=null;const ci=L.findIndex(p=>p.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}ordSave(S.you);
    for(const k of[...lfFlips])if(/^f\d/.test(k))lfFlips.delete(k);applyDefense();updateHUD();try{sfx('glove')}catch(_){}}
   boRender(TEAMS[S.you],S.you);return}
  if(e.target.closest('.lfSortB')){lfSort=(lfSort+1)%LF_SORTS.length;try{localStorage.setItem('pd-lfsort',lfSort)}catch(_){}lineupRender();return}
@@ -186,7 +186,7 @@ addEventListener('pointermove',e=>{const d=boDrag;if(!d.st||e.pointerId!==d.st.p
  const row=document.querySelector('.boRow'),rr=row.getBoundingClientRect();if(e.clientX<rr.left+40)row.scrollLeft-=12;else if(e.clientX>rr.right-40)row.scrollLeft+=12},{passive:false});
 function boDragEnd(e,cancel){const d=boDrag;if(!d.st)return;if(d.on){if(d.g)d.g.remove();document.body.classList.remove('lfDragging');lfDrag.eat=performance.now()+300;
   if(!cancel){const from=d.st.i;let to=boIndexAt(e.clientX);if(to>from)to--;if(to!==from){const L=TEAMS[S.you].lineup,[p]=L.splice(from,1);L.splice(to,0,p);
-    const ci=L.findIndex(q=>q.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}for(const k of[...lfFlips])if(/^f\d/.test(k))lfFlips.delete(k);applyDefense();updateHUD();try{sfx('glove')}catch(_){}lfSay(`${p.name} now bats ${to+1}${['','st','nd','rd'][to+1]||'th'}.`)}}
+    const ci=L.findIndex(q=>q.custom);if(ci>=0){CUSTOM.slot=ci;saveCustom()}ordSave(S.you);for(const k of[...lfFlips])if(/^f\d/.test(k))lfFlips.delete(k);applyDefense();updateHUD();try{sfx('glove')}catch(_){}lfSay(`${p.name} now bats ${to+1}${['','st','nd','rd'][to+1]||'th'}.`)}}
   boSel=null;boRender(TEAMS[S.you],S.you)}
  d.st=null;d.on=false;d.g=null}
 addEventListener('pointerup',e=>boDragEnd(e,false));addEventListener('pointercancel',e=>boDragEnd(e,true));

@@ -20,7 +20,7 @@ function releasePlayer(k,origName,pit){const T=TEAMS[k],orig=pit?origPit(T,origN
  const[arr,i]=pit?pitSlot(T,orig):[T.lineup,slotOf(T,orig,false)];if(i>=0){if(arr[i].custom)T.benched=orig;else arr[i]=orig}
  if(SIGN[k]){delete SIGN[k][(pit?'P:':'L:')+origName];saveSign()}}
 function applySignings(){snapOrig();for(const k in SIGN){if(!TEAMS[k])continue;for(const key in SIGN[k]){const pit=key[0]==='P',nm=key.slice(2),id=SIGN[k][key];
-   if(!CARD_BY[id]||!COL.owned[id]){delete SIGN[k][key];continue}signPlayer(k,nm,id,pit,false)}}saveSign();rotApply()}
+   if(!CARD_BY[id]||!COL.owned[id]){delete SIGN[k][key];continue}signPlayer(k,nm,id,pit,false)}}saveSign();rotApply();ordApply()}
 const usedCards=k=>new Set([...TEAMS[k].lineup,...(TEAMS[k].benched?[TEAMS[k].benched]:[]),...TEAMS[k].staff,...(TEAMS[k].rot||[])].filter(p=>p&&p.signed).map(p=>p.signed));
 /* ---- the rotation: five starters in a set order, the ace first. The ace starts every single game (and every online
    game); in a series, game 1 goes to the ace, game 2 to the No. 2, and so on round the five. Both clubs work this way.
@@ -31,6 +31,15 @@ const rotName=p=>p.signedFor||p.name;
 function rotSave(k){const T=TEAMS[k];ROTO[k]=rotFive(T).map(rotName);try{localStorage.setItem('pd-rot',JSON.stringify(ROTO));if(typeof accDirty==='function')accDirty()}catch(e){}}
 function rotApply(){for(const k in ROTO){const T=TEAMS[k];if(!T||!T.rot||!Array.isArray(ROTO[k]))continue;const five=rotFive(T),by=n=>five.find(p=>rotName(p)===n);
   const ord=ROTO[k].map(by).filter(Boolean);if(ord.length!==5||new Set(ord).size!==5)continue;T.staff[0]=ord[0];T.rot=ord.slice(1)}}
+/* the batting order, kept per club by who bats where (a signed card counts as the player he replaced, your created
+   player as the one he benched), so it survives closing the game, signings and releases */
+let ORDO={};try{ORDO=JSON.parse(localStorage.getItem('pd-order')||'{}')||{}}catch(e){ORDO={}}
+const ordName=(T,p)=>p.custom?(T.benched?rotName(T.benched):'*'):rotName(p);
+function ordSave(k){const T=TEAMS[k];if(!T)return;ORDO[k]=T.lineup.map(p=>ordName(T,p));try{localStorage.setItem('pd-order',JSON.stringify(ORDO));if(typeof accDirty==='function')accDirty()}catch(e){}}
+function ordApply(){for(const k in ORDO){const T=TEAMS[k],want=ORDO[k];if(!T||!Array.isArray(want))continue;
+  const L=T.lineup.slice(),out=[];for(const n of want){const i=L.findIndex(p=>p&&ordName(T,p)===n);if(i>=0){out.push(L[i]);L[i]=null}}
+  for(const p of L)if(p)out.push(p);/* (anyone the saved order doesn't know bats where he was left) */
+  if(out.length!==T.lineup.length)continue;T.lineup.splice(0,T.lineup.length,...out)}}
 /* move a starter to another spot in the order (the rest slide over) */
 function rotMove(k,from,to){const T=TEAMS[k],f=rotFive(T);if(from===to||!f[from]||to<0||to>=f.length)return;const[x]=f.splice(from,1);f.splice(to,0,x);T.staff[0]=f[0];T.rot=f.slice(1);rotSave(k)}
 /* which of the five starts this game: 1 for a single game or online, otherwise the series game number round the five */
