@@ -15,7 +15,10 @@ function phLoad(){if(PH.ready||PH.loading||!phOn())return;PH.loading=true;
     phIdent();for(const [n,p] of PH.q.splice(0))ph.capture(n,p)}})}catch(e){}};
  s.onerror=()=>{PH.loading=false};document.head.appendChild(s)}
 // record an event (queued until PostHog has loaded; dropped if stats are off)
-function track(name,props){if(!phOn())return;const p={...(props||{}),signed_in:!!ACC.user};
+// clubs go out by their team name ("Whales", not "ulsan"), so PostHog charts read the way the game does
+const PH_TEAM_KEYS=['club','opp_club','park'];
+function phTeam(k){const T=typeof TEAMS!=='undefined'&&TEAMS[k];return T&&T.name&&ORDER.includes(k)?T.name.charAt(0)+T.name.slice(1).toLowerCase():k}
+function track(name,props){if(!phOn())return;const p={...(props||{}),signed_in:!!ACC.user};for(const k of PH_TEAM_KEYS)if(typeof p[k]==='string')p[k]=phTeam(p[k]);
  if(PH.ready)try{window.posthog.capture(name,p)}catch(e){}else{if(PH.q.length<200)PH.q.push([name,p]);phLoad()}}
 // the signed-in account is the person (by UUID); signing out starts a fresh anonymous visitor
 // every event says whether it came from a guest or an account; a signed-in player's username (public anyway, on the
