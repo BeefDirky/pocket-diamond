@@ -138,6 +138,7 @@ function lfSlotPos(T,i){return i>=0?T.lineup[i].pos:i===-1||i<=-10?'SP':'RP'}
 function lfFitWhy(c,i,p){if(!c)return'That card is gone.';const T=TEAMS[S.you],slot=lfSlotPos(T,i),cp=c.p.pos,nm=c.p.name;
  if(c.pit!==(i<0))return c.pit?`${nm} is a pitcher. Put him in the rotation or the bullpen (PITCHERS).`:`${nm} is a hitter. He can't pitch.`;
  if(usedCards(S.you).has(c.id)&&!(p&&p.signed===c.id))return`${nm} is already in your lineup.`;
+ if(teamMates(T).some(q=>q!==p&&sameName(q.name,nm)))return`${nm} is already on your team.`;
  if(c.pit)return slot==='SP'&&cp!=='SP'?`${nm} is a reliever. Only a starter can start.`:slot!=='SP'&&cp==='SP'?`${nm} is a starter. He can only go on the mound, not in the bullpen.`:'';
  if(slot==='DH'||cp===slot||(LF_OF.has(cp)&&LF_OF.has(slot)))return'';
  return`${nm} plays ${cp}. He can't play ${slot}.`}

@@ -20,7 +20,15 @@ function releasePlayer(k,origName,pit){const T=TEAMS[k],orig=pit?origPit(T,origN
  const[arr,i]=pit?pitSlot(T,orig):[T.lineup,slotOf(T,orig,false)];if(i>=0){if(arr[i].custom)T.benched=orig;else arr[i]=orig}
  if(SIGN[k]){delete SIGN[k][(pit?'P:':'L:')+origName];saveSign()}}
 function applySignings(){snapOrig();for(const k in SIGN){if(!TEAMS[k])continue;for(const key in SIGN[k]){const pit=key[0]==='P',nm=key.slice(2),id=SIGN[k][key];
-   if(!CARD_BY[id]||!COL.owned[id]){delete SIGN[k][key];continue}signPlayer(k,nm,id,pit,false)}}saveSign();rotApply();ordApply()}
+   if(!CARD_BY[id]||!COL.owned[id]){delete SIGN[k][key];continue}signPlayer(k,nm,id,pit,false)}}saveSign();dupRelease();rotApply();ordApply()}
+/* everyone on a club right now: the nine, today's starter and the bullpen, and the next four starters */
+const teamMates=T=>[...T.lineup,...T.staff,...(T.rot||[])].filter(Boolean);
+const sameName=(a,b)=>String(a).trim().toUpperCase()===String(b).trim().toUpperCase();
+/* no one appears twice: a signed card whose player has the same name as someone else on the club goes back to your
+   cards (a saved team from before this rule could have one) */
+function dupRelease(){for(const k in SIGN){const T=TEAMS[k];if(!T)continue;
+  for(const key of Object.keys(SIGN[k])){const pit=key[0]==='P',nm=key.slice(2),id=SIGN[k][key],all=teamMates(T),q=all.find(x=>x.signed===id&&x.signedFor===nm);
+   if(q&&all.some(x=>x!==q&&sameName(x.name,q.name)))releasePlayer(k,nm,pit)}}}
 const usedCards=k=>new Set([...TEAMS[k].lineup,...(TEAMS[k].benched?[TEAMS[k].benched]:[]),...TEAMS[k].staff,...(TEAMS[k].rot||[])].filter(p=>p&&p.signed).map(p=>p.signed));
 /* ---- the rotation: five starters in a set order, the ace first. The ace starts every single game (and every online
    game); in a series, game 1 goes to the ace, game 2 to the No. 2, and so on round the five. Both clubs work this way.
