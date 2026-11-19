@@ -708,7 +708,9 @@ body:has(#title:not([hidden]) #scrTeams:not([hidden])) :is(.board,.matchup,.mete
 .ballCam i{position:absolute;left:5px;top:4px;font-style:normal;font-family:var(--f-hud);font-size:10px;letter-spacing:.12em;color:#fff;background:rgba(200,40,40,.85);padding:1px 5px}
 .ballCam span{position:absolute;left:0;right:0;bottom:0;text-align:center;white-space:nowrap;overflow:hidden;font-family:var(--f-hud);font-size:clamp(9px,2.6vw,12px);color:var(--chalk);background:rgba(8,20,14,.75);padding:2px 4px}
 .ballCam.hr span{color:var(--edge);background:var(--amber)}
-.app.deskApp .ballCam{top:14px;right:14px;width:280px}
+.app.deskApp .ballCam{top:14px;right:auto;left:14px;width:280px}
+/* PC: on the left, below the pause button (the score and pitch map sit on the right) */
+.app.deskApp:not(.phoneLand) .ballCam{top:52px}
 /* phone, in a game: small, on the left under the pause button, out of the way of the score */
 .app:not(.deskApp) .ballCam.inGame{right:auto;left:6px;top:44px;width:min(26%,120px);border-width:2px}
 .app:not(.deskApp) .ballCam.inGame i{font-size:7px;padding:0 3px;left:3px;top:2px}
