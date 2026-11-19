@@ -40,11 +40,11 @@ function renderBracket(){
  if(PO.champ===PO.you){$('poStatus').textContent='Champions! +1,000 coins';$('poNext').innerHTML=`<b>${TEAMS[PO.you].name}</b> win the Korean Series!`}
  else if(PO.out){$('poStatus').textContent='Eliminated';$('poNext').innerHTML=PO.champ?`${TEAMS[PO.champ].city} ${TEAMS[PO.champ].name} won it all. Start a new bracket for another run.`:'Eliminated.'}
  else if(sr){const opp=sr.a===PO.you?sr.b:sr.a,g=sr.wa+sr.wb+1;$('poStatus').textContent=`${PO_NAMES[PO.round]} · ${poLine(sr)}`;$('poNext').innerHTML=`Game ${g} vs <b>${TEAMS[opp].city} ${TEAMS[opp].name}</b> · first to ${need(PO.round)} wins`}
- $('poPlay').hidden=!sr;$('poSim').disabled=!sr;$('poPlay').textContent=sr?`PLAY GAME ${sr.wa+sr.wb+1}`:'PLAY GAME';
+ $('poPlay').hidden=!sr;$('poPlay').textContent=sr?`PLAY GAME ${sr.wa+sr.wb+1}`:'PLAY GAME';
 }
 function openBracket(fresh){if(fresh&&(!PO||PO.you!==S.you||PO.champ||PO.out))newBracket();if(!PO)newBracket();renderBracket();showScreen('scrBracket')}
 $('poPlay').addEventListener('click',()=>{const sr=poMySeries();if(!sr)return;if(S.you!==PO.you){S.you=PO.you;syncPicker();applyCustom();if(FIELD)rebuildPark()}S.opp=sr.a===PO.you?sr.b:sr.a;S.poGame=true;S.auto=false;syncAuto();startGame('arcade')});
-$('poSim').addEventListener('click',()=>{const sr=poMySeries();if(!sr)return;const pa=clamp(.5+(teamStr(PO.you)-teamStr(sr.a===PO.you?sr.b:sr.a))*.012,.3,.7);poRecord(Math.random()<pa);renderBracket()});
+/* (your own playoff games can't be simulated: you play every one) */
 $('poNew').addEventListener('click',()=>{newBracket();renderBracket()});
 $('toBracket').addEventListener('click',()=>{$('over').hidden=true;toTitle();openBracket(false)});
 

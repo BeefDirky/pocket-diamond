@@ -241,6 +241,7 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .mode:active{transform:translateY(3px);box-shadow:0 1px 0 var(--edge)}
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .tiles.three{grid-template-columns:repeat(3,1fr)}
+.tiles.two{grid-template-columns:repeat(2,1fr)}
 .muBat{cursor:pointer;position:relative}
 .muBat:hover{border-color:var(--amber)}
 .muPit{position:relative}.muPit.canPen{cursor:pointer}.muPit.canPen:hover{border-color:var(--amber)}
@@ -2197,7 +2198,7 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
         <div class="bracket" id="bracket"></div>
         <p id="poNext" class="oppLine"></p>
         <button class="big" id="poPlay" type="button">PLAY GAME</button>
-        <div class="tiles three"><button class="tile" type="button" id="poSim"><span>Sim this game</span></button><button class="tile" type="button" id="poNew"><span>New bracket</span></button><button class="tile" type="button" data-go="scrMain"><span>Menu</span></button></div>
+        <div class="tiles two"><button class="tile" type="button" id="poNew"><span>New bracket</span></button><button class="tile" type="button" data-go="scrMain"><span>Menu</span></button></div>
       </div>
       <div class="card" id="scrMulti" hidden>
         <h1>MUL<i class="kT">T</i>I<span>PLAYER</span></h1>
@@ -8120,11 +8121,11 @@ function renderBracket(){
  if(PO.champ===PO.you){$('poStatus').textContent='Champions! +1,000 coins';$('poNext').innerHTML=`<b>${TEAMS[PO.you].name}</b> win the Korean Series!`}
  else if(PO.out){$('poStatus').textContent='Eliminated';$('poNext').innerHTML=PO.champ?`${TEAMS[PO.champ].city} ${TEAMS[PO.champ].name} won it all. Start a new bracket for another run.`:'Eliminated.'}
  else if(sr){const opp=sr.a===PO.you?sr.b:sr.a,g=sr.wa+sr.wb+1;$('poStatus').textContent=`${PO_NAMES[PO.round]} · ${poLine(sr)}`;$('poNext').innerHTML=`Game ${g} vs <b>${TEAMS[opp].city} ${TEAMS[opp].name}</b> · first to ${need(PO.round)} wins`}
- $('poPlay').hidden=!sr;$('poSim').disabled=!sr;$('poPlay').textContent=sr?`PLAY GAME ${sr.wa+sr.wb+1}`:'PLAY GAME';
+ $('poPlay').hidden=!sr;$('poPlay').textContent=sr?`PLAY GAME ${sr.wa+sr.wb+1}`:'PLAY GAME';
 }
 function openBracket(fresh){if(fresh&&(!PO||PO.you!==S.you||PO.champ||PO.out))newBracket();if(!PO)newBracket();renderBracket();showScreen('scrBracket')}
 $('poPlay').addEventListener('click',()=>{const sr=poMySeries();if(!sr)return;if(S.you!==PO.you){S.you=PO.you;syncPicker();applyCustom();if(FIELD)rebuildPark()}S.opp=sr.a===PO.you?sr.b:sr.a;S.poGame=true;S.auto=false;syncAuto();startGame('arcade')});
-$('poSim').addEventListener('click',()=>{const sr=poMySeries();if(!sr)return;const pa=clamp(.5+(teamStr(PO.you)-teamStr(sr.a===PO.you?sr.b:sr.a))*.012,.3,.7);poRecord(Math.random()<pa);renderBracket()});
+/* (your own playoff games can't be simulated: you play every one) */
 $('poNew').addEventListener('click',()=>{newBracket();renderBracket()});
 $('toBracket').addEventListener('click',()=>{$('over').hidden=true;toTitle();openBracket(false)});
 
@@ -8578,7 +8579,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='32ad3d044d',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='1cf1669806',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}

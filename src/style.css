@@ -218,6 +218,7 @@ body.inMenu .pauseBtn,body.inMenu .zoomCtl,body.inMenu .parkBtn,body.inMenu .bug
 .mode:active{transform:translateY(3px);box-shadow:0 1px 0 var(--edge)}
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .tiles.three{grid-template-columns:repeat(3,1fr)}
+.tiles.two{grid-template-columns:repeat(2,1fr)}
 .muBat{cursor:pointer;position:relative}
 .muBat:hover{border-color:var(--amber)}
 .muPit{position:relative}.muPit.canPen{cursor:pointer}.muPit.canPen:hover{border-color:var(--amber)}
