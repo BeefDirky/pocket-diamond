@@ -7583,7 +7583,7 @@ function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()
  const keep=lfKeepScroll();
  const modes=`<div class="seg lfModes"><button type="button" data-m="field" aria-pressed="${lfMode==='field'}">FIELDERS</button><button type="button" data-m="pit" aria-pressed="${lfMode==='pit'}">PITCHERS</button></div>`;
  const board=lfMode==='pit'?`<div class="lfField lfStaff"><h5>ROTATION</h5><div class="lfRow lfRot">${rotRow}</div><p class="lfCap">Your ace starts every single game. In a series the starters go in this order. Drag a starter to move him in the order.</p><h5>BULLPEN</h5><div class="lfRow lfPenRow">${pen}</div></div>`
-  :`<div class="lfField" style="background-image:url(${lfFieldArt()})">${field}<span class="lfDhTag">DH</span></div>`;
+  :`<div class="lfField" style="background-image:url(${lfFieldArt()})">${field}</div>`;
  $('cards').innerHTML=`${modes}<div class="lfWrap noSide">${board}<div class="lfActs" hidden>${acts}</div></div>
   ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><button type="button" class="mbtn lfSortB">SORT: ${LF_SORTS[lfSort].n}</button></div><div class="lfTray">${tray}</div>`:''}`;
  $('lnHint').textContent=mine?'Drag one of your cards onto a player to put him in. Tap a card to flip it.':'';lfFit();keep()}
@@ -8483,7 +8483,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='481ba501ec',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='d6b01acb0a',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
