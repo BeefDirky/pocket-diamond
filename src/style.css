@@ -1836,3 +1836,9 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 @media (max-width:560px){.vsIntro{padding:8px 4px 22px}.vsMid{padding:0 4px}.vsHead{padding:4px 5px;gap:5px}.vsHead img{width:26px;height:26px}
  .vsLine li{grid-template-columns:12px 1fr 22px;font-size:10px;padding:1px 4px;gap:3px}.vsLine em{display:none}.vsSp span{display:none}.vsSp b{font-size:11px}}
 @media (prefers-reduced-motion:reduce){.vsIntro.go .vsSide.you,.vsIntro.go .vsSide.opp,.vsIntro.go .vsMid b{animation-duration:.01s}}
+/* long-press to drag (touch): no text selection or iOS callout on cards, the row scrolls by hand, and the card sinks
+   slightly over the one-second hold, then lifts */
+#cards .lfc{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.boRow .lfc.bo{touch-action:none}
+.lfc.lpHold{animation:lpHold 1s linear forwards}
+@keyframes lpHold{0%{transform:scale(1)}100%{transform:scale(.93);filter:brightness(1.15)}}
