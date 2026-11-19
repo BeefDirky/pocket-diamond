@@ -102,6 +102,7 @@ body.bpMode .bugSc{display:none}
 .zoomCtl button{width:34px;height:34px;font-family:var(--f-px);font-size:14px;background:rgba(8,20,14,.86);border:2px solid var(--edge);color:var(--chalk);cursor:pointer;line-height:1}
 .infoBtn{position:absolute;right:8px;bottom:max(8px,env(safe-area-inset-bottom,0px));z-index:3;font-family:var(--f-hud);font-size:11px;padding:6px 8px;background:rgba(8,20,14,.86);color:var(--chalk);border:2px solid var(--edge);cursor:pointer}
 .kz{position:absolute;right:8px;bottom:calc(max(6px,env(safe-area-inset-bottom,0px)) + 30px);z-index:3;width:76px;padding:3px 3px 2px;background:rgba(8,20,14,.82);border:2px solid rgba(240,232,210,.35);pointer-events:none;text-align:center}
+.kz{box-sizing:content-box}/* (the canvas is exactly the width: padding and border go outside it, so the zone sits in the middle) */
 .kz[hidden]{display:none}.kz canvas{display:block;width:76px;height:98px;image-rendering:pixelated}
 .kz b{display:block;height:11px;font-family:var(--f-hud);font-size:9px;letter-spacing:.06em;color:var(--chalk);font-weight:400}
 .kz b.s{color:#ff6b5e}.kz b.b{color:#7be38a}
