@@ -1819,6 +1819,46 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .cpShow.go .cpFlash{animation:cpFl 5.2s linear forwards}
 @keyframes cpFl{0%,70%{opacity:0}71%{opacity:.9}73%{opacity:0}75%{opacity:.7}77%{opacity:0}79%{opacity:.5}81%,100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.cpShow.go .cpFlash{animation:none}}
+/* ---- TEAM VS TEAM intro ---- */
+.vsIntro{position:absolute;inset:0;z-index:80;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0;padding:12px 10px 28px;
+ background:rgba(4,8,18,.0);font-family:var(--f-hud);color:#fff;overflow:hidden;cursor:pointer}
+.vsIntro.go{animation:vsBg 4.3s linear forwards}
+.vsIntro.out{animation:vsOut .3s steps(3) forwards}
+@keyframes vsBg{0%{background:rgba(4,8,18,0)}6%,100%{background:rgba(4,8,18,.9)}}
+.stage:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
+@keyframes vsOut{to{opacity:0}}
+.vsSide{min-width:0;align-self:stretch;display:flex;flex-direction:column;gap:6px;justify-content:center;max-width:380px;width:100%}
+.vsSide.you{justify-self:end}.vsSide.opp{justify-self:start}
+.vsIntro.go .vsSide.you{animation:vsInL .34s cubic-bezier(.2,.9,.3,1.15) both}
+.vsIntro.go .vsSide.opp{animation:vsInR .34s cubic-bezier(.2,.9,.3,1.15) both}
+@keyframes vsInL{from{transform:translateX(-110%)}to{transform:none}}
+@keyframes vsInR{from{transform:translateX(110%)}to{transform:none}}
+.vsHead{display:flex;align-items:center;gap:8px;background:var(--tj);border:3px solid var(--tc);padding:6px 8px;box-shadow:4px 4px 0 rgba(0,0,0,.45)}
+.vsHead img{width:38px;height:38px;image-rendering:pixelated;flex:none}
+.vsHead>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.vsHead small{font-size:10px;letter-spacing:.16em;opacity:.85}
+.vsHead b{font-family:var(--f-px);font-weight:400;font-size:clamp(11px,2.4vw,17px);text-shadow:2px 2px 0 rgba(0,0,0,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vsOvr{display:flex;flex-direction:column;align-items:center;background:#0b1220;border:2px solid var(--tc);padding:2px 6px;font-family:var(--f-px);font-size:clamp(12px,2.6vw,18px);color:#7dfc8c;line-height:1.2}
+.vsOvr small{font-family:var(--f-hud);font-size:8px;color:#fff;letter-spacing:.1em}
+.vsSp{background:rgba(255,255,255,.07);border-left:4px solid var(--tc);padding:4px 8px;display:flex;flex-direction:column;opacity:0}
+.vsSp small{font-size:9px;letter-spacing:.16em;color:#ffe08a}.vsSp b{font-size:13px}.vsSp span{font-size:10px;opacity:.8}
+.vsIntro.go .vsSp{animation:vsRow .2s steps(3) .42s forwards}
+.vsLine{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.vsLine li{display:grid;grid-template-columns:16px 1fr 26px 22px;gap:5px;align-items:center;font-size:12px;padding:2px 6px;background:rgba(255,255,255,.06);opacity:0}
+.vsLine li:nth-child(odd){background:rgba(255,255,255,.1)}
+.vsIntro.go .vsLine li{animation:vsRow .18s steps(3) calc(.5s + var(--d) * 45ms) forwards}
+.vsLine b{color:#ffe08a;font-weight:400}.vsLine .vsNm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vsLine i{font-style:normal;opacity:.75;text-align:center}.vsLine em{font-style:normal;color:#7dfc8c;text-align:right}
+@keyframes vsRow{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.vsMid{padding:0 10px;align-self:center}
+.vsMid b{display:block;font-family:var(--f-px);font-weight:400;font-size:clamp(26px,6vw,52px);color:#ffd23a;text-shadow:3px 3px 0 #c2410c,-2px -2px 0 #000,0 0 22px rgba(255,210,58,.6);opacity:0}
+.vsIntro.go .vsMid b{animation:vsSlam .3s cubic-bezier(.3,1.6,.5,1) .3s forwards}
+@keyframes vsSlam{from{opacity:0;transform:scale(3) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(-6deg)}}
+.vsSkip{position:absolute;left:0;right:0;bottom:6px;margin:0;text-align:center;font-size:10px;letter-spacing:.2em;opacity:.55}
+/* phones: tighter, and the order loses its numbers' room */
+@media (max-width:560px){.vsIntro{padding:8px 4px 22px}.vsMid{padding:0 4px}.vsHead{padding:4px 5px;gap:5px}.vsHead img{width:26px;height:26px}
+ .vsLine li{grid-template-columns:12px 1fr 22px;font-size:10px;padding:1px 4px;gap:3px}.vsLine em{display:none}.vsSp span{display:none}.vsSp b{font-size:11px}}
+@media (prefers-reduced-motion:reduce){.vsIntro.go .vsSide.you,.vsIntro.go .vsSide.opp,.vsIntro.go .vsMid b{animation-duration:.01s}}
 </style>
 
 <div class="app">
@@ -1857,6 +1897,7 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
     <div class="netToast" id="netToast" role="status" aria-live="polite" hidden></div>
     <div class="wuTag" id="wuTag" hidden aria-live="polite"><small id="wuHead">NOW BATTING</small><b id="wuName"></b><em id="wuSong" hidden></em></div>
     <div class="cpShow" id="cpShow" hidden aria-hidden="true"><i class="cpBeam l"></i><i class="cpBeam r"></i><div class="cpTxt"><small>NOW ENTERING</small><b id="cpName"></b><span><em id="cpClub"></em> · CLOSER</span></div><i class="cpFlash"></i></div>
+    <div class="vsIntro" id="vsIntro" hidden></div>
     <div class="banner" id="banner" hidden><b id="bt"></b><small id="bs"></small></div>
     <div class="upd" id="upd" hidden role="status"><span>New version available. Please refresh your browser.</span><button type="button" id="updGo">REFRESH</button></div>
     <div class="afk" id="afk" hidden><b>ARE YOU STILL THERE?</b><span id="afkT"></span><small>Tap anywhere to keep playing</small></div>
@@ -7125,6 +7166,7 @@ function startGame(mode){S.gameNo=(S.gameNo||0)+1;rotUse();if(!onlineGame())appl
  setCam('pitch');
  $('bpBar').hidden=S.mode!=='bp';$('parkBtn').hidden=S.mode!=='bp';$('actsBat').classList.toggle('withBP',S.mode==='bp');S.bpBalls=[];S.bpFly=[];if(S.mode==='bp')setBP(S.bpPitch);applyVolumes();
  if(S.mode==='bp'){S.target=0;S.totalInn=1;S.oppLine=[0];S.youLine=[0];S.oppHits=0;banner('BATTING PRACTICE','Pick a pitch for the machine. It keeps throwing it until you change.');S.jumbo={text:'BATTING PRACTICE',kr:'타격 연습',until:performance.now()+2500};setPhase('inning');updateHUD();return}
+ vsIntro();
  const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;
  if(se){const g=se.w+se.l+1;banner(`GAME ${g} OF ${se.len} · ${TEAMS[S.opp].name} POSTED ${S.target}`,`Series ${se.w}-${se.l} · ${TEAMS[S.you].city} needs ${S.target+1} in ${INNINGS} innings`);S.jumbo={text:`GAME ${g}`,kr:`${g}차전`,until:performance.now()+3000};setPhase('inning');updateHUD();return}
  if(S.mode==='full')banner('PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name}, 9 innings. You pitch the top halves.`);
@@ -7169,6 +7211,31 @@ function gameOver(win){if(S.olMenu){S.olMenu=false;$('title').hidden=true;showSc
  if(S.celebr){const gid=S.overGid=(S.overGid||0)+1;setTimeout(()=>{if(S.phase==='over'&&S.overGid===gid&&$('title').hidden)$('over').hidden=false},3400)}else $('over').hidden=false;/* the results card always follows the celebration */updateHUD();
 }
 
+/* ---------- TEAM VS TEAM: a short intro before the first pitch (single player) ----------
+   Your club slides in from the left, the opponent from the right, VS slams down between them, then each side's
+   batting order and starting pitcher drop in. About four and a half seconds; a tap or any key skips it. The game
+   holds on its "PLAY BALL" beat until the intro is gone. (Online games skip it: both phones have to stay in step.) */
+const VSI={on:false,t:[],key:null};
+function vsSide(k,cls){const T=TEAMS[k],r=teamRating(k),sp=(T.staff||[T.pitcher])[0];
+ const rows=T.lineup.map((p,i)=>`<li style="--d:${i}"><b>${i+1}</b><span class="vsNm">${esc(p.name)}</span><i>${p.pos}</i><em>${ovr(p)}</em></li>`).join('');
+ return `<div class="vsSide ${cls}" style="--tj:${T.jersey};--tc:${T.cap}">
+  <div class="vsHead"><img src="${LOGO_URL[k]||''}" alt=""><div><small>${esc(T.city)}</small><b>${esc(T.name)}</b></div><span class="vsOvr"><small>OVR</small>${r.ovr}</span></div>
+  <div class="vsSp"><small>STARTER</small><b>#${sp.no} ${esc(sp.name)}</b><span>${sp.hand}HP · VEL ${sp.vel} · MOV ${sp.mov} · CTL ${sp.ctl}</span></div>
+  <ol class="vsLine">${rows}</ol></div>`}
+function vsIntro(){if(onlineGame()||S.mode==='bp'||!TEAMS[S.you]||!TEAMS[S.opp])return;const el=$('vsIntro');if(!el)return;
+ vsEnd(true);S.vsHold=true;VSI.on=true;
+ el.innerHTML=`${vsSide(S.you,'you')}<div class="vsMid"><b>VS</b></div>${vsSide(S.opp,'opp')}<p class="vsSkip">TAP TO SKIP</p>`;
+ // wait for the loading screen to lift, then play
+ const t0=performance.now(),go=()=>{if(!VSI.on)return;const L=$('loadScr');if(L&&!L.hidden&&performance.now()-t0<2500){VSI.t.push(setTimeout(go,80));return}
+  el.hidden=false;el.classList.remove('out','go');void el.offsetWidth;el.classList.add('go');try{playSample('woosh',.55)}catch(e){}
+  VSI.t.push(setTimeout(()=>{try{playSample('woosh',.4,1.3)}catch(e){}},330));
+  VSI.t.push(setTimeout(()=>vsEnd(),4300))};
+ go()}
+function vsEnd(now){for(const t of VSI.t)clearTimeout(t);VSI.t=[];const el=$('vsIntro'),was=VSI.on;VSI.on=false;S.vsHold=false;if(!el)return;
+ if(now||el.hidden){el.hidden=true;el.classList.remove('go','out');return}
+ if(was){el.classList.add('out');VSI.t.push(setTimeout(()=>{el.hidden=true;el.classList.remove('go','out')},320))}}
+$('vsIntro').addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();vsEnd()});
+addEventListener('keydown',e=>{if(!VSI.on)return;e.stopImmediatePropagation();e.preventDefault();vsEnd()},true);
 // the player line in the at-bat / pitching boxes: the club's logo, then the name
 function muSet(id,k,txt,tags,pre){const el=$(id);el.textContent='';const box=el.closest('.mu');if(box){box.style.setProperty('--tc',TEAMS[k].jersey);box.style.setProperty('--tc2',TEAMS[k].cap)}
  if(LOGO_URL[k]){const lb=document.createElement('span');lb.className='muLogo';const im=document.createElement('img');im.src=LOGO_URL[k];im.alt=TEAMS[k].name;lb.appendChild(im);el.appendChild(lb)}
@@ -8483,7 +8550,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='d6b01acb0a',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='5b30c8c027',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -11123,6 +11190,7 @@ function update(dt,now){/* lead-off clock: starts from the bag each time the run
  if(now<S.fwUntil&&Math.random()<dt/240)burst(rand(80,880)*K,rand(30,260)*K);
  if(S.fx.length){const k=dt/1000;for(const p of S.fx){p.x+=p.vx*k;p.y+=p.vy*k;p.vy+=28*K*k;p.vx*=.99;p.life-=dt/1150}S.fx=S.fx.filter(p=>p.life>0)}
  updateCam(dt);updateLife(dt,now);
+ if(S.vsHold){if(S.phase==='inning')S.pt=Math.min(S.pt,1);else if(S.phase==='title'||S.phase==='over')vsEnd(true)}/* the TEAM VS TEAM intro is up */
  switch(S.phase){
   case'ready':if(S.pt>60&&S.pt<120&&S.mode!=='bp'&&batKey()===S.you){const on=S.bases.filter(Boolean).length,key=`${S.inning}|${S.half}`;
     if(on>=2&&S.rallyKey!==key){S.rallyKey=key;crowdChant()}else if(now>nextChant&&Math.random()<.18){crowdChant()}if(now>nextChant)nextChant=now+rand(45000,90000)}

@@ -1796,3 +1796,43 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .cpShow.go .cpFlash{animation:cpFl 5.2s linear forwards}
 @keyframes cpFl{0%,70%{opacity:0}71%{opacity:.9}73%{opacity:0}75%{opacity:.7}77%{opacity:0}79%{opacity:.5}81%,100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.cpShow.go .cpFlash{animation:none}}
+/* ---- TEAM VS TEAM intro ---- */
+.vsIntro{position:absolute;inset:0;z-index:80;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0;padding:12px 10px 28px;
+ background:rgba(4,8,18,.0);font-family:var(--f-hud);color:#fff;overflow:hidden;cursor:pointer}
+.vsIntro.go{animation:vsBg 4.3s linear forwards}
+.vsIntro.out{animation:vsOut .3s steps(3) forwards}
+@keyframes vsBg{0%{background:rgba(4,8,18,0)}6%,100%{background:rgba(4,8,18,.9)}}
+.stage:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
+@keyframes vsOut{to{opacity:0}}
+.vsSide{min-width:0;align-self:stretch;display:flex;flex-direction:column;gap:6px;justify-content:center;max-width:380px;width:100%}
+.vsSide.you{justify-self:end}.vsSide.opp{justify-self:start}
+.vsIntro.go .vsSide.you{animation:vsInL .34s cubic-bezier(.2,.9,.3,1.15) both}
+.vsIntro.go .vsSide.opp{animation:vsInR .34s cubic-bezier(.2,.9,.3,1.15) both}
+@keyframes vsInL{from{transform:translateX(-110%)}to{transform:none}}
+@keyframes vsInR{from{transform:translateX(110%)}to{transform:none}}
+.vsHead{display:flex;align-items:center;gap:8px;background:var(--tj);border:3px solid var(--tc);padding:6px 8px;box-shadow:4px 4px 0 rgba(0,0,0,.45)}
+.vsHead img{width:38px;height:38px;image-rendering:pixelated;flex:none}
+.vsHead>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.vsHead small{font-size:10px;letter-spacing:.16em;opacity:.85}
+.vsHead b{font-family:var(--f-px);font-weight:400;font-size:clamp(11px,2.4vw,17px);text-shadow:2px 2px 0 rgba(0,0,0,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vsOvr{display:flex;flex-direction:column;align-items:center;background:#0b1220;border:2px solid var(--tc);padding:2px 6px;font-family:var(--f-px);font-size:clamp(12px,2.6vw,18px);color:#7dfc8c;line-height:1.2}
+.vsOvr small{font-family:var(--f-hud);font-size:8px;color:#fff;letter-spacing:.1em}
+.vsSp{background:rgba(255,255,255,.07);border-left:4px solid var(--tc);padding:4px 8px;display:flex;flex-direction:column;opacity:0}
+.vsSp small{font-size:9px;letter-spacing:.16em;color:#ffe08a}.vsSp b{font-size:13px}.vsSp span{font-size:10px;opacity:.8}
+.vsIntro.go .vsSp{animation:vsRow .2s steps(3) .42s forwards}
+.vsLine{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.vsLine li{display:grid;grid-template-columns:16px 1fr 26px 22px;gap:5px;align-items:center;font-size:12px;padding:2px 6px;background:rgba(255,255,255,.06);opacity:0}
+.vsLine li:nth-child(odd){background:rgba(255,255,255,.1)}
+.vsIntro.go .vsLine li{animation:vsRow .18s steps(3) calc(.5s + var(--d) * 45ms) forwards}
+.vsLine b{color:#ffe08a;font-weight:400}.vsLine .vsNm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vsLine i{font-style:normal;opacity:.75;text-align:center}.vsLine em{font-style:normal;color:#7dfc8c;text-align:right}
+@keyframes vsRow{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.vsMid{padding:0 10px;align-self:center}
+.vsMid b{display:block;font-family:var(--f-px);font-weight:400;font-size:clamp(26px,6vw,52px);color:#ffd23a;text-shadow:3px 3px 0 #c2410c,-2px -2px 0 #000,0 0 22px rgba(255,210,58,.6);opacity:0}
+.vsIntro.go .vsMid b{animation:vsSlam .3s cubic-bezier(.3,1.6,.5,1) .3s forwards}
+@keyframes vsSlam{from{opacity:0;transform:scale(3) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(-6deg)}}
+.vsSkip{position:absolute;left:0;right:0;bottom:6px;margin:0;text-align:center;font-size:10px;letter-spacing:.2em;opacity:.55}
+/* phones: tighter, and the order loses its numbers' room */
+@media (max-width:560px){.vsIntro{padding:8px 4px 22px}.vsMid{padding:0 4px}.vsHead{padding:4px 5px;gap:5px}.vsHead img{width:26px;height:26px}
+ .vsLine li{grid-template-columns:12px 1fr 22px;font-size:10px;padding:1px 4px;gap:3px}.vsLine em{display:none}.vsSp span{display:none}.vsSp b{font-size:11px}}
+@media (prefers-reduced-motion:reduce){.vsIntro.go .vsSide.you,.vsIntro.go .vsSide.opp,.vsIntro.go .vsMid b{animation-duration:.01s}}

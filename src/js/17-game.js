@@ -20,6 +20,7 @@ function startGame(mode){S.gameNo=(S.gameNo||0)+1;rotUse();if(!onlineGame())appl
  setCam('pitch');
  $('bpBar').hidden=S.mode!=='bp';$('parkBtn').hidden=S.mode!=='bp';$('actsBat').classList.toggle('withBP',S.mode==='bp');S.bpBalls=[];S.bpFly=[];if(S.mode==='bp')setBP(S.bpPitch);applyVolumes();
  if(S.mode==='bp'){S.target=0;S.totalInn=1;S.oppLine=[0];S.youLine=[0];S.oppHits=0;banner('BATTING PRACTICE','Pick a pitch for the machine. It keeps throwing it until you change.');S.jumbo={text:'BATTING PRACTICE',kr:'타격 연습',until:performance.now()+2500};setPhase('inning');updateHUD();return}
+ vsIntro();
  const se=S.mode==='arcade'&&S.series&&S.series.len>1?S.series:null;
  if(se){const g=se.w+se.l+1;banner(`GAME ${g} OF ${se.len} · ${TEAMS[S.opp].name} POSTED ${S.target}`,`Series ${se.w}-${se.l} · ${TEAMS[S.you].city} needs ${S.target+1} in ${INNINGS} innings`);S.jumbo={text:`GAME ${g}`,kr:`${g}차전`,until:performance.now()+3000};setPhase('inning');updateHUD();return}
  if(S.mode==='full')banner('PLAY BALL',`${TEAMS[S.opp].name} at ${TEAMS[S.you].name}, 9 innings. You pitch the top halves.`);

@@ -9,6 +9,7 @@ function update(dt,now){/* lead-off clock: starts from the bag each time the run
  if(now<S.fwUntil&&Math.random()<dt/240)burst(rand(80,880)*K,rand(30,260)*K);
  if(S.fx.length){const k=dt/1000;for(const p of S.fx){p.x+=p.vx*k;p.y+=p.vy*k;p.vy+=28*K*k;p.vx*=.99;p.life-=dt/1150}S.fx=S.fx.filter(p=>p.life>0)}
  updateCam(dt);updateLife(dt,now);
+ if(S.vsHold){if(S.phase==='inning')S.pt=Math.min(S.pt,1);else if(S.phase==='title'||S.phase==='over')vsEnd(true)}/* the TEAM VS TEAM intro is up */
  switch(S.phase){
   case'ready':if(S.pt>60&&S.pt<120&&S.mode!=='bp'&&batKey()===S.you){const on=S.bases.filter(Boolean).length,key=`${S.inning}|${S.half}`;
     if(on>=2&&S.rallyKey!==key){S.rallyKey=key;crowdChant()}else if(now>nextChant&&Math.random()<.18){crowdChant()}if(now>nextChant)nextChant=now+rand(45000,90000)}
