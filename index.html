@@ -7423,7 +7423,7 @@ let SIGN={};try{SIGN=JSON.parse(localStorage.getItem('pd-signings')||'{}')||{}}c
 const saveSign=()=>{try{localStorage.setItem('pd-signings',JSON.stringify(SIGN))}catch(e){}};
 function snapOrig(){for(const k of ORDER){const T=TEAMS[k];if(!T.orig)T.orig={L:T.lineup.slice(),P:T.staff.slice(),R:(T.rot||[]).slice()}}}
 function signClone(c,base,lvSpec){const p={...c.p,...cardEff(c,lvSpec)},q={name:p.name,hand:p.hand,thr:p.thr||p.hand,pos:base.pos,natPos:p.pos,no:base.no,signed:c.id,
-  con:p.con,pow:p.pow,spd:p.spd,def:p.def==null?60:p.def,vel:p.vel,mov:p.mov,ctl:p.ctl,slot:p.slot||'over',type:p.type,cp:!!p.cp,bat:p.bat||base.bat||'#d9b07a'};
+  con:p.con,pow:p.pow,spd:p.spd,def:p.def==null?60:p.def,vel:p.vel,mov:p.mov,ctl:p.ctl,slot:p.slot||'over',type:p.type,cp:!!p.cp,sta:c.pit?p.sta:undefined,bat:p.bat||base.bat||'#d9b07a'};
  if(p.skin)SKIN_OVR[q.name]=p.skin;if(lvSpec)q.lvSpec=lvSpec;if(c.pit)q.ars=arsFor({...q,pos:base.pos},c.code||c.k||'fa');return q}
 // where does the original player for this slot live now (lineup order can be shuffled)
 function slotOf(T,orig,pit){const arr=pit?T.staff:T.lineup;return arr.findIndex(p=>p===orig||(p.signedFor===orig.name))}
@@ -8579,7 +8579,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='1cf1669806',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='e482146b4e',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -9699,12 +9699,12 @@ function buildCardDB(){
   (O?O.P:(T.orig&&T.orig.P)||T.staff||[T.pitcher]).forEach((p,j)=>CARDS.push({id:k+':p'+j,k,p,pit:true,set:'club'}));(O?O.R:(T.orig&&T.orig.R)||T.rot||[]).forEach((p,j)=>CARDS.push({id:k+':r'+j,k,p,pit:true,set:'club'}))}
  const sorted=CARDS.map(c=>ovr(c.p)).sort((a,b)=>b-a),cut=f=>sorted[Math.floor(sorted.length*f)];
  const L=cut(.08),E=cut(.25),Rr=cut(.55);
- for(const c of CARDS){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};const o=ovr(c.p);c.o=o;c.r=o>=L?3:o>=E?2:o>=Rr?1:0;if(c.p.type&&c.r<2)c.r=2;CARD_BY[c.id]=c}
- for(const c of buildFreeAgents()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};c.o=ovr(c.p);CARDS.push(c);CARD_BY[c.id]=c}
+ for(const c of CARDS){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl,sta:c.pit?staOf(c.p):null};const o=ovr(c.p);c.o=o;c.r=o>=L?3:o>=E?2:o>=Rr?1:0;if(c.p.type&&c.r<2)c.r=2;CARD_BY[c.id]=c}
+ for(const c of buildFreeAgents()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl,sta:c.pit?staOf(c.p):null};c.o=ovr(c.p);CARDS.push(c);CARD_BY[c.id]=c}
  {const F=CARDS.filter(c=>c.set==='fa'),s=F.map(c=>c.o).sort((a,b)=>b-a),cut=f=>s[Math.floor(s.length*f)],L=cut(.08),E=cut(.25),R=cut(.55);for(const c of F){c.r=c.o>=L?3:c.o>=E?2:c.o>=R?1:0;if(c.p.type&&c.r<2)c.r=2}
   /* a free agent's power tops out by rarity: common 70, rare 80, epic 85, legend 95 (a ceiling, not a target) */
   for(const c of F){const cap=FA_POW_CAP[c.r];if(c.p.pow!=null&&c.p.pow>cap){c.p.pow=c.b.pow=cap;c.o=ovr(c.p)}}}
- for(const c of buildBigLeague()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl};CARDS.push(c);CARD_BY[c.id]=c}
+ for(const c of buildBigLeague()){c.b={con:c.p.con,pow:c.p.pow,spd:c.p.spd,def:c.p.def,vel:c.p.vel,mov:c.p.mov,ctl:c.p.ctl,sta:c.pit?staOf(c.p):null};CARDS.push(c);CARD_BY[c.id]=c}
  /* closers (CP): the legendary relief cards, so they're the rarer, better relievers */
  for(const c of CARDS)if(c.set!=='club'&&c.pit&&c.p.pos==='RP'&&c.r>=3)c.p.cp=true
 }
@@ -10042,8 +10042,8 @@ coinUI();
 // ratings whenever he plays for your club, as one of its own players or signed into your lineup. Online, the levels travel
 // with the roster spec, so both phones field the same players.
 const PACK_COST={fa:200,bl:500};
-const LV_KEYS={bat:['con','pow','spd','def'],pit:['vel','mov','ctl']};
-const LV_NAME={con:'CON',pow:'POW',spd:'SPD',def:'DEF',vel:'VEL',mov:'MOV',ctl:'CTL'};
+const LV_KEYS={bat:['con','pow','spd','def'],pit:['vel','mov','ctl','sta']};/* (STA: how long a pitcher lasts before he tires) */
+const LV_NAME={con:'CON',pow:'POW',spd:'SPD',def:'DEF',vel:'VEL',mov:'MOV',ctl:'CTL',sta:'STA'};
 const lvOf=id=>(COL.lv&&COL.lv[id])||{};
 const lvN=id=>Object.values(lvOf(id)).reduce((a,b)=>a+(b|0),0);
 // a card's ratings with its levels on top (only the ratings the card has)

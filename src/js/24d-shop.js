@@ -4,8 +4,8 @@
 // ratings whenever he plays for your club, as one of its own players or signed into your lineup. Online, the levels travel
 // with the roster spec, so both phones field the same players.
 const PACK_COST={fa:200,bl:500};
-const LV_KEYS={bat:['con','pow','spd','def'],pit:['vel','mov','ctl']};
-const LV_NAME={con:'CON',pow:'POW',spd:'SPD',def:'DEF',vel:'VEL',mov:'MOV',ctl:'CTL'};
+const LV_KEYS={bat:['con','pow','spd','def'],pit:['vel','mov','ctl','sta']};/* (STA: how long a pitcher lasts before he tires) */
+const LV_NAME={con:'CON',pow:'POW',spd:'SPD',def:'DEF',vel:'VEL',mov:'MOV',ctl:'CTL',sta:'STA'};
 const lvOf=id=>(COL.lv&&COL.lv[id])||{};
 const lvN=id=>Object.values(lvOf(id)).reduce((a,b)=>a+(b|0),0);
 // a card's ratings with its levels on top (only the ratings the card has)
