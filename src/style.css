@@ -1806,7 +1806,7 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .vsIntro.go{animation:vsBg 4.3s linear forwards}
 .vsIntro.out{animation:vsOut .3s steps(3) forwards}
 @keyframes vsBg{0%{background:rgba(4,8,18,0)}6%,100%{background:rgba(4,8,18,.9)}}
-.stage:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
+body:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
 @keyframes vsOut{to{opacity:0}}
 .vsSide{min-width:0;align-self:stretch;display:flex;flex-direction:column;gap:6px;justify-content:center;max-width:380px;width:100%}
 .vsSide.you{justify-self:end}.vsSide.opp{justify-self:start}
@@ -1846,3 +1846,4 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .boRow .lfc.bo{touch-action:none}
 .lfc.lpHold{animation:lpHold 1s linear forwards}
 @keyframes lpHold{0%{transform:scale(1)}100%{transform:scale(.93);filter:brightness(1.15)}}
+.vsIntro.vsFull{position:fixed;z-index:60}

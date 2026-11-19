@@ -10,6 +10,8 @@ function vsSide(k,cls){const T=TEAMS[k],r=teamRating(k),sp=(T.staff||[T.pitcher]
   <div class="vsSp"><small>STARTER</small><b>#${sp.no} ${esc(sp.name)}</b><span>${sp.hand}HP · VEL ${sp.vel} · MOV ${sp.mov} · CTL ${sp.ctl}</span></div>
   <ol class="vsLine">${rows}</ol></div>`}
 function vsIntro(){if(onlineGame()||S.mode==='bp'||!TEAMS[S.you]||!TEAMS[S.opp])return;const el=$('vsIntro');if(!el)return;
+ /* on PC the batter and pitcher panels float above the park, so the intro covers the whole window instead */
+ const desk=!!document.querySelector('.app.deskApp:not(.phoneLand)'),home=desk?document.body:$('stage');if(el.parentNode!==home)home.appendChild(el);el.classList.toggle('vsFull',desk);
  vsEnd(true);S.vsHold=true;VSI.on=true;
  el.innerHTML=`${vsSide(S.you,'you')}<div class="vsMid"><b>VS</b></div>${vsSide(S.opp,'opp')}<p class="vsSkip">TAP TO SKIP</p>`;
  // wait for the loading screen to lift, then play

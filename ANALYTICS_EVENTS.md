@@ -30,7 +30,7 @@ The event catalogue for PostHog (step 5). Nothing is sent yet. When it's wired u
 
 ## Naming
 
-`object_verb` in snake_case, past tense where it's a finished thing. Property values are the game's own short keys: club and park by team name (`Rats`, `Whales`; before Nov 18 2026 they were city keys like `seoul`), pitch `SL`, mode `arcade`.
+`object_verb` in snake_case, past tense where it's a finished thing. Property values are the game's own short keys: club and park by team name (`Supers`, `Whales`; before Nov 18 2026 they were city keys like `seoul`), pitch `SL`, mode `arcade`.
 
 ## Events
 

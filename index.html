@@ -1829,7 +1829,7 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .vsIntro.go{animation:vsBg 4.3s linear forwards}
 .vsIntro.out{animation:vsOut .3s steps(3) forwards}
 @keyframes vsBg{0%{background:rgba(4,8,18,0)}6%,100%{background:rgba(4,8,18,.9)}}
-.stage:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
+body:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
 @keyframes vsOut{to{opacity:0}}
 .vsSide{min-width:0;align-self:stretch;display:flex;flex-direction:column;gap:6px;justify-content:center;max-width:380px;width:100%}
 .vsSide.you{justify-self:end}.vsSide.opp{justify-self:start}
@@ -1869,6 +1869,7 @@ img[src$="#lg"]{background:var(--lgSwirl) 0 0/100% 250% repeat-y #f6e8ff;animati
 .boRow .lfc.bo{touch-action:none}
 .lfc.lpHold{animation:lpHold 1s linear forwards}
 @keyframes lpHold{0%{transform:scale(1)}100%{transform:scale(.93);filter:brightness(1.15)}}
+.vsIntro.vsFull{position:fixed;z-index:60}
 </style>
 
 <div class="app">
@@ -2442,7 +2443,7 @@ function dugoutFrame(sd){const along=82.5,perp=48.5;return toPx3(sd*(along+perp)
 function penSpot(sd,th){const r=fenceDist(sd*th)+9;return{x:sd*r*Math.sin(th*RAD),y:r*Math.cos(th*RAD)}}
 
 const TEAMS={
- seoul:{city:'SEOUL',kcity:'서울',name:'RATS',kname:'래츠',script:'Rats',emblem:'rat',logo:'shield',
+ seoul:{city:'SEOUL',kcity:'서울',name:'SUPERS',kname:'슈퍼스',script:'Supers',emblem:'rat',logo:'shield',
   jersey:'#4a5060',cap:'#c8202a',brim:'#7a1018',mascot:'Chuchu',mdesc:'A subway rat in a conductor\'s cap. Knows every shortcut on Line 2 and squeaks the seventh-inning song.',
   pitcher:{name:'AHN W.K.',hand:'R',slot:'side'},pen:[{name:'WALSH',hand:'R',slot:'over'},{name:'NOH S.H.',hand:'L',slot:'over'}],
   lineup:[['PARK J.H.','L'],['KIM D.W.','R'],['RAMIREZ','S'],['LEE S.M.','R'],['CHOI W.S.','L'],['JUNG H.S.','R'],['KANG M.G.','R'],['OH J.Y.','L'],['YANG E.S.','R']]},
@@ -2499,7 +2500,7 @@ const CLUB_INFO={
   facts:['The rat leads the zodiac: it won the great race by riding the ox and hopping off first. The club says that\'s just good baserunning.',
    'Hangang Park sits so close to the river that home runs to right have been fished out by rowers.',
    'Night games end with the whole park lit up on phone flashlights while the cheer squad leads one last song.'],
-  slogans:['한강의 쥐들!','찍찍 화이팅','오늘도 래츠!'],landmark:null},
+  slogans:['한강의 쥐들!','찍찍 화이팅','오늘도 슈퍼스!'],landmark:null},
  busan:{est:1982,nick:'Baseball city',
   city:'Korea\'s second city and its biggest port: Haeundae beach, the Gwangan Bridge and a seagull for a city bird.',
   facts:['Fans tie orange plastic bags on their heads in the late innings, then use them for trash on the way out.',
@@ -7233,6 +7234,8 @@ function vsSide(k,cls){const T=TEAMS[k],r=teamRating(k),sp=(T.staff||[T.pitcher]
   <div class="vsSp"><small>STARTER</small><b>#${sp.no} ${esc(sp.name)}</b><span>${sp.hand}HP · VEL ${sp.vel} · MOV ${sp.mov} · CTL ${sp.ctl}</span></div>
   <ol class="vsLine">${rows}</ol></div>`}
 function vsIntro(){if(onlineGame()||S.mode==='bp'||!TEAMS[S.you]||!TEAMS[S.opp])return;const el=$('vsIntro');if(!el)return;
+ /* on PC the batter and pitcher panels float above the park, so the intro covers the whole window instead */
+ const desk=!!document.querySelector('.app.deskApp:not(.phoneLand)'),home=desk?document.body:$('stage');if(el.parentNode!==home)home.appendChild(el);el.classList.toggle('vsFull',desk);
  vsEnd(true);S.vsHold=true;VSI.on=true;
  el.innerHTML=`${vsSide(S.you,'you')}<div class="vsMid"><b>VS</b></div>${vsSide(S.opp,'opp')}<p class="vsSkip">TAP TO SKIP</p>`;
  // wait for the loading screen to lift, then play
@@ -8581,7 +8584,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='e482146b4e',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='4a0dfb1ca7',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
