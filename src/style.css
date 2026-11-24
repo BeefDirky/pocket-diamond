@@ -1847,3 +1847,71 @@ body:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
 .lfc.lpHold{animation:lpHold 1s linear forwards}
 @keyframes lpHold{0%{transform:scale(1)}100%{transform:scale(.93);filter:brightness(1.15)}}
 .vsIntro.vsFull{position:fixed;z-index:60}
+/* ---- opening a pack (24f-pack-open.js) ---- */
+.pko{position:fixed;inset:0;z-index:300;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+ background:radial-gradient(ellipse at 50% 42%,#26355e 0%,#121a33 48%,#070a14 100%);font-family:var(--f-hud);color:#fff;opacity:0;transition:opacity .25s}
+.pko.in{opacity:1}.pko.out{opacity:0}
+.pkoRays{position:absolute;left:50%;top:44%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;opacity:.16;pointer-events:none;transition:opacity .5s;
+ background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.55) 0 4deg,transparent 4deg 18deg);animation:pkoSpin 40s linear infinite;
+ -webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%)}
+@keyframes pkoSpin{to{transform:rotate(360deg)}}
+.pko.epic .pkoRays{opacity:.5;background:repeating-conic-gradient(from 0deg,rgba(190,130,255,.8) 0 5deg,transparent 5deg 18deg);animation-duration:12s}
+.pko.legend .pkoRays{opacity:.85;background:repeating-conic-gradient(from 0deg,#ffb3d9 0 5deg,transparent 5deg 12deg,#b5d8ff 12deg 17deg,transparent 17deg 24deg,#c9ffd9 24deg 29deg,transparent 29deg 36deg,#fff1a8 36deg 41deg,transparent 41deg 48deg);animation-duration:7s}
+.pko.legend::after{content:"";position:absolute;inset:0;background:#fff;pointer-events:none;animation:pkoFlash .7s ease-out forwards}
+@keyframes pkoFlash{0%{opacity:.9}100%{opacity:0}}
+.pkoSkip{position:absolute;top:max(12px,env(safe-area-inset-top,0px));right:14px;z-index:5;background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.35);color:#fff;font-family:var(--f-hud);font-size:12px;letter-spacing:.12em;padding:6px 10px;cursor:pointer}
+.pko.sum .pkoSkip{display:none}
+.pkoStage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.pkoFoot{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;text-align:center;padding:0 16px}
+.pkoFoot b{font-family:var(--f-px);font-weight:400;font-size:13px;color:#ffe08a;min-height:1em}
+.pkoFoot span{font-size:12px;letter-spacing:.14em;opacity:.85;animation:pkoBlink 1.6s steps(2) infinite}
+@keyframes pkoBlink{50%{opacity:.35}}
+/* the pack */
+.pkoPack{position:relative;z-index:2;height:min(58vh,460px);aspect-ratio:40/56;animation:pkoBob 2.4s ease-in-out infinite;filter:drop-shadow(0 18px 24px rgba(0,0,0,.55))}
+@keyframes pkoBob{50%{transform:translateY(-8px) rotate(.6deg)}}
+.pkoPack canvas{position:absolute;left:0;width:100%;image-rendering:pixelated;display:block}
+.pkoTop{top:0;height:calc(100% * 9 / 56);transition:transform .55s cubic-bezier(.3,.6,.4,1),opacity .55s}
+.pkoBody{top:calc(100% * 9 / 56);height:calc(100% * 47 / 56);transition:transform .7s cubic-bezier(.5,0,.8,.4)}
+.pkoLine{position:absolute;left:-4%;right:-4%;top:calc(100% * 9 / 56 - 2px);height:4px;pointer-events:none}
+.pkoGuide{position:absolute;inset:1px 4%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.85) 0 6px,transparent 6px 12px);opacity:.75;animation:pkoGuide 1.2s linear infinite}
+@keyframes pkoGuide{to{background-position:12px 0}}
+.pkoTrail{position:absolute;top:-2px;height:8px;left:0;width:0;background:linear-gradient(90deg,#fff6c8,#fff);box-shadow:0 0 10px #ffe58a,0 0 22px #ffd23a;transition:width .25s}
+.pko.cutting .pkoTrail{transition:none}.pko.cutting .pkoPack{animation-play-state:paused}
+.pko.cut .pkoPack{animation:none}.pko.cut .pkoGuide{opacity:0}
+.pko.cut .pkoTop{transform:translate(55%,-140%) rotate(28deg);opacity:0}
+.pko.opened .pkoBody{transform:translateY(120vh)}.pko.opened .pkoLine{opacity:0}
+/* the stack */
+.pkoStack{position:absolute;left:50%;top:46%;width:170px;height:290px;margin:-145px 0 0 -85px;opacity:0;pointer-events:none;transform:translateY(14vh);transition:opacity .3s,transform .7s cubic-bezier(.2,.8,.3,1)}
+/* the wrapper drops away and the cards rise out of it */
+.pko.opened .pkoStack{opacity:1;pointer-events:auto;transform:none}
+.pkoCard{position:absolute;left:0;top:0;width:170px;z-index:var(--z);transform-origin:50% 50%;perspective:900px;
+ transform:translateY(calc(var(--d,0) * 6px)) scale(var(--s,1));transition:transform .4s cubic-bezier(.3,.7,.4,1),opacity .4s;cursor:grab}
+.pkoCard.drag{transition:none;cursor:grabbing}
+.pkoCard.gone{transition:transform .42s cubic-bezier(.5,0,.9,.6),opacity .42s;opacity:0;pointer-events:none}
+.pkoCard .tc{width:170px;cursor:inherit;box-shadow:0 10px 24px rgba(0,0,0,.5)}
+.pkoIn{display:grid;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.7,.4,1)}
+.pkoBack,.pkoFront{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.pkoBack{transform:rotateY(180deg);display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(45deg,#1b2b3a 0 10px,#22384b 10px 20px);border:4px solid #f4f1e8;font-family:var(--f-px);font-size:12px;line-height:1.7;color:var(--amber);text-align:center}
+.pkoCard.down .pkoIn{transform:rotateY(180deg)}
+.pkoCard.down.r2 .pkoBack{animation:pkoGlowE 1.4s ease-in-out infinite}
+.pkoCard.down.r3 .pkoBack{border-color:#fff;animation:pkoGlowL 1.1s linear infinite}
+@keyframes pkoGlowE{0%,100%{box-shadow:0 0 0 3px #b77cff,0 0 16px #b77cff}50%{box-shadow:0 0 0 4px #d6b0ff,0 0 34px #b77cff}}
+@keyframes pkoGlowL{0%{box-shadow:0 0 0 4px #ffb3d9,0 0 30px #ffb3d9}25%{box-shadow:0 0 0 4px #b5d8ff,0 0 36px #b5d8ff}50%{box-shadow:0 0 0 4px #c9ffd9,0 0 30px #c9ffd9}75%{box-shadow:0 0 0 4px #fff1a8,0 0 36px #fff1a8}100%{box-shadow:0 0 0 4px #ffb3d9,0 0 30px #ffb3d9}}
+.pkoCard.charge{animation:pkoShake .52s linear}
+@keyframes pkoShake{0%,100%{translate:0 0}20%{translate:-4px 1px}40%{translate:4px -1px}60%{translate:-3px 0}80%{translate:3px 1px}}
+.pkoBurst{position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-30px;border-radius:50%;pointer-events:none;opacity:0;z-index:-1}
+.pkoCard.shown.r2 .pkoBurst{animation:pkoBurst .8s ease-out;background:radial-gradient(circle,rgba(230,205,255,.95),rgba(183,124,255,.5) 45%,rgba(183,124,255,0) 70%)}
+.pkoCard.shown.r3 .pkoBurst{animation:pkoBurst 1.1s ease-out;background:radial-gradient(circle,#fff,rgba(255,233,168,.6) 40%,rgba(255,179,217,0) 70%)}
+@keyframes pkoBurst{0%{opacity:1;transform:scale(.5)}100%{opacity:0;transform:scale(9)}}
+/* the spread */
+.pkoSum{display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px;max-width:980px;width:100%}
+.pkoSum h3{margin:0;font-family:var(--f-px);font-weight:400;font-size:clamp(16px,4vw,26px);color:#ffe08a;text-shadow:2px 2px 0 #000;animation:pkoDeal .35s steps(5) both}
+.pkoSpread{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.pkoDeal{width:150px;opacity:0;animation:pkoDeal .35s cubic-bezier(.3,.8,.4,1.2) calc(var(--k) * 90ms) forwards}
+.pkoDeal .tc{width:150px}
+@keyframes pkoDeal{from{opacity:0;transform:translateY(40px) scale(.8) rotate(-4deg)}to{opacity:1;transform:none}}
+.pkoNew{margin:0;font-size:12px;letter-spacing:.08em;opacity:.8}
+.pkoBtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+@media (max-width:560px){.pkoDeal,.pkoDeal .tc{width:calc((100vw - 56px) / 3)}.pkoSpread{gap:8px}}
+@media (prefers-reduced-motion:reduce){.pkoRays{animation:none}.pko.legend::after{animation:none}.pkoPack{animation:none}}
+.pkoDeal:only-child,.pkoDeal:only-child .tc{width:min(240px,62vw)}
