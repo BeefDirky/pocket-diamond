@@ -1844,7 +1844,7 @@ body:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
    slightly over the one-second hold, then lifts */
 #cards .lfc{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .boRow .lfc.bo{touch-action:none}
-.lfc.lpHold{animation:lpHold 1s linear forwards}
+.lfc.lpHold{animation:lpHold .5s linear forwards}
 @keyframes lpHold{0%{transform:scale(1)}100%{transform:scale(.93);filter:brightness(1.15)}}
 .vsIntro.vsFull{position:fixed;z-index:60}
 /* ---- opening a pack (24f-pack-open.js) ---- */

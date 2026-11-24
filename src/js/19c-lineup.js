@@ -52,7 +52,7 @@ for(const b of $('lnTabs').children)b.addEventListener('click',()=>{if(lfTab==='
 /* the batting order: the nine hitters in a row, in order. Tap one, then tap the spot he should bat in: they swap */
 function boRender(T,key){const row=T.lineup.map((p,i)=>{const c=lfCard(key,p),art=c?cardArt(c,key):portrait(T,p,key===S.you);
   return `<div class="boSlot"><span class="boNum">${i+1}</span><button type="button" class="lfc bo r${c?c.r:0}${lfFlips.has('o'+i)?' flip':''}" data-o="${i}" style="--tj:${T.jersey};--tc:${T.cap}"><span class="lfIn">${lfFace(art,ovr(p),p.name,p.pos)}${lfBackFace(p,false,ovr(p),p.pos,'',i+1)}</span></button></div>`}).join('');
- const keep=lfKeepScroll();$('cards').innerHTML=`<div class="boRow">${row}</div>`;keep();$('lnHint').textContent=matchMedia('(pointer:fine)').matches?'Drag a hitter to a new spot in the order. Click a card to see its back.':'Tap a card to see its back. Hold a card for a second, then drag it to a new spot.';lfFit()}
+ const keep=lfKeepScroll();$('cards').innerHTML=`<div class="boRow">${row}</div>`;keep();$('lnHint').textContent=matchMedia('(pointer:fine)').matches?'Drag a hitter to a new spot in the order. Click a card to see its back.':'Tap a card to see its back. Hold a card for a moment, then drag it to a new spot.';lfFit()}
 function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()%2600)+'ms');for(const b of $('lnTabs').children)b.setAttribute('aria-pressed',String(b.dataset.t===lfTab));
  $('lnNext').textContent=pregame?'NEXT':'DONE';
  const key=lnView==='mine'?S.you:S.opp,T=TEAMS[key],mine=lnView==='mine';
@@ -86,7 +86,7 @@ function lineupRender(){$('cards').style.setProperty('--lgD',-(performance.now()
   :`<div class="lfField" style="background-image:url(${lfFieldArt()})">${field}</div>`;
  $('cards').innerHTML=`${modes}<div class="lfWrap noSide">${board}<div class="lfActs" hidden>${acts}</div></div>
   ${mine?`<div class="lfTrayHead"><h4>YOUR CARDS</h4><button type="button" class="mbtn lfSortB">SORT: ${LF_SORTS[lfSort].n}</button></div><div class="lfTray">${tray}</div>`:''}`;
- $('lnHint').textContent=mine?(matchMedia('(pointer:fine)').matches?'Drag one of your cards onto a player to put him in. Click a card to flip it.':'Hold one of your cards for a second, then drag it onto a player to put him in. Tap a card to flip it.'):'';lfFit();keep()}
+ $('lnHint').textContent=mine?(matchMedia('(pointer:fine)').matches?'Drag one of your cards onto a player to put him in. Click a card to flip it.':'Hold one of your cards for a moment, then drag it onto a player to put him in. Tap a card to flip it.'):'';lfFit();keep()}
 /* a redraw (flipping a card) keeps the bullpen and card rows where you had scrolled them */
 function lfKeepScroll(){const at={};for(const c of['lfPen','lfTray','boRow']){const e=document.querySelector('#cards .'+c);if(e)at[c]=[e.scrollLeft,e.scrollTop]}
  return()=>{for(const c in at){const e=document.querySelector('#cards .'+c);if(e){e.style.scrollBehavior='auto';e.scrollLeft=at[c][0];e.scrollTop=at[c][1];e.style.scrollBehavior=''}}}}
@@ -142,9 +142,9 @@ function lfFitWhy(c,i,p){if(!c)return'That card is gone.';const T=TEAMS[S.you],s
  if(slot==='DH'||cp===slot||(LF_OF.has(cp)&&LF_OF.has(slot)))return'';
  return`${nm} plays ${cp}. He can't play ${slot}.`}
 function lfSay(t,bad){const m=$('lfMsg');m.textContent=t;m.classList.toggle('bad',!!bad);m.classList.add('on');clearTimeout(lfSay.t);lfSay.t=setTimeout(()=>m.classList.remove('on'),2600)}
-/* touch: a card waits for a one-second hold before it lifts for dragging (it shrinks a little while you hold); moving
+/* touch: a card waits for a half-second hold before it lifts for dragging (it shrinks a little while you hold); moving
    sooner scrolls instead, and letting go sooner is a tap (which flips the card). A mouse drags straight away. */
-const LP_MS=1000;
+const LP_MS=500;
 function lpArm(st,e,go){st.touch=e.pointerType!=='mouse';st.lx=e.clientX;st.ly=e.clientY;if(!st.touch)return;st.b.classList.add('lpHold');
  st.lpT=setTimeout(()=>{if(st.pan||st.done)return;st.b.classList.remove('lpHold');try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}go()},LP_MS)}
 function lpDrop(st){if(!st)return;st.done=true;clearTimeout(st.lpT);if(st.b)st.b.classList.remove('lpHold')}
