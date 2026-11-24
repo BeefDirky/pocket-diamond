@@ -1887,7 +1887,8 @@ body:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
 .pkoCard{position:absolute;left:0;top:0;width:170px;z-index:var(--z);transform-origin:50% 50%;perspective:900px;
  transform:translateY(calc(var(--d,0) * 6px)) scale(var(--s,1));transition:transform .4s cubic-bezier(.3,.7,.4,1),opacity .4s;cursor:grab}
 .pkoCard.drag{transition:none;cursor:grabbing}
-.pkoCard.gone{transition:transform .42s cubic-bezier(.5,0,.9,.6),opacity .42s;opacity:0;pointer-events:none}
+/* a card you're done with slides all the way off the screen, fully visible (no fade) */
+.pkoCard.gone{transition:transform .45s cubic-bezier(.5,0,.9,.6);pointer-events:none}
 .pkoCard .tc{width:170px;cursor:inherit;box-shadow:0 10px 24px rgba(0,0,0,.5)}
 .pkoIn{display:grid;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.7,.4,1)}
 .pkoBack,.pkoFront{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden}

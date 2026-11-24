@@ -55,8 +55,8 @@ function pkoReveal(c){if(c.classList.contains('turning'))return;const r=PKO.got[
   try{sfx(r>=2?'bigcheer':'glove')}catch(e){}if(r===3){try{playSample('fworks',.6)}catch(e){}try{navigator.vibrate&&navigator.vibrate([30,40,30])}catch(e){}}
   pkoLater(()=>el.classList.remove('epic','legend'),r===3?2600:1400);pkoTop()},r===3?1040:520)}
 function pkoNext(dir){const c=pkoCur();if(!c||c.classList.contains('down')||c.classList.contains('turning'))return;
- c.classList.add('gone');c.style.transform=`translate(${dir*120}vw,-6vh) rotate(${dir*24}deg) scale(var(--s))`;try{sfx('glove')}catch(e){}
- PKO.i++;pkoLater(()=>c.remove(),420);pkoTop()}
+ c.classList.add('gone');c.style.transform=`translate(${dir*150}vw,-8vh) rotate(${dir*24}deg) scale(var(--s))`;try{sfx('glove')}catch(e){}
+ PKO.i++;pkoLater(()=>c.remove(),480);pkoTop()}
 /* ---- 3. the spread ---- */
 function pkoSummary(){if(PKO.stage==='summary')return;PKO.stage='summary';pkoClear();const el=pkoEl(),got=PKO.got,best=Math.max(...got.map(c=>c.r));
  const left=COL.packs,cost=PACK_COST[PKO.set],canBuy=PKO.paid&&WAL.coins>=cost;

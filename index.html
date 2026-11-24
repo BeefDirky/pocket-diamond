@@ -1910,7 +1910,8 @@ body:has(.vsIntro:not([hidden])) .banner{visibility:hidden}
 .pkoCard{position:absolute;left:0;top:0;width:170px;z-index:var(--z);transform-origin:50% 50%;perspective:900px;
  transform:translateY(calc(var(--d,0) * 6px)) scale(var(--s,1));transition:transform .4s cubic-bezier(.3,.7,.4,1),opacity .4s;cursor:grab}
 .pkoCard.drag{transition:none;cursor:grabbing}
-.pkoCard.gone{transition:transform .42s cubic-bezier(.5,0,.9,.6),opacity .42s;opacity:0;pointer-events:none}
+/* a card you're done with slides all the way off the screen, fully visible (no fade) */
+.pkoCard.gone{transition:transform .45s cubic-bezier(.5,0,.9,.6);pointer-events:none}
 .pkoCard .tc{width:170px;cursor:inherit;box-shadow:0 10px 24px rgba(0,0,0,.5)}
 .pkoIn{display:grid;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.7,.4,1)}
 .pkoBack,.pkoFront{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden}
@@ -8653,7 +8654,7 @@ function mlWire(m){return{v:m.v,mode:m.mode,me:m.me,sched:m.sched,home:m.home,aw
 // the record adds up as a baseball game. Single-player and casual online games are reported as your own
 // (unverified) stat line instead, for your profile.
 // the release name (bump it by hand when shipping) and the build id (stamped by tools/build.py from the code itself)
-const APP_VERSION='2.1',PD_BUILD='a2550514fb',PD_VER=APP_VERSION+'+'+PD_BUILD;
+const APP_VERSION='2.1',PD_BUILD='ea8a181e98',PD_VER=APP_VERSION+'+'+PD_BUILD;
 $('abVer').innerHTML=`${APP_VERSION} <small class="abBuild">build ${PD_BUILD}</small>`;
 const RK={pingT:0,pollT:0,claimT:0};
 async function rpc(fn,args){const c=await supaClient();const {data,error}=await c.rpc(fn,args||{});if(error)throw error;return data}
@@ -10253,8 +10254,8 @@ function pkoReveal(c){if(c.classList.contains('turning'))return;const r=PKO.got[
   try{sfx(r>=2?'bigcheer':'glove')}catch(e){}if(r===3){try{playSample('fworks',.6)}catch(e){}try{navigator.vibrate&&navigator.vibrate([30,40,30])}catch(e){}}
   pkoLater(()=>el.classList.remove('epic','legend'),r===3?2600:1400);pkoTop()},r===3?1040:520)}
 function pkoNext(dir){const c=pkoCur();if(!c||c.classList.contains('down')||c.classList.contains('turning'))return;
- c.classList.add('gone');c.style.transform=`translate(${dir*120}vw,-6vh) rotate(${dir*24}deg) scale(var(--s))`;try{sfx('glove')}catch(e){}
- PKO.i++;pkoLater(()=>c.remove(),420);pkoTop()}
+ c.classList.add('gone');c.style.transform=`translate(${dir*150}vw,-8vh) rotate(${dir*24}deg) scale(var(--s))`;try{sfx('glove')}catch(e){}
+ PKO.i++;pkoLater(()=>c.remove(),480);pkoTop()}
 /* ---- 3. the spread ---- */
 function pkoSummary(){if(PKO.stage==='summary')return;PKO.stage='summary';pkoClear();const el=pkoEl(),got=PKO.got,best=Math.max(...got.map(c=>c.r));
  const left=COL.packs,cost=PACK_COST[PKO.set],canBuy=PKO.paid&&WAL.coins>=cost;
